@@ -43,7 +43,7 @@
 
 ### 의존 방향
 
-- 불변식 로직은 외부 기술을 모른다. 그래서 외부 기술을 생각하지 않고 불변식을 다룰 수 있고, 외부 기술이 바뀌어도 불변식 로직은 바뀌지 않는다.
+- 불변식 로직은 외부 기술을 모른다. 그래서 외부 기술을 생각하지 않고 불변식을 다룰 수 있고, 혹여나 외부 기술이 바뀌어도 불변식 로직은 바뀌지 않는다.
 - 각 계층의 역할에 따라 의존 방향은 아래와 같다.
 
 ```
@@ -56,5 +56,3 @@ interfaces ──▶ application ──▶ domain ◀── infrastructure
 | domain      | interfaces, application, infrastructure |
 | application | interfaces, infrastructure              |
 | interfaces  | infrastructure                          |
-
-
