@@ -49,6 +49,19 @@ public class OrderRepositoryAdapter implements OrderRepository {
         return jpaRepository.findAllByBuyerId(buyerId, pageRequest);
     }
 
+    @Override
+    public long countAllByBuyerId(Long buyerId) {
+        return jpaRepository.countByBuyerId(buyerId);
+    }
+
+    @Override
+    public long countAll(Long buyerId) {
+        if (buyerId == null) {
+            return jpaRepository.count();
+        }
+        return jpaRepository.countByBuyerId(buyerId);
+    }
+
     private PageRequest pageRequest(int page, int size) {
         Sort sort = Sort.by(Sort.Order.desc("createdAt"), Sort.Order.asc("id"));
         return PageRequest.of(page, size, sort);

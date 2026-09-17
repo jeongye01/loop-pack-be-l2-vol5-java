@@ -6,6 +6,7 @@ import com.loopers.support.error.ErrorCode;
 import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.Table;
 
 import java.time.ZonedDateTime;
@@ -19,7 +20,7 @@ import java.util.Map;
 public class Order extends BaseEntity {
 
     private Long buyerId;
-    @ElementCollection
+    @ElementCollection(fetch = FetchType.EAGER)
     private List<OrderItem> items;
     private OrderStatus status;
     @Embedded

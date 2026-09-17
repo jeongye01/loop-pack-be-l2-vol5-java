@@ -9,4 +9,6 @@ import java.util.List;
 interface OrderJpaRepository extends JpaRepository<Order, Long> {
 
     List<Order> findAllByBuyerId(Long buyerId, Pageable pageable);
+
+    long countByBuyerId(Long buyerId);
 }

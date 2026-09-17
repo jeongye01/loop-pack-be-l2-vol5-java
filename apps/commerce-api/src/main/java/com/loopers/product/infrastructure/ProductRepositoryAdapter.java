@@ -74,4 +74,17 @@ public class ProductRepositoryAdapter implements ProductRepository {
             case LIKES_DESC -> jpaRepository.findCustomerProductsByLikes(brandId, pageable);
         };
     }
+
+    @Override
+    public long countAll(Long brandId) {
+        if (brandId == null) {
+            return jpaRepository.count();
+        }
+        return jpaRepository.countByBrandId(brandId);
+    }
+
+    @Override
+    public long countCustomerProducts(Long brandId) {
+        return jpaRepository.countCustomerProducts(brandId);
+    }
 }

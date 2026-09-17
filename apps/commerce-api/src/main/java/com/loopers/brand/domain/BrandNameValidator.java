@@ -20,6 +20,7 @@ public class BrandNameValidator {
     public void validateNotDuplicated(String name, Long excludeBrandId) {
         boolean duplicated = brandRepository.findAllByName(name).stream()
             .anyMatch(brand -> !brand.isDeleted()
+                && brand.getName().equals(name)
                 && (excludeBrandId == null || !Objects.equals(brand.getId(), excludeBrandId)));
         if (duplicated) {
             throw new CoreException(ErrorCode.DUPLICATE_BRAND_NAME);

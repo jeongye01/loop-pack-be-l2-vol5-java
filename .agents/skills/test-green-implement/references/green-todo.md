@@ -169,3 +169,94 @@ Green 에이전트가 Red 전체를 실행하고 실패를 분석한 뒤, produc
   - 선행 작업: 8~16번 완료
   - 테스트 명령: 통합 10개 클래스 50개 대상 실행, `./gradlew :apps:commerce-api:test`, `./gradlew :apps:commerce-api:check`, `./gradlew :apps:commerce-api:test --tests 'com.loopers.architecture.ArchitectureTest'`
   - 완료 조건: 관련 50개·전체 테스트·Checkstyle·ArchitectureTest가 모두 Green이고, `687c69b` 대비 모든 `src/test` 파일 SHA-256이 동일하며 `git diff --check`가 통과한다.
+
+## HTTP 계층·이름 대소문자 Red 262개 (e1fef44)
+
+기준 실행 `./gradlew :apps:commerce-api:test --continue`: 449개 중 262개 실패. HTTP 7개 클래스 258개는 모두 컨트롤러와 관리자 접근 필터가 없어 `404 NOT_FOUND`(`NoResourceFoundException`)로 끝난다. 나머지 4개는 이름 중복 검사가 MySQL 기본 콜레이션(`utf8mb4_general_ci`)의 대소문자 무시 조회 결과를 그대로 중복으로 판단해 실패한다.
+
+- [x] 18. 이름 중복을 대소문자를 구분해 판단 (4개 Red)
+  - 요구사항 ID: P-ADMIN-01, P-ADMIN-02
+  - 관찰한 실패: `BrandUseCaseIntegrationTest$RejectDuplicatedBrandName`의 `savesNameDifferentOnlyByCase`·`updatesToNameDifferentOnlyByCase`, `ProductUseCaseIntegrationTest$RejectDuplicatedProductName`의 같은 이름 두 테스트가 `DUPLICATE_BRAND_NAME`·`DUPLICATE_PRODUCT_NAME` 예외로 실패한다. `findAllByName("NIKE")`가 `Nike`를 돌려주고 validator가 이름을 다시 비교하지 않는다.
+  - 필요한 최소 동작: 두 validator가 조회 결과 중 이름이 정확히 같은(`String.equals`) 활성 대상만 중복으로 본다. 규칙이 DB 콜레이션에 기대지 않게 domain에서 비교한다.
+  - 변경할 production 파일: `brand/domain/BrandNameValidator.java`, `product/domain/ProductNameValidator.java`
+  - 선행 작업: 없음
+  - 테스트 명령: `./gradlew :apps:commerce-api:test --tests 'com.loopers.brand.application.BrandUseCaseIntegrationTest' --tests 'com.loopers.product.application.ProductUseCaseIntegrationTest' --tests 'com.loopers.brand.domain.BrandNameValidatorTest' --tests 'com.loopers.product.domain.ProductNameValidatorTest'`
+  - 완료 조건: 네 클래스가 모두 Green이고, 앞뒤 공백만 다른 이름은 여전히 중복으로 거절된다.
+
+- [x] 19. HTTP 공통 기반: 관리자 접근 필터, 요청자 식별, 페이지 조건, 목록 응답, 입력 형식 검사
+  - 요구사항 ID: R-ACCESS-04, R-ACCESS-05, P-ACCESS-01, P-CATALOG-05, P-CATALOG-06, P-CATALOG-07, R-POINT-04
+  - 관찰한 실패: `RequesterAccessHttpTest$AdminOnly`의 비관리자 조회·변경이 403이 아니라 404이고, 고객 API의 식별 실패가 401이 아니라 404이다. 목록 응답의 `page`·`size`·`totalElements`를 만들 곳이 없고, `1.5` 같은 실수 입력을 Jackson 기본값(`ACCEPT_FLOAT_AS_INT`)이 정수로 받아들인다.
+  - 필요한 최소 동작:
+    - 과제 문서의 `spring-boot-starter-security` 의존성과 `AdminBoundaryConfig`로 `/api-admin/**`에 `ADMIN` 역할을 요구하고, 미인증·권한 없음을 본문 없는 `403`으로 거절한다.
+    - `X-USER-ID`가 없거나 숫자가 아니거나 없는 사용자이면 같은 `401 USER_NOT_IDENTIFIED`를 준다. 컨트롤러 인자 `Requester`를 resolver가 채우고, 사용자 존재 확인은 application(`UserUseCase`)이 한다. 인터셉터로 막지 않아 매핑되지 않은 경로의 `404 NOT_FOUND` 계약을 유지한다.
+    - `page`는 0 이상, `size`는 1~100(기본 0, 20)이 아니면 `400 INVALID_REQUEST`로 거절한다. 목록 응답은 `content`·`page`·`size`·`totalElements`다. application은 목록과 전체 수를 한 트랜잭션에서 `PageResult`로 돌려준다.
+    - 요청 본문의 필수 필드가 없으면 `400 INVALID_REQUEST`로 거절하고, 실수를 정수 필드로 받지 않게 `ACCEPT_FLOAT_AS_INT`를 끈다(공용 `supports/jackson`은 고치지 않고 앱 설정에서 끈다).
+  - 변경할 production 파일: `apps/commerce-api/build.gradle.kts`, `config/AdminBoundaryConfig.java`, `config/WebConfig.java`, `interfaces/api/Requester.java`, `interfaces/api/RequesterArgumentResolver.java`, `interfaces/api/PageQuery.java`, `interfaces/api/ListResponse.java`, `interfaces/api/RequestFields.java`, `support/page/PageResult.java`, `user/application/UserUseCase.java`
+  - 선행 작업: 없음
+  - 테스트 명령: `./gradlew :apps:commerce-api:test --tests 'com.loopers.CommerceApiContextTest' --tests 'com.loopers.interfaces.api.ContractClassificationTest' --tests 'com.loopers.interfaces.api.ExampleV1ApiE2ETest' --tests '*RequesterAccessHttpTest*rejectsNonAdminReads*'`
+  - 완료 조건: 기존 컨텍스트·Example·계약 분류 테스트가 그대로 Green이고, 비관리자·미식별 관리자 조회 12개가 오류 코드 없는 403으로 Green이다.
+
+- [x] 20. 브랜드 고객·관리자 API (26개 Red)
+  - 요구사항 ID: R-CATALOG-01, R-CATALOG-07, R-ADMIN-01, R-ADMIN-12, P-ADMIN-07, P-ADMIN-08 (C-01, A-01~A-05)
+  - 관찰한 실패: `BrandHttpTest` 26개가 모두 404 `NOT_FOUND`이다.
+  - 필요한 최소 동작: 고객 브랜드 상세(`id`, `name`, 없거나 삭제되면 `BRAND_NOT_FOUND`), 관리자 목록(삭제 포함 최신순 페이지)·생성(201)·상세(삭제 포함)·수정·삭제(`data` 없음)를 연결한다. application에 활성 브랜드 조회와 페이지 조회를 더한다. 저장소 포트에 전체 수 조회를 더한다.
+  - 변경할 production 파일: `brand/interfaces/BrandV1Controller.java`, `brand/interfaces/BrandAdminV1Controller.java`, `brand/interfaces/BrandV1Dto.java`, `brand/application/BrandUseCase.java`, `brand/domain/BrandRepository.java`, `brand/infrastructure/BrandRepositoryAdapter.java`
+  - 선행 작업: 19번
+  - 테스트 명령: `./gradlew :apps:commerce-api:test --tests 'com.loopers.brand.interfaces.BrandHttpTest'`
+  - 완료 조건: `BrandHttpTest` 26개가 Green이다.
+
+- [x] 21. 상품 고객·관리자 API와 재고 변경 (75개 Red)
+  - 요구사항 ID: R-CATALOG-02, R-CATALOG-03, R-CATALOG-07, R-CATALOG-08, R-ACCESS-06, R-ADMIN-04, R-ADMIN-06, R-ADMIN-08, R-ADMIN-09, R-ADMIN-13, P-CATALOG-01, P-CATALOG-05, P-CATALOG-06, P-CATALOG-07, P-ADMIN-03, P-ADMIN-04, P-ADMIN-07, P-ADMIN-08, P-ADMIN-09 (C-02, C-03, A-06~A-11)
+  - 관찰한 실패: `ProductHttpTest` 75개가 모두 404 `NOT_FOUND`이다.
+  - 필요한 최소 동작: 고객 상품(`id`, `name`, `price`, `brand{id,name}`, `likeCount`, `soldOut`)의 목록·상세, 관리자 상품(`id`, `name`, `price`, `brand{id,name}`, `stock`, `deleted`)의 목록·생성·상세·수정·삭제·재고 변경을 연결한다. `sort`는 `latest`·`price_asc`·`likes_desc`만 받고(없으면 `latest`) 그 밖은 `INVALID_REQUEST`다. application이 상품·브랜드·좋아요 수를 함께 조합하고(대표 흐름 1), 고객 목록은 없거나 삭제된 브랜드 필터에서 빈 페이지를 준다. 저장소 포트에 관리자·고객 목록의 전체 수 조회를 더한다.
+  - 변경할 production 파일: `product/interfaces/ProductV1Controller.java`, `product/interfaces/ProductAdminV1Controller.java`, `product/interfaces/ProductV1Dto.java`, `product/application/ProductUseCase.java`, `product/domain/ProductRepository.java`, `product/infrastructure/ProductJpaRepository.java`, `product/infrastructure/ProductRepositoryAdapter.java`
+  - 선행 작업: 19, 20번
+  - 테스트 명령: `./gradlew :apps:commerce-api:test --tests 'com.loopers.product.interfaces.ProductHttpTest'`
+  - 완료 조건: `ProductHttpTest` 75개가 Green이고, 거절된 생성·수정·재고 변경 뒤 상품이 그대로다.
+
+- [x] 22. 포인트 충전·잔액 API (18개 Red)
+  - 요구사항 ID: R-POINT-01, R-POINT-02, R-POINT-04, R-POINT-06, R-POINT-07, R-POINT-08 (C-07, C-08)
+  - 관찰한 실패: `PointHttpTest` 18개가 모두 404 `NOT_FOUND`이다.
+  - 필요한 최소 동작: 요청자의 잔액을 충전해 `{balance}`를 주고, 저장된 잔액을 조회한다. `amount` 누락·정수 아님·64비트 범위 초과는 `INVALID_REQUEST`, 0 이하·한도 초과는 domain 오류를 그대로 준다.
+  - 변경할 production 파일: `user/interfaces/PointV1Controller.java`, `user/interfaces/PointV1Dto.java`
+  - 선행 작업: 19번
+  - 테스트 명령: `./gradlew :apps:commerce-api:test --tests 'com.loopers.user.interfaces.PointHttpTest'`
+  - 완료 조건: `PointHttpTest` 18개가 Green이고 거절 뒤 잔액이 그대로다.
+
+- [x] 23. 좋아요 등록·취소·내 좋아요 목록 API (10개 Red)
+  - 요구사항 ID: R-LIKE-01, R-LIKE-04, R-LIKE-06, P-ACCESS-02, P-LIKE-01, P-LIKE-02 (C-04~C-06)
+  - 관찰한 실패: `LikeHttpTest` 10개가 모두 404 `NOT_FOUND`이다.
+  - 필요한 최소 동작: 처음 등록은 201, 반복 등록은 200(둘 다 `data` 없음), 취소는 항상 200이다. 내 좋아요 목록은 경로의 `userId`가 요청자가 아니면 application이 `404 USER_NOT_FOUND`로 거절하고, 요청자의 활성 상품을 고객 상품 형식의 페이지로 준다. 저장소 포트에 활성 상품 좋아요 수 조회를 더한다.
+  - 변경할 production 파일: `like/interfaces/LikeV1Controller.java`, `like/application/LikeUseCase.java`, `like/domain/LikeRepository.java`, `like/infrastructure/LikeJpaRepository.java`, `like/infrastructure/LikeRepositoryAdapter.java`
+  - 선행 작업: 19, 21번(고객 상품 응답)
+  - 테스트 명령: `./gradlew :apps:commerce-api:test --tests 'com.loopers.like.interfaces.LikeHttpTest'`
+  - 완료 조건: `LikeHttpTest` 10개가 Green이다.
+
+- [x] 24. 주문 고객·관리자 API (37개 Red)
+  - 요구사항 ID: R-ORDER-01, R-ORDER-05, R-ORDER-06, R-ORDER-13, R-ORDER-14, R-ADMIN-10, R-ADMIN-11, P-ACCESS-02, P-ADMIN-10, P-ORDER-01, P-ORDER-04, P-ORDER-07, P-ORDER-08, P-ORDER-09 (C-09~C-12, A-12, A-13)
+  - 관찰한 실패: `OrderHttpTest` 37개가 모두 404 `NOT_FOUND`이다.
+  - 이어받은 시점의 관찰(작업 트리, 전체 449개 중 25개 실패): 컨트롤러·DTO·목록 전체 수 조회는 이미 연결되어 있다. `OrderHttpTest` 19개, `RequesterAccessHttpTest` 5개, `ChargeOrderFlowHttpTest` 1개가 모두 주문을 읽는 요청에서 `500 INTERNAL_ERROR`로 실패한다. 원인은 `LazyInitializationException: Order.items ... no Session`이다. 트랜잭션이 끝난 뒤 컨트롤러가 응답을 만들며 지연 로딩 컬렉션 `items`를 읽는다. 남은 일은 아래의 `FetchType.EAGER` 한 가지다.
+  - 필요한 최소 동작: 주문 생성(201, 주문 상세)·확정(200, 주문 상세)·내 주문 목록(요약)·상세, 관리자 주문 목록(요약 + `buyerId`, `buyerId` 선택 필터)·상세(상세 + `buyerId`)를 연결한다. `items`·`productId`·`quantity` 누락은 `INVALID_REQUEST`이다. `open-in-view: false`에서 트랜잭션 밖에서 품목을 읽을 수 있도록, 주문 애그리거트의 값 컬렉션 `items`를 주문과 함께 읽는다(`FetchType.EAGER`). 저장소 포트에 목록 전체 수 조회를 더한다.
+  - 변경할 production 파일: `order/interfaces/OrderV1Controller.java`, `order/interfaces/OrderAdminV1Controller.java`, `order/interfaces/OrderV1Dto.java`, `order/application/OrderUseCase.java`, `order/domain/Order.java`, `order/domain/OrderRepository.java`, `order/infrastructure/OrderJpaRepository.java`, `order/infrastructure/OrderRepositoryAdapter.java`
+  - 선행 작업: 19, 21번(재고 확인용 관리자 상품), 22번(잔액 확인)
+  - 테스트 명령: `./gradlew :apps:commerce-api:test --tests 'com.loopers.order.interfaces.OrderHttpTest'`
+  - 완료 조건: `OrderHttpTest` 37개가 Green이고, 거절된 생성·확정 뒤 주문 수·주문 상태·재고·잔액이 그대로다.
+
+- [x] 25. 요청자 구분과 충전→주문 확정 연결 흐름 검증 (92개 Red)
+  - 요구사항 ID: R-ACCESS-01, R-ACCESS-02, R-ACCESS-04, R-ACCESS-05, P-ACCESS-01, R-POINT-02, R-POINT-06, R-ORDER-11, R-ORDER-12, R-ORDER-14
+  - 관찰한 실패: `RequesterAccessHttpTest` 87개(401·403·200·201 기대에 404), `ChargeOrderFlowHttpTest` 5개(200 기대에 404).
+  - 이어받은 시점의 관찰: 남은 실패는 `RequesterAccessHttpTest` 5개(`CustomerFeatures.usesOrders`, `AdminFeatures.readsBuyersOrders`, `RejectUnidentifiedCustomer.keepsStateWhenCustomerIsUnidentified` 3개)와 `ChargeOrderFlowHttpTest` 1개(`ReadOrderAfterFlow`)다. 모두 주문 조회에서 24번과 같은 `LazyInitializationException`으로 500이 난다.
+  - 필요한 최소 동작: 19~24번 외 추가 구현 없음. 모든 고객 API가 식별 실패에 같은 401 본문을 주고, 비관리자 변경 요청이 상태를 바꾸지 않는지 확인한다.
+  - 변경할 production 파일: 없음(부족하면 19~24번 파일 안에서만 보완)
+  - 선행 작업: 19~24번
+  - 테스트 명령: `./gradlew :apps:commerce-api:test --tests 'com.loopers.interfaces.api.RequesterAccessHttpTest' --tests 'com.loopers.interfaces.api.ChargeOrderFlowHttpTest'`
+  - 완료 조건: 두 클래스 92개가 Green이다.
+
+- [x] 26. HTTP·이름 Red 262개와 전체 회귀 검증
+  - 요구사항 ID: 위 18~25번 전체, 아키텍처 의존 방향
+  - 관찰한 실패: 기준 실행에서 262개 실패.
+  - 필요한 최소 동작: 18~25번 구현만으로 262개를 Green으로 만들고 domain·application·repository·Example 테스트를 회귀시키지 않는다. 테스트·기대값·검사 규칙과 공용 모듈(`modules/`, `supports/`)은 바꾸지 않는다.
+  - 변경할 production 파일: 18~25번에 열거한 파일만
+  - 선행 작업: 18~25번
+  - 테스트 명령: 위 HTTP 7개 클래스와 이름 관련 2개 클래스 실행, `./gradlew :apps:commerce-api:test --continue`, `./gradlew :apps:commerce-api:check`, `./gradlew :apps:commerce-api:test --tests 'com.loopers.architecture.ArchitectureTest'`, `git diff --check`
+  - 완료 조건: 관련·전체 테스트, Checkstyle, ArchitectureTest가 모두 Green이고, `e1fef44` 시작 시점과 `src/test` 파일 목록·SHA-256이 같다.

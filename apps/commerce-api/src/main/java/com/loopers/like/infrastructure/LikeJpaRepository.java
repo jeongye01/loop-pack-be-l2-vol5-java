@@ -26,4 +26,12 @@ interface LikeJpaRepository extends JpaRepository<Like, Long> {
         @Param("userId") Long userId,
         Pageable pageable
     );
+
+    @Query("""
+        select count(l) from Like l, Product p
+        where l.productId = p.id
+          and l.userId = :userId
+          and p.deletedAt is null
+        """)
+    long countActiveProductLikesByUserId(@Param("userId") Long userId);
 }

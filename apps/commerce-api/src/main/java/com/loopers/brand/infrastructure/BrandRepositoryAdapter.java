@@ -45,4 +45,9 @@ public class BrandRepositoryAdapter implements BrandRepository {
         Sort sort = Sort.by(Sort.Order.desc("createdAt"), Sort.Order.asc("id"));
         return jpaRepository.findAll(PageRequest.of(page, size, sort)).getContent();
     }
+
+    @Override
+    public long countAll() {
+        return jpaRepository.count();
+    }
 }

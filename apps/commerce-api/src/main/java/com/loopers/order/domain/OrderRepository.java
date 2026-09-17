@@ -12,4 +12,8 @@ public interface OrderRepository {
     List<Order> findAllByBuyerId(Long buyerId, int page, int size);
 
     List<Order> findAll(Long buyerId, int page, int size);
+
+    long countAllByBuyerId(Long buyerId);
+
+    long countAll(Long buyerId);
 }

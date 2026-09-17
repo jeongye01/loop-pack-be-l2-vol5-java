@@ -20,6 +20,7 @@ public class ProductNameValidator {
     public void validateNotDuplicated(Long brandId, String name, Long excludeProductId) {
         boolean duplicated = productRepository.findAllByBrandIdAndName(brandId, name).stream()
             .anyMatch(product -> !product.isDeleted()
+                && product.getName().equals(name)
                 && (excludeProductId == null || !Objects.equals(product.getId(), excludeProductId)));
         if (duplicated) {
             throw new CoreException(ErrorCode.DUPLICATE_PRODUCT_NAME);

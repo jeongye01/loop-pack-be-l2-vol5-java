@@ -8,6 +8,7 @@ import com.loopers.product.domain.Product;
 import com.loopers.product.domain.ProductRepository;
 import com.loopers.support.error.CoreException;
 import com.loopers.support.error.ErrorCode;
+import com.loopers.support.page.PageResult;
 import com.loopers.user.domain.User;
 import com.loopers.user.domain.UserRepository;
 import org.springframework.stereotype.Service;
@@ -79,8 +80,28 @@ public class OrderUseCase {
     }
 
     @Transactional(readOnly = true)
+    public PageResult<Order> findMinePage(Long buyerId, int page, int size) {
+        return new PageResult<>(
+            findMine(buyerId, page, size),
+            page,
+            size,
+            orderRepository.countAllByBuyerId(buyerId)
+        );
+    }
+
+    @Transactional(readOnly = true)
     public List<Order> findForAdmin(Long buyerId, int page, int size) {
         return orderRepository.findAll(buyerId, page, size);
+    }
+
+    @Transactional(readOnly = true)
+    public PageResult<Order> findPageForAdmin(Long buyerId, int page, int size) {
+        return new PageResult<>(
+            findForAdmin(buyerId, page, size),
+            page,
+            size,
+            orderRepository.countAll(buyerId)
+        );
     }
 
     @Transactional(readOnly = true)

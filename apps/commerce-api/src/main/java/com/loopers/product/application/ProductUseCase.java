@@ -9,6 +9,7 @@ import com.loopers.product.domain.ProductRepository;
 import com.loopers.product.domain.ProductSort;
 import com.loopers.support.error.CoreException;
 import com.loopers.support.error.ErrorCode;
+import com.loopers.support.page.PageResult;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -104,6 +105,53 @@ public class ProductUseCase {
             .toList();
     }
 
+    @Transactional(readOnly = true)
+    public PageResult<CustomerProduct> findCustomerProductPage(
+        Long brandId,
+        ProductSort sort,
+        int page,
+        int size
+    ) {
+        List<CustomerProduct> content = findCustomerProducts(brandId, sort, page, size).stream()
+            .map(view -> new CustomerProduct(
+                view.product(),
+                findBrand(view.product().getBrandId()),
+                view.likeCount()
+            ))
+            .toList();
+        long totalElements = brandId != null && !isActiveBrand(brandId)
+            ? 0
+            : productRepository.countCustomerProducts(brandId);
+        return new PageResult<>(content, page, size, totalElements);
+    }
+
+    @Transactional(readOnly = true)
+    public CustomerProduct findCustomerProduct(Long productId) {
+        Product product = findRequired(productId);
+        if (product.isDeleted()) {
+            throw new CoreException(ErrorCode.PRODUCT_NOT_FOUND);
+        }
+        return new CustomerProduct(
+            product,
+            findBrand(product.getBrandId()),
+            likeRepository.countByProductId(productId)
+        );
+    }
+
+    @Transactional(readOnly = true)
+    public PageResult<AdminProduct> findAdminProductPage(Long brandId, int page, int size) {
+        List<AdminProduct> content = productRepository.findAll(brandId, page, size).stream()
+            .map(product -> new AdminProduct(product, findBrand(product.getBrandId())))
+            .toList();
+        return new PageResult<>(content, page, size, productRepository.countAll(brandId));
+    }
+
+    @Transactional(readOnly = true)
+    public AdminProduct findAdminProduct(Long productId) {
+        Product product = findRequired(productId);
+        return new AdminProduct(product, findBrand(product.getBrandId()));
+    }
+
     private Product findRequired(Long productId) {
         return productRepository.findById(productId)
             .orElseThrow(() -> new CoreException(ErrorCode.PRODUCT_NOT_FOUND));
@@ -124,6 +172,17 @@ public class ProductUseCase {
             .isPresent();
     }
 
+    private Brand findBrand(Long brandId) {
+        return brandRepository.findById(brandId)
+            .orElseThrow(() -> new CoreException(ErrorCode.BRAND_NOT_FOUND));
+    }
+
     public record ProductView(Product product, long likeCount) {
+    }
+
+    public record CustomerProduct(Product product, Brand brand, long likeCount) {
+    }
+
+    public record AdminProduct(Product product, Brand brand) {
     }
 }

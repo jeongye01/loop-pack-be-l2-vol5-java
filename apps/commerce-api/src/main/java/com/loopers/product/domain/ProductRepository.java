@@ -16,4 +16,8 @@ public interface ProductRepository {
     List<Product> findAll(Long brandId, int page, int size);
 
     List<Product> findCustomerProducts(Long brandId, ProductSort sort, int page, int size);
+
+    long countAll(Long brandId);
+
+    long countCustomerProducts(Long brandId);
 }

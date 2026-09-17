@@ -7,6 +7,7 @@ import com.loopers.brand.domain.BrandRepository;
 import com.loopers.product.domain.ProductRepository;
 import com.loopers.support.error.CoreException;
 import com.loopers.support.error.ErrorCode;
+import com.loopers.support.page.PageResult;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -49,6 +50,15 @@ public class BrandUseCase {
         return findRequired(brandId);
     }
 
+    @Transactional(readOnly = true)
+    public Brand findActive(Long brandId) {
+        Brand brand = findRequired(brandId);
+        if (brand.isDeleted()) {
+            throw new CoreException(ErrorCode.BRAND_NOT_FOUND);
+        }
+        return brand;
+    }
+
     @Transactional
     public void delete(Long brandId) {
         Brand brand = findRequired(brandId);
@@ -63,6 +73,11 @@ public class BrandUseCase {
     @Transactional(readOnly = true)
     public List<Brand> findAll(int page, int size) {
         return brandRepository.findAll(page, size);
+    }
+
+    @Transactional(readOnly = true)
+    public PageResult<Brand> findPage(int page, int size) {
+        return new PageResult<>(brandRepository.findAll(page, size), page, size, brandRepository.countAll());
     }
 
     private Brand findRequired(Long brandId) {

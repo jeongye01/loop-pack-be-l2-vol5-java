@@ -1,11 +1,14 @@
 package com.loopers.like.application;
 
+import com.loopers.brand.domain.BrandRepository;
 import com.loopers.like.domain.Like;
 import com.loopers.like.domain.LikeRepository;
+import com.loopers.product.application.ProductUseCase.CustomerProduct;
 import com.loopers.product.domain.Product;
 import com.loopers.product.domain.ProductRepository;
 import com.loopers.support.error.CoreException;
 import com.loopers.support.error.ErrorCode;
+import com.loopers.support.page.PageResult;
 import com.loopers.user.domain.UserRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,15 +21,18 @@ public class LikeUseCase {
     private final LikeRepository likeRepository;
     private final ProductRepository productRepository;
     private final UserRepository userRepository;
+    private final BrandRepository brandRepository;
 
     public LikeUseCase(
         LikeRepository likeRepository,
         ProductRepository productRepository,
-        UserRepository userRepository
+        UserRepository userRepository,
+        BrandRepository brandRepository
     ) {
         this.likeRepository = likeRepository;
         this.productRepository = productRepository;
         this.userRepository = userRepository;
+        this.brandRepository = brandRepository;
     }
 
     @Transactional
@@ -57,6 +63,22 @@ public class LikeUseCase {
             .map(like -> productRepository.findById(like.getProductId())
                 .orElseThrow(() -> new CoreException(ErrorCode.PRODUCT_NOT_FOUND)))
             .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public PageResult<CustomerProduct> findMinePage(Long requesterId, Long userId, int page, int size) {
+        if (!requesterId.equals(userId)) {
+            throw new CoreException(ErrorCode.USER_NOT_FOUND);
+        }
+        List<CustomerProduct> content = findMine(userId, page, size).stream()
+            .map(product -> new CustomerProduct(
+                product,
+                brandRepository.findById(product.getBrandId())
+                    .orElseThrow(() -> new CoreException(ErrorCode.BRAND_NOT_FOUND)),
+                likeRepository.countByProductId(product.getId())
+            ))
+            .toList();
+        return new PageResult<>(content, page, size, likeRepository.countAllByUserId(userId));
     }
 
     @Transactional(readOnly = true)

@@ -43,6 +43,11 @@ public class LikeRepositoryAdapter implements LikeRepository {
     }
 
     @Override
+    public long countAllByUserId(Long userId) {
+        return jpaRepository.countActiveProductLikesByUserId(userId);
+    }
+
+    @Override
     public long countByProductId(Long productId) {
         return jpaRepository.countByProductId(productId);
     }
