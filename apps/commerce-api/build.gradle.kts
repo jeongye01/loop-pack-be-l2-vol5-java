@@ -33,4 +33,7 @@ dependencies {
 
     // architecture test
     testImplementation("com.tngtech.archunit:archunit:1.5.0")
+
+    // admin HTTP test
+    testImplementation("org.springframework.security:spring-security-test")
 }

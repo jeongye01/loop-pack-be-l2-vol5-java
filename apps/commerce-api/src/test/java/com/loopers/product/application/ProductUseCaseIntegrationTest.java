@@ -116,6 +116,48 @@ class ProductUseCaseIntegrationTest {
             assertThat(entityManager.createQuery("select p from Product p", Product.class).getResultList())
                 .hasSize(1);
         }
+
+        @DisplayName("[동등 클래스 분할] 앞뒤 공백을 붙인 이름으로 만들면 공백을 뺀 이름으로 저장한다.")
+        @Test void savesTrimmedName() {
+            Brand brand = persist(new Brand("Nike"));
+            Product result = useCase.create(brand.getId(), "  Air  ", 1_000L);
+            entityManager.flush();
+            entityManager.clear();
+            assertThat(entityManager.find(Product.class, result.getId()).getName()).isEqualTo("Air");
+        }
+
+        @DisplayName("[동등 클래스 분할] 같은 브랜드의 활성 상품과 앞뒤 공백만 다른 이름이면 DUPLICATE_PRODUCT_NAME이고 하나만 남는다.")
+        @Test void rejectsNameDifferentOnlyByOuterSpaces() {
+            Brand brand = persist(new Brand("Nike"));
+            persist(new Product(brand.getId(), "Air", 1_000L));
+            CoreException result = assertThrows(CoreException.class,
+                () -> useCase.create(brand.getId(), "  Air  ", 2_000L));
+            assertThat(result.getErrorCode()).isEqualTo(ErrorCode.DUPLICATE_PRODUCT_NAME);
+            assertThat(entityManager.createQuery("select p from Product p", Product.class).getResultList())
+                .hasSize(1);
+        }
+
+        @DisplayName("[동등 클래스 분할] 같은 브랜드의 활성 상품과 대소문자만 다른 이름이면 다른 이름으로 저장해 두 상품이 남는다.")
+        @Test void savesNameDifferentOnlyByCase() {
+            Brand brand = persist(new Brand("Nike"));
+            persist(new Product(brand.getId(), "Air", 1_000L));
+            useCase.create(brand.getId(), "AIR", 2_000L);
+            entityManager.flush();
+            entityManager.clear();
+            assertThat(entityManager.createQuery("select p.name from Product p", String.class).getResultList())
+                .containsExactlyInAnyOrder("Air", "AIR");
+        }
+
+        @DisplayName("[동등 클래스 분할] 같은 브랜드의 다른 활성 상품과 대소문자만 다른 이름으로 수정하면 새 이름이 저장된다.")
+        @Test void updatesToNameDifferentOnlyByCase() {
+            Brand brand = persist(new Brand("Nike"));
+            persist(new Product(brand.getId(), "Air", 1_000L));
+            Product target = persist(new Product(brand.getId(), "Max", 2_000L));
+            useCase.update(target.getId(), "air", 2_000L, brand.getId());
+            entityManager.flush();
+            entityManager.clear();
+            assertThat(entityManager.find(Product.class, target.getId()).getName()).isEqualTo("air");
+        }
     }
 
     @DisplayName("[P-ADMIN-05] 상품은 재고 0에서 시작하고 재고 변경으로만 수량을 정한다.")

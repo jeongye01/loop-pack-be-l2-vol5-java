@@ -46,18 +46,18 @@
 | `order/domain/PaymentResultTest` | R-ORDER-12, P-ORDER-06 |
 | `order/domain/OrderTest` | R-ACCESS-03, R-ORDER-01, R-ORDER-02, R-ORDER-03, R-ORDER-06, R-ORDER-12, R-ORDER-15, P-ORDER-01, P-ORDER-02, P-ORDER-03, P-ORDER-04, P-ORDER-05, P-ORDER-06 |
 | `order/domain` 주문 확정 | R-ACCESS-03, R-ORDER-07, R-ORDER-08, R-ORDER-09, R-ORDER-10, R-ORDER-11, R-ORDER-12, P-ORDER-04 |
-| 요청자 구분 HTTP | R-ACCESS-01, R-ACCESS-02, R-ACCESS-04, R-ACCESS-05, P-ACCESS-01 |
+| `interfaces/api/RequesterAccessHttpTest` | R-ACCESS-01, R-ACCESS-02, R-ACCESS-04, R-ACCESS-05, P-ACCESS-01 |
 | `brand/application/BrandUseCaseIntegrationTest`, `brand/infrastructure/BrandRepositoryIntegrationTest` | R-ADMIN-01, R-ADMIN-02, R-ADMIN-14, R-ADMIN-15, P-ADMIN-01, P-ADMIN-06 |
-| `brand` HTTP | R-ADMIN-01, R-ADMIN-12, R-CATALOG-01, R-CATALOG-07, P-ADMIN-07, P-ADMIN-08 |
+| `brand/interfaces/BrandHttpTest` | R-ADMIN-01, R-ADMIN-12, R-CATALOG-01, R-CATALOG-07, P-ADMIN-07, P-ADMIN-08 |
 | `product/application/ProductUseCaseIntegrationTest`, `product/infrastructure/ProductRepositoryIntegrationTest` | R-ADMIN-04, R-ADMIN-05, R-ADMIN-08, R-ADMIN-12, R-CATALOG-04, R-CATALOG-05, R-CATALOG-06, R-LIKE-05, P-ADMIN-02, P-ADMIN-05, P-CATALOG-02, P-CATALOG-03, P-CATALOG-04, P-CATALOG-08 |
-| `product` HTTP | R-ACCESS-06, R-ADMIN-04, R-ADMIN-06, R-ADMIN-08, R-ADMIN-09, R-ADMIN-13, R-CATALOG-02, R-CATALOG-03, R-CATALOG-07, R-CATALOG-08, P-ADMIN-03, P-ADMIN-04, P-ADMIN-07, P-ADMIN-08, P-ADMIN-09, P-CATALOG-01, P-CATALOG-05, P-CATALOG-06, P-CATALOG-07 |
+| `product/interfaces/ProductHttpTest` | R-ACCESS-06, R-ADMIN-04, R-ADMIN-06, R-ADMIN-08, R-ADMIN-09, R-ADMIN-13, R-CATALOG-02, R-CATALOG-03, R-CATALOG-07, R-CATALOG-08, P-ADMIN-03, P-ADMIN-04, P-ADMIN-07, P-ADMIN-08, P-ADMIN-09, P-CATALOG-01, P-CATALOG-05, P-CATALOG-06, P-CATALOG-07 |
 | `like/application/LikeUseCaseIntegrationTest`, `like/infrastructure/LikeRepositoryIntegrationTest` | R-LIKE-02, R-LIKE-03, R-LIKE-05, R-LIKE-06, R-LIKE-07, R-LIKE-08, P-LIKE-01 |
-| `like` HTTP | R-LIKE-01, R-LIKE-04, R-LIKE-06, P-ACCESS-02, P-LIKE-01, P-LIKE-02 |
+| `like/interfaces/LikeHttpTest` | R-LIKE-01, R-LIKE-04, R-LIKE-06, P-ACCESS-02, P-LIKE-01, P-LIKE-02 |
 | `user/application/PointUseCaseIntegrationTest`, `user/infrastructure/UserRepositoryIntegrationTest` | R-POINT-01, R-POINT-02, R-POINT-06, R-POINT-08, P-POINT-01 |
-| `user` 포인트 HTTP | R-POINT-01, R-POINT-02, R-POINT-04, R-POINT-06, R-POINT-07, R-POINT-08 |
+| `user/interfaces/PointHttpTest` | R-POINT-01, R-POINT-02, R-POINT-04, R-POINT-06, R-POINT-07, R-POINT-08 |
 | `order/application/OrderUseCaseIntegrationTest`, `order/infrastructure/OrderRepositoryIntegrationTest` | R-ADMIN-10, R-ADMIN-14, R-ORDER-04, R-ORDER-05, R-ORDER-10, R-ORDER-11, R-ORDER-13, P-ADMIN-10, P-ORDER-07, P-ORDER-09 |
-| `order` HTTP | R-ADMIN-10, R-ADMIN-11, R-ORDER-01, R-ORDER-05, R-ORDER-06, R-ORDER-13, R-ORDER-14, P-ACCESS-02, P-ADMIN-10, P-ORDER-01, P-ORDER-04, P-ORDER-07, P-ORDER-08, P-ORDER-09 |
-| 연결 흐름 HTTP | R-POINT-02, R-POINT-06, R-ORDER-11, R-ORDER-12, R-ORDER-14 |
+| `order/interfaces/OrderHttpTest` | R-ADMIN-10, R-ADMIN-11, R-ORDER-01, R-ORDER-05, R-ORDER-06, R-ORDER-13, R-ORDER-14, P-ACCESS-02, P-ADMIN-10, P-ORDER-01, P-ORDER-04, P-ORDER-07, P-ORDER-08, P-ORDER-09 |
+| `interfaces/api/ChargeOrderFlowHttpTest` | R-POINT-02, R-POINT-06, R-ORDER-11, R-ORDER-12, R-ORDER-14 |
 
 ## 요구사항이 정하지 않아 확인하지 않는 것
 

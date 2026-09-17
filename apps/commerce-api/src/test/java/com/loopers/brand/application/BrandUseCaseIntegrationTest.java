@@ -85,6 +85,43 @@ class BrandUseCaseIntegrationTest {
             assertThat(entityManager.createQuery("select b from Brand b", Brand.class).getResultList())
                 .hasSize(1);
         }
+
+        @DisplayName("[동등 클래스 분할] 앞뒤 공백을 붙인 이름으로 만들면 공백을 뺀 이름으로 저장한다.")
+        @Test void savesTrimmedName() {
+            Brand result = useCase.create("  Nike  ");
+            entityManager.flush();
+            entityManager.clear();
+            assertThat(entityManager.find(Brand.class, result.getId()).getName()).isEqualTo("Nike");
+        }
+
+        @DisplayName("[동등 클래스 분할] 활성 브랜드와 앞뒤 공백만 다른 이름이면 DUPLICATE_BRAND_NAME이고 하나만 남는다.")
+        @Test void rejectsNameDifferentOnlyByOuterSpaces() {
+            persist(new Brand("Nike"));
+            CoreException result = assertThrows(CoreException.class, () -> useCase.create("  Nike  "));
+            assertThat(result.getErrorCode()).isEqualTo(ErrorCode.DUPLICATE_BRAND_NAME);
+            assertThat(entityManager.createQuery("select b from Brand b", Brand.class).getResultList())
+                .hasSize(1);
+        }
+
+        @DisplayName("[동등 클래스 분할] 활성 브랜드와 대소문자만 다른 이름이면 다른 이름으로 저장해 두 브랜드가 남는다.")
+        @Test void savesNameDifferentOnlyByCase() {
+            persist(new Brand("Nike"));
+            useCase.create("NIKE");
+            entityManager.flush();
+            entityManager.clear();
+            assertThat(entityManager.createQuery("select b.name from Brand b", String.class).getResultList())
+                .containsExactlyInAnyOrder("Nike", "NIKE");
+        }
+
+        @DisplayName("[동등 클래스 분할] 다른 활성 브랜드와 대소문자만 다른 이름으로 수정하면 새 이름이 저장된다.")
+        @Test void updatesToNameDifferentOnlyByCase() {
+            persist(new Brand("Nike"));
+            Brand target = persist(new Brand("Puma"));
+            useCase.update(target.getId(), "nike");
+            entityManager.flush();
+            entityManager.clear();
+            assertThat(entityManager.find(Brand.class, target.getId()).getName()).isEqualTo("nike");
+        }
     }
 
     @DisplayName("[P-ADMIN-06] 이미 삭제된 브랜드를 다시 삭제하면 없는 대상으로 거절한다.")
