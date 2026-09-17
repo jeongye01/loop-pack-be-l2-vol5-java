@@ -2,6 +2,7 @@ package com.loopers.like.application;
 
 import com.loopers.brand.domain.BrandRepository;
 import com.loopers.like.domain.Like;
+import com.loopers.like.domain.LikeDuplicationChecker;
 import com.loopers.like.domain.LikeRepository;
 import com.loopers.product.application.ProductUseCase.CustomerProduct;
 import com.loopers.product.domain.Product;
@@ -22,6 +23,7 @@ public class LikeUseCase {
     private final ProductRepository productRepository;
     private final UserRepository userRepository;
     private final BrandRepository brandRepository;
+    private final LikeDuplicationChecker duplicationChecker;
 
     public LikeUseCase(
         LikeRepository likeRepository,
@@ -33,13 +35,14 @@ public class LikeUseCase {
         this.productRepository = productRepository;
         this.userRepository = userRepository;
         this.brandRepository = brandRepository;
+        this.duplicationChecker = new LikeDuplicationChecker(likeRepository);
     }
 
     @Transactional
     public boolean register(Long userId, Long productId) {
         requireUser(userId);
         requireActiveProduct(productId);
-        if (likeRepository.findByUserIdAndProductId(userId, productId).isPresent()) {
+        if (duplicationChecker.isDuplicated(userId, productId)) {
             return false;
         }
         likeRepository.save(new Like(userId, productId));

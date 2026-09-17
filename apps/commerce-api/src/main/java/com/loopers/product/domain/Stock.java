@@ -24,12 +24,20 @@ public class Stock {
     }
 
     public Stock decrease(int amount) {
+        ensurePositive(amount);
+        ensureSufficient(amount);
+        return new Stock(quantity - amount);
+    }
+
+    private static void ensurePositive(int amount) {
         if (amount <= 0) {
             throw new CoreException(ErrorCode.INTERNAL_ERROR);
         }
+    }
+
+    private void ensureSufficient(int amount) {
         if (amount > quantity) {
             throw new CoreException(ErrorCode.INSUFFICIENT_STOCK);
         }
-        return new Stock(quantity - amount);
     }
 }
