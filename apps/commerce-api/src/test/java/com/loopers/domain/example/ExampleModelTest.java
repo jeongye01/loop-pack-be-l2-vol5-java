@@ -1,7 +1,7 @@
 package com.loopers.domain.example;
 
 import com.loopers.support.error.CoreException;
-import com.loopers.support.error.ErrorType;
+import com.loopers.support.error.ErrorCode;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -32,7 +32,7 @@ class ExampleModelTest {
             );
         }
 
-        @DisplayName("제목이 빈칸으로만 이루어져 있으면, BAD_REQUEST 예외가 발생한다.")
+        @DisplayName("제목이 빈칸으로만 이루어져 있으면, INVALID_REQUEST 예외가 발생한다.")
         @Test
         void throwsBadRequestException_whenTitleIsBlank() {
             // arrange
@@ -44,10 +44,10 @@ class ExampleModelTest {
             });
 
             // assert
-            assertThat(result.getErrorType()).isEqualTo(ErrorType.BAD_REQUEST);
+            assertThat(result.getErrorCode()).isEqualTo(ErrorCode.INVALID_REQUEST);
         }
 
-        @DisplayName("설명이 비어있으면, BAD_REQUEST 예외가 발생한다.")
+        @DisplayName("설명이 비어있으면, INVALID_REQUEST 예외가 발생한다.")
         @Test
         void throwsBadRequestException_whenDescriptionIsEmpty() {
             // arrange
@@ -59,7 +59,7 @@ class ExampleModelTest {
             });
 
             // assert
-            assertThat(result.getErrorType()).isEqualTo(ErrorType.BAD_REQUEST);
+            assertThat(result.getErrorCode()).isEqualTo(ErrorCode.INVALID_REQUEST);
         }
     }
 }

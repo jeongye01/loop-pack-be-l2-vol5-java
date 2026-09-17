@@ -84,7 +84,7 @@ class ContractClassificationTest {
             response,
             body,
             HttpStatus.BAD_REQUEST,
-            "Bad Request",
+            "INVALID_REQUEST",
             "요청 파라미터 'exampleId' (타입: Long)의 값 'abc'이(가) 잘못되었습니다."
         );
     }
@@ -101,7 +101,7 @@ class ContractClassificationTest {
             response,
             body,
             HttpStatus.NOT_FOUND,
-            "Not Found",
+            "NOT_FOUND",
             "[id = -1] 예시를 찾을 수 없습니다."
         );
     }
@@ -118,8 +118,8 @@ class ContractClassificationTest {
             response,
             body,
             HttpStatus.NOT_FOUND,
-            "Not Found",
-            "존재하지 않는 요청입니다."
+            "NOT_FOUND",
+            "요청한 경로를 찾을 수 없습니다."
         );
     }
 

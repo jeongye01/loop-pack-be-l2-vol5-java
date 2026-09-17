@@ -27,3 +27,46 @@
 | "삭제된 것은 보이지 않게"를 모든 조회에 한꺼번에 적용하면 관리자 조회와 주문 조회에서도 사라진다. | 삭제된 대상을 거르는 곳을 고객 조회와 새 주문으로 한정한다(`R-ADMIN-12`, `P-ADMIN-07`). 주문은 저장된 당시 값으로 보여 준다(`P-ORDER-07`). |
 
 **다시 검토할 조건**: 삭제한 이름을 다시 쓰지 못하게 해야 할 때, 또는 삭제한 데이터를 실제로 지워야 하는 요구가 생길 때
+
+## ADR-002. 오류 코드는 HTTP를 모르는 enum 하나에 둔다
+
+- 상태: 결정 (2026-09-17)
+- 근거: [아키텍처의 의존 방향](./commerce-api-design.md#의존-방향), [API 응답 계약의 오류 코드](./api-response-contract.md#오류-코드)
+
+**상황**: starter의 `CoreException`은 `ErrorType`을 담는다. `ErrorType`은 HTTP 상태(`HttpStatus`)를 가지고, 응답의 `meta.errorCode`로 상태 문구(`Bad Request`, `Not Found`)를 쓴다. 이대로 쓰면 다음 문제가 생긴다.
+
+- domain이 예외를 던질 때 HTTP 상태를 고른다. 불변식 로직이 외부 기술을 알게 된다.
+- 코드가 상태마다 하나라서, API 응답 계약의 규칙별 코드를 담을 수 없다. 재고 부족과 잔액 부족이 같은 코드로 나간다.
+- 도메인 테스트가 거절을 HTTP 상태로만 확인해서, 어떤 규칙으로 거절했는지 구분하지 못한다.
+
+과제는 starter의 Example 테스트와 오류 계약 정리 방식을 참고하라고 하고, 바꾸지 말라고 하지 않는다.
+
+**대안**
+
+- A. starter 그대로 `ErrorType`에 상태별 코드를 둔다.
+- B. HTTP를 모르는 오류 코드를 기능별 enum으로 나누고, 공통 인터페이스로 묶는다.
+- C. HTTP를 모르는 오류 코드를 enum 하나에 둔다.
+
+**결정**: C. `ErrorCode` enum 하나에 두고, `CoreException`이 `ErrorType` 대신 `ErrorCode`를 담는다.
+
+- domain과 application은 HTTP를 모른다. 상태는 interfaces의 `ErrorStatus`가 정한다.
+- 코드가 규칙마다 하나라서, 도메인 테스트가 거절한 규칙을 코드로 확인한다.
+- enum 하나가 API 응답 계약의 오류 코드 표와 1:1로 맞는다.
+- `PRODUCT_NOT_FOUND`처럼 여러 기능이 함께 쓰는 코드가 있다. 기능별로 나누면 주문·좋아요가 상품의 오류 코드 enum을 알아야 한다.
+- 예외는 starter의 `CoreException`을 그대로 쓴다. 새 예외를 만들면 두 예외가 함께 남는다.
+
+| 바꾼 것 | 전 | 후 |
+| --- | --- | --- |
+| 오류 코드 | `ErrorType`(상태, 상태 문구, 메시지) | `ErrorCode`(메시지). 이름이 `meta.errorCode`가 된다. |
+| 예외 | `CoreException(ErrorType)` | `CoreException(ErrorCode)` |
+| 상태를 정하는 곳 | `ErrorType` | interfaces의 `ErrorStatus` |
+
+**C로 생기는 문제와 대응**
+
+| 문제 | 대응 |
+| --- | --- |
+| 코드를 추가할 때 상태 매핑을 빠뜨릴 수 있다. | `ErrorStatus`는 모든 코드를 다루는 `switch`라서 빠뜨리면 컴파일이 실패한다. `ErrorStatusTest`가 계약 표의 상태와 비교한다. |
+| Example API의 오류 응답이 바뀐다. | `meta.errorCode`가 `Bad Request`에서 `INVALID_REQUEST`로, `Not Found`에서 `NOT_FOUND`로 바뀌었고, 테스트의 기대값을 함께 고쳤다. |
+| 여러 기능이 한 파일을 함께 고친다. | 코드가 26개라서 한 파일로 둔다. 아래 조건이 되면 B로 나눈다. |
+
+**다시 검토할 조건**: 기능과 코드가 늘어 여러 기능이 한 파일을 자주 함께 고치게 될 때
