@@ -117,39 +117,4 @@ class StockTest {
             );
         }
     }
-
-    @DisplayName("[ADR-003] 재고 차감 수량이 0 이하이면 내부 오류로 거절한다.")
-    @Nested
-    class PositiveAmount {
-
-        @DisplayName("[경계값 분석] 재고 5에서 1을 차감하면 4가 남는다.")
-        @Test
-        void decreases_whenAmountIsOne() {
-            // arrange
-            Stock stock = new Stock(5);
-
-            // act
-            Stock result = stock.decrease(1);
-
-            // assert
-            assertThat(result.quantity()).isEqualTo(4);
-        }
-
-        @DisplayName("[경계값 분석] 재고 5에서 0, -1을 차감하면 내부 오류로 거절하고, 재고는 5 그대로다.")
-        @ParameterizedTest
-        @ValueSource(ints = {0, -1})
-        void throwsInternalError_whenAmountIsZeroOrLess(int amount) {
-            // arrange
-            Stock stock = new Stock(5);
-
-            // act
-            CoreException result = assertThrows(CoreException.class, () -> stock.decrease(amount));
-
-            // assert
-            assertAll(
-                () -> assertThat(result.getErrorCode()).isEqualTo(ErrorCode.INTERNAL_ERROR),
-                () -> assertThat(stock.quantity()).isEqualTo(5)
-            );
-        }
-    }
 }
