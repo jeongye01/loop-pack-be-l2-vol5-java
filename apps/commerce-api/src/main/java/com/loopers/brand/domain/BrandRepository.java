@@ -10,4 +10,6 @@ public interface BrandRepository {
     Optional<Brand> findById(Long id);
 
     List<Brand> findAllByName(String name);
+
+    List<Brand> findAll(int page, int size);
 }

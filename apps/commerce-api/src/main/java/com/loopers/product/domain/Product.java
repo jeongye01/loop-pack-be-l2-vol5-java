@@ -3,13 +3,22 @@ package com.loopers.product.domain;
 import com.loopers.domain.BaseEntity;
 import com.loopers.support.error.CoreException;
 import com.loopers.support.error.ErrorCode;
+import jakarta.persistence.Embedded;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Table;
 
+@Entity
+@Table(name = "product")
 public class Product extends BaseEntity {
 
     private Long brandId;
     private String name;
     private long price;
+    @Embedded
     private Stock stock;
+
+    protected Product() {
+    }
 
     public Product(Long brandId, String name, long price) {
         if (brandId == null) {

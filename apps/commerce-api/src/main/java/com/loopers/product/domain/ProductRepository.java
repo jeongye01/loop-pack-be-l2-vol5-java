@@ -12,4 +12,8 @@ public interface ProductRepository {
     List<Product> findAllByBrandId(Long brandId);
 
     List<Product> findAllByBrandIdAndName(Long brandId, String name);
+
+    List<Product> findAll(Long brandId, int page, int size);
+
+    List<Product> findCustomerProducts(Long brandId, ProductSort sort, int page, int size);
 }

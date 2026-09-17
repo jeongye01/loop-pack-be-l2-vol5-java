@@ -3,6 +3,10 @@ package com.loopers.order.domain;
 import com.loopers.domain.BaseEntity;
 import com.loopers.support.error.CoreException;
 import com.loopers.support.error.ErrorCode;
+import jakarta.persistence.ElementCollection;
+import jakarta.persistence.Embedded;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Table;
 
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
@@ -10,12 +14,19 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+@Entity
+@Table(name = "orders")
 public class Order extends BaseEntity {
 
     private Long buyerId;
+    @ElementCollection
     private List<OrderItem> items;
     private OrderStatus status;
+    @Embedded
     private PaymentResult paymentResult;
+
+    protected Order() {
+    }
 
     public Order(Long buyerId, List<OrderItem> items) {
         if (items == null || items.isEmpty()) {

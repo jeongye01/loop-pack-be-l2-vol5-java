@@ -2,8 +2,23 @@ package com.loopers.user.domain;
 
 import com.loopers.support.error.CoreException;
 import com.loopers.support.error.ErrorCode;
+import jakarta.persistence.Embeddable;
 
-public record Point(long balance) {
+@Embeddable
+public class Point {
+
+    private long balance;
+
+    protected Point() {
+    }
+
+    public Point(long balance) {
+        this.balance = balance;
+    }
+
+    public long balance() {
+        return balance;
+    }
 
     public Point charge(long amount) {
         if (amount <= 0) {

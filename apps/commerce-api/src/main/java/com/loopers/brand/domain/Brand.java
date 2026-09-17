@@ -3,10 +3,17 @@ package com.loopers.brand.domain;
 import com.loopers.domain.BaseEntity;
 import com.loopers.support.error.CoreException;
 import com.loopers.support.error.ErrorCode;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Table;
 
+@Entity
+@Table(name = "brand")
 public class Brand extends BaseEntity {
 
     private String name;
+
+    protected Brand() {
+    }
 
     public Brand(String name) {
         this.name = validateName(name);
