@@ -38,6 +38,7 @@ Red 테스트와 오류 코드는 바꾸지 않았다. Refactor 전후 모두 `S
   - Red: 같은 고객·상품 관계를 두 번 저장하는 저장소 통합 테스트 3개 중 1개가 실패했고, DB가 중복 행을 허용하는 것을 확인했다.
   - Green: `Like`의 테이블 매핑에 `uk_product_like_user_product` 제약을 추가해 DB가 중복 관계를 거절하도록 했다.
   - `GenerationType.IDENTITY`에서는 중복 INSERT 예외가 `flush`보다 `persist`에서 먼저 발생할 수 있으므로, 테스트는 두 저장과 flush를 포함한 영속화 작업 전체가 `PersistenceException`으로 거절되는지 확인한다.
+- 과제 기능이 아닌 starter의 `Example` API·도메인·저장소와 전용 테스트를 제거했다. Example을 사용하던 공통 응답 계약 테스트는 고객 브랜드 API로 옮겨 성공·입력 오류·자원 미존재·미매핑 응답 검증을 유지했다.
 - 주문 품목 로딩 방식은 구현 중 생긴 판단이어서 [ADR-007](./decisions.md#adr-007-주문을-조회할-때-품목을-함께-로딩한다)에 대안과 비용을 기록했다.
 
 ## 실행한 검사
@@ -46,7 +47,7 @@ Red 테스트와 오류 코드는 바꾸지 않았다. Refactor 전후 모두 `S
 | --- | --- |
 | `StockTest`, `ProductTest`, `LikeDuplicationCheckerTest`, `LikeUseCaseIntegrationTest` | 성공 |
 | `./gradlew :apps:commerce-api:check --rerun-tasks` | 성공 |
-| commerce-api 테스트 결과 | 450개, 실패 0, 오류 0, skip 0 |
+| commerce-api 테스트 결과 | 442개, 실패 0, 오류 0, skip 0 |
 | `ArchitectureTest` | 1개, 실패 0 |
 | commerce-api main·test Checkstyle | 성공 |
 | `./gradlew check --continue` | 성공, 전체 하위 모듈 Checkstyle 포함 |
@@ -56,4 +57,4 @@ Red 테스트와 오류 코드는 바꾸지 않았다. Refactor 전후 모두 `S
 
 - 대표 TDD 사례: 재고 차감 규칙을 Red → Green → 조건 검증 메서드 분리 Refactor 순서로 진행했다.
 - 설계에서 바뀐 판단: 주문 응답이 항상 품목을 사용하고 Open EntityManager in View를 끈 환경이므로 주문과 품목을 함께 로딩한다. 대안과 재검토 조건은 ADR-007에 남겼다.
-- 검사: commerce-api 테스트 450개, Checkstyle, ArchUnit과 루트 전체 `check`가 통과했다.
+- 검사: commerce-api 테스트 442개, Checkstyle, ArchUnit과 루트 전체 `check`가 통과했다.
