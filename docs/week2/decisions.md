@@ -157,40 +157,45 @@
 
 **다시 검토할 조건**: 독립 Green 에이전트가 저장소의 계약만으로 반복해서 구현할 수 없거나, 에이전트 분리 비용이 검증 효과보다 커질 때
 
-## ADR-006. 인프라를 분리해 테스트할 수 있도록 DIP를 적용한다
+## ADR-006. Repository에는 DIP를 적용하고 domain 객체를 JPA Entity로 사용한다
 
 - 상태: 결정 (2026-09-17)
 - 근거: [아키텍처의 의존 방향](./commerce-api-design.md#의존-방향), [테스트 계획](./test-plan.md), 과제의 `4. 실행·제출`
 
-**상황**: application과 domain의 규칙은 DB 없이 빠르게 확인하고, repository의 저장·조회는 실제 JPA와 MySQL Testcontainers로 확인해야 한다. application이 Spring Data JPA나 구체 저장소를 직접 사용하면 규칙 테스트에도 DB가 필요하고, 저장 기술이 안쪽 계층으로 전파된다.
+**상황**: application과 domain의 규칙은 DB 없이 빠르게 확인하고, repository의 저장·조회는 실제 JPA와 MySQL Testcontainers로 확인해야 한다. application이 Spring Data JPA나 구체 저장소를 직접 사용하면 규칙 테스트에도 DB가 필요하고, 저장 기술이 application으로 전파된다.
+
+Repository 포트와 어댑터로 의존을 역전하는 것과 domain 객체에서 JPA annotation을 제거하는 것은 별개의 결정이다. domain 객체와 JPA Entity를 분리하면 domain은 영속 기술을 전혀 모르지만, 같은 상태를 가진 Entity와 변환 코드를 함께 관리해야 한다. 반대로 domain 객체를 JPA Entity로 사용하면 persistence metadata가 domain에 남지만 별도 모델과 변환 없이 JPA 변경 감지를 사용할 수 있다.
 
 **대안**
 
 - A. application이 Spring Data `JpaRepository`를 직접 사용한다.
-- B. domain에 Repository 포트를 두고 infrastructure의 JPA 어댑터가 포트를 구현한다.
-- C. 테스트에서만 별도 저장소 추상화를 사용하고 production은 JPA 구현에 직접 의존한다.
+- B. domain에 Repository 포트를 두고 infrastructure의 JPA 어댑터가 포트를 구현하며, domain 객체와 JPA Entity는 분리한다.
+- C. domain에 Repository 포트를 두고 infrastructure의 JPA 어댑터가 포트를 구현하며, domain 객체를 JPA Entity로 함께 사용한다.
 
-**결정**: B. domain에 Repository 인터페이스를 두고 infrastructure가 이를 구현하도록 DIP를 적용한다.
+**결정**: C. Repository에는 DIP를 적용하고 domain 객체를 JPA Entity로 함께 사용한다.
 
 ```text
 application ──▶ domain Repository(port) ◀── infrastructure JPA adapter ──▶ MySQL
 ```
 
 - application은 domain의 Repository 포트에만 의존한다.
-- JPA Entity, Spring Data `JpaRepository`, domain과 영속 모델 사이의 변환은 infrastructure에 둔다.
-- domain 객체에는 JPA annotation을 붙이지 않고, HTTP·JPA·MySQL을 모르는 순수 Java 객체로 유지한다.
+- Spring Data `JpaRepository`와 Repository 포트의 어댑터는 infrastructure에 둔다.
+- domain 객체에는 영속 매핑을 위한 JPA annotation과 기본 생성자를 허용한다. domain 규칙은 Entity 안에 유지한다.
+- domain은 Spring Data Repository, EntityManager, 구체 쿼리나 MySQL API를 직접 사용하지 않는다.
+- 별도의 infrastructure JPA Entity와 domain 변환 mapper는 만들지 않는다.
 - production에서는 Spring이 JPA 어댑터를 Repository 포트의 구현으로 주입한다.
 - domain·application 테스트는 mock 또는 메모리 구현으로 포트를 대체해 DB 없이 실행한다.
 - repository 통합 테스트는 JPA 어댑터와 MySQL 8.0 Testcontainers를 사용하고, 저장 후 `flush`·`clear`한 뒤 다시 조회한다.
 - HTTP 테스트는 실제 controller·application·JPA 어댑터와 테스트 DB를 연결한다.
 - 테스트와 로컬 실행의 DB 동작 차이를 만들지 않기 위해 H2를 추가하지 않는다.
 
-**B로 생기는 문제와 대응**
+**C로 생기는 문제와 대응**
 
 | 문제 | 대응 |
 | --- | --- |
-| domain 모델과 JPA Entity, 변환 코드가 따로 생긴다. | 변환 책임을 infrastructure 어댑터에 한정하고, 요구사항에 필요한 필드만 매핑한다. |
+| domain이 JPA annotation과 `BaseEntity`에 컴파일 시점 의존한다. | 영속 metadata와 기본 생성자만 허용하고, 저장소·쿼리·트랜잭션 같은 실행 기술은 infrastructure와 application에 둔다. |
+| JPA 매핑 변경이 domain 클래스의 변경을 일으킨다. | 이번 과제의 단순 aggregate에서는 별도 Entity와 mapper의 중복 비용이 더 크다고 판단한다. 영속 모델과 domain 모델의 변화 속도가 달라지면 분리를 다시 검토한다. |
 | mock·메모리 구현만으로는 실제 매핑과 쿼리 오류를 찾을 수 없다. | repository·DB 경계는 MySQL Testcontainers 통합 테스트로 별도 확인한다. |
 | 테스트를 위한 구조가 production 코드에도 남는다. | 테스트 전용 분기가 아니라 의존 방향을 지키는 production 구조로 사용하며, 테스트에서는 같은 포트를 교체 가능 지점으로 활용한다. |
 
-**다시 검토할 조건**: 영속 모델과 domain 모델의 변환 비용이 분리 효과보다 커지거나, JPA 외 저장 기술을 함께 사용해 포트의 책임을 다시 나눠야 할 때
+**다시 검토할 조건**: JPA 제약 때문에 domain 규칙 표현이 어려워지거나, 영속 모델과 domain 모델의 변화 속도가 달라지거나, JPA 외 저장 기술을 함께 사용하게 될 때
