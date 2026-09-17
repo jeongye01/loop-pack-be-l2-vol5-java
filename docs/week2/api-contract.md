@@ -169,6 +169,8 @@
 
 관리자 조회는 삭제된 브랜드와 상품도 삭제 여부와 함께 보여 준다. 삭제된 대상은 수정, 재고 변경, 다시 삭제의 대상이 아니며 없는 대상으로 알린다. (P-ADMIN-06, P-ADMIN-07, R-ADMIN-13)
 
+브랜드·상품 이름은 앞뒤 공백을 빼고 저장한다. 길이와 중복은 뺀 이름으로 판단하고, 중복은 대소문자를 구분해 비교한다. (P-ADMIN-01, P-ADMIN-02)
+
 ### A-01. 브랜드 목록
 
 | 항목 | 계약 |
@@ -186,7 +188,7 @@
 | 요청 | `POST /api-admin/v1/brands` |
 | 입력 | body `{ "name": "브랜드" }` |
 | 성공 | `201`, 관리자 브랜드 |
-| 대표 오류 | `400 INVALID_REQUEST`: `name` 누락 · `400 INVALID_BRAND_NAME`: 비었음, 공백만 있음, 50자 초과 · `409 DUPLICATE_BRAND_NAME` |
+| 대표 오류 | `400 INVALID_REQUEST`: `name` 누락 · `400 INVALID_BRAND_NAME`: 비었음, 공백만 있음, 앞뒤 공백을 뺀 길이가 50자 초과 · `409 DUPLICATE_BRAND_NAME` |
 | 근거 | R-ADMIN-01, R-ADMIN-15, P-ADMIN-01 |
 
 ### A-03. 브랜드 상세
@@ -236,7 +238,7 @@
 | 요청 | `POST /api-admin/v1/products` |
 | 입력 | body `{ "brandId": 1, "name": "상품", "price": 3000 }` |
 | 성공 | `201`, 관리자 상품. `stock`은 0이다. |
-| 대표 오류 | `400 INVALID_REQUEST`: 필드 누락, 타입이 틀림 · `400 INVALID_PRODUCT_NAME`: 이름이 비었음·공백만 있음·100자 초과 · `400 INVALID_PRODUCT_PRICE`: 가격이 1원~1,000,000,000원 밖 · `404 BRAND_NOT_FOUND`: 없거나 삭제된 브랜드 · `409 DUPLICATE_PRODUCT_NAME` |
+| 대표 오류 | `400 INVALID_REQUEST`: 필드 누락, 타입이 틀림 · `400 INVALID_PRODUCT_NAME`: 이름이 비었음·공백만 있음·앞뒤 공백을 뺀 길이가 100자 초과 · `400 INVALID_PRODUCT_PRICE`: 가격이 1원~1,000,000,000원 밖 · `404 BRAND_NOT_FOUND`: 없거나 삭제된 브랜드 · `409 DUPLICATE_PRODUCT_NAME` |
 | 근거 | R-ADMIN-04, R-ADMIN-05, R-ADMIN-06, P-ADMIN-02, P-ADMIN-03, P-ADMIN-05 |
 
 ### A-08. 상품 상세

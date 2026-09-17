@@ -52,9 +52,9 @@
 | --- | --- | --- | --- | --- |
 | `400` | `INVALID_REQUEST` | interfaces | 요청의 형식이 틀렸다. 필드 누락, 타입 오류, 깨진 JSON, 잘못된 페이지·정렬 조건 | 요청 형식이 올바르지 않습니다. 입력값을 확인해 주세요. |
 | `400` | `INVALID_STOCK_QUANTITY` | domain (Stock) | 재고 수량이 0보다 작다. | 재고 수량은 0 이상이어야 합니다. |
-| `400` | `INVALID_PRODUCT_NAME` | domain (Product) | 상품 이름이 비었거나 공백만 있거나 100자를 넘는다. | 상품 이름은 공백이 아닌 1~100자여야 합니다. |
+| `400` | `INVALID_PRODUCT_NAME` | domain (Product) | 상품 이름이 비었거나 공백만 있거나, 앞뒤 공백을 뺀 길이가 100자를 넘는다. | 상품 이름은 공백이 아닌 1~100자여야 합니다. |
 | `400` | `INVALID_PRODUCT_PRICE` | domain (Product) | 상품 가격이 1원~1,000,000,000원 밖이다. | 상품 가격은 1원 이상 1,000,000,000원 이하여야 합니다. |
-| `400` | `INVALID_BRAND_NAME` | domain (Brand) | 브랜드 이름이 비었거나 공백만 있거나 50자를 넘는다. | 브랜드 이름은 공백이 아닌 1~50자여야 합니다. |
+| `400` | `INVALID_BRAND_NAME` | domain (Brand) | 브랜드 이름이 비었거나 공백만 있거나, 앞뒤 공백을 뺀 길이가 50자를 넘는다. | 브랜드 이름은 공백이 아닌 1~50자여야 합니다. |
 | `400` | `INVALID_CHARGE_AMOUNT` | domain (Point) | 충전액이 0 이하이다. | 충전액은 1 이상이어야 합니다. |
 | `400` | `INVALID_ORDER_QUANTITY` | domain (OrderItem) | 주문 수량이 0 이하이다. | 주문 수량은 1 이상이어야 합니다. |
 | `400` | `EMPTY_ORDER_ITEMS` | domain (Order) | 주문에 품목이 없다. | 주문할 상품을 하나 이상 담아 주세요. |
@@ -66,8 +66,8 @@
 | `404` | `LIKE_NOT_FOUND` | domain (Like) | 다른 고객의 좋아요를 취소하려 했다. 좋아요 취소 API는 요청자의 좋아요만 찾으므로 응답으로는 나오지 않는다. | 좋아요를 찾을 수 없습니다. |
 | `404` | `NOT_FOUND` | interfaces | 요청한 경로가 없다. | 요청한 경로를 찾을 수 없습니다. |
 | `405` | `METHOD_NOT_ALLOWED` | interfaces | 경로는 있지만 허용하지 않는 method로 요청했다. | 허용하지 않는 요청 방식입니다. |
-| `409` | `DUPLICATE_BRAND_NAME` | domain (브랜드 이름 중복 여부) | 삭제되지 않은 브랜드 중에 같은 이름이 있다. | 이미 사용 중인 브랜드 이름입니다. |
-| `409` | `DUPLICATE_PRODUCT_NAME` | domain (상품 이름 중복 여부) | 같은 브랜드의 삭제되지 않은 상품 중에 같은 이름이 있다. | 이 브랜드에 같은 이름의 상품이 있습니다. |
+| `409` | `DUPLICATE_BRAND_NAME` | domain (브랜드 이름 중복 여부) | 삭제되지 않은 브랜드 중에 같은 이름이 있다. 앞뒤 공백을 빼고, 대소문자를 구분해 비교한다. | 이미 사용 중인 브랜드 이름입니다. |
+| `409` | `DUPLICATE_PRODUCT_NAME` | domain (상품 이름 중복 여부) | 같은 브랜드의 삭제되지 않은 상품 중에 같은 이름이 있다. 앞뒤 공백을 빼고, 대소문자를 구분해 비교한다. | 이 브랜드에 같은 이름의 상품이 있습니다. |
 | `409` | `BRAND_HAS_PRODUCTS` | domain (브랜드 삭제 가능 여부) | 삭제되지 않은 상품이 연결된 브랜드를 삭제하려 했다. | 연결된 상품이 있어 브랜드를 삭제할 수 없습니다. |
 | `409` | `ORDER_ALREADY_CONFIRMED` | domain (Order) | 이미 확정된 주문을 확정하거나 품목 수량을 바꾸려 했다. | 이미 확정된 주문입니다. |
 | `409` | `BRAND_CHANGE_NOT_ALLOWED` | domain (Product) | 상품 수정에서 브랜드를 바꾸려 했다. | 상품의 브랜드는 바꿀 수 없습니다. |
