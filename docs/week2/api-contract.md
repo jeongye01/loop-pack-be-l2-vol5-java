@@ -18,7 +18,7 @@
 
 응답 형식, 응답 필드, 오류 코드는 [API 응답 계약](./api-response-contract.md)을 따른다. 아래 각 API의 `성공` 칸에 적힌 응답 이름(고객 상품, 주문 상세 등)과 `대표 오류` 칸의 오류 코드도 그 문서를 가리킨다.
 
-- 성공은 `200 OK`이다.
+- 새 대상을 만드는 요청(A-02, A-07, C-09, 처음 등록하는 C-04)의 성공은 `201 Created`, 나머지 성공은 `200 OK`이다.
 - 실패한 요청은 저장된 상태를 바꾸지 않는다.
 
 ### 목록
@@ -34,6 +34,8 @@
 | 순서 | 요청마다 적는다. 순서 기준이 같으면 식별자 오름차순으로 정한다. |
 
 ## 고객 API
+
+고객이 브랜드·상품을 조회하고 좋아요·포인트·주문 기능을 쓰는 API다. (R-ACCESS-01)
 
 ### C-01. 브랜드 상세
 
@@ -55,7 +57,7 @@
 | 순서 | `latest`는 등록 최신순, `price_asc`는 가격 오름차순, `likes_desc`는 좋아요 수 내림차순. 같으면 상품 식별자 오름차순 |
 | 대표 오류 | `400 INVALID_REQUEST`: 지원하지 않는 `sort`, 잘못된 `page`·`size` |
 | 규칙 | 없거나 삭제된 `brandId`로 거르면 빈 목록을 돌려준다. |
-| 근거 | R-CATALOG-02, R-CATALOG-03, R-CATALOG-04, R-CATALOG-05, R-CATALOG-06, R-CATALOG-08, R-ADMIN-12, P-CATALOG-02, P-CATALOG-03, P-CATALOG-04, P-CATALOG-06, P-CATALOG-08 |
+| 근거 | R-CATALOG-02, R-CATALOG-03, R-LIKE-05, R-CATALOG-04, R-CATALOG-05, R-CATALOG-06, R-CATALOG-08, R-ADMIN-12, P-CATALOG-02, P-CATALOG-03, P-CATALOG-04, P-CATALOG-06, P-CATALOG-08 |
 
 ### C-03. 상품 상세
 
@@ -65,7 +67,7 @@
 | 입력 | path `productId` |
 | 성공 | `200`, 고객 상품 |
 | 대표 오류 | `404 PRODUCT_NOT_FOUND`: 없거나 삭제된 상품 |
-| 근거 | R-CATALOG-02, R-CATALOG-03, R-CATALOG-07, R-ADMIN-12 |
+| 근거 | R-CATALOG-02, R-CATALOG-03, R-CATALOG-07, R-LIKE-05, R-ADMIN-12 |
 
 ### C-04. 좋아요 등록
 
@@ -73,7 +75,7 @@
 | --- | --- |
 | 요청 | `POST /api/v1/products/{productId}/likes` |
 | 입력 | path `productId` |
-| 성공 | `200`, `data` 없음. 이미 좋아요한 상품이어도 `200`이며 좋아요 수는 그대로다. |
+| 성공 | `201`, `data` 없음. 이미 좋아요한 상품이면 새로 만들지 않고 `200`이며, 좋아요 수는 그대로다. |
 | 대표 오류 | `404 PRODUCT_NOT_FOUND`: 없거나 삭제된 상품 |
 | 근거 | R-LIKE-01, R-LIKE-02, R-LIKE-06, R-LIKE-07, P-LIKE-01, P-LIKE-02 |
 
@@ -105,7 +107,7 @@
 | 요청 | `POST /api/v1/points/charge` |
 | 입력 | body `{ "amount": 10000 }`. `amount`는 양의 정수 |
 | 성공 | `200`, `data`는 `{ "balance": 충전 후 잔액 }` |
-| 대표 오류 | `400 INVALID_REQUEST`: `amount` 누락, 정수가 아님, 0 이하, 표현 범위 초과 · `422 POINT_BALANCE_LIMIT_EXCEEDED`: 충전 후 잔액이 표현 범위를 넘음. 어느 경우든 잔액은 그대로다. |
+| 대표 오류 | `400 INVALID_REQUEST`: `amount` 누락, 정수가 아님, 0 이하, 표현 범위 초과 · `409 POINT_BALANCE_LIMIT_EXCEEDED`: 충전 후 잔액이 표현 범위를 넘음. 어느 경우든 잔액은 그대로다. |
 | 근거 | R-POINT-01, R-POINT-03, R-POINT-04, R-POINT-06, R-POINT-07, R-POINT-08 |
 
 ### C-08. 내 잔액 조회
@@ -124,7 +126,7 @@
 | --- | --- |
 | 요청 | `POST /api/v1/orders` |
 | 입력 | body `{ "items": [ { "productId": 1, "quantity": 2 } ] }` |
-| 성공 | `200`, 주문 상세. `status`는 `DRAFT`, `payment`는 `null`이다. 재고와 잔액은 그대로다. |
+| 성공 | `201`, 주문 상세. `status`는 `DRAFT`, `payment`는 `null`이다. 재고와 잔액은 그대로다. |
 | 대표 오류 | `400 INVALID_REQUEST`: `items`가 비었음, `quantity`가 양의 정수가 아님 · `404 PRODUCT_NOT_FOUND`: 없거나 삭제된 상품 |
 | 규칙 | 같은 `productId`가 여러 번 오면 수량을 합산해 품목 하나로 만든다. 단가와 상품 이름은 지금 값으로 기록하고, 합계는 품목 금액의 합이다. |
 | 근거 | R-ORDER-01, R-ORDER-02, R-ORDER-03, R-ORDER-04, R-ORDER-05, R-ORDER-06, R-ORDER-15, P-ORDER-01, P-ORDER-02, P-ORDER-03, P-ORDER-07 |
@@ -136,7 +138,7 @@
 | 요청 | `POST /api/v1/orders/{orderId}/confirm` |
 | 입력 | path `orderId` |
 | 성공 | `200`, 주문 상세. `status`는 `CONFIRMED`이고 `payment`에 결제액과 결제 시점이 있다. 각 상품의 재고와 고객의 잔액이 차감된다. |
-| 대표 오류 | `404 ORDER_NOT_FOUND`: 없거나 다른 고객의 주문 · `409 ORDER_ALREADY_CONFIRMED` · `422 PRODUCT_NOT_AVAILABLE`: 삭제된 상품이 있음 · `422 INSUFFICIENT_STOCK` · `422 INSUFFICIENT_POINT` |
+| 대표 오류 | `404 ORDER_NOT_FOUND`: 없거나 다른 고객의 주문 · `409 ORDER_ALREADY_CONFIRMED` · `409 PRODUCT_NOT_AVAILABLE`: 삭제된 상품이 있음 · `409 INSUFFICIENT_STOCK` · `409 INSUFFICIENT_POINT` |
 | 규칙 | 하나라도 통과하지 못하면 주문 상태, 재고, 잔액을 모두 그대로 둔다. |
 | 근거 | R-ACCESS-03, R-ORDER-07, R-ORDER-08, R-ORDER-09, R-ORDER-10, R-ORDER-11, R-ORDER-12, P-ACCESS-02, P-ORDER-04, P-ORDER-06 |
 
@@ -163,6 +165,8 @@
 
 ## 관리자 API
 
+관리자가 브랜드·상품·재고를 관리하고 구매자들의 주문을 조회하는 API다. (R-ACCESS-02)
+
 관리자 조회는 삭제된 브랜드와 상품도 삭제 여부와 함께 보여 준다. 삭제된 대상은 수정, 재고 변경, 다시 삭제의 대상이 아니며 없는 대상으로 알린다. (P-ADMIN-06, P-ADMIN-07, R-ADMIN-13)
 
 ### A-01. 브랜드 목록
@@ -181,7 +185,7 @@
 | --- | --- |
 | 요청 | `POST /api-admin/v1/brands` |
 | 입력 | body `{ "name": "브랜드" }` |
-| 성공 | `200`, 관리자 브랜드 |
+| 성공 | `201`, 관리자 브랜드 |
 | 대표 오류 | `400 INVALID_REQUEST`: 이름 누락, 공백만 있음, 50자 초과 · `409 DUPLICATE_BRAND_NAME` |
 | 근거 | R-ADMIN-01, R-ADMIN-15, P-ADMIN-01 |
 
@@ -231,7 +235,7 @@
 | --- | --- |
 | 요청 | `POST /api-admin/v1/products` |
 | 입력 | body `{ "brandId": 1, "name": "상품", "price": 3000 }` |
-| 성공 | `200`, 관리자 상품. `stock`은 0이다. |
+| 성공 | `201`, 관리자 상품. `stock`은 0이다. |
 | 대표 오류 | `400 INVALID_REQUEST`: 이름 누락·공백만 있음·100자 초과, 가격이 1원~1,000,000,000원 밖 · `404 BRAND_NOT_FOUND`: 없거나 삭제된 브랜드 · `409 DUPLICATE_PRODUCT_NAME` |
 | 근거 | R-ADMIN-04, R-ADMIN-05, R-ADMIN-06, P-ADMIN-02, P-ADMIN-03, P-ADMIN-05 |
 
@@ -252,7 +256,7 @@
 | 요청 | `PUT /api-admin/v1/products/{productId}` |
 | 입력 | path `productId`, body `{ "name": "새 이름", "price": 3500, "brandId": 1 }`. `brandId`는 선택이며, 보내면 현재 브랜드와 같아야 한다. |
 | 성공 | `200`, 관리자 상품. 재고는 바뀌지 않는다. |
-| 대표 오류 | `400 INVALID_REQUEST`: 이름·가격 규칙 위반 · `404 PRODUCT_NOT_FOUND`: 없거나 삭제된 상품 · `409 DUPLICATE_PRODUCT_NAME` · `422 BRAND_CHANGE_NOT_ALLOWED`: `brandId`가 현재 브랜드와 다름. 어느 경우든 상품은 그대로다. |
+| 대표 오류 | `400 INVALID_REQUEST`: 이름·가격 규칙 위반 · `404 PRODUCT_NOT_FOUND`: 없거나 삭제된 상품 · `409 DUPLICATE_PRODUCT_NAME` · `409 BRAND_CHANGE_NOT_ALLOWED`: `brandId`가 현재 브랜드와 다름. 어느 경우든 상품은 그대로다. |
 | 근거 | R-ADMIN-04, R-ADMIN-06, R-ADMIN-07, R-ADMIN-13, P-ADMIN-02, P-ADMIN-03, P-ADMIN-04, P-ADMIN-05 |
 
 ### A-10. 상품 삭제
@@ -295,6 +299,12 @@
 | 대표 오류 | `404 ORDER_NOT_FOUND` |
 | 근거 | R-ADMIN-10, R-ADMIN-11, P-ORDER-07 |
 
+## 제공하지 않는 기능
+
+| 기능 | 이유 | 근거 |
+| --- | --- | --- |
+| `DRAFT` 주문의 품목 수량 변경 | 도메인 모델과 정책에는 있지만, 과제가 요구한 API에 없어 제공하지 않는다. | P-ORDER-05 |
+
 ## 주요 규칙의 기대값
 
 | 규칙 | 조건 | 기대값 | 근거 |
@@ -307,13 +317,13 @@
 | 충전 | 0원 또는 음수 충전 | `400`. 잔액 그대로 | R-POINT-04, R-POINT-08 |
 | 잔액 | 한 번도 충전하지 않음 | 잔액 0 | R-POINT-05, P-POINT-01 |
 | 주문 확정 | 잔액 10,000, 합계 7,000 | `CONFIRMED`, 결제액 7,000, 잔액 3,000 | R-ORDER-11, R-ORDER-12 |
-| 주문 확정 | 잔액 5,000, 합계 7,000 | `422 INSUFFICIENT_POINT`. 주문 `DRAFT`, 재고와 잔액 그대로 | R-ORDER-09, R-ORDER-10 |
+| 주문 확정 | 잔액 5,000, 합계 7,000 | `409 INSUFFICIENT_POINT`. 주문 `DRAFT`, 재고와 잔액 그대로 | R-ORDER-09, R-ORDER-10 |
 | 주문 확정 | 이미 `CONFIRMED`인 주문 | `409 ORDER_ALREADY_CONFIRMED`. 결제액과 잔액 그대로 | P-ORDER-04 |
 | 주문 생성 | 상품 A 2개와 상품 A 3개 | 품목 A 5개 하나. 확정할 때 재고 5 이상이어야 한다 | R-ORDER-15, P-ORDER-02 |
 | 주문 생성 | 품목 0개 | `400` | P-ORDER-01 |
 | 주문 생성 | 수량 0 | `400` | R-ORDER-06 |
 | 주문 조회 | 주문 뒤 상품 가격이 3,000원에서 3,500원으로 바뀜 | 품목 단가는 3,000 그대로 | P-ORDER-03, P-ORDER-07 |
-| 좋아요 | 같은 상품에 두 번 등록 | 둘 다 `200`. 좋아요 수 1 | R-LIKE-02, P-LIKE-01 |
+| 좋아요 | 같은 상품에 두 번 등록 | 처음은 `201`, 두 번째는 `200`. 좋아요 수 1 | R-LIKE-02, P-LIKE-01 |
 | 좋아요 | 좋아요한 상품이 삭제됨 | 내 목록에서 빠지고, 취소는 `200` | R-LIKE-07, R-LIKE-08 |
 | 브랜드 삭제 | 재고 0인 상품만 연결됨 | `409 BRAND_HAS_PRODUCTS` | R-ADMIN-02, R-ADMIN-03 |
 | 상품 생성 | 가격 0원 | `400` | P-ADMIN-03 |
