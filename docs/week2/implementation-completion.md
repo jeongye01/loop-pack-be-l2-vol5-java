@@ -34,6 +34,10 @@ Red 테스트와 오류 코드는 바꾸지 않았다. Refactor 전후 모두 `S
 - 여러 애그리거트나 저장된 관계를 확인하는 도메인 서비스가 구현에 존재하는지 확인했다.
   - 브랜드 삭제 가능 여부, 브랜드·상품 이름 중복 여부, 좋아요 중복 여부, 주문 확정
 - 좋아요 등록이 저장소를 직접 조회하던 부분을 설계에 적힌 `LikeDuplicationChecker`를 사용하도록 정리했다. 판단 결과와 API 동작은 바뀌지 않았다.
+- `R-LIKE-02`를 애플리케이션의 선조회에만 의존하지 않도록 `product_like`의 `(user_id, product_id)`에 복합 유니크 제약을 추가했다.
+  - Red: 같은 고객·상품 관계를 두 번 저장하는 저장소 통합 테스트 3개 중 1개가 실패했고, DB가 중복 행을 허용하는 것을 확인했다.
+  - Green: `Like`의 테이블 매핑에 `uk_product_like_user_product` 제약을 추가해 DB가 중복 관계를 거절하도록 했다.
+  - `GenerationType.IDENTITY`에서는 중복 INSERT 예외가 `flush`보다 `persist`에서 먼저 발생할 수 있으므로, 테스트는 두 저장과 flush를 포함한 영속화 작업 전체가 `PersistenceException`으로 거절되는지 확인한다.
 - 주문 품목 로딩 방식은 구현 중 생긴 판단이어서 [ADR-007](./decisions.md#adr-007-주문을-조회할-때-품목을-함께-로딩한다)에 대안과 비용을 기록했다.
 
 ## 실행한 검사
@@ -42,7 +46,7 @@ Red 테스트와 오류 코드는 바꾸지 않았다. Refactor 전후 모두 `S
 | --- | --- |
 | `StockTest`, `ProductTest`, `LikeDuplicationCheckerTest`, `LikeUseCaseIntegrationTest` | 성공 |
 | `./gradlew :apps:commerce-api:check --rerun-tasks` | 성공 |
-| commerce-api 테스트 결과 | 449개, 실패 0, 오류 0, skip 0 |
+| commerce-api 테스트 결과 | 450개, 실패 0, 오류 0, skip 0 |
 | `ArchitectureTest` | 1개, 실패 0 |
 | commerce-api main·test Checkstyle | 성공 |
 | `./gradlew check --continue` | 성공, 전체 하위 모듈 Checkstyle 포함 |
@@ -52,4 +56,4 @@ Red 테스트와 오류 코드는 바꾸지 않았다. Refactor 전후 모두 `S
 
 - 대표 TDD 사례: 재고 차감 규칙을 Red → Green → 조건 검증 메서드 분리 Refactor 순서로 진행했다.
 - 설계에서 바뀐 판단: 주문 응답이 항상 품목을 사용하고 Open EntityManager in View를 끈 환경이므로 주문과 품목을 함께 로딩한다. 대안과 재검토 조건은 ADR-007에 남겼다.
-- 검사: commerce-api 테스트 449개, Checkstyle, ArchUnit과 루트 전체 `check`가 통과했다.
+- 검사: commerce-api 테스트 450개, Checkstyle, ArchUnit과 루트 전체 `check`가 통과했다.

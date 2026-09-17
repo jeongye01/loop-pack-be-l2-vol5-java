@@ -5,9 +5,16 @@ import com.loopers.support.error.CoreException;
 import com.loopers.support.error.ErrorCode;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 
 @Entity
-@Table(name = "product_like")
+@Table(
+    name = "product_like",
+    uniqueConstraints = @UniqueConstraint(
+        name = "uk_product_like_user_product",
+        columnNames = {"user_id", "product_id"}
+    )
+)
 public class Like extends BaseEntity {
 
     private Long userId;

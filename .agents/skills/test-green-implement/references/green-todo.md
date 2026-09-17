@@ -260,3 +260,14 @@ Green 에이전트가 Red 전체를 실행하고 실패를 분석한 뒤, produc
   - 선행 작업: 18~25번
   - 테스트 명령: 위 HTTP 7개 클래스와 이름 관련 2개 클래스 실행, `./gradlew :apps:commerce-api:test --continue`, `./gradlew :apps:commerce-api:check`, `./gradlew :apps:commerce-api:test --tests 'com.loopers.architecture.ArchitectureTest'`, `git diff --check`
   - 완료 조건: 관련·전체 테스트, Checkstyle, ArchitectureTest가 모두 Green이고, `e1fef44` 시작 시점과 `src/test` 파일 목록·SHA-256이 같다.
+
+## 좋아요 DB 중복 관계 Red 1개
+
+- [x] 27. 고객·상품 좋아요 관계의 DB 복합 유일성 보장
+  - 요구사항 ID: R-LIKE-02, ADR-006
+  - 관찰한 실패: `LikeRepositoryIntegrationTest` 3개 중 `rejectsDuplicateRelationAtDatabase` 1개가 실패한다. 같은 `userId=1`, `productId=10`인 두 `Like`를 저장하고 `flush`해도 예외가 나지 않아 DB 중복 관계가 허용된다.
+  - 필요한 최소 동작: `product_like` 테이블에 `(user_id, product_id)` 복합 유니크 제약을 두어 같은 고객의 같은 상품 관계를 DB가 거절한다. 서로 다른 고객이나 상품의 관계는 계속 허용한다.
+  - 변경할 production 파일: `apps/commerce-api/src/main/java/com/loopers/like/domain/Like.java`
+  - 선행 작업: 없음
+  - 테스트 명령: `./gradlew :apps:commerce-api:test --tests 'com.loopers.like.infrastructure.LikeRepositoryIntegrationTest' --rerun-tasks`
+  - 완료 조건: 통합 테스트 3개가 모두 Green이고, 중복 관계를 두 번 저장하고 반영하는 과정이 `PersistenceException`으로 거절된다.
