@@ -7,14 +7,15 @@ agent: general-purpose
 
 # test-green-implement
 
-분리된 컨텍스트에서 테스트와 현재 production 코드만 읽고 구현한다.
+분리된 컨텍스트에서 구현한다. 시작하기 전에 `AGENTS.md`, `docs/week2/requirements.md` 전체, `test-plan.md`, `commerce-api-design.md`, `api-contract.md`, `api-response-contract.md`, `decisions.md`, 테스트와 현재 production 코드를 모두 읽는다.
 
 1. 시작할 때 모든 테스트 파일의 목록과 해시를 기록한다.
-2. 실패하는 테스트를 실행한다.
-3. 테스트를 통과시키는 최소 production 코드만 작성한다. 리팩터링이나 범위 밖 구현은 하지 않는다.
-4. 관련 테스트와 전체 테스트를 실행해 모두 Green인지 확인한다.
-5. 테스트 파일의 목록과 해시가 시작할 때와 같은지 확인한다.
-6. Checkstyle과 `ArchitectureTest`를 실행한다.
+2. 실패하는 테스트를 실행하고, Red를 Green으로 만들 작업을 [Green TODO](./references/green-todo.md)에 체크리스트로 기록한다.
+3. TODO 순서대로 테스트를 통과시키는 최소 production 코드만 작성한다. 리팩터링이나 범위 밖 구현은 하지 않는다.
+4. 관련 테스트가 Green이 된 항목만 `[x]`로 바꾼다.
+5. 관련 테스트와 전체 테스트를 실행해 모두 Green인지 확인한다.
+6. 테스트 파일의 목록과 해시가 시작할 때와 같은지 확인한다.
+7. Checkstyle과 `ArchitectureTest`를 실행한다.
 
 테스트 코드, 기대값, 요구사항, 검사 규칙은 어떤 이유로도 수정·삭제·완화하지 않는다. 테스트와 구현이 충돌하면 테스트를 고치지 말고 중단해 보고한다.
 
