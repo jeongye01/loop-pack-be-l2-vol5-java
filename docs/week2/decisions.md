@@ -156,3 +156,41 @@
 | 에이전트를 나누어 확인 작업이 중복된다. | 중복 확인을 테스트가 독립적인 실행 계약인지 검증하는 비용으로 받아들인다. |
 
 **다시 검토할 조건**: 독립 Green 에이전트가 저장소의 계약만으로 반복해서 구현할 수 없거나, 에이전트 분리 비용이 검증 효과보다 커질 때
+
+## ADR-006. 인프라를 분리해 테스트할 수 있도록 DIP를 적용한다
+
+- 상태: 결정 (2026-09-17)
+- 근거: [아키텍처의 의존 방향](./commerce-api-design.md#의존-방향), [테스트 계획](./test-plan.md), 과제의 `4. 실행·제출`
+
+**상황**: application과 domain의 규칙은 DB 없이 빠르게 확인하고, repository의 저장·조회는 실제 JPA와 MySQL Testcontainers로 확인해야 한다. application이 Spring Data JPA나 구체 저장소를 직접 사용하면 규칙 테스트에도 DB가 필요하고, 저장 기술이 안쪽 계층으로 전파된다.
+
+**대안**
+
+- A. application이 Spring Data `JpaRepository`를 직접 사용한다.
+- B. domain에 Repository 포트를 두고 infrastructure의 JPA 어댑터가 포트를 구현한다.
+- C. 테스트에서만 별도 저장소 추상화를 사용하고 production은 JPA 구현에 직접 의존한다.
+
+**결정**: B. domain에 Repository 인터페이스를 두고 infrastructure가 이를 구현하도록 DIP를 적용한다.
+
+```text
+application ──▶ domain Repository(port) ◀── infrastructure JPA adapter ──▶ MySQL
+```
+
+- application은 domain의 Repository 포트에만 의존한다.
+- JPA Entity, Spring Data `JpaRepository`, domain과 영속 모델 사이의 변환은 infrastructure에 둔다.
+- domain 객체에는 JPA annotation을 붙이지 않고, HTTP·JPA·MySQL을 모르는 순수 Java 객체로 유지한다.
+- production에서는 Spring이 JPA 어댑터를 Repository 포트의 구현으로 주입한다.
+- domain·application 테스트는 mock 또는 메모리 구현으로 포트를 대체해 DB 없이 실행한다.
+- repository 통합 테스트는 JPA 어댑터와 MySQL 8.0 Testcontainers를 사용하고, 저장 후 `flush`·`clear`한 뒤 다시 조회한다.
+- HTTP 테스트는 실제 controller·application·JPA 어댑터와 테스트 DB를 연결한다.
+- 테스트와 로컬 실행의 DB 동작 차이를 만들지 않기 위해 H2를 추가하지 않는다.
+
+**B로 생기는 문제와 대응**
+
+| 문제 | 대응 |
+| --- | --- |
+| domain 모델과 JPA Entity, 변환 코드가 따로 생긴다. | 변환 책임을 infrastructure 어댑터에 한정하고, 요구사항에 필요한 필드만 매핑한다. |
+| mock·메모리 구현만으로는 실제 매핑과 쿼리 오류를 찾을 수 없다. | repository·DB 경계는 MySQL Testcontainers 통합 테스트로 별도 확인한다. |
+| 테스트를 위한 구조가 production 코드에도 남는다. | 테스트 전용 분기가 아니라 의존 방향을 지키는 production 구조로 사용하며, 테스트에서는 같은 포트를 교체 가능 지점으로 활용한다. |
+
+**다시 검토할 조건**: 영속 모델과 domain 모델의 변환 비용이 분리 효과보다 커지거나, JPA 외 저장 기술을 함께 사용해 포트의 책임을 다시 나눠야 할 때
