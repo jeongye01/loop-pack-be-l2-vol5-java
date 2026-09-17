@@ -105,7 +105,7 @@
 
 ## 시나리오 작성
 
-`test-scenario-write` 스킬(`.agents/skills/test-scenario-write`)로 요구사항을 테스트 파일에 배치하고, 요구사항마다 위 기법을 매핑해 시나리오를 작성한다. 시나리오 문서는 [`test-scenarios`](./test-scenarios/) 폴더에 둔다.
+`test-scenario-write` 스킬(`.agents/skills/test-scenario-write`)로 요구사항을 테스트 파일에 배치하고, 요구사항마다 위 기법을 매핑해 **테스트 코드로 바로** 작성한다. 시나리오는 따로 문서로 두지 않는다. 요구사항은 `@Nested`의 `@DisplayName`에, 기법은 테스트의 `@DisplayName`에 적는다.
 
 ## 테스트 설계에서 드러난 질문
 
