@@ -53,7 +53,7 @@ class ProductRepositoryIntegrationTest {
                 20
             );
 
-            assertThat(result).containsExactly(active);
+            assertThat(result).extracting(Product::getId).containsExactly(active.getId());
         }
     }
 
@@ -76,7 +76,7 @@ class ProductRepositoryIntegrationTest {
                 1
             );
 
-            assertThat(result).containsExactly(first);
+            assertThat(result).extracting(Product::getId).containsExactly(first.getId());
         }
     }
 
