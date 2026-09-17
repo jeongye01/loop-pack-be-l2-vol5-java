@@ -2,6 +2,8 @@ package com.loopers.like.infrastructure;
 
 import com.loopers.like.domain.Like;
 import com.loopers.like.domain.LikeRepository;
+import jakarta.persistence.EntityManager;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -10,31 +12,43 @@ import java.util.Optional;
 @Component
 public class LikeRepositoryAdapter implements LikeRepository {
 
-    public LikeRepositoryAdapter(LikeJpaRepository jpaRepository) {
+    private final LikeJpaRepository jpaRepository;
+    private final EntityManager entityManager;
+
+    public LikeRepositoryAdapter(LikeJpaRepository jpaRepository, EntityManager entityManager) {
+        this.jpaRepository = jpaRepository;
+        this.entityManager = entityManager;
     }
 
     @Override
     public Like save(Like like) {
-        throw new UnsupportedOperationException("Not implemented");
+        if (like.getId() == 0L) {
+            entityManager.persist(like);
+            return like;
+        }
+        return jpaRepository.save(like);
     }
 
     @Override
     public Optional<Like> findByUserIdAndProductId(Long userId, Long productId) {
-        throw new UnsupportedOperationException("Not implemented");
+        return jpaRepository.findByUserIdAndProductId(userId, productId);
     }
 
     @Override
     public List<Like> findAllByUserId(Long userId, int page, int size) {
-        throw new UnsupportedOperationException("Not implemented");
+        return jpaRepository.findActiveProductLikesByUserId(
+            userId,
+            PageRequest.of(page, size)
+        );
     }
 
     @Override
     public long countByProductId(Long productId) {
-        throw new UnsupportedOperationException("Not implemented");
+        return jpaRepository.countByProductId(productId);
     }
 
     @Override
     public void delete(Like like) {
-        throw new UnsupportedOperationException("Not implemented");
+        jpaRepository.delete(like);
     }
 }

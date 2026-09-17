@@ -3,6 +3,10 @@ package com.loopers.product.infrastructure;
 import com.loopers.product.domain.Product;
 import com.loopers.product.domain.ProductRepository;
 import com.loopers.product.domain.ProductSort;
+import jakarta.persistence.EntityManager;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -11,32 +15,49 @@ import java.util.Optional;
 @Component
 public class ProductRepositoryAdapter implements ProductRepository {
 
-    public ProductRepositoryAdapter(ProductJpaRepository jpaRepository) {
+    private final ProductJpaRepository jpaRepository;
+    private final EntityManager entityManager;
+
+    public ProductRepositoryAdapter(
+        ProductJpaRepository jpaRepository,
+        EntityManager entityManager
+    ) {
+        this.jpaRepository = jpaRepository;
+        this.entityManager = entityManager;
     }
 
     @Override
     public Product save(Product product) {
-        throw new UnsupportedOperationException("Not implemented");
+        if (product.getId() == 0L) {
+            entityManager.persist(product);
+            return product;
+        }
+        return jpaRepository.save(product);
     }
 
     @Override
     public Optional<Product> findById(Long id) {
-        throw new UnsupportedOperationException("Not implemented");
+        return jpaRepository.findById(id);
     }
 
     @Override
     public List<Product> findAllByBrandId(Long brandId) {
-        throw new UnsupportedOperationException("Not implemented");
+        return jpaRepository.findAllByBrandId(brandId);
     }
 
     @Override
     public List<Product> findAllByBrandIdAndName(Long brandId, String name) {
-        throw new UnsupportedOperationException("Not implemented");
+        return jpaRepository.findAllByBrandIdAndName(brandId, name);
     }
 
     @Override
     public List<Product> findAll(Long brandId, int page, int size) {
-        throw new UnsupportedOperationException("Not implemented");
+        Sort sort = Sort.by(Sort.Order.desc("createdAt"), Sort.Order.asc("id"));
+        PageRequest pageRequest = PageRequest.of(page, size, sort);
+        if (brandId == null) {
+            return jpaRepository.findAll(pageRequest).getContent();
+        }
+        return jpaRepository.findAllByBrandId(brandId, pageRequest);
     }
 
     @Override
@@ -46,6 +67,11 @@ public class ProductRepositoryAdapter implements ProductRepository {
         int page,
         int size
     ) {
-        throw new UnsupportedOperationException("Not implemented");
+        Pageable pageable = PageRequest.of(page, size);
+        return switch (sort) {
+            case LATEST -> jpaRepository.findCustomerProductsByLatest(brandId, pageable);
+            case PRICE_ASC -> jpaRepository.findCustomerProductsByPrice(brandId, pageable);
+            case LIKES_DESC -> jpaRepository.findCustomerProductsByLikes(brandId, pageable);
+        };
     }
 }

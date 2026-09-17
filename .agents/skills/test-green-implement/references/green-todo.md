@@ -77,3 +77,95 @@ Green 에이전트가 Red 전체를 실행하고 실패를 분석한 뒤, produc
 - [x] Checkstyle 통과
 - [x] ArchitectureTest 통과
 - [x] production diff 확인
+
+## Application · JPA 통합 Red 50개 (687c69b)
+
+- [x] 8. 사용자 JPA 저장소와 포인트 유스케이스 구현 (6개 Red)
+  - 요구사항 ID: R-POINT-01, R-POINT-02, R-POINT-06, R-POINT-08, P-POINT-01, ADR-006
+  - 관찰한 실패: `PointUseCaseIntegrationTest` 5개와 `UserRepositoryIntegrationTest` 1개가 모두 `UnsupportedOperationException`으로 실패한다. `UserRepositoryAdapter`가 Spring Data 저장소를 보관·호출하지 않고, `PointUseCase`도 사용자 조회·충전·저장을 하지 않는다.
+  - 필요한 최소 동작: JPA adapter가 `save/findById`를 위임하고, 유스케이스가 사용자를 조회하여 충전 후 저장·잔액 반환 및 저장 잔액 조회를 수행한다. 없는 사용자는 `USER_NOT_IDENTIFIED`로 거절한다.
+  - 변경할 production 파일: `user/infrastructure/UserRepositoryAdapter.java`, `user/application/PointUseCase.java`
+  - 선행 작업: 기존 완료 TODO 1, 5의 `Point`, `User`; Spring Data `UserJpaRepository`
+  - 테스트 명령: `./gradlew :apps:commerce-api:test --tests 'com.loopers.user.application.PointUseCaseIntegrationTest' --tests 'com.loopers.user.infrastructure.UserRepositoryIntegrationTest'`
+  - 완료 조건: 사용자/포인트 통합 테스트 6개가 Green이고 flush·clear 뒤 충전 잔액과 최초 잔액 0이 재조회되며 거절 시 기존 잔액이 유지된다.
+
+- [x] 9. 브랜드 JPA 저장소 구현 (1개 Red)
+  - 요구사항 ID: R-ADMIN-14, ADR-001, ADR-006
+  - 관찰한 실패: `BrandRepositoryIntegrationTest` 1개가 `BrandRepositoryAdapter.save`의 `UnsupportedOperationException`으로 실패한다.
+  - 필요한 최소 동작: adapter가 Spring Data 저장소를 보관하고 저장·식별자 조회·이름 조회·최신순 페이지 조회를 위임하여 논리 삭제 상태를 그대로 영속화한다.
+  - 변경할 production 파일: `brand/infrastructure/BrandJpaRepository.java`, `brand/infrastructure/BrandRepositoryAdapter.java`
+  - 선행 작업: 기존 완료 TODO 2의 JPA Entity `Brand`
+  - 테스트 명령: `./gradlew :apps:commerce-api:test --tests 'com.loopers.brand.infrastructure.BrandRepositoryIntegrationTest'`
+  - 완료 조건: 저장 후 논리 삭제한 브랜드를 flush·clear 뒤 포트로 재조회했을 때 삭제 상태가 유지되어 테스트 1개가 Green이다.
+
+- [x] 10. 상품 JPA 조회·정렬·페이지 구현 (6개 Red)
+  - 요구사항 ID: R-ADMIN-12, R-CATALOG-04, R-CATALOG-05, R-CATALOG-06, P-CATALOG-02, P-CATALOG-04, ADR-006
+  - 관찰한 실패: `ProductRepositoryIntegrationTest` 6개가 adapter의 미구현 예외로 실패한다. 고객 목록에는 활성 상품 필터, 세 정렬, ID 보조 정렬과 페이지가 필요하다.
+  - 필요한 최소 동작: 기본 CRUD/브랜드·이름 조건 조회를 Spring Data에 위임하고, 고객 조회는 삭제되지 않은 상품을 대상으로 `LATEST(createdAt desc)`, `PRICE_ASC(price asc)`, `LIKES_DESC(관계 count desc)` 뒤 `id asc`를 적용해 0 기반 페이지를 반환한다. 브랜드 가용성은 application이 검사하고, 관리자 목록은 삭제 여부와 관계없이 최신순·ID 오름차순으로 조회한다.
+  - 변경할 production 파일: `product/infrastructure/ProductJpaRepository.java`, `product/infrastructure/ProductRepositoryAdapter.java`, `modules/jpa/.../BaseEntity.java`(flush·clear 전후 Entity 식별자 동등성)
+  - 선행 작업: 9번 브랜드 영속 매핑, 기존 완료 TODO 3의 `Product`
+  - 테스트 명령: `./gradlew :apps:commerce-api:test --tests 'com.loopers.product.infrastructure.ProductRepositoryIntegrationTest'`
+  - 완료 조건: 상품 repository 통합 테스트 6개가 Green이고 flush·clear 이후 삭제 제외, 브랜드 필터, 세 정렬, 안정적인 페이지, 생성 시점 최신순이 모두 유지된다.
+
+- [x] 11. 좋아요 JPA 관계 저장·집계·활성 상품 목록 구현 (2개 Red)
+  - 요구사항 ID: R-LIKE-05, R-LIKE-07, ADR-006
+  - 관찰한 실패: `LikeRepositoryIntegrationTest` 2개가 adapter의 미구현 예외로 실패한다.
+  - 필요한 최소 동작: 동일 사용자·상품 관계 조회, 저장·삭제, 상품별 관계 수 집계를 위임하고, 내 좋아요는 삭제되지 않은 상품과 연결된 관계만 좋아요 생성 최신순·ID 오름차순으로 페이지 조회한다. 관계 자체는 상품 삭제 시 남긴다.
+  - 변경할 production 파일: `like/infrastructure/LikeJpaRepository.java`, `like/infrastructure/LikeRepositoryAdapter.java`
+  - 선행 작업: 10번 상품 JPA 조회
+  - 테스트 명령: `./gradlew :apps:commerce-api:test --tests 'com.loopers.like.infrastructure.LikeRepositoryIntegrationTest'`
+  - 완료 조건: 좋아요 repository 통합 테스트 2개가 Green이고 flush·clear 후 집계는 2이며 삭제 상품 관계는 DB에 남되 내 목록에서는 제외된다.
+
+- [x] 12. 주문 JPA 컬렉션 저장과 최신순 조회 구현 (3개 Red)
+  - 요구사항 ID: R-ADMIN-14, P-ORDER-07, P-ORDER-09, ADR-006
+  - 관찰한 실패: `OrderRepositoryIntegrationTest` 3개가 adapter의 미구현 예외로 실패한다.
+  - 필요한 최소 동작: `Order`와 `OrderItem` 값 컬렉션을 JPA로 저장·재조회하고, 구매자 목록과 관리자 선택 필터 목록을 생성 시점 내림차순·ID 오름차순으로 페이지 조회한다.
+  - 변경할 production 파일: `order/infrastructure/OrderJpaRepository.java`, `order/infrastructure/OrderRepositoryAdapter.java`
+  - 선행 작업: 기존 완료 TODO 6의 `Order`, `OrderItem`, `PaymentResult` JPA 매핑
+  - 테스트 명령: `./gradlew :apps:commerce-api:test --tests 'com.loopers.order.infrastructure.OrderRepositoryIntegrationTest'`
+  - 완료 조건: 주문 repository 통합 테스트 3개가 Green이고 상품 수정·삭제 뒤에도 주문 품목 스냅샷이 유지되며 최신 주문이 첫 페이지에 나온다.
+
+- [x] 13. 브랜드 application CRUD와 정책 조합 구현 (5개 Red)
+  - 요구사항 ID: R-ADMIN-01, R-ADMIN-02, R-ADMIN-15, P-ADMIN-01, P-ADMIN-06
+  - 관찰한 실패: `BrandUseCaseIntegrationTest` 5개가 `BrandUseCase`의 미구현 예외로 실패한다.
+  - 필요한 최소 동작: 포트로 CRUD/페이지 조회를 수행하고, 생성·수정 전 정규화된 이름 중복을 검사하며, 삭제 전 활성 여부와 연결된 활성 상품 여부를 검사한다. 변경 메서드는 한 트랜잭션에서 동작한다.
+  - 변경할 production 파일: `brand/application/BrandUseCase.java`
+  - 선행 작업: 9, 10번 repository adapter; 기존 완료 TODO 2의 validator
+  - 테스트 명령: `./gradlew :apps:commerce-api:test --tests 'com.loopers.brand.application.BrandUseCaseIntegrationTest'`
+  - 완료 조건: 브랜드 application 통합 테스트 5개가 Green이고 CRUD 상태가 저장되며 중복·연결 상품·재삭제 거절 때 DB 상태가 유지된다.
+
+- [x] 14. 상품 application CRUD·재고·고객 조회 조합 구현 (10개 Red)
+  - 요구사항 ID: R-ADMIN-04, R-ADMIN-05, R-ADMIN-08, R-LIKE-05, P-ADMIN-02, P-ADMIN-05, P-CATALOG-03, P-CATALOG-08
+  - 관찰한 실패: `ProductUseCaseIntegrationTest` 10개가 `ProductUseCase`의 미구현 예외로 실패한다.
+  - 필요한 최소 동작: 활성 브랜드 확인 후 중복 이름을 검사해 생성하고, 상품 CRUD·재고 변경을 포트로 저장한다. 고객 목록은 정렬 null을 `LATEST`로 바꾸고 없는/삭제된 브랜드 필터에는 빈 목록을 반환하며 각 상품의 좋아요 관계 수를 조합한다.
+  - 변경할 production 파일: `product/application/ProductUseCase.java`
+  - 선행 작업: 9~11번 repository adapter; 기존 완료 TODO 3의 validator
+  - 테스트 명령: `./gradlew :apps:commerce-api:test --tests 'com.loopers.product.application.ProductUseCaseIntegrationTest'`
+  - 완료 조건: 상품 application 통합 테스트 10개가 Green이고 CRUD·재고·중복·브랜드 가용성·기본 최신순·좋아요 수 조합 결과가 DB 상태와 일치한다.
+
+- [x] 15. 좋아요 application 멱등 등록·취소·내 목록 구현 (6개 Red)
+  - 요구사항 ID: R-LIKE-02, R-LIKE-03, R-LIKE-06, R-LIKE-08, P-LIKE-01
+  - 관찰한 실패: `LikeUseCaseIntegrationTest` 6개가 `LikeUseCase`의 미구현 예외로 실패한다.
+  - 필요한 최소 동작: 사용자와 활성 상품을 확인하고 기존 관계면 저장하지 않는 멱등 등록, 상품 삭제 여부와 무관하게 소유 관계가 있으면 삭제하는 멱등 취소, 활성 상품에 대한 요청자 관계 목록과 관계 기반 count 조회를 구현한다.
+  - 변경할 production 파일: `like/application/LikeUseCase.java`
+  - 선행 작업: 8, 10, 11번 repository adapter; 기존 완료 TODO 4의 소유권·중복 규칙
+  - 테스트 명령: `./gradlew :apps:commerce-api:test --tests 'com.loopers.like.application.LikeUseCaseIntegrationTest'`
+  - 완료 조건: 좋아요 application 통합 테스트 6개가 Green이고 반복 요청은 관계 수를 바꾸지 않으며 삭제 상품 관계 취소와 요청자 전용 목록이 동작한다.
+
+- [x] 16. 주문 application 생성·확정·고객/관리자 조회 구현 (11개 Red)
+  - 요구사항 ID: R-ORDER-04, R-ORDER-05, R-ORDER-10, R-ORDER-11, R-ORDER-13, R-ADMIN-10, P-ADMIN-10
+  - 관찰한 실패: `OrderUseCaseIntegrationTest` 11개가 `OrderUseCase`의 미구현 예외로 실패한다.
+  - 필요한 최소 동작: 구매자와 활성 상품을 포트로 조회해 스냅샷 품목으로 DRAFT 주문만 저장한다. 확정은 주문·전체 상품·구매자를 조회해 기존 도메인 서비스를 호출한 뒤 주문·상품·사용자를 한 트랜잭션에서 저장한다. 고객 조회는 소유권을 숨김 오류로 확인하고, 관리자는 구매자 선택 필터와 전체 목록 및 상세를 조회한다.
+  - 변경할 production 파일: `order/application/OrderUseCase.java`
+  - 선행 작업: 8, 10, 12번 repository adapter; 기존 완료 TODO 6, 7의 주문·확정 규칙
+  - 테스트 명령: `./gradlew :apps:commerce-api:test --tests 'com.loopers.order.application.OrderUseCaseIntegrationTest'`
+  - 완료 조건: 주문 application 통합 테스트 11개가 Green이고 생성은 재고·포인트를 유지하며 확정 성공은 세 aggregate를 함께 저장하고 모든 거절은 세 저장 상태를 유지한다.
+
+- [x] 17. application/JPA Red 50개와 전체 회귀 검증
+  - 요구사항 ID: 위 8~16번 전체, ADR-006, 아키텍처 의존 방향
+  - 관찰한 실패: 기준 실행에서 통합 Red 50개 중 50개가 실패했다.
+  - 필요한 최소 동작: 8~16번 구현만으로 50개를 모두 Green으로 만들고 기존 domain·Example·오류 계약을 회귀시키지 않는다. 테스트·기대값·검사 규칙은 변경하지 않는다.
+  - 변경할 production 파일: 8~16번에 열거한 application/infrastructure 파일만 해당하며 HTTP/controller는 제외한다.
+  - 선행 작업: 8~16번 완료
+  - 테스트 명령: 통합 10개 클래스 50개 대상 실행, `./gradlew :apps:commerce-api:test`, `./gradlew :apps:commerce-api:check`, `./gradlew :apps:commerce-api:test --tests 'com.loopers.architecture.ArchitectureTest'`
+  - 완료 조건: 관련 50개·전체 테스트·Checkstyle·ArchitectureTest가 모두 Green이고, `687c69b` 대비 모든 `src/test` 파일 SHA-256이 동일하며 `git diff --check`가 통과한다.
