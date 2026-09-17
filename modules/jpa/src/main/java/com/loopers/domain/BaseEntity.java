@@ -70,21 +70,4 @@ public abstract class BaseEntity {
             this.deletedAt = null;
         }
     }
-
-    @Override
-    public boolean equals(Object other) {
-        if (this == other) {
-            return true;
-        }
-        if (other == null || getClass() != other.getClass()) {
-            return false;
-        }
-        BaseEntity entity = (BaseEntity) other;
-        return id != 0L && id.equals(entity.id);
-    }
-
-    @Override
-    public int hashCode() {
-        return getClass().hashCode();
-    }
 }
