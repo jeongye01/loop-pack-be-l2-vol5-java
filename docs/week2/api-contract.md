@@ -6,11 +6,12 @@
 
 ### 요청자 식별
 
-| 경로 | 식별 | 실패하면 |
+| 대상 | 식별 | 실패하면 |
 | --- | --- | --- |
-| `/api/v1/**` | `X-USER-ID` 요청 헤더 | `401 USER_NOT_IDENTIFIED`. 헤더가 없거나, 숫자가 아니거나, 없는 사용자이면 같은 결과로 거절한다. (R-ACCESS-05, P-ACCESS-01) |
+| [고객 API](#고객-api) (C-01 ~ C-12) | `X-USER-ID` 요청 헤더 | `401 USER_NOT_IDENTIFIED`. 헤더가 없거나, 숫자가 아니거나, 없는 사용자이면 같은 결과로 거절한다. (R-ACCESS-05, P-ACCESS-01) |
 | `/api-admin/v1/**` | `ADMIN` 역할 | `403`. 관리자 접근 필터가 거절하며 컨트롤러에 닿지 않는다. 응답 본문은 [API 응답 계약](./api-response-contract.md)의 공통 응답 형식이 아니다. (R-ACCESS-04) |
 
+- 고객 요청의 식별은 과제가 요구한 고객 API에만 적용한다. 같은 `/api/v1` 아래에 있는 기존 starter의 Example API(`/api/v1/examples/**`)는 식별하지 않는다.
 - 고객은 자신의 좋아요·포인트·주문만 다룬다. 다른 고객의 것을 요청하면 없는 대상으로 알린다. (R-ACCESS-03, P-ACCESS-02)
 - 관리자의 변경은 이후 고객 조회에 반영된다. (R-ADMIN-09)
 
