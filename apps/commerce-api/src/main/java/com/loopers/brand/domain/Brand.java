@@ -1,13 +1,15 @@
 package com.loopers.brand.domain;
 
 import com.loopers.domain.BaseEntity;
+import com.loopers.support.error.CoreException;
+import com.loopers.support.error.ErrorCode;
 
 public class Brand extends BaseEntity {
 
     private String name;
 
     public Brand(String name) {
-        this.name = name;
+        this.name = validateName(name);
     }
 
     public String getName() {
@@ -15,9 +17,34 @@ public class Brand extends BaseEntity {
     }
 
     public boolean isDeleted() {
-        return false;
+        return getDeletedAt() != null;
     }
 
     public void update(String name) {
+        ensureActive();
+        this.name = validateName(name);
+    }
+
+    @Override
+    public void delete() {
+        ensureActive();
+        super.delete();
+    }
+
+    private static String validateName(String name) {
+        if (name == null) {
+            throw new CoreException(ErrorCode.INVALID_BRAND_NAME);
+        }
+        String trimmedName = name.trim();
+        if (trimmedName.isEmpty() || trimmedName.length() > 50) {
+            throw new CoreException(ErrorCode.INVALID_BRAND_NAME);
+        }
+        return trimmedName;
+    }
+
+    private void ensureActive() {
+        if (isDeleted()) {
+            throw new CoreException(ErrorCode.BRAND_NOT_FOUND);
+        }
     }
 }

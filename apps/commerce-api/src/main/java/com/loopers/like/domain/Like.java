@@ -1,6 +1,8 @@
 package com.loopers.like.domain;
 
 import com.loopers.domain.BaseEntity;
+import com.loopers.support.error.CoreException;
+import com.loopers.support.error.ErrorCode;
 
 public class Like extends BaseEntity {
 
@@ -21,5 +23,8 @@ public class Like extends BaseEntity {
     }
 
     public void cancel(Long requesterId) {
+        if (!userId.equals(requesterId)) {
+            throw new CoreException(ErrorCode.LIKE_NOT_FOUND);
+        }
     }
 }

@@ -9,6 +9,6 @@ public class LikeDuplicationChecker {
     }
 
     public boolean isDuplicated(Long userId, Long productId) {
-        return false;
+        return likeRepository.findByUserIdAndProductId(userId, productId).isPresent();
     }
 }
