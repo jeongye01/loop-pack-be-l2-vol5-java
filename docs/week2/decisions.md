@@ -128,7 +128,7 @@
 ## ADR-005. Red와 Green은 컨텍스트를 공유하지 않는 별도 에이전트가 수행한다
 
 - 상태: 결정 (2026-09-17)
-- 근거: [테스트 계획](./test-plan.md), 프로젝트 `AGENTS.md`, `test-scenario-write`, `test-green-implement`
+- 근거: 테스트 계획, 프로젝트 `AGENTS.md`, `test-scenario-write`, `test-green-implement`
 
 **상황**: 한 에이전트가 요구사항을 해석해 Red 테스트를 작성하고 곧바로 Green 구현까지 하면, 테스트를 작성할 때 떠올린 구현 구조와 암묵적인 가정을 그대로 구현에 가져갈 수 있다. 이 경우 테스트가 저장소에 남은 실행 가능한 계약만으로 충분한지 확인하기 어렵고, Red 단계에서 테스트를 통과시키기 위한 production 규칙까지 미리 구현할 위험이 있다.
 
@@ -160,7 +160,7 @@
 ## ADR-006. Repository에는 DIP를 적용하고 domain 객체를 JPA Entity로 사용한다
 
 - 상태: 결정 (2026-09-17)
-- 근거: [아키텍처의 의존 방향](./commerce-api-design.md#의존-방향), [테스트 계획](./test-plan.md), 과제의 `4. 실행·제출`
+- 근거: [아키텍처의 의존 방향](./commerce-api-design.md#의존-방향), 테스트 계획, 과제의 `4. 실행·제출`
 
 **상황**: application과 domain의 규칙은 DB 없이 빠르게 확인하고, repository의 저장·조회는 실제 JPA와 MySQL Testcontainers로 확인해야 한다. application이 Spring Data JPA나 구체 저장소를 직접 사용하면 규칙 테스트에도 DB가 필요하고, 저장 기술이 application으로 전파된다.
 
