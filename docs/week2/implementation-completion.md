@@ -1,4 +1,4 @@
-# commerce-api 구현 마무리 기록
+# commerce-api 구현 기록
 
 2026-09-18에 Green 구현 뒤 남아 있던 Refactor, 설계 대조, 검사 범위 연결을 마무리한 기록이다. 요구사항, Red 테스트, 검사 규칙은 수정하거나 완화하지 않았다.
 
@@ -12,15 +12,15 @@
   - `apps/commerce-batch/.../DemoJobE2ETest.java`: 사용하지 않는 import를 제거했다.
 - Kafka 설정값, Bean 구성, 배치 테스트의 동작은 바꾸지 않았다.
 
-### 대표 TDD 사례 Refactor
+### 대표 TDD 사례 — 재고 차감
 
 대표 규칙은 `Stock`의 재고 차감이다.
 
 | 단계 | 커밋·변경 | 확인한 내용 |
 | --- | --- | --- |
-| Red | `04e1d73` | 재고 이내 차감, 재고 부족 거절, 성공·실패 뒤 원본 재고 유지 시나리오를 먼저 작성했다. |
-| Green | `0f87e24` | `Stock.decrease`가 조건을 검사하고 새 `Stock`을 반환하는 최소 구현을 추가했다. |
-| Refactor | 현재 변경 | 양수 조건과 재고 충분 조건을 `ensurePositive`, `ensureSufficient`로 분리해 차감 흐름과 거절 이유를 드러냈다. |
+| Red | `04e1d73` | 재고 5개에서 6개 차감 시 `INSUFFICIENT_STOCK`으로 거절하고 기존 재고 5개를 유지하며, 2개 차감 시 새 재고 3개를 반환하는 테스트를 먼저 작성했다. 당시 `Stock.decrease()`는 기존 객체를 그대로 반환해 테스트가 의도한 이유로 실패했다. |
+| Green | `0f87e24` | 차감 수량과 보유 재고를 검사하고 성공하면 차감된 새 `Stock`을 반환하는 최소 구현을 추가했다. Red 테스트의 기대값은 변경하지 않았다. |
+| Refactor | `a4a03da` | 양수 조건과 재고 충분 조건을 `ensurePositive`, `ensureSufficient`로 분리했다. `Stock`을 `Product`가 소유하는 JPA VO로 정리하면서 새 값을 반환하는 불변성은 유지했다. |
 
 Red 테스트와 오류 코드는 바꾸지 않았다. Refactor 전후 모두 `Stock`은 불변이며 성공하면 새 값을 반환하고, 실패하면 기존 값을 유지한다.
 
@@ -42,6 +42,12 @@ Red 테스트와 오류 코드는 바꾸지 않았다. Refactor 전후 모두 `S
 - 주문 품목 로딩 방식은 구현 중 생긴 판단이어서 [ADR-007](./decisions.md#adr-007-주문을-조회할-때-품목을-함께-로딩한다)에 대안과 비용을 기록했다.
 
 ## 실행한 검사
+
+```bash
+./gradlew :apps:commerce-api:test --tests '*Stock*Test'
+./gradlew :apps:commerce-api:test --tests '*ArchitectureTest'
+./gradlew :apps:commerce-api:clean :apps:commerce-api:check
+```
 
 | 검사 | 결과 |
 | --- | --- |
