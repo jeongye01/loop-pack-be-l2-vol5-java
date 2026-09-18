@@ -13,9 +13,9 @@
 | 버드뷰        | [버드뷰](#버드뷰)                                                                                  |
 | 구조와 의존     | [아키텍처](#아키텍처)                                                                                |
 | 도메인 관계     | [상세 관계도](./domain-relations.md)                                                              |
-| 대표 흐름      | [대표 흐름 요약](#대표-흐름-요약), [상세 시퀀스](./representative-flows.md)                                   |
+| 대표 흐름      | [포인트 충전 → 주문 확정](#대표-흐름), [전체 흐름 시퀀스](./representative-flows.md)                             |
 | 기본 API 계약  | [API 계약 요약](#api-계약-요약), [상세 API 계약](./api-contract.md), [응답 계약](./api-response-contract.md) |
-| 설계 의사결정 내역 | [의사결정 기록](./decisions.md)                                                                    |
+| 설계 의사결정 내역 | [의사결정 기록](./ADR.md)                                                                          |
 
 
 ## 버드뷰
@@ -76,17 +76,65 @@ interfaces ──▶ application ──▶ domain ◀── infrastructure
 | interfaces  | infrastructure                          |
 
 
-## 대표 흐름 요약
+## 대표 흐름
+
+과제가 제시한 세 흐름 중 **포인트 충전 → 주문 확정**을 대표 흐름으로 선정했다.
 
 
-| 흐름               | 핵심 결과                                                                  |
-| ---------------- | ---------------------------------------------------------------------- |
-| 관리자 변경 → 고객 조회   | 관리자의 브랜드·상품·재고 변경이 이후 고객 조회에 반영되고, 논리 삭제된 대상은 고객 조회에서 제외된다.            |
-| 좋아요 등록 → 조회 → 취소 | 관계를 하나만 저장하고 상품 좋아요 수와 내 좋아요 목록에 반영하며, 취소 후 집계에서 제외한다.                 |
-| 포인트 충전 → 주문 확정   | 10,000원을 충전하고 7,000원 주문을 확정하면 재고와 포인트를 함께 차감하고 잔액 3,000원과 결제 결과를 저장한다. |
+| 단계     | 결과                                                                                          |
+| ------ | ------------------------------------------------------------------------------------------- |
+| 포인트 충전 | 잔액 0원인 고객이 10,000원을 충전하면 잔액이 10,000원이 된다.                                                   |
+| 주문 생성  | 2,000원 상품 A 2개와 3,000원 상품 B 1개를 합계 7,000원의 `DRAFT` 주문으로 저장한다. 이때 재고와 포인트는 차감하지 않는다.         |
+| 주문 확정  | 상품 A의 재고는 5개에서 3개, 상품 B는 3개에서 2개, 포인트는 10,000원에서 3,000원으로 줄고 주문은 결제 결과를 가진 `CONFIRMED`가 된다. |
+| 결과 조회  | 내 잔액은 3,000원이고, 주문 상세에는 품목·수량·합계·상태·결제액 7,000원이 보인다.                                        |
+| 대표 오류  | 재고나 포인트가 부족하면 확정을 거절하고 주문·재고·포인트를 모두 기존 상태로 유지한다.                                           |
 
 
-각 흐름의 HTTP 요청, 계층별 호출, DB 반영과 대표 오류는 [대표 흐름](./representative-flows.md)에 시퀀스 다이어그램으로 정리했다.
+### 구현 시퀀스
+
+아래 시퀀스는 실제 구현의 주문 확정 호출과 트랜잭션 경계를 요약한다. 모든 고객 요청은 Controller에 도달하기 전에 `RequesterArgumentResolver`가 `X-USER-ID`로 사용자를 식별한다.
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor C as 고객
+    participant API as PointV1Controller / OrderV1Controller
+    participant UC as PointUseCase / OrderUseCase
+    participant RP as Repository
+    participant CS as OrderConfirmService
+    participant D as Order / Product / User
+    participant DB as MySQL
+
+    Note over C,DB: 충전 API로 잔액 10,000원, 주문 생성 API로 합계 7,000원의 DRAFT 주문 준비
+    C->>API: POST /api/v1/orders/{orderId}/confirm
+    API->>UC: OrderUseCase.confirm(userId, orderId)
+    UC->>RP: OrderRepository.findById(orderId)
+    RP->>DB: 주문과 품목 조회
+    UC->>D: 주문 소유권 확인
+    UC->>RP: User와 품목별 Product 조회
+    RP->>DB: 구매자와 상품 조회
+    UC->>CS: confirm(userId, order, products, buyer, paidAt)
+    CS->>D: DRAFT·상품·재고·포인트 검증
+    alt 검증 성공
+        CS->>D: Product 재고 차감·User 결제·Order 확정
+        UC->>RP: Product·User·Order 저장
+        RP->>DB: 한 트랜잭션으로 반영
+        UC-->>API: 확정된 주문
+        API-->>C: CONFIRMED, 결제액 7,000
+    else 재고 또는 포인트 부족
+        CS-->>API: 오류
+        API-->>C: 확정 거절
+        Note over UC,DB: 주문·재고·포인트를 기존 상태로 유지
+    end
+
+    C->>API: GET /api/v1/points, GET /api/v1/orders/{orderId}
+    API->>UC: getBalance(), findMine()
+    UC->>RP: User와 Order 조회
+    RP->>DB: 저장 결과 조회
+    API-->>C: 잔액 3,000, CONFIRMED 주문
+```
+
+전체 시퀀스는 [전체 흐름 시퀀스](./representative-flows.md)에, 이 대표 흐름의 실제 HTTP 연결 검증은 [ChargeOrderFlowHttpTest](../../apps/commerce-api/src/test/java/com/loopers/interfaces/api/ChargeOrderFlowHttpTest.java)에 정리했다.
 
 ## API 계약 요약
 
