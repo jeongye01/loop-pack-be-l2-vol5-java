@@ -4,7 +4,7 @@ import com.loopers.support.error.ErrorCode;
 import org.springframework.http.HttpStatus;
 
 /**
- * 오류 코드를 API 응답 계약의 상태 코드로 바꾼다.
+ * 오류 코드를 API 응답 스키마의 상태 코드로 바꾼다.
  */
 public final class ErrorStatus {
 

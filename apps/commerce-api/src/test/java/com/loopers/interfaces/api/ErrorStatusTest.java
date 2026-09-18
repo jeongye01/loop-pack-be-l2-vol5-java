@@ -10,7 +10,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class ErrorStatusTest {
 
-    @DisplayName("오류 코드는 API 응답 계약의 상태 코드로 바뀐다.")
+    @DisplayName("오류 코드는 API 응답 스키마의 상태 코드로 바뀐다.")
     @ParameterizedTest
     @CsvSource({
         "INVALID_REQUEST, BAD_REQUEST",

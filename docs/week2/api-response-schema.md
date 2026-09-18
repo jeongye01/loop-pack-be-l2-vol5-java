@@ -1,6 +1,6 @@
-# commerce-api API 응답 계약
+# commerce-api API 응답 스키마
 
-[API 계약](./api-contract.md)의 성공·실패 응답이 따르는 형식, 필드, 오류 코드다. 근거는 [요구사항 문서](./requirements.md)의 요구사항 ID와 정책 ID를 가리킨다.
+[API 엔드포인트](./api-endpoints.md)의 성공·실패 응답이 따르는 형식, 필드, 오류 코드다. 근거는 [요구사항 문서](./requirements.md)의 요구사항 ID와 정책 ID를 가리킨다.
 
 ## 응답 형식
 
@@ -15,7 +15,7 @@
 
 ## 목록 응답
 
-목록을 돌려주는 성공 응답의 `data`는 다음 필드를 가진다. 페이지 요청 규칙은 [API 계약](./api-contract.md)의 `목록`에 있다.
+목록을 돌려주는 성공 응답의 `data`는 다음 필드를 가진다. 페이지 요청 규칙은 [API 엔드포인트](./api-endpoints.md)의 `목록`에 있다.
 
 | 필드 | 뜻 |
 | --- | --- |
