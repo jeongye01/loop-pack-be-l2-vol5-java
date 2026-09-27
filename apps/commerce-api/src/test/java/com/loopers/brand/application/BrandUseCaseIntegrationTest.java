@@ -1,7 +1,6 @@
 package com.loopers.brand.application;
 
 import com.loopers.brand.domain.Brand;
-import com.loopers.product.domain.Product;
 import com.loopers.support.error.CoreException;
 import com.loopers.support.error.ErrorCode;
 import com.loopers.testcontainers.MySqlTestContainersConfig;
@@ -44,22 +43,6 @@ class BrandUseCaseIntegrationTest {
                 () -> assertThat(found.getId()).isEqualTo(created.getId()),
                 () -> assertThat(updated.getName()).isEqualTo("Jordan"),
                 () -> assertThat(deleted.isDeleted()).isTrue()
-            );
-        }
-    }
-
-    @DisplayName("[R-ADMIN-02] 삭제되지 않은 상품이 연결된 브랜드는 삭제할 수 없다.")
-    @Nested class RejectBrandDeletionWithProduct {
-        @DisplayName("[의사결정표] 활성 상품이 연결되어 있으면 BRAND_HAS_PRODUCTS이고 브랜드를 유지한다.")
-        @Test void rejectsDeletionAndKeepsBrand() {
-            Brand brand = persist(new Brand("Nike"));
-            persist(new Product(brand.getId(), "Air", 1_000L));
-            CoreException result = assertThrows(CoreException.class, () -> useCase.delete(brand.getId()));
-            entityManager.clear();
-            Brand persisted = entityManager.find(Brand.class, brand.getId());
-            assertAll(
-                () -> assertThat(result.getErrorCode()).isEqualTo(ErrorCode.BRAND_HAS_PRODUCTS),
-                () -> assertThat(persisted.isDeleted()).isFalse()
             );
         }
     }

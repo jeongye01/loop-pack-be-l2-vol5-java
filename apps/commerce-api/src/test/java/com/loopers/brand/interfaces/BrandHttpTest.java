@@ -326,19 +326,6 @@ class BrandHttpTest {
                 .andExpect(failure(HttpStatus.NOT_FOUND, "BRAND_NOT_FOUND"));
         }
 
-        @DisplayName("[의사결정표] 판매 중인 상품이 연결된 브랜드를 삭제하면 409 BRAND_HAS_PRODUCTS이고 브랜드는 유지된다.")
-        @Test
-        void rejectsDeletingBrandWithProducts() throws Exception {
-            Brand brand = fixture.brand("Nike");
-            fixture.product(brand, "Air", 3_000L, 0);
-
-            mockMvc.perform(delete(ADMIN_BRAND, brand.getId()).with(admin()).with(csrf()))
-                .andExpect(failure(HttpStatus.CONFLICT, "BRAND_HAS_PRODUCTS"));
-
-            mockMvc.perform(get(ADMIN_BRAND, brand.getId()).with(admin()))
-                .andExpect(success(HttpStatus.OK))
-                .andExpect(jsonPath("$.data.deleted").value(false));
-        }
     }
 
     @DisplayName("[P-ADMIN-07] 관리자 브랜드 목록과 상세에는 삭제된 브랜드도 삭제 여부와 함께 보여 준다.")

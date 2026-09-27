@@ -282,3 +282,14 @@ Green 에이전트가 Red 전체를 실행하고 실패를 분석한 뒤, produc
   - 선행 작업: `INVALID_POINT_BALANCE` 오류 코드와 `ErrorStatus`의 `BAD_REQUEST` 매핑이 이미 존재함
   - 테스트 명령: `./gradlew :apps:commerce-api:test --tests 'com.loopers.user.domain.PointTest' --tests 'com.loopers.brand.domain.BrandDeletionValidatorTest' --tests 'com.loopers.interfaces.api.ErrorStatusTest'`
   - 완료 조건: 위 3개 테스트 클래스 41개가 모두 Green이고 `Point(-1)`은 `INVALID_POINT_BALANCE`로 거절되며 `Point(0)`과 `Point(1)`은 허용된다.
+
+## 브랜드 연관 상품 일괄 삭제 Red 2개
+
+- [x] 29. 브랜드와 연결된 활성 상품의 도메인 상태를 함께 삭제
+  - 요구사항 ID: R-ADMIN-16, INV-BRAND-03
+  - 관찰한 실패: 전체 Red 실행의 `compileTestJava`가 새 `BrandRemovalServiceTest`에서 `BrandRemovalService` 심볼을 찾지 못해 실패한다.
+  - 필요한 최소 동작: 전달된 상품 중 삭제되지 않은 상품만 삭제하고, 브랜드를 삭제한다. 이미 삭제된 상품의 삭제 시점은 보존한다.
+  - 변경할 production 파일: `apps/commerce-api/src/main/java/com/loopers/brand/domain/BrandRemovalService.java`
+  - 선행 작업: 기존 `Brand.delete()`와 `Product.delete()`의 논리 삭제 구현
+  - 테스트 명령: `./gradlew :apps:commerce-api:test --tests 'com.loopers.brand.domain.BrandRemovalServiceTest'`
+  - 완료 조건: 새 도메인 테스트 2개가 Green이고, 기존 삭제 상품의 삭제 시점이 유지된다.
