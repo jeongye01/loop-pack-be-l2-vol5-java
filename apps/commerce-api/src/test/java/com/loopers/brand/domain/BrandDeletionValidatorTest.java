@@ -18,7 +18,7 @@ import static org.mockito.Mockito.when;
 
 class BrandDeletionValidatorTest {
 
-    @DisplayName("[INV-03] 삭제된 브랜드에 속한 상품은 모두 삭제된 상태다.")
+    @DisplayName("[INV-BRAND-03] 삭제된 브랜드에 속한 상품은 모두 삭제된 상태다.")
     @Nested
     class RejectDeletionWithActiveProduct {
 

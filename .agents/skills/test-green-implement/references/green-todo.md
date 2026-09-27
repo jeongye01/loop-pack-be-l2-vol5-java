@@ -275,7 +275,7 @@ Green 에이전트가 Red 전체를 실행하고 실패를 분석한 뒤, produc
 ## 포인트 음수 잔액 Red 1개
 
 - [x] 28. Point 생성 시 음수 잔액 거절
-  - 요구사항 ID: R-POINT-05, R-ORDER-09, INV-16
+  - 요구사항 ID: R-POINT-05, R-ORDER-09, INV-POINT-16
   - 관찰한 실패: 전달된 Red 3개 클래스 41개 중 `PointTest`의 `throwsInvalidPointBalance_whenBalanceIsNegative` 1개가 실패한다. `Point(long balance)`가 `-1`을 그대로 저장해 `CoreException`을 던지지 않는다. `BrandDeletionValidatorTest`의 연결 상품 없음 허용과 `ErrorStatusTest`의 `INVALID_POINT_BALANCE` 400 매핑은 이미 Green이다.
   - 필요한 최소 동작: `Point` 생성자에서 잔액이 0보다 작으면 `INVALID_POINT_BALANCE`인 `CoreException`으로 거절하고, 0 이상은 기존처럼 저장한다.
   - 변경할 production 파일: `apps/commerce-api/src/main/java/com/loopers/user/domain/Point.java`

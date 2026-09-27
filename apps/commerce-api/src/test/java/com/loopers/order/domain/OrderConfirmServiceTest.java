@@ -26,7 +26,7 @@ class OrderConfirmServiceTest {
     /** 상품 A 2개(2,000원) + 상품 B 1개(3,000원) */
     private static final long TOTAL_AMOUNT = 7_000L;
 
-    @DisplayName("[INV-36] 확정에 성공하면 재고는 품목 수량만큼, 잔액은 주문 합계만큼 줄어든다.")
+    @DisplayName("[INV-ORDER-36] 확정에 성공하면 재고는 품목 수량만큼, 잔액은 주문 합계만큼 줄어든다.")
     @Nested
     class DecreaseStockAndBalance {
 
@@ -48,7 +48,7 @@ class OrderConfirmServiceTest {
         }
     }
 
-    @DisplayName("[INV-44] 확정에 성공한 주문의 상태는 CONFIRMED다.")
+    @DisplayName("[INV-ORDER-44] 확정에 성공한 주문의 상태는 CONFIRMED다.")
     @Nested
     class ConfirmedStatus {
 
@@ -66,7 +66,7 @@ class OrderConfirmServiceTest {
         }
     }
 
-    @DisplayName("[INV-43] 결제액은 확정 시점의 주문 합계다.")
+    @DisplayName("[INV-ORDER-43] 결제액은 확정 시점의 주문 합계다.")
     @Nested
     class PaidAmountIsOrderTotal {
 
@@ -98,7 +98,7 @@ class OrderConfirmServiceTest {
         }
     }
 
-    @DisplayName("[INV-31] 주문은 구매자의 것이다.")
+    @DisplayName("[INV-ORDER-31] 주문은 구매자의 것이다.")
     @Nested
     class OwnedByBuyer {
 
@@ -117,7 +117,7 @@ class OrderConfirmServiceTest {
         }
     }
 
-    @DisplayName("[INV-33] 주문에 쓰인 상품은 주문 생성 시점과 확정 시점 모두 존재하며 삭제되지 않은 상태다.")
+    @DisplayName("[INV-ORDER-33] 주문에 쓰인 상품은 주문 생성 시점과 확정 시점 모두 존재하며 삭제되지 않은 상태다.")
     @Nested
     class ProductsAvailableAtConfirmation {
 
@@ -159,7 +159,7 @@ class OrderConfirmServiceTest {
         }
     }
 
-    @DisplayName("[INV-35] 거절된 확정은 주문 상태·재고·잔액을 바꾸지 않는다.")
+    @DisplayName("[INV-ORDER-35] 거절된 확정은 주문 상태·재고·잔액을 바꾸지 않는다.")
     @Nested
     class KeepAllStateOnRejection {
 
@@ -207,7 +207,7 @@ class OrderConfirmServiceTest {
         }
     }
 
-    @DisplayName("[INV-37] 확정된 주문의 결제 결과는 바뀌지 않는다.")
+    @DisplayName("[INV-ORDER-37] 확정된 주문의 결제 결과는 바뀌지 않는다.")
     @Nested
     class ImmutablePaymentResult {
 
@@ -249,7 +249,7 @@ class OrderConfirmServiceTest {
 
     /**
      * 식별자는 JPA 가 저장할 때만 채워지므로, 상품 둘을 서로 다른 품목으로 만들려면 여기서 넣어야 한다.
-     * 같은 식별자면 한 품목으로 합쳐져(INV-28) 상품 하나짜리 주문이 된다.
+     * 같은 식별자면 한 품목으로 합쳐져(INV-ORDER-28) 상품 하나짜리 주문이 된다.
      */
     private static Product product(Long id, String name, long price, int stock) {
         Product product = new Product(1L, name, price);

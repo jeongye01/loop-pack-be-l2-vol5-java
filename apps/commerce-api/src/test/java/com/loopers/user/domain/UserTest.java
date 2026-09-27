@@ -12,7 +12,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class UserTest {
 
-    @DisplayName("[INV-22] 새 고객의 잔액은 0이다.")
+    @DisplayName("[INV-USER-22] 새 고객의 잔액은 0이다.")
     @Nested
     class InitialBalance {
 
@@ -27,7 +27,7 @@ class UserTest {
         }
     }
 
-    @DisplayName("[INV-21] 거절된 충전은 잔액을 바꾸지 않는다.")
+    @DisplayName("[INV-POINT-21] 거절된 충전은 잔액을 바꾸지 않는다.")
     @Nested
     class KeepBalanceOnRejectedCharge {
 
@@ -67,7 +67,7 @@ class UserTest {
         }
     }
 
-    @DisplayName("[INV-20] 결제액은 현재 잔액 이하다.")
+    @DisplayName("[INV-POINT-20] 결제액은 현재 잔액 이하다.")
     @Nested
     class PayWithinBalance {
 

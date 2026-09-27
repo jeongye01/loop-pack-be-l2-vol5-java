@@ -7,7 +7,7 @@ description: 도메인 규칙을 테스트 코드로 옮길 때 사용한다. do
 
 ## 할 일
 
-1. `docs/week2/domain-rules.yaml`에서 검증할 규칙(`INV-…`)을 고른다. 검증할 규칙에 ID가 없으면 만들어서 `domain-rules.yaml`에 넣는다. 규칙이 생기기를 기다리지 않는다.
+1. `docs/week2/domain-rules.yaml`에서 검증할 규칙(`INV-<개념>-<번호>`)을 고른다. 검증할 규칙에 ID가 없으면 만들어서 `domain-rules.yaml`에 넣는다. 규칙이 생기기를 기다리지 않는다.
 2. 규칙 하나를 골라 아래 기법을 알맞게 매핑하고, **그 기법이 요구하는 값을 빠짐없이** 써서 테스트 코드를 작성한다. 테스트 파일은 `src/test/java`에서 대상과 같은 패키지에 `<대상>Test.java`로 둔다.
 3. 테스트를 작성한 뒤 [Red 검증](./references/red-validation.md)을 수행한다. 검증을 통과하기 전에는 Green 구현을 시작하지 않는다.
 
@@ -30,7 +30,7 @@ description: 도메인 규칙을 테스트 코드로 옮길 때 사용한다. do
 `"~ 이하다"`, `"~ 이상이다"` 같은 규칙 문장은 한쪽 끝만 말한다. **문장이 말하지 않은 반대쪽 끝도 범위의 경계다.**
 
 ```
-INV-20  결제액은 현재 잔액 이하다.
+INV-POINT-20  결제액은 현재 잔액 이하다.
         ↓ 문장이 말한 것          ↓ 문장이 말하지 않은 것
 범위     … 잔액, 잔액+1            잔액-1 아래 어딘가에 있는 하한, 그 바로 아래
 ```
@@ -57,7 +57,7 @@ INV-20  결제액은 현재 잔액 이하다.
 ```java
 class StockTest {
 
-    @DisplayName("[INV-15] 차감 수량은 현재 재고 이하다.")
+    @DisplayName("[INV-STOCK-15] 차감 수량은 현재 재고 이하다.")
     @Nested
     class DecreaseWithinStock {
 

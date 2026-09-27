@@ -15,7 +15,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class ProductTest {
 
-    @DisplayName("[INV-06] 상품 이름은 앞뒤 공백을 뺀 1자 이상 100자 이하다.")
+    @DisplayName("[INV-PRODUCT-06] 상품 이름은 앞뒤 공백을 뺀 1자 이상 100자 이하다.")
     @Nested
     class ValidName {
 
@@ -55,7 +55,7 @@ class ProductTest {
         }
     }
 
-    @DisplayName("[INV-08] 상품 가격은 1원 이상 1,000,000,000원 이하다.")
+    @DisplayName("[INV-PRODUCT-08] 상품 가격은 1원 이상 1,000,000,000원 이하다.")
     @Nested
     class ValidPrice {
 
@@ -85,7 +85,7 @@ class ProductTest {
         }
     }
 
-    @DisplayName("[INV-09] 상품은 존재하며 삭제되지 않은 브랜드에 속한다.")
+    @DisplayName("[INV-PRODUCT-09] 상품은 존재하며 삭제되지 않은 브랜드에 속한다.")
     @Nested
     class BelongsToBrand {
 
@@ -100,7 +100,7 @@ class ProductTest {
         }
     }
 
-    @DisplayName("[INV-10] 상품의 소속 브랜드는 만든 뒤에 바뀌지 않는다.")
+    @DisplayName("[INV-PRODUCT-10] 상품의 소속 브랜드는 만든 뒤에 바뀌지 않는다.")
     @Nested
     class ImmutableBrand {
 
@@ -160,7 +160,7 @@ class ProductTest {
         }
     }
 
-    @DisplayName("[INV-11] 삭제된 상품의 이름·가격·재고는 바뀌지 않는다.")
+    @DisplayName("[INV-PRODUCT-11] 삭제된 상품의 이름·가격·재고는 바뀌지 않는다.")
     @Nested
     class ImmutableAfterDeletion {
 
@@ -213,7 +213,7 @@ class ProductTest {
         }
     }
 
-    @DisplayName("[INV-12] 이미 삭제된 상품은 다시 삭제되지 않는다.")
+    @DisplayName("[INV-PRODUCT-12] 이미 삭제된 상품은 다시 삭제되지 않는다.")
     @Nested
     class RejectRepeatedDeletion {
 
@@ -236,7 +236,7 @@ class ProductTest {
         }
     }
 
-    @DisplayName("[INV-13] 새로 만든 상품의 재고는 0이다.")
+    @DisplayName("[INV-PRODUCT-13] 새로 만든 상품의 재고는 0이다.")
     @Nested
     class InitialStock {
 
@@ -254,7 +254,7 @@ class ProductTest {
         }
     }
 
-    @DisplayName("[INV-14] 재고 수량은 0 이상이다.")
+    @DisplayName("[INV-STOCK-14] 재고 수량은 0 이상이다.")
     @Nested
     class NonNegativeStock {
 
@@ -290,7 +290,7 @@ class ProductTest {
         }
     }
 
-    @DisplayName("[INV-15] 차감 수량은 현재 재고 이하다.")
+    @DisplayName("[INV-STOCK-15] 차감 수량은 현재 재고 이하다.")
     @Nested
     class DecreaseWithinStock {
 
