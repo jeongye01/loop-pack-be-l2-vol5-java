@@ -253,7 +253,7 @@ paths:
               $ref: '#/components/schemas/CreateOrderRequest'
       responses:
         '201':
-          description: DRAFT 상태의 주문 상세
+          description: DRAFT 주문 상세. 품목과 합계를 담고 결제 전이므로 payment는 없음
           content:
             application/json:
               schema:
@@ -285,7 +285,7 @@ paths:
         - $ref: '#/components/parameters/Size'
       responses:
         '200':
-          description: 주문 생성 최신순의 주문 요약 목록
+          description: 주문 생성 최신순의 주문 요약 목록. CONFIRMED 항목에만 paymentAmount가 있음
           content:
             application/json:
               schema:
@@ -306,7 +306,7 @@ paths:
         - $ref: '#/components/parameters/OrderId'
       responses:
         '200':
-          description: CONFIRMED 상태의 주문 상세
+          description: CONFIRMED 주문 상세. 품목·합계와 결제액·결제 시각을 담음
           content:
             application/json:
               schema:
@@ -341,7 +341,7 @@ paths:
         - $ref: '#/components/parameters/OrderId'
       responses:
         '200':
-          description: 주문 상세
+          description: 주문 상세. DRAFT에는 payment가 없고 CONFIRMED에는 결제액·시각이 있음
           content:
             application/json:
               schema:
@@ -709,7 +709,7 @@ paths:
         - $ref: '#/components/parameters/Size'
       responses:
         '200':
-          description: 주문 생성 최신순의 주문 요약 목록
+          description: 주문 생성 최신순의 관리자 주문 요약 목록. CONFIRMED 항목에만 paymentAmount가 있음
           content:
             application/json:
               schema:
@@ -728,7 +728,7 @@ paths:
         - $ref: '#/components/parameters/OrderId'
       responses:
         '200':
-          description: 구매자 식별자를 포함한 주문 상세
+          description: 구매자 식별자를 포함한 주문 상세. DRAFT에는 payment가 없고 CONFIRMED에는 결제액·시각이 있음
           content:
             application/json:
               schema:
@@ -1130,9 +1130,11 @@ components:
           type: integer
           format: int64
           minimum: 1
+          description: 확정에 성공해 실제 결제한 금액
         paidAt:
           type: string
           format: date-time
+          description: 결제 시각
     OrderDetail:
       type: object
       required: [id, status, items, totalAmount]
@@ -1145,14 +1147,18 @@ components:
         items:
           type: array
           minItems: 1
+          description: 주문 당시 저장한 상품 정보와 수량·단가·품목 금액
           items:
             $ref: '#/components/schemas/OrderItem'
         totalAmount:
           type: integer
           format: int64
           minimum: 1
+          description: 주문 품목 금액의 합계. DRAFT에도 존재함
         payment:
-          $ref: '#/components/schemas/Payment'
+          description: CONFIRMED일 때만 존재하는 결제액과 결제 시각. DRAFT에서는 생략함
+          allOf:
+            - $ref: '#/components/schemas/Payment'
     OrderSummary:
       type: object
       required: [id, status, itemCount, totalAmount]
@@ -1170,10 +1176,12 @@ components:
           type: integer
           format: int64
           minimum: 1
+          description: 주문 품목 금액의 합계
         paymentAmount:
           type: integer
           format: int64
           minimum: 1
+          description: CONFIRMED일 때만 존재하는 결제액. DRAFT에서는 생략함
     AdminOrderDetail:
       type: object
       required: [id, buyerId, status, items, totalAmount]
@@ -1189,14 +1197,18 @@ components:
         items:
           type: array
           minItems: 1
+          description: 주문 당시 저장한 상품 정보와 수량·단가·품목 금액
           items:
             $ref: '#/components/schemas/OrderItem'
         totalAmount:
           type: integer
           format: int64
           minimum: 1
+          description: 주문 품목 금액의 합계. DRAFT에도 존재함
         payment:
-          $ref: '#/components/schemas/Payment'
+          description: CONFIRMED일 때만 존재하는 결제액과 결제 시각. DRAFT에서는 생략함
+          allOf:
+            - $ref: '#/components/schemas/Payment'
     AdminOrderSummary:
       type: object
       required: [id, buyerId, status, itemCount, totalAmount]
@@ -1217,10 +1229,12 @@ components:
           type: integer
           format: int64
           minimum: 1
+          description: 주문 품목 금액의 합계
         paymentAmount:
           type: integer
           format: int64
           minimum: 1
+          description: CONFIRMED일 때만 존재하는 결제액. DRAFT에서는 생략함
 
     CustomerProductPage:
       type: object

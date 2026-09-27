@@ -50,7 +50,7 @@
 
 ### 계약·도메인 시퀀스
 
-세 대표 흐름의 상세 시퀀스는 [전체 흐름 시퀀스](./representative-flows.md)에 정리한다. 이 시퀀스는 [요구사항](./requirements.md), [API 계약](./api-contract.md), [도메인 규칙](./domain-rules.yaml), [도메인 관계](./domain-relations.md)를 기준으로 API 경계와 도메인 상태 변화를 표현한다. 구현 클래스나 저장 방식의 호출 순서는 다루지 않는다.
+대표 흐름의 상세 시퀀스는 [전체 흐름 시퀀스](./representative-flows.md)에 정리한다. 이 시퀀스는 [요구사항](./requirements.md), [API 계약](./api-contract.md), [도메인 규칙](./domain-rules.yaml), [도메인 관계](./domain-relations.md)를 기준으로 API 경계와 도메인 상태 변화를 표현한다. 구현 클래스나 저장 방식의 호출 순서는 다루지 않는다.
 
 ## API 계약 요약
 
