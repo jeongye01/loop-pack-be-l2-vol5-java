@@ -486,7 +486,7 @@ paths:
         - $ref: '#/components/parameters/BrandId'
       responses:
         '200':
-          description: 삭제 성공
+          description: 브랜드와 연결된 미삭제 상품 전체를 함께 논리 삭제함
           content:
             application/json:
               schema:
@@ -498,13 +498,6 @@ paths:
         '404':
           description: BRAND_NOT_FOUND - 브랜드가 없거나 이미 삭제됨
           x-error-codes: [BRAND_NOT_FOUND]
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorEnvelope'
-        '409':
-          description: BRAND_HAS_PRODUCTS
-          x-error-codes: [BRAND_HAS_PRODUCTS]
           content:
             application/json:
               schema:
@@ -874,7 +867,6 @@ components:
             - METHOD_NOT_ALLOWED
             - DUPLICATE_BRAND_NAME
             - DUPLICATE_PRODUCT_NAME
-            - BRAND_HAS_PRODUCTS
             - ORDER_ALREADY_CONFIRMED
             - BRAND_CHANGE_NOT_ALLOWED
             - PRODUCT_NOT_AVAILABLE

@@ -67,12 +67,12 @@ classDiagram
     }
     class OrderItem {
         <<VO>>
-        상품
+        상품 식별자
         상품 이름
         수량
         단가
         금액을 구한다()
-        수량을 바꾼다(수량)
+        수량이 바뀐 새 품목을 만든다(수량)
     }
     class PaymentResult {
         <<VO>>
@@ -88,7 +88,7 @@ classDiagram
     Order "N" --> "1" User : 구매자
     Order "1" --> "1..*" OrderItem : 품목
     Order "1" --> "0..1" PaymentResult : 결제 결과
-    OrderItem "N" --> "1" Product : 어떤 상품
+    OrderItem "N" ..> "1" Product : 생성 시 정보 복사
 
     note for User "사용자 애그리거트 : User + Point"
     note for Product "상품 애그리거트 : Product + Stock"
@@ -105,7 +105,7 @@ classDiagram
 | Brand 1 ── N Product | Product가 자신이 속한 Brand를 안다. Brand는 Product를 모른다. |
 | User 1 ── N Like N ── 1 Product | Like가 User와 Product를 안다. Product는 Like를 모른다. |
 | Order 1 ── 1..N OrderItem | Order가 자신의 OrderItem을 가진다. |
-| OrderItem N ── 1 Product | OrderItem이 주문한 Product를 가리킨다. |
+| OrderItem → Product | OrderItem은 상품 엔티티를 참조하지 않고 생성 시점의 상품 식별자·이름·단가를 저장한다. |
 | User 1 ── N Order | Order가 구매자인 User를 안다. |
 | Order 1 ── 0..1 PaymentResult | Order가 자신의 결제 결과를 가진다. |
 
@@ -142,9 +142,9 @@ classDiagram
         <<Domain Service>>
         확정한다(요청자, 주문, 상품들, 구매자, 결제 시점)
     }
-    class BrandDeletionValidator {
+    class BrandRemovalService {
         <<Domain Service>>
-        삭제할 수 있는지 본다(브랜드)
+        함께 삭제한다(브랜드, 상품들)
     }
     class BrandNameValidator {
         <<Domain Service>>
@@ -158,8 +158,8 @@ classDiagram
     OrderConfirmService ..> Order
     OrderConfirmService ..> Product
     OrderConfirmService ..> User
-    BrandDeletionValidator ..> Brand
-    BrandDeletionValidator ..> Product
+    BrandRemovalService ..> Brand
+    BrandRemovalService ..> Product
     BrandNameValidator ..> Brand
     ProductNameValidator ..> Product
 ```
@@ -168,11 +168,10 @@ classDiagram
 | 도메인 서비스 | 애그리거트 안에 둘 수 없는 이유 |
 | --- | --- |
 | `OrderConfirmService` | 주문·상품·사용자 세 애그리거트의 상태를 함께 바꿔야 확정이 끝난다 |
-| `BrandDeletionValidator` | `Brand`가 자기 `Product`를 모르므로 `Brand.delete()`가 스스로 답할 수 없다 |
+| `BrandRemovalService` | `Brand`가 연결 상품을 모르므로 브랜드와 미삭제 상품의 상태를 함께 맞춘다 |
 | `BrandNameValidator` | 한 `Brand`는 다른 `Brand` 전부를 볼 수 없다 |
 | `ProductNameValidator` | 한 `Product`는 같은 브랜드의 다른 `Product`를 볼 수 없다 |
 
-
-상태를 바꾸는 것은 `OrderConfirmService` 하나뿐이지만, 나머지 셋도 도메인 서비스다. 기준은 상태 변경이 아니라 **위 둘 중 하나에 해당하는 것**이다.
+상태를 바꾸는 것은 `OrderConfirmService`와 `BrandRemovalService`다. 이름 검사기도 도메인 서비스다. 기준은 상태 변경 여부가 아니라 **위 둘 중 하나에 해당하는 것**이다.
 
 확정은 **검사를 모두 마친 뒤에 상태를 바꾼다.** 한 상품이라도 재고가 모자라거나 잔액이 모자라면 어느 것도 바뀌지 않는다.

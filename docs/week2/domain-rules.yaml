@@ -4,7 +4,7 @@
 # 규칙 문장은 "언제 보아도 참인 상태"로 적는다. 금지 서술("~할 수 없다")로 적지 않는다.
 #
 # requirements  요구사항 ID → 거기서 파생된 규칙 ID
-#               빈 배열은 도메인 규칙을 낳지 않는 요구사항이다 (조회 계약·접근 경계·응답 계약)
+#               빈 배열은 도메인 규칙을 낳지 않는 요구사항이다 (조회·접근·응답·트랜잭션 결과 계약)
 # rules         규칙을 지키는 개념 → 규칙 ID → 문장
 
 requirements:
@@ -59,8 +59,6 @@ requirements:
   R-ORDER-15:   [INV-28]
 
   R-ADMIN-01:   []
-  R-ADMIN-02:   [INV-03]
-  R-ADMIN-03:   [INV-03]
   R-ADMIN-04:   []
   R-ADMIN-05:   [INV-09]
   R-ADMIN-06:   [INV-06, INV-08]
@@ -73,6 +71,8 @@ requirements:
   R-ADMIN-13:   [INV-04, INV-11]
   R-ADMIN-14:   [INV-26, INV-41]
   R-ADMIN-15:   [INV-01]
+  R-ADMIN-16:   [INV-03]
+  R-ADMIN-18:   []
 
   P-ACCESS-01:  []
   P-ACCESS-02:  []
