@@ -12,7 +12,6 @@
 | 요구사항       | [요구사항 목록](./requirements.md)                                                                 |
 | 버드뷰        | [버드뷰](#버드뷰)                                                                                  |
 | 구조와 의존     | [아키텍처](./architecture.md)                                                                                |
-| 사용자 목적과 결과 | [유스케이스 지도](./use-cases.md) |
 | 도메인 관계     | [상세 관계도](./domain-relations.md)                                                              |
 | 대표 흐름      | [포인트 충전 → 주문 확정](#대표-흐름), [전체 흐름 시퀀스](./representative-flows.md)                             |
 | 기본 API 계약  | [API 계약 요약](#api-계약-요약), [API 계약](./api-contract.md) |
