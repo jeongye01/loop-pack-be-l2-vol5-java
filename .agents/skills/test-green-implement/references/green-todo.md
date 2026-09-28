@@ -293,3 +293,14 @@ Green 에이전트가 Red 전체를 실행하고 실패를 분석한 뒤, produc
   - 선행 작업: 기존 `Brand.delete()`와 `Product.delete()`의 논리 삭제 구현
   - 테스트 명령: `./gradlew :apps:commerce-api:test --tests 'com.loopers.brand.domain.BrandRemovalServiceTest'`
   - 완료 조건: 새 도메인 테스트 2개가 Green이고, 기존 삭제 상품의 삭제 시점이 유지된다.
+
+## 브랜드 일괄 삭제 통합·HTTP Red 2개
+
+- [x] 30. 브랜드 삭제 유스케이스에서 연결 상품을 함께 논리 삭제
+  - 요구사항 ID: R-ADMIN-16, R-ADMIN-14, INV-BRAND-03
+  - 관찰한 실패: `BrandUseCaseIntegrationTest`의 `removesLinkedProductsOnly`가 기존 `BrandDeletionValidator`의 `CoreException`으로 실패하고, `BrandHttpTest`의 `deletesBrandWithLinkedProduct`가 삭제 거절 응답으로 OpenAPI 검증에 실패한다. 대상 두 클래스를 실행한 결과 38개 중 이 2개가 Red다.
+  - 필요한 최소 동작: 기존 `BrandUseCase.delete()`의 `@Transactional` 경계 안에서 해당 브랜드의 상품을 조회해 `BrandRemovalService`로 활성 상품과 브랜드를 삭제하고, 저장한다. 이미 삭제된 상품과 다른 브랜드·기존 주문은 변경하지 않는다.
+  - 변경할 production 파일: `apps/commerce-api/src/main/java/com/loopers/brand/application/BrandUseCase.java`
+  - 선행 작업: 기존 `BrandRemovalService`와 `ProductRepository.findAllByBrandId` 사용
+  - 테스트 명령: `./gradlew :apps:commerce-api:test --tests 'com.loopers.brand.application.BrandUseCaseIntegrationTest' --tests 'com.loopers.brand.interfaces.BrandHttpTest' --rerun-tasks`
+  - 완료 조건: 두 클래스 전체가 Green이고 새 두 사례에서 브랜드·연결 상품의 삭제와 다른 대상·기존 주문 보존을 확인한다.

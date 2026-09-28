@@ -2,6 +2,7 @@ package com.loopers.brand.interfaces;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.loopers.brand.domain.Brand;
+import com.loopers.product.domain.Product;
 import com.loopers.support.fixture.CommerceFixture;
 import com.loopers.testcontainers.MySqlTestContainersConfig;
 import com.loopers.user.domain.User;
@@ -317,6 +318,26 @@ class BrandHttpTest {
             mockMvc.perform(get(ADMIN_BRAND, brand.getId()).with(admin()))
                 .andExpect(success(HttpStatus.OK))
                 .andExpect(jsonPath("$.data.deleted").value(true));
+        }
+
+        @DisplayName("[R-ADMIN-16] 연결 상품이 있는 브랜드를 삭제하면 상품도 고객에게 보이지 않는다.")
+        @Test
+        void deletesBrandWithLinkedProduct() throws Exception {
+            User buyer = fixture.user();
+            Brand brand = fixture.brand("Nike");
+            Product product = fixture.product(brand, "Air", 1_000L, 0);
+
+            mockMvc.perform(delete(ADMIN_BRAND, brand.getId()).with(admin()).with(csrf()))
+                .andExpect(success(HttpStatus.OK));
+
+            mockMvc.perform(get(ADMIN_BRAND, brand.getId()).with(admin()))
+                .andExpect(success(HttpStatus.OK))
+                .andExpect(jsonPath("$.data.deleted").value(true));
+            mockMvc.perform(get("/api-admin/v1/products/{productId}", product.getId()).with(admin()))
+                .andExpect(success(HttpStatus.OK))
+                .andExpect(jsonPath("$.data.deleted").value(true));
+            mockMvc.perform(get("/api/v1/products/{productId}", product.getId()).with(customer(buyer)))
+                .andExpect(failure(HttpStatus.NOT_FOUND, "PRODUCT_NOT_FOUND"));
         }
 
         @DisplayName("[동등 클래스 분할] 존재하지 않는 브랜드를 삭제하면 404 BRAND_NOT_FOUND이다.")
