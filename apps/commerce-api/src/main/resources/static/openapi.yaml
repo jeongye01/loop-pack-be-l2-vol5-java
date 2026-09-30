@@ -362,6 +362,8 @@ paths:
     get:
       tags: [Admin Brand]
       operationId: A01GetBrands
+      security:
+        - adminBasic: []
       summary: 관리자 브랜드 목록 조회
       parameters:
         - $ref: '#/components/parameters/Page'
@@ -380,6 +382,8 @@ paths:
     post:
       tags: [Admin Brand]
       operationId: A02CreateBrand
+      security:
+        - adminBasic: []
       summary: 브랜드 생성
       requestBody:
         required: true
@@ -415,6 +419,8 @@ paths:
     get:
       tags: [Admin Brand]
       operationId: A03GetBrand
+      security:
+        - adminBasic: []
       summary: 관리자 브랜드 상세 조회
       parameters:
         - $ref: '#/components/parameters/BrandId'
@@ -439,6 +445,8 @@ paths:
     put:
       tags: [Admin Brand]
       operationId: A04UpdateBrand
+      security:
+        - adminBasic: []
       summary: 브랜드 수정
       parameters:
         - $ref: '#/components/parameters/BrandId'
@@ -481,6 +489,8 @@ paths:
     delete:
       tags: [Admin Brand]
       operationId: A05DeleteBrand
+      security:
+        - adminBasic: []
       summary: 브랜드 삭제
       parameters:
         - $ref: '#/components/parameters/BrandId'
@@ -507,6 +517,8 @@ paths:
     get:
       tags: [Admin Product]
       operationId: A06GetProducts
+      security:
+        - adminBasic: []
       summary: 관리자 상품 목록 조회
       parameters:
         - $ref: '#/components/parameters/OptionalBrandId'
@@ -526,6 +538,8 @@ paths:
     post:
       tags: [Admin Product]
       operationId: A07CreateProduct
+      security:
+        - adminBasic: []
       summary: 상품 생성
       requestBody:
         required: true
@@ -568,6 +582,8 @@ paths:
     get:
       tags: [Admin Product]
       operationId: A08GetProduct
+      security:
+        - adminBasic: []
       summary: 관리자 상품 상세 조회
       parameters:
         - $ref: '#/components/parameters/ProductId'
@@ -592,6 +608,8 @@ paths:
     put:
       tags: [Admin Product]
       operationId: A09UpdateProduct
+      security:
+        - adminBasic: []
       summary: 상품 수정
       parameters:
         - $ref: '#/components/parameters/ProductId'
@@ -634,6 +652,8 @@ paths:
     delete:
       tags: [Admin Product]
       operationId: A10DeleteProduct
+      security:
+        - adminBasic: []
       summary: 상품 삭제
       parameters:
         - $ref: '#/components/parameters/ProductId'
@@ -660,6 +680,8 @@ paths:
     put:
       tags: [Admin Product]
       operationId: A11ChangeStock
+      security:
+        - adminBasic: []
       summary: 상품 재고 변경
       parameters:
         - $ref: '#/components/parameters/ProductId'
@@ -697,6 +719,8 @@ paths:
     get:
       tags: [Admin Order]
       operationId: A12GetOrders
+      security:
+        - adminBasic: []
       summary: 관리자 주문 목록 조회
       parameters:
         - name: buyerId
@@ -723,6 +747,8 @@ paths:
     get:
       tags: [Admin Order]
       operationId: A13GetOrder
+      security:
+        - adminBasic: []
       summary: 관리자 주문 상세 조회
       parameters:
         - $ref: '#/components/parameters/OrderId'
@@ -747,11 +773,15 @@ paths:
 
 components:
   securitySchemes:
+    adminBasic:
+      type: http
+      scheme: basic
+      description: 관리자 모드. 로컬 실습 계정은 admin / admin이며 비밀번호는 LOCAL_ADMIN_PASSWORD로 변경할 수 있다.
     userId:
       type: apiKey
       in: header
       name: X-USER-ID
-      description: 요청자를 식별하는 사용자 ID
+      description: 일반 사용자 모드. DB에 존재하는 사용자 ID를 입력한다.
 
   parameters:
     BrandId:
