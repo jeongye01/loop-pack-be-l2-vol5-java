@@ -37,7 +37,7 @@ sequenceDiagram
     autonumber
     actor C as 고객
     participant API as 주문 API
-    participant A as application
+    participant A as OrderUseCase.confirm()
     participant R as Repository
     participant S as OrderConfirmService
     participant O as Order
@@ -46,6 +46,7 @@ sequenceDiagram
 
     C->>API: POST /api/v1/orders/{orderId}/confirm
     API->>A: 요청자·주문 ID 전달
+    Note over A: @Transactional 시작
     A->>R: 주문 조회
     R-->>A: Order
     A->>O: 본인 주문 확인
@@ -76,4 +77,4 @@ sequenceDiagram
     end
 ```
 
-확정 성공 시 재고·포인트·주문 상태·결제 결과는 함께 반영된다. 검사에서 거절되거나 처리 중 실패하면 이번 확정으로 바뀐 상태를 남기지 않는다. 같은 주문·재고·잔액을 동시에 바꾸는 요청의 보호 방식과 순서는 3주차 동시성 설계에서 결정한다.
+`OrderUseCase.confirm()`이 트랜잭션 경계다. 정상 반환 시 commit된 뒤 HTTP 성공 응답을 보내고, 예외가 전달되면 rollback 후 오류를 응답한다. 확정 성공 시 재고·포인트·주문 상태·결제 결과는 함께 반영된다. 검사에서 거절되거나 처리 중 실패하면 이번 확정으로 바뀐 상태를 남기지 않는다. 같은 주문·재고·잔액을 동시에 바꾸는 요청의 보호 방식과 순서는 3주차 동시성 설계에서 결정한다.
