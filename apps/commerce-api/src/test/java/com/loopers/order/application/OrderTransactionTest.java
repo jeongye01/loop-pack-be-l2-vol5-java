@@ -52,6 +52,35 @@ class OrderTransactionTest {
         fixture.truncateRemainingTables();
     }
 
+    @DisplayName("[R-ORDER-11][R-ORDER-12] 여러 품목의 주문 확정 결과가 함께 저장된다.")
+    @Test
+    void commitsOrderStockPointAndPaymentTogether() {
+        Brand brand = fixture.brand("Nike");
+        Product first = fixture.product(brand, "Air", 2_000L, 5);
+        Product second = fixture.product(brand, "Dunk", 3_000L, 4);
+        User buyer = fixture.userWithPoint(10_000L);
+        Order order = fixture.draftOrder(buyer, fixture.item(first, 2), fixture.item(second, 1));
+
+        useCase.confirm(buyer.getId(), order.getId());
+
+        new TransactionTemplate(transactionManager).executeWithoutResult(status -> {
+            Order savedOrder = entityManager.find(Order.class, order.getId());
+            assertAll(
+                () -> assertThat(savedOrder.getStatus()).isEqualTo(OrderStatus.CONFIRMED),
+                () -> assertThat(savedOrder.getTotalAmount()).isEqualTo(7_000L),
+                () -> assertThat(savedOrder.getPaymentResult()).isNotNull(),
+                () -> assertThat(savedOrder.getPaymentResult().amount()).isEqualTo(7_000L),
+                () -> assertThat(savedOrder.getPaymentResult().paidAt()).isNotNull(),
+                () -> assertThat(entityManager.find(Product.class, first.getId()).getStock().quantity())
+                    .isEqualTo(3),
+                () -> assertThat(entityManager.find(Product.class, second.getId()).getStock().quantity())
+                    .isEqualTo(3),
+                () -> assertThat(entityManager.find(User.class, buyer.getId()).getPoint().balance())
+                    .isEqualTo(3_000L)
+            );
+        });
+    }
+
     @DisplayName("[INV-ORDER-35] 재고 차감 SQL 전송 뒤 저장에 실패하면 주문·재고·잔액·결제 결과를 되돌린다.")
     @Test
     void rollsBackConfirmationAfterFlushedChanges() {
