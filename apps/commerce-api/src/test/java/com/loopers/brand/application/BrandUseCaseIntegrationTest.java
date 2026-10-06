@@ -5,6 +5,7 @@ import com.loopers.order.domain.Order;
 import com.loopers.order.domain.OrderItem;
 import com.loopers.order.domain.OrderStatus;
 import com.loopers.product.domain.Product;
+import com.loopers.product.domain.Stock;
 import com.loopers.support.error.CoreException;
 import com.loopers.support.error.ErrorCode;
 import com.loopers.testcontainers.MySqlTestContainersConfig;
@@ -135,9 +136,8 @@ class BrandUseCaseIntegrationTest {
         @Test void removesLinkedProductsOnly() {
             Brand brand = persist(new Brand("Nike"));
             Product zeroStock = persist(new Product(brand.getId(), "Air", 1_000L));
-            Product stocked = new Product(brand.getId(), "Dunk", 2_000L);
-            stocked.changeStock(3);
-            persist(stocked);
+            Product stocked = persist(new Product(brand.getId(), "Dunk", 2_000L));
+            persist(new Stock(stocked.getId(), 3));
             Product alreadyDeleted = new Product(brand.getId(), "Old", 500L);
             alreadyDeleted.delete();
             persist(alreadyDeleted);

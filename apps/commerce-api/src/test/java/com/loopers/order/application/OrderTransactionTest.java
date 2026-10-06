@@ -1,5 +1,7 @@
 package com.loopers.order.application;
 
+import com.loopers.support.fixture.TestEntities;
+
 import com.loopers.brand.domain.Brand;
 import com.loopers.order.domain.Order;
 import com.loopers.order.domain.OrderStatus;
@@ -7,7 +9,8 @@ import com.loopers.product.domain.Product;
 import com.loopers.support.fixture.CommerceFixture;
 import com.loopers.testcontainers.MySqlTestContainersConfig;
 import com.loopers.user.domain.User;
-import com.loopers.user.infrastructure.UserRepositoryAdapter;
+import com.loopers.user.domain.Point;
+import com.loopers.user.infrastructure.PointRepositoryAdapter;
 import com.loopers.utils.DatabaseCleanUp;
 import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.AfterEach;
@@ -37,7 +40,7 @@ class OrderTransactionTest {
     @Autowired private EntityManager entityManager;
     @Autowired private PlatformTransactionManager transactionManager;
     @Autowired private DatabaseCleanUp databaseCleanUp;
-    @MockitoSpyBean private UserRepositoryAdapter userRepository;
+    @MockitoSpyBean private PointRepositoryAdapter pointRepository;
 
     private CommerceFixture fixture;
 
@@ -71,11 +74,11 @@ class OrderTransactionTest {
                 () -> assertThat(savedOrder.getPaymentResult()).isNotNull(),
                 () -> assertThat(savedOrder.getPaymentResult().amount()).isEqualTo(7_000L),
                 () -> assertThat(savedOrder.getPaymentResult().paidAt()).isNotNull(),
-                () -> assertThat(entityManager.find(Product.class, first.getId()).getStock().quantity())
+                () -> assertThat(TestEntities.stockQuantity(entityManager, first.getId()))
                     .isEqualTo(3),
-                () -> assertThat(entityManager.find(Product.class, second.getId()).getStock().quantity())
+                () -> assertThat(TestEntities.stockQuantity(entityManager, second.getId()))
                     .isEqualTo(3),
-                () -> assertThat(entityManager.find(User.class, buyer.getId()).getPoint().balance())
+                () -> assertThat(TestEntities.pointBalance(entityManager, buyer.getId()))
                     .isEqualTo(3_000L)
             );
         });
@@ -94,18 +97,18 @@ class OrderTransactionTest {
         doAnswer(invocation -> {
             entityManager.flush();
             assertAll(
-                () -> assertThat(numberFrom("select quantity from product where id = :id", first.getId()))
+                () -> assertThat(numberFrom("select quantity from stock where product_id = :id", first.getId()))
                     .isEqualTo(3),
-                () -> assertThat(numberFrom("select quantity from product where id = :id", second.getId()))
+                () -> assertThat(numberFrom("select quantity from stock where product_id = :id", second.getId()))
                     .isEqualTo(3),
-                () -> assertThat(numberFrom("select balance from users where id = :id", buyer.getId()))
+                () -> assertThat(numberFrom("select balance from point where user_id = :id", buyer.getId()))
                     .isEqualTo(3_000L),
                 () -> assertThat(numberFrom("select amount from orders where id = :id", order.getId()))
                     .isEqualTo(7_000L)
             );
             flushed.set(true);
             throw new IllegalStateException("injected user save failure");
-        }).when(userRepository).save(any(User.class));
+        }).when(pointRepository).save(any(Point.class));
 
         IllegalStateException failure = assertThrows(IllegalStateException.class,
             () -> useCase.confirm(buyer.getId(), order.getId()));
@@ -118,11 +121,11 @@ class OrderTransactionTest {
             () -> assertThat(entityManager.find(Order.class, order.getId()).getStatus())
                 .isEqualTo(OrderStatus.DRAFT),
             () -> assertThat(entityManager.find(Order.class, order.getId()).getPaymentResult()).isNull(),
-            () -> assertThat(entityManager.find(Product.class, first.getId()).getStock().quantity())
+            () -> assertThat(TestEntities.stockQuantity(entityManager, first.getId()))
                 .isEqualTo(5),
-            () -> assertThat(entityManager.find(Product.class, second.getId()).getStock().quantity())
+            () -> assertThat(TestEntities.stockQuantity(entityManager, second.getId()))
                 .isEqualTo(4),
-            () -> assertThat(entityManager.find(User.class, buyer.getId()).getPoint().balance())
+            () -> assertThat(TestEntities.pointBalance(entityManager, buyer.getId()))
                 .isEqualTo(10_000L)
         ));
     }

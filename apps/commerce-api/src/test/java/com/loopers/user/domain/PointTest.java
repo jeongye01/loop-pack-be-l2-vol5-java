@@ -14,6 +14,26 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class PointTest {
 
+    @DisplayName("[INV-USER-22] 새 고객의 잔액은 0이다.")
+    @Nested
+    class InitialBalance {
+        @Test
+        void startsAtZero() {
+            assertThat(new Point(0L).balance()).isZero();
+        }
+    }
+
+    @DisplayName("[INV-POINT-21] 거절된 충전은 잔액을 바꾸지 않는다.")
+    @Nested
+    class RejectedChargeKeepsBalance {
+        @Test
+        void keepsBalance() {
+            Point point = new Point(1_000L);
+            assertThrows(CoreException.class, () -> point.charge(0L));
+            assertThat(point.balance()).isEqualTo(1_000L);
+        }
+    }
+
     @DisplayName("[INV-POINT-16] 포인트 잔액은 0 이상이다.")
     @Nested
     class NonNegativeBalance {

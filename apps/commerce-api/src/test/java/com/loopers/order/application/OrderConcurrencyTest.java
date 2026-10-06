@@ -1,5 +1,7 @@
 package com.loopers.order.application;
 
+import com.loopers.support.fixture.TestEntities;
+
 import com.loopers.brand.domain.Brand;
 import com.loopers.order.domain.Order;
 import com.loopers.order.domain.OrderStatus;
@@ -100,8 +102,8 @@ class OrderConcurrencyTest {
                 () -> assertThat(technicalErrors).isEmpty(),
                 () -> assertThat(successes + stockRejections + otherRejections.size() + technicalErrors.size())
                     .isEqualTo(REQUESTS),
-                () -> assertThat(savedProduct.getStock().quantity()).isZero(),
-                () -> assertThat(5 - successes).isEqualTo((long) savedProduct.getStock().quantity()),
+                () -> assertThat(TestEntities.stockQuantity(entityManager, savedProduct.getId())).isZero(),
+                () -> assertThat(5 - successes).isEqualTo((long) TestEntities.stockQuantity(entityManager, savedProduct.getId())),
                 () -> assertThat(confirmed).isEqualTo(successes)
             );
             for (Outcome outcome : outcomes) {
@@ -111,13 +113,13 @@ class OrderConcurrencyTest {
                     assertAll(
                         () -> assertThat(savedOrder.getStatus()).isEqualTo(OrderStatus.CONFIRMED),
                         () -> assertThat(savedOrder.getPaymentResult().amount()).isEqualTo(1_000L),
-                        () -> assertThat(savedBuyer.getPoint().balance()).isZero()
+                        () -> assertThat(TestEntities.pointBalance(entityManager, savedBuyer.getId())).isZero()
                     );
                 } else if (outcome.rejection() == ErrorCode.INSUFFICIENT_STOCK) {
                     assertAll(
                         () -> assertThat(savedOrder.getStatus()).isEqualTo(OrderStatus.DRAFT),
                         () -> assertThat(savedOrder.getPaymentResult()).isNull(),
-                        () -> assertThat(savedBuyer.getPoint().balance()).isEqualTo(1_000L)
+                        () -> assertThat(TestEntities.pointBalance(entityManager, savedBuyer.getId())).isEqualTo(1_000L)
                     );
                 }
             }
@@ -147,8 +149,8 @@ class OrderConcurrencyTest {
 
         new TransactionTemplate(transactionManager).executeWithoutResult(status -> {
             Order savedOrder = entityManager.find(Order.class, order.getId());
-            int stock = entityManager.find(Product.class, product.getId()).getStock().quantity();
-            long balance = entityManager.find(User.class, buyer.getId()).getPoint().balance();
+            int stock = TestEntities.stockQuantity(entityManager, product.getId());
+            long balance = TestEntities.pointBalance(entityManager, buyer.getId());
             assertAll(
                 () -> assertThat(outcomes).hasSize(2),
                 () -> assertThat(successes).isEqualTo(1),
@@ -190,8 +192,8 @@ class OrderConcurrencyTest {
         List<Outcome> technicalErrors = outcomes.stream().filter(result -> result.technical() != null).toList();
 
         new TransactionTemplate(transactionManager).executeWithoutResult(status -> {
-            long balance = entityManager.find(User.class, buyer.getId()).getPoint().balance();
-            int stock = entityManager.find(Product.class, product.getId()).getStock().quantity();
+            long balance = TestEntities.pointBalance(entityManager, buyer.getId());
+            int stock = TestEntities.stockQuantity(entityManager, product.getId());
             long confirmed = purchases.stream()
                 .map(purchase -> entityManager.find(Order.class, purchase.orderId()))
                 .filter(order -> order.getStatus() == OrderStatus.CONFIRMED)
@@ -245,7 +247,7 @@ class OrderConcurrencyTest {
 
         new TransactionTemplate(transactionManager).executeWithoutResult(status -> {
             Order savedOrder = entityManager.find(Order.class, order.getId());
-            long balance = entityManager.find(User.class, buyer.getId()).getPoint().balance();
+            long balance = TestEntities.pointBalance(entityManager, buyer.getId());
             assertAll(
                 () -> assertThat(outcomes).hasSize(2),
                 () -> assertThat(successes).isEqualTo(2),
@@ -256,7 +258,7 @@ class OrderConcurrencyTest {
                 () -> assertThat(balance).isEqualTo(10_000L + 2_000L - 7_000L),
                 () -> assertThat(savedOrder.getStatus()).isEqualTo(OrderStatus.CONFIRMED),
                 () -> assertThat(savedOrder.getPaymentResult().amount()).isEqualTo(7_000L),
-                () -> assertThat(entityManager.find(Product.class, product.getId()).getStock().quantity())
+                () -> assertThat(TestEntities.stockQuantity(entityManager, product.getId()))
                     .isZero()
             );
         });
@@ -287,7 +289,7 @@ class OrderConcurrencyTest {
                 () -> assertThat(outcomes).allMatch(OperationOutcome::success),
                 () -> assertThat(savedProduct.getName()).isEqualTo("Updated Air"),
                 () -> assertThat(savedProduct.getPrice()).isEqualTo(1_100L),
-                () -> assertThat(savedProduct.getStock().quantity()).isEqualTo(4),
+                () -> assertThat(TestEntities.stockQuantity(entityManager, savedProduct.getId())).isEqualTo(4),
                 () -> assertThat(savedOrder.getStatus()).isEqualTo(OrderStatus.CONFIRMED),
                 () -> assertThat(savedOrder.getPaymentResult().amount()).isEqualTo(1_000L),
                 () -> assertThat(savedOrder.getItems()).singleElement().satisfies(item -> assertAll(
@@ -295,7 +297,7 @@ class OrderConcurrencyTest {
                     () -> assertThat(item.unitPrice()).isEqualTo(1_000L),
                     () -> assertThat(item.quantity()).isEqualTo(1)
                 )),
-                () -> assertThat(savedBuyer.getPoint().balance()).isZero()
+                () -> assertThat(TestEntities.pointBalance(entityManager, savedBuyer.getId())).isZero()
             );
         });
     }

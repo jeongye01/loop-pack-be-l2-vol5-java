@@ -70,7 +70,7 @@ requirements:
   R-ADMIN-10:   []
   R-ADMIN-11:   []
   R-ADMIN-12:   [INV-ORDER-33]
-  R-ADMIN-13:   [INV-BRAND-04, INV-PRODUCT-11]
+  R-ADMIN-13:   [INV-BRAND-04]
   R-ADMIN-14:   [INV-LIKE-26, INV-ORDERITEM-41]
   R-ADMIN-15:   [INV-BRAND-01]
   R-ADMIN-16:   [INV-BRAND-03]
@@ -102,7 +102,7 @@ requirements:
   P-ADMIN-02:   [INV-PRODUCT-06, INV-PRODUCT-07]
   P-ADMIN-03:   [INV-PRODUCT-08]
   P-ADMIN-04:   [INV-PRODUCT-10]
-  P-ADMIN-05:   [INV-PRODUCT-13]
+  P-ADMIN-05:   [INV-STOCK-14]
   P-ADMIN-06:   [INV-BRAND-05, INV-PRODUCT-12]
   P-ADMIN-07:   []
   P-ADMIN-08:   []
@@ -126,9 +126,7 @@ rules:
     INV-PRODUCT-08: 상품 가격은 1원 이상 1,000,000,000원 이하다.
     INV-PRODUCT-09: 상품은 존재하며 삭제되지 않은 브랜드에 속한다.
     INV-PRODUCT-10: 상품의 소속 브랜드는 만든 뒤에 바뀌지 않는다.
-    INV-PRODUCT-11: 삭제된 상품의 이름·가격·재고는 바뀌지 않는다.
     INV-PRODUCT-12: 이미 삭제된 상품은 다시 삭제되지 않는다.
-    INV-PRODUCT-13: 새로 만든 상품의 재고는 0이다.
 
   Stock:
     INV-STOCK-14: 재고 수량은 0 이상이다.

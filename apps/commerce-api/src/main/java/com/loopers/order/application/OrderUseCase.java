@@ -6,11 +6,16 @@ import com.loopers.order.domain.OrderItem;
 import com.loopers.order.domain.OrderRepository;
 import com.loopers.product.domain.Product;
 import com.loopers.product.domain.ProductRepository;
+import com.loopers.product.domain.Stock;
+import com.loopers.product.domain.StockRepository;
 import com.loopers.support.error.CoreException;
 import com.loopers.support.error.ErrorCode;
 import com.loopers.support.page.PageResult;
+import com.loopers.support.transaction.TransactionRetryExecutor;
 import com.loopers.user.domain.User;
 import com.loopers.user.domain.UserRepository;
+import com.loopers.user.domain.Point;
+import com.loopers.user.domain.PointRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,16 +28,25 @@ public class OrderUseCase {
     private final OrderRepository orderRepository;
     private final ProductRepository productRepository;
     private final UserRepository userRepository;
+    private final PointRepository pointRepository;
+    private final StockRepository stockRepository;
+    private final TransactionRetryExecutor transactionRetryExecutor;
     private final OrderConfirmService confirmService = new OrderConfirmService();
 
     public OrderUseCase(
         OrderRepository orderRepository,
         ProductRepository productRepository,
-        UserRepository userRepository
+        UserRepository userRepository,
+        PointRepository pointRepository,
+        StockRepository stockRepository,
+        TransactionRetryExecutor transactionRetryExecutor
     ) {
         this.orderRepository = orderRepository;
         this.productRepository = productRepository;
         this.userRepository = userRepository;
+        this.pointRepository = pointRepository;
+        this.stockRepository = stockRepository;
+        this.transactionRetryExecutor = transactionRetryExecutor;
     }
 
     @Transactional
@@ -47,21 +61,41 @@ public class OrderUseCase {
 
     @Transactional
     public Order confirm(Long buyerId, Long orderId) {
-        Order order = findOrder(orderId);
+        if (transactionRetryExecutor.isEnabled()) {
+            return transactionRetryExecutor.execute(() -> confirmInCurrentTransaction(buyerId, orderId));
+        }
+        return confirmInCurrentTransaction(buyerId, orderId);
+    }
+
+    private Order confirmInCurrentTransaction(Long buyerId, Long orderId) {
+        Order order = orderRepository.findById(orderId)
+            .orElseThrow(() -> new CoreException(ErrorCode.ORDER_NOT_FOUND));
         if (!order.isOwnedBy(buyerId)) {
             throw new CoreException(ErrorCode.ORDER_NOT_FOUND);
         }
-        User buyer = requireUser(order.getBuyerId());
+        User buyer = userRepository.findById(order.getBuyerId())
+            .orElseThrow(() -> new CoreException(ErrorCode.USER_NOT_IDENTIFIED));
         List<Product> products = order.getItems().stream()
             .map(OrderItem::productId)
             .distinct()
+            .sorted()
             .map(productRepository::findById)
             .flatMap(java.util.Optional::stream)
             .toList();
+        List<Stock> stocks = products.stream().map(product -> stockRepository.findByProductId(product.getId())
+            .orElseThrow(() -> new CoreException(ErrorCode.PRODUCT_NOT_AVAILABLE))).toList();
+        Point point = pointRepository.findByUserId(order.getBuyerId())
+            .orElseThrow(() -> new CoreException(ErrorCode.USER_NOT_IDENTIFIED));
 
-        confirmService.confirm(buyerId, order, products, buyer, ZonedDateTime.now());
-        products.forEach(productRepository::save);
-        userRepository.save(buyer);
+        confirmService.confirm(buyerId, order, products, stocks, point, ZonedDateTime.now());
+        for (int i = 0; i < stocks.size(); i++) {
+            Stock stock = stocks.get(i);
+            OrderItem item = order.getItems().stream().filter(x -> x.productId().equals(stock.getProductId())).findFirst().orElseThrow();
+            stock.changeQuantity(stock.decrease(item.quantity()).quantity());
+            stockRepository.save(stock);
+        }
+        point.changeBalance(point.pay(order.getTotalAmount()).balance());
+        pointRepository.save(point);
         return orderRepository.save(order);
     }
 

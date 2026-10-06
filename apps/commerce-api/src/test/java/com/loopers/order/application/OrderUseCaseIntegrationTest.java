@@ -1,14 +1,18 @@
 package com.loopers.order.application;
 
+import com.loopers.support.fixture.TestEntities;
+
 import com.loopers.order.domain.Order;
 import com.loopers.order.domain.OrderItem;
 import com.loopers.order.domain.OrderRepository;
 import com.loopers.order.domain.OrderStatus;
 import com.loopers.product.domain.Product;
+import com.loopers.product.domain.Stock;
 import com.loopers.support.error.CoreException;
 import com.loopers.support.error.ErrorCode;
 import com.loopers.testcontainers.MySqlTestContainersConfig;
 import com.loopers.user.domain.User;
+import com.loopers.user.domain.Point;
 import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -43,9 +47,9 @@ class OrderUseCaseIntegrationTest {
             entityManager.flush();
             entityManager.clear();
             assertAll(
-                () -> assertThat(entityManager.find(Product.class, product.getId()).getStock().quantity())
+                () -> assertThat(TestEntities.stockQuantity(entityManager, product.getId()))
                     .isEqualTo(5),
-                () -> assertThat(entityManager.find(User.class, buyer.getId()).getPoint().balance())
+                () -> assertThat(TestEntities.pointBalance(entityManager, buyer.getId()))
                     .isEqualTo(10_000L)
             );
         }
@@ -87,10 +91,8 @@ class OrderUseCaseIntegrationTest {
                 () -> assertThat(result.getErrorCode()).isEqualTo(ErrorCode.INSUFFICIENT_STOCK),
                 () -> assertThat(entityManager.find(Order.class, scenario.order().getId()).getStatus())
                     .isEqualTo(OrderStatus.DRAFT),
-                () -> assertThat(entityManager.find(Product.class, scenario.product().getId())
-                    .getStock().quantity()).isEqualTo(1),
-                () -> assertThat(entityManager.find(User.class, scenario.buyer().getId())
-                    .getPoint().balance()).isEqualTo(10_000L)
+                () -> assertThat(TestEntities.stockQuantity(entityManager, scenario.product().getId())).isEqualTo(1),
+                () -> assertThat(TestEntities.pointBalance(entityManager, scenario.buyer().getId())).isEqualTo(10_000L)
             );
         }
 
@@ -104,10 +106,8 @@ class OrderUseCaseIntegrationTest {
                 () -> assertThat(result.getErrorCode()).isEqualTo(ErrorCode.INSUFFICIENT_POINT),
                 () -> assertThat(entityManager.find(Order.class, scenario.order().getId()).getStatus())
                     .isEqualTo(OrderStatus.DRAFT),
-                () -> assertThat(entityManager.find(Product.class, scenario.product().getId())
-                    .getStock().quantity()).isEqualTo(5),
-                () -> assertThat(entityManager.find(User.class, scenario.buyer().getId())
-                    .getPoint().balance()).isEqualTo(3_999L)
+                () -> assertThat(TestEntities.stockQuantity(entityManager, scenario.product().getId())).isEqualTo(5),
+                () -> assertThat(TestEntities.pointBalance(entityManager, scenario.buyer().getId())).isEqualTo(3_999L)
             );
         }
     }
@@ -121,10 +121,8 @@ class OrderUseCaseIntegrationTest {
             entityManager.flush();
             entityManager.clear();
             assertAll(
-                () -> assertThat(entityManager.find(Product.class, scenario.product().getId())
-                    .getStock().quantity()).isEqualTo(3),
-                () -> assertThat(entityManager.find(User.class, scenario.buyer().getId())
-                    .getPoint().balance()).isEqualTo(6_000L)
+                () -> assertThat(TestEntities.stockQuantity(entityManager, scenario.product().getId())).isEqualTo(3),
+                () -> assertThat(TestEntities.pointBalance(entityManager, scenario.buyer().getId())).isEqualTo(6_000L)
             );
         }
     }
@@ -175,23 +173,23 @@ class OrderUseCaseIntegrationTest {
     }
 
     private Scenario confirmationScenario(int stock, long point) {
-        Product product = persist(productWithStock(stock));
-        User buyer = persist(userWithPoint(point));
+        Product product = persist(new Product(1L, "상품", 2_000L));
+        persist(new Stock(product.getId(), stock));
+        User buyer = persist(new User());
+        if (point > 0) persist(new Point(buyer.getId(), point));
         Order order = persist(new Order(buyer.getId(), List.of(OrderItem.of(product, 2))));
         return new Scenario(product, buyer, order);
     }
 
-    private static Product productWithStock(int stock) {
-        Product product = new Product(1L, "상품", 2_000L);
-        product.changeStock(stock);
+    private Product productWithStock(int stock) {
+        Product product = persist(new Product(1L, "상품", 2_000L));
+        persist(new Stock(product.getId(), stock));
         return product;
     }
 
-    private static User userWithPoint(long point) {
-        User user = new User();
-        if (point > 0) {
-            user.charge(point);
-        }
+    private User userWithPoint(long point) {
+        User user = persist(new User());
+        if (point > 0) persist(new Point(user.getId(), point));
         return user;
     }
 
