@@ -16,7 +16,10 @@ import com.loopers.user.domain.User;
 import com.loopers.user.domain.UserRepository;
 import com.loopers.user.domain.Point;
 import com.loopers.user.domain.PointRepository;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.OptimisticLockException;
 import org.springframework.stereotype.Service;
+import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.ZonedDateTime;
@@ -31,6 +34,7 @@ public class OrderUseCase {
     private final PointRepository pointRepository;
     private final StockRepository stockRepository;
     private final TransactionRetryExecutor transactionRetryExecutor;
+    private final EntityManager entityManager;
     private final OrderConfirmService confirmService = new OrderConfirmService();
 
     public OrderUseCase(
@@ -39,7 +43,8 @@ public class OrderUseCase {
         UserRepository userRepository,
         PointRepository pointRepository,
         StockRepository stockRepository,
-        TransactionRetryExecutor transactionRetryExecutor
+        TransactionRetryExecutor transactionRetryExecutor,
+        EntityManager entityManager
     ) {
         this.orderRepository = orderRepository;
         this.productRepository = productRepository;
@@ -47,6 +52,7 @@ public class OrderUseCase {
         this.pointRepository = pointRepository;
         this.stockRepository = stockRepository;
         this.transactionRetryExecutor = transactionRetryExecutor;
+        this.entityManager = entityManager;
     }
 
     @Transactional
@@ -61,14 +67,18 @@ public class OrderUseCase {
 
     @Transactional
     public Order confirm(Long buyerId, Long orderId) {
-        if (transactionRetryExecutor.isEnabled()) {
-            return transactionRetryExecutor.execute(() -> confirmInCurrentTransaction(buyerId, orderId));
+        try {
+            if (transactionRetryExecutor.isEnabled()) {
+                return transactionRetryExecutor.execute(() -> confirmInCurrentTransaction(buyerId, orderId));
+            }
+            return confirmInCurrentTransaction(buyerId, orderId);
+        } catch (OptimisticLockException | OptimisticLockingFailureException exception) {
+            throw new CoreException(ErrorCode.ORDER_ALREADY_CONFIRMED);
         }
-        return confirmInCurrentTransaction(buyerId, orderId);
     }
 
     private Order confirmInCurrentTransaction(Long buyerId, Long orderId) {
-        Order order = orderRepository.findById(orderId)
+        Order order = orderRepository.findForConfirmById(orderId)
             .orElseThrow(() -> new CoreException(ErrorCode.ORDER_NOT_FOUND));
         if (!order.isOwnedBy(buyerId)) {
             throw new CoreException(ErrorCode.ORDER_NOT_FOUND);
@@ -79,12 +89,12 @@ public class OrderUseCase {
             .map(OrderItem::productId)
             .distinct()
             .sorted()
-            .map(productRepository::findById)
+            .map(productRepository::findForOrder)
             .flatMap(java.util.Optional::stream)
             .toList();
-        List<Stock> stocks = products.stream().map(product -> stockRepository.findByProductId(product.getId())
+        List<Stock> stocks = products.stream().map(product -> stockRepository.findForOrderByProductId(product.getId())
             .orElseThrow(() -> new CoreException(ErrorCode.PRODUCT_NOT_AVAILABLE))).toList();
-        Point point = pointRepository.findByUserId(order.getBuyerId())
+        Point point = pointRepository.findForOrderByUserId(order.getBuyerId())
             .orElseThrow(() -> new CoreException(ErrorCode.USER_NOT_IDENTIFIED));
 
         confirmService.confirm(buyerId, order, products, stocks, point, ZonedDateTime.now());
@@ -96,7 +106,9 @@ public class OrderUseCase {
         }
         point.changeBalance(point.pay(order.getTotalAmount()).balance());
         pointRepository.save(point);
-        return orderRepository.save(order);
+        Order saved = orderRepository.save(order);
+        entityManager.flush();
+        return saved;
     }
 
     @Transactional(readOnly = true)

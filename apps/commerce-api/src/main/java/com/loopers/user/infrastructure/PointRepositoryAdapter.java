@@ -13,4 +13,5 @@ public class PointRepositoryAdapter implements PointRepository {
     public PointRepositoryAdapter(PointJpaRepository jpa, EntityManager entityManager) { this.jpa = jpa; this.entityManager = entityManager; }
     public Point save(Point point) { if (point.getId() == 0L) entityManager.persist(point); else jpa.save(point); return point; }
     public Optional<Point> findByUserId(Long userId) { return jpa.findByUserId(userId); }
+    public Optional<Point> findForOrderByUserId(Long userId) { return jpa.findForOrderByUserId(userId); }
 }

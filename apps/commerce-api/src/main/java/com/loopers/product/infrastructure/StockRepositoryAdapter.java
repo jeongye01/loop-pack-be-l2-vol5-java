@@ -13,4 +13,5 @@ public class StockRepositoryAdapter implements StockRepository {
     public StockRepositoryAdapter(StockJpaRepository jpa, EntityManager entityManager) { this.jpa = jpa; this.entityManager = entityManager; }
     public Stock save(Stock stock) { if (stock.getId() == 0L) entityManager.persist(stock); else jpa.save(stock); return stock; }
     public Optional<Stock> findByProductId(Long productId) { return jpa.findByProductId(productId); }
+    public Optional<Stock> findForOrderByProductId(Long productId) { return jpa.findForOrderByProductId(productId); }
 }
