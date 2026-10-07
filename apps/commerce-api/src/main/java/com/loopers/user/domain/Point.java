@@ -6,6 +6,7 @@ import com.loopers.domain.BaseEntity;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Table;
+import jakarta.persistence.Version;
 
 @Entity
 @Table(name = "point")
@@ -15,6 +16,8 @@ public class Point extends BaseEntity {
     private Long userId;
 
     private long balance;
+    @Version
+    private Long version;
 
     protected Point() {
     }

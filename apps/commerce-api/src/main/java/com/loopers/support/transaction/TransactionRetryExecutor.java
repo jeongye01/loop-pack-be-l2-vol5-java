@@ -2,6 +2,7 @@ package com.loopers.support.transaction;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.OptimisticLockingFailureException;
+import jakarta.persistence.OptimisticLockException;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
@@ -40,7 +41,7 @@ public class TransactionRetryExecutor {
         for (int attempt = 0; attempt <= maxRetries; attempt++) {
             try {
                 return newTransaction.execute(status -> operation.get());
-            } catch (OptimisticLockingFailureException exception) {
+            } catch (OptimisticLockException | OptimisticLockingFailureException exception) {
                 failure = exception;
                 if (attempt == maxRetries) {
                     throw exception;

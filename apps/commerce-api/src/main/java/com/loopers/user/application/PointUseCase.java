@@ -7,6 +7,7 @@ import com.loopers.user.domain.User;
 import com.loopers.user.domain.UserRepository;
 import com.loopers.user.domain.PointRepository;
 import com.loopers.user.domain.Point;
+import jakarta.persistence.EntityManager;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -16,26 +17,26 @@ public class PointUseCase {
     private final UserRepository userRepository;
     private final PointRepository pointRepository;
     private final TransactionRetryExecutor transactionRetryExecutor;
+    private final EntityManager entityManager;
 
-    public PointUseCase(UserRepository userRepository, PointRepository pointRepository, TransactionRetryExecutor transactionRetryExecutor) {
+    public PointUseCase(UserRepository userRepository, PointRepository pointRepository, TransactionRetryExecutor transactionRetryExecutor, EntityManager entityManager) {
         this.userRepository = userRepository;
         this.pointRepository = pointRepository;
         this.transactionRetryExecutor = transactionRetryExecutor;
+        this.entityManager = entityManager;
     }
 
-    @Transactional
     public long charge(Long userId, long amount) {
-        if (transactionRetryExecutor.isEnabled()) {
-            return transactionRetryExecutor.execute(() -> chargeInCurrentTransaction(userId, amount));
-        }
-        return chargeInCurrentTransaction(userId, amount);
+        return transactionRetryExecutor.execute(() -> chargeInCurrentTransaction(userId, amount));
     }
 
     private long chargeInCurrentTransaction(Long userId, long amount) {
         userRepository.findById(userId).orElseThrow(() -> new CoreException(ErrorCode.USER_NOT_IDENTIFIED));
         Point point = pointRepository.findByUserId(userId).orElse(new Point(userId, 0));
         point.changeBalance(point.charge(amount).balance());
-        return pointRepository.save(point).balance();
+        long balance = pointRepository.save(point).balance();
+        entityManager.flush();
+        return balance;
     }
 
     @Transactional(readOnly = true)
