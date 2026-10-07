@@ -1,6 +1,12 @@
 # commerce-api 대표 흐름
 
+> 변경일: 2026-10-07
+>
+> Point·Stock을 독립 저장 단위로 다루는 설계안으로 갱신했다.
+
 과제의 대표 흐름을 API 경계와 도메인 상태 변화를 따라 그린 것이다. 구현 클래스나 저장 방식의 호출 순서를 표현하지 않는다. 흐름마다 기대값과 대표 오류를 함께 적으며, [요구사항](./requirements.md), [API 계약](./api-contract.md), [도메인 규칙](./domain-rules.yaml), [도메인 관계](./domain-relations.md)를 근거로 삼는다.
+
+
 
 
 
@@ -109,7 +115,7 @@ sequenceDiagram
     autonumber
     actor C as 고객
     participant API as Commerce API
-    participant D as Point / Product / Order
+    participant D as Product / Stock / Point / Order
 
     C->>API: 포인트 10,000 충전
     API->>D: 잔액 0→10,000
@@ -120,7 +126,7 @@ sequenceDiagram
     API-->>C: 201, 재고와 잔액은 그대로
 
     C->>API: 주문 확정
-    API->>D: 상품·재고·잔액 조건 확인
+    API->>D: 상품·재고·포인트 조건 확인
     alt 확정 성공
         D->>D: 재고와 잔액 차감, 주문 CONFIRMED
         API-->>C: 200, 결제액 7,000
