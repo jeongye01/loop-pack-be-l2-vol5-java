@@ -51,9 +51,10 @@ public class ProductUseCase {
 
     @Transactional
     public Product changeStock(Long productId, int quantity) {
-        Product product = findRequired(productId);
+        Product product = productRepository.findForStock(productId)
+            .orElseThrow(() -> new CoreException(ErrorCode.PRODUCT_NOT_FOUND));
         if (product.isDeleted()) throw new CoreException(ErrorCode.PRODUCT_NOT_FOUND);
-        Stock stock = stockRepository.findByProductId(productId)
+        Stock stock = stockRepository.findForStockUpdateByProductId(productId)
             .orElseThrow(() -> new CoreException(ErrorCode.PRODUCT_NOT_FOUND));
         stock.changeQuantity(quantity);
         stockRepository.save(stock);
@@ -92,7 +93,8 @@ public class ProductUseCase {
 
     @Transactional
     public void delete(Long productId) {
-        Product product = findRequired(productId);
+        Product product = productRepository.findForDelete(productId)
+            .orElseThrow(() -> new CoreException(ErrorCode.PRODUCT_NOT_FOUND));
         product.delete();
         productRepository.save(product);
     }

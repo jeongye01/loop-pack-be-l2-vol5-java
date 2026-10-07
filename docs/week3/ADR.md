@@ -9,12 +9,14 @@ Product와 Stock이 묶여 있으면 재고 차감에도 Product 행을 배타�
 
 | 대상 | 잠금 |
 | --- | --- |
-| Product | 일반 조회 |
+| Product | 주문 `PESSIMISTIC_READ`, 삭제 `PESSIMISTIC_WRITE` |
 | Stock | `PESSIMISTIC_WRITE` 배타락 |
 | Point | `@Version` 낙관적 충돌 검사 |
 | Order | `@Version` 낙관적 충돌 검사 |
 
-주문 확정에서 비관적 잠금은 Stock에만 건다. Product는 존재·삭제 여부를 일반 조회로 확인하고, Point와 Order는 저장 시 `@Version` 충돌을 검사한다. 낙관적 충돌은 기본 2회까지 새 트랜잭션으로 재시도한다.
+주문 확정은 Product를 `PESSIMISTIC_READ`로 확인하고 Stock을 `PESSIMISTIC_WRITE`로 차감한다. Product 삭제는 `PESSIMISTIC_WRITE`로 주문과 순서를 조정한다. Point와 Order는 저장 시 `@Version` 충돌을 검사하고, 낙관적 충돌은 기본 2회까지 새 트랜잭션으로 재시도한다.
+
+관리자 재고 변경도 Product `PESSIMISTIC_READ` → Stock `PESSIMISTIC_WRITE` 순서를 사용한다. Product 공유락은 삭제된 상품의 재고 변경을 막고 삭제와의 순서를 보장하며, Stock 배타락은 주문 확정과 재고 수량 갱신이 겹칠 때 갱신 유실과 음수 재고를 막는다.
 
 포인트 충전은 주문 확정과 별도 경로이므로 Point의 `@Version`을 사용한다. 충돌이 발생하면 현재 잔액을 다시 읽는 새 트랜잭션으로 제한 횟수만큼 재시도한다.
 
