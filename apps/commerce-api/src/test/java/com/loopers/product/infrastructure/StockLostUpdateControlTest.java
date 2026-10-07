@@ -100,7 +100,7 @@ class StockLostUpdateControlTest {
             bothRead.countDown();
             await(allowWrite);
             int staleQuantity = readStock - 1;
-            entityManager.createNativeQuery("update product set quantity = :quantity where id = :id")
+            entityManager.createNativeQuery("update stock set quantity = :quantity where product_id = :id")
                 .setParameter("quantity", staleQuantity)
                 .setParameter("id", productId)
                 .executeUpdate();
@@ -111,7 +111,7 @@ class StockLostUpdateControlTest {
     }
 
     private int stockOf(Long productId) {
-        return ((Number) entityManager.createNativeQuery("select quantity from product where id = :id")
+        return ((Number) entityManager.createNativeQuery("select quantity from stock where product_id = :id")
             .setParameter("id", productId)
             .getSingleResult()).intValue();
     }

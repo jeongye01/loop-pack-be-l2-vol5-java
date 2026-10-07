@@ -26,28 +26,28 @@ SPRING_APPLICATION_JSON='{"spring":{"jpa":{"show-sql":true}},"logging":{"level":
 
 ## 관찰한 근거
 
-| 경로 | 관찰한 SQL 형태 | 의미 |
-| --- | --- | --- |
-| 주문 확정 Product 조회 | `select ... from product ... for share` | Product 공유락 |
-| 좋아요 등록 Product 조회 | `select ... from product ... for share` | 등록 중 상품 삭제와 순서 조정 |
-| 관리자 재고 변경 Product 조회 | `select ... from product ... for share` | 삭제된 상품의 재고 변경 방지 |
-| 주문 확정 Stock 조회 | `select ... from stock ... for update` | 재고 차감 경합 직렬화 |
-| 관리자 재고 변경 Stock 조회 | `select ... from stock ... for update` | 주문과 관리자 수량 변경 경합 직렬화 |
-| 브랜드 삭제 Brand 조회 | `select ... from brand ... for update` | 브랜드 삭제 시작 시 배타락 |
-| 브랜드 삭제 연결 상품 조회 | `select ... from product ... order by p.id for update` | 연결 상품을 ID 순서로 배타락 |
-| 상품 삭제 Product 조회 | `select ... from product ... for update` | 삭제 중 주문·수정·재고 변경 대기 |
-| Point 저장 | `update point ... version=? where id=? and version=?` | 낙관적 충돌 검사 |
-| Order 저장 | `update orders ... version=? where id=? and version=?` | 중복 확정 충돌 검사 |
+
+| 경로                   | 관찰한 SQL 형태                                             | 의미                   |
+| -------------------- | ------------------------------------------------------ | -------------------- |
+| 주문 확정 Product 조회     | `select ... from product ... for share`                | Product 공유락          |
+| 좋아요 등록 Product 조회    | `select ... from product ... for share`                | 등록 중 상품 삭제와 순서 조정    |
+| 관리자 재고 변경 Product 조회 | `select ... from product ... for share`                | 삭제된 상품의 재고 변경 방지     |
+| 주문 확정 Stock 조회       | `select ... from stock ... for update`                 | 재고 차감 경합 직렬화         |
+| 관리자 재고 변경 Stock 조회   | `select ... from stock ... for update`                 | 주문과 관리자 수량 변경 경합 직렬화 |
+| 브랜드 삭제 Brand 조회      | `select ... from brand ... for update`                 | 브랜드 삭제 시작 시 배타락      |
+| 브랜드 삭제 연결 상품 조회      | `select ... from product ... order by p.id for update` | 연결 상품을 ID 순서로 배타락    |
+| 상품 삭제 Product 조회     | `select ... from product ... for update`               | 삭제 중 주문·수정·재고 변경 대기  |
+| 상품 수정 Product 조회     | `select ... from product ... for update`               | 수정 중 주문 확정·삭제 대기      |
+| Point 저장             | `update point ... version=? where id=? and version=?`  | 낙관적 충돌 검사            |
+| Order 저장             | `update orders ... version=? where id=? and version=?` | 중복 확정 충돌 검사          |
+
 
 ## 코드 경로 대조
 
 - 주문 확정: `OrderUseCase.confirm` → `ProductRepository.findForOrder` → `StockRepository.findForOrderByProductId` → `PointRepository.findForOrderByUserId`
 - 관리자 재고 변경: `ProductUseCase.changeStock` → `ProductRepository.findForStock` → `StockRepository.findForStockUpdateByProductId`
-- 브랜드 삭제: `BrandUseCase.delete` → `BrandRepository.findForDelete` → `ProductRepository.findAllForBrandDelete`
+- 브랜드 수정·삭제: `BrandUseCase.update/delete` → `BrandRepository.findForWrite` → (삭제 시) `ProductRepository.findAllForBrandDelete`
+- 상품 수정·삭제: `ProductUseCase.update/delete` → `ProductRepository.findForWrite`
 - 좋아요 등록: `LikeUseCase.register` → `ProductRepository.findForLike`
 
 같은 행을 수정하는 경로가 위 잠금 조회를 우회하지 않는지 repository 호출도 함께 확인했다.
-
-## 범위
-
-이 기록은 대표 통합 테스트에서 SQL 형태와 호출 경로를 확인한 결과다. 운영 환경의 실제 DB 잠금 대기 시간과 `performance_schema`의 대기 행은 별도 부하 실험에서 측정한다.

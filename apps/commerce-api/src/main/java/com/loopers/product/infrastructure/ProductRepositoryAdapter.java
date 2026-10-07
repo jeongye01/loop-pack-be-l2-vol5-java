@@ -56,8 +56,8 @@ public class ProductRepositoryAdapter implements ProductRepository {
     }
 
     @Override
-    public Optional<Product> findForDelete(Long id) {
-        return jpaRepository.findForDelete(id);
+    public Optional<Product> findForWrite(Long id) {
+        return jpaRepository.findForWrite(id);
     }
 
     @Override

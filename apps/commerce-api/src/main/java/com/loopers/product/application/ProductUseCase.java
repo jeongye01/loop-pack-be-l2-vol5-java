@@ -73,7 +73,8 @@ public class ProductUseCase {
 
     @Transactional
     public Product update(Long productId, String name, long price, Long brandId) {
-        Product product = findRequired(productId);
+        Product product = productRepository.findForWrite(productId)
+            .orElseThrow(() -> new CoreException(ErrorCode.PRODUCT_NOT_FOUND));
         if (product.isDeleted()) {
             throw new CoreException(ErrorCode.PRODUCT_NOT_FOUND);
         }
@@ -93,7 +94,7 @@ public class ProductUseCase {
 
     @Transactional
     public void delete(Long productId) {
-        Product product = productRepository.findForDelete(productId)
+        Product product = productRepository.findForWrite(productId)
             .orElseThrow(() -> new CoreException(ErrorCode.PRODUCT_NOT_FOUND));
         product.delete();
         productRepository.save(product);

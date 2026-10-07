@@ -9,12 +9,12 @@ Product와 Stock이 묶여 있으면 재고 차감에도 Product 행을 배타�
 
 | 대상 | 잠금 |
 | --- | --- |
-| Product | 주문 `PESSIMISTIC_READ`, 삭제 `PESSIMISTIC_WRITE` |
+| Product | 주문·좋아요·재고 확인 `PESSIMISTIC_READ`, 수정·삭제 `PESSIMISTIC_WRITE` |
 | Stock | `PESSIMISTIC_WRITE` 배타락 |
 | Point | `@Version` 낙관적 충돌 검사 |
 | Order | `@Version` 낙관적 충돌 검사 |
 
-주문 확정은 Product를 `PESSIMISTIC_READ`로 확인하고 Stock을 `PESSIMISTIC_WRITE`로 차감한다. Product 삭제는 `PESSIMISTIC_WRITE`로 주문과 순서를 조정한다. Point와 Order는 저장 시 `@Version` 충돌을 검사하고, 낙관적 충돌은 기본 2회까지 새 트랜잭션으로 재시도한다.
+주문 확정은 Product를 `PESSIMISTIC_READ`로 확인하고 Stock을 `PESSIMISTIC_WRITE`로 차감한다. Product 수정·삭제는 `PESSIMISTIC_WRITE`로 주문 확정과의 순서를 조정한다. Point 충전은 `@Version` 충돌을 기본 1회, 주문 확정은 Point 차감까지 포함한 전체 트랜잭션을 2회까지 새 트랜잭션으로 재시도한다.
 
 관리자 재고 변경도 Product `PESSIMISTIC_READ` → Stock `PESSIMISTIC_WRITE` 순서를 사용한다. Product 공유락은 삭제된 상품의 재고 변경을 막고 삭제와의 순서를 보장하며, Stock 배타락은 주문 확정과 재고 수량 갱신이 겹칠 때 갱신 유실과 음수 재고를 막는다.
 
@@ -22,7 +22,7 @@ Product와 Stock이 묶여 있으면 재고 차감에도 Product 행을 배타�
 
 포인트 충전은 주문 확정과 별도 경로이므로 Point의 `@Version`을 사용한다. 충돌이 발생하면 현재 잔액을 다시 읽는 새 트랜잭션으로 제한 횟수만큼 재시도한다.
 
-브랜드 삭제는 Brand와 연결 Product를 `PESSIMISTIC_WRITE`로 잠근다. 삭제 중 주문·상품 수정이 해당 행을 바꾸지 못하게 하고, 삭제 완료 후에는 새 주문·수정이 거절되도록 한다. `@Version`은 잠금 없는 일반 수정 경로의 충돌 감지용으로 유지한다.
+브랜드 수정·삭제는 Brand를 `PESSIMISTIC_WRITE`로 잠근다. 브랜드 삭제는 연결 Product도 같은 잠금으로 보호한다. 삭제 중 주문·상품 수정이 해당 행을 바꾸지 못하게 하고, 삭제 완료 후에는 새 주문·수정이 거절되도록 한다. Product 수정도 같은 배타락을 사용해 주문 확정 중 상품명·가격이 바뀌지 않게 한다. Product와 Brand에는 별도 낙관적 버전 충돌 경로를 두지 않는다.
 
 상품명·가격은 주문 품목에 보존되므로 Product soft delete 이후에도 기존 주문 정보는 유지된다.
 

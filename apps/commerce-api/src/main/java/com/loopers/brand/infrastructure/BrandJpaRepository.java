@@ -16,5 +16,5 @@ interface BrandJpaRepository extends JpaRepository<Brand, Long> {
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("select b from Brand b where b.id = :id")
-    Optional<Brand> findForDelete(@Param("id") Long id);
+    Optional<Brand> findForWrite(@Param("id") Long id);
 }

@@ -20,7 +20,7 @@ public class TransactionRetryExecutor {
 
     public TransactionRetryExecutor(
         PlatformTransactionManager transactionManager,
-        @Value("${concurrency.transaction-retry.max-retries:2}") int maxRetries,
+        @Value("${concurrency.transaction-retry.max-retries:1}") int maxRetries,
         @Value("${concurrency.transaction-retry.backoff-ms:0}") long backoffMillis
     ) {
         this.newTransaction = new TransactionTemplate(transactionManager);
@@ -34,16 +34,20 @@ public class TransactionRetryExecutor {
     }
 
     public <T> T execute(Supplier<T> operation) {
+        return execute(operation, maxRetries);
+    }
+
+    public <T> T execute(Supplier<T> operation, int retries) {
         if (TransactionSynchronizationManager.isActualTransactionActive()) {
             return operation.get();
         }
         RuntimeException failure = null;
-        for (int attempt = 0; attempt <= maxRetries; attempt++) {
+        for (int attempt = 0; attempt <= retries; attempt++) {
             try {
                 return newTransaction.execute(status -> operation.get());
             } catch (OptimisticLockException | OptimisticLockingFailureException exception) {
                 failure = exception;
-                if (attempt == maxRetries) {
+                if (attempt == retries) {
                     throw exception;
                 }
                 waitBeforeRetry();

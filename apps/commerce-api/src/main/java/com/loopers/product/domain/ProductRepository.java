@@ -15,7 +15,7 @@ public interface ProductRepository {
 
     Optional<Product> findForStock(Long id);
 
-    Optional<Product> findForDelete(Long id);
+    Optional<Product> findForWrite(Long id);
 
     List<Product> findAllForBrandDelete(Long brandId);
 

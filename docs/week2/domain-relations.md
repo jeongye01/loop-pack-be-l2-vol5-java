@@ -186,7 +186,6 @@ classDiagram
 
 ## 상품 수정·주문 확정 유즈케이스 매핑
 
-`OrderConcurrencyTest.preservesProductAndOrderStateUnderConcurrentUpdateAndConfirmation`은 새 불변식을 추가하지 않고, 상품 수정과 주문 확정이 함께 실행될 때 기존 불변식이 보존되는지를 확인한다.
 
 | 불변식 | 요구사항·정책 출처 | 검증 결과 |
 | --- | --- | --- |

@@ -9,7 +9,7 @@ public interface BrandRepository {
 
     Optional<Brand> findById(Long id);
 
-    Optional<Brand> findForDelete(Long id);
+    Optional<Brand> findForWrite(Long id);
 
     List<Brand> findAllByName(String name);
 

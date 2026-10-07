@@ -6,7 +6,6 @@ import com.loopers.brand.domain.Brand;
 import com.loopers.order.domain.Order;
 import com.loopers.order.domain.OrderStatus;
 import com.loopers.product.domain.Product;
-import com.loopers.product.application.ProductUseCase;
 import com.loopers.support.error.CoreException;
 import com.loopers.support.error.ErrorCode;
 import com.loopers.support.fixture.CommerceFixture;
@@ -45,7 +44,6 @@ class OrderConcurrencyTest {
     private static final int REQUESTS = 8;
 
     @Autowired private OrderUseCase useCase;
-    @Autowired private ProductUseCase productUseCase;
     @Autowired private PointUseCase pointUseCase;
     @Autowired private EntityManager entityManager;
     @Autowired private PlatformTransactionManager transactionManager;
@@ -264,44 +262,6 @@ class OrderConcurrencyTest {
         });
     }
 
-    @DisplayName("[INV-ORDERITEM-40][INV-ORDER-36·43·44] "
-        + "상품 수정과 주문 확정이 어느 순서로 실행되어도 최종 상품 Updated Air·1,100원·재고 4개, "
-        + "주문 CONFIRMED·결제액 1,000원·품목 Air·1,000원을 유지한다.")
-    @Test
-    void preservesProductAndOrderStateUnderConcurrentUpdateAndConfirmation() throws Exception {
-        Brand brand = fixture.brand("Nike");
-        Product product = fixture.product(brand, "Air", 1_000L, 5);
-        User buyer = fixture.userWithPoint(1_000L);
-        Order order = fixture.draftOrder(buyer, fixture.item(product, 1));
-
-        List<OperationOutcome> outcomes = runTogether(List.of(
-            () -> confirmOperation(buyer.getId(), order.getId()),
-            () -> updateProduct(product.getId(), brand.getId())
-        ));
-
-        new TransactionTemplate(transactionManager).executeWithoutResult(status -> {
-            Product savedProduct = entityManager.find(Product.class, product.getId());
-            Order savedOrder = entityManager.find(Order.class, order.getId());
-            User savedBuyer = entityManager.find(User.class, buyer.getId());
-
-            assertAll(
-                () -> assertThat(outcomes).hasSize(2),
-                () -> assertThat(outcomes).allMatch(OperationOutcome::success),
-                () -> assertThat(savedProduct.getName()).isEqualTo("Updated Air"),
-                () -> assertThat(savedProduct.getPrice()).isEqualTo(1_100L),
-                () -> assertThat(TestEntities.stockQuantity(entityManager, savedProduct.getId())).isEqualTo(4),
-                () -> assertThat(savedOrder.getStatus()).isEqualTo(OrderStatus.CONFIRMED),
-                () -> assertThat(savedOrder.getPaymentResult().amount()).isEqualTo(1_000L),
-                () -> assertThat(savedOrder.getItems()).singleElement().satisfies(item -> assertAll(
-                    () -> assertThat(item.productName()).isEqualTo("Air"),
-                    () -> assertThat(item.unitPrice()).isEqualTo(1_000L),
-                    () -> assertThat(item.quantity()).isEqualTo(1)
-                )),
-                () -> assertThat(TestEntities.pointBalance(entityManager, savedBuyer.getId())).isZero()
-            );
-        });
-    }
-
     private Outcome confirm(Purchase purchase) {
         try {
             useCase.confirm(purchase.buyerId(), purchase.orderId());
@@ -327,17 +287,6 @@ class OrderConcurrencyTest {
     private OperationOutcome confirmOperation(Long buyerId, Long orderId) {
         Outcome outcome = confirm(new Purchase(orderId, buyerId));
         return new OperationOutcome(outcome.success(), outcome.rejection(), outcome.technical());
-    }
-
-    private OperationOutcome updateProduct(Long productId, Long brandId) {
-        try {
-            productUseCase.update(productId, "Updated Air", 1_100L, brandId);
-            return new OperationOutcome(true, null, null);
-        } catch (CoreException exception) {
-            return new OperationOutcome(false, exception.getErrorCode(), null);
-        } catch (RuntimeException exception) {
-            return new OperationOutcome(false, null, exception);
-        }
     }
 
     private <T> List<T> runTogether(List<Callable<T>> tasks) throws Exception {

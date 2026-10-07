@@ -38,7 +38,7 @@ public class BrandUseCase {
 
     @Transactional
     public Brand update(Long brandId, String name) {
-        Brand brand = brandRepository.findForDelete(brandId)
+        Brand brand = brandRepository.findForWrite(brandId)
             .orElseThrow(() -> new CoreException(ErrorCode.BRAND_NOT_FOUND));
         if (brand.isDeleted()) {
             throw new CoreException(ErrorCode.BRAND_NOT_FOUND);
@@ -65,7 +65,8 @@ public class BrandUseCase {
 
     @Transactional
     public void delete(Long brandId) {
-        Brand brand = findRequired(brandId);
+        Brand brand = brandRepository.findForWrite(brandId)
+            .orElseThrow(() -> new CoreException(ErrorCode.BRAND_NOT_FOUND));
         if (brand.isDeleted()) {
             throw new CoreException(ErrorCode.BRAND_NOT_FOUND);
         }

@@ -67,7 +67,7 @@ public class OrderUseCase {
 
     public Order confirm(Long buyerId, Long orderId) {
         try {
-            return transactionRetryExecutor.execute(() -> confirmInCurrentTransaction(buyerId, orderId));
+            return transactionRetryExecutor.execute(() -> confirmInCurrentTransaction(buyerId, orderId), 2);
         } catch (OptimisticLockException | OptimisticLockingFailureException exception) {
             throw new CoreException(ErrorCode.ORDER_ALREADY_CONFIRMED);
         }

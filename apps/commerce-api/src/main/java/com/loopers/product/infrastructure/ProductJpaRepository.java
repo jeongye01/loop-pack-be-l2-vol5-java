@@ -27,7 +27,7 @@ interface ProductJpaRepository extends JpaRepository<Product, Long> {
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("select p from Product p where p.id = :id")
-    Optional<Product> findForDelete(@Param("id") Long id);
+    Optional<Product> findForWrite(@Param("id") Long id);
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("select p from Product p where p.brandId = :brandId order by p.id asc")
