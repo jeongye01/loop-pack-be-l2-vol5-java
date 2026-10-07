@@ -11,6 +11,8 @@ public interface ProductRepository {
 
     Optional<Product> findForOrder(Long id);
 
+    Optional<Product> findForLike(Long id);
+
     Optional<Product> findForStock(Long id);
 
     Optional<Product> findForDelete(Long id);

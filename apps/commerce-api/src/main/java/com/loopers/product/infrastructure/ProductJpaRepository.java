@@ -19,6 +19,10 @@ interface ProductJpaRepository extends JpaRepository<Product, Long> {
 
     @Lock(LockModeType.PESSIMISTIC_READ)
     @Query("select p from Product p where p.id = :id")
+    Optional<Product> findForLike(@Param("id") Long id);
+
+    @Lock(LockModeType.PESSIMISTIC_READ)
+    @Query("select p from Product p where p.id = :id")
     Optional<Product> findForStock(@Param("id") Long id);
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
@@ -26,7 +30,7 @@ interface ProductJpaRepository extends JpaRepository<Product, Long> {
     Optional<Product> findForDelete(@Param("id") Long id);
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
-    @Query("select p from Product p where p.brandId = :brandId")
+    @Query("select p from Product p where p.brandId = :brandId order by p.id asc")
     List<Product> findAllForBrandDelete(@Param("brandId") Long brandId);
 
     List<Product> findAllByBrandId(Long brandId);

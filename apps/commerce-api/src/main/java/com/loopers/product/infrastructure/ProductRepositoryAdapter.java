@@ -46,6 +46,11 @@ public class ProductRepositoryAdapter implements ProductRepository {
     }
 
     @Override
+    public Optional<Product> findForLike(Long id) {
+        return jpaRepository.findForLike(id);
+    }
+
+    @Override
     public Optional<Product> findForStock(Long id) {
         return jpaRepository.findForStock(id);
     }

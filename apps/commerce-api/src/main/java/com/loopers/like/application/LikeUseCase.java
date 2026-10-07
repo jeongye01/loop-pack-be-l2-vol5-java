@@ -106,7 +106,7 @@ public class LikeUseCase {
     }
 
     private Product requireActiveProduct(Long productId) {
-        Product product = productRepository.findById(productId)
+        Product product = productRepository.findForLike(productId)
             .orElseThrow(() -> new CoreException(ErrorCode.PRODUCT_NOT_FOUND));
         if (product.isDeleted()) {
             throw new CoreException(ErrorCode.PRODUCT_NOT_FOUND);

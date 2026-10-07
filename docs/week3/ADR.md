@@ -18,6 +18,8 @@ Product와 Stock이 묶여 있으면 재고 차감에도 Product 행을 배타�
 
 관리자 재고 변경도 Product `PESSIMISTIC_READ` → Stock `PESSIMISTIC_WRITE` 순서를 사용한다. Product 공유락은 삭제된 상품의 재고 변경을 막고 삭제와의 순서를 보장하며, Stock 배타락은 주문 확정과 재고 수량 갱신이 겹칠 때 갱신 유실과 음수 재고를 막는다.
 
+좋아요 등록은 Product `PESSIMISTIC_READ`로 활성 상품을 확인한 뒤 Like를 저장한다. 상품 삭제가 등록 중간에 끼어드는 것을 막고, 삭제 완료 후에는 새 좋아요를 거절한다.
+
 포인트 충전은 주문 확정과 별도 경로이므로 Point의 `@Version`을 사용한다. 충돌이 발생하면 현재 잔액을 다시 읽는 새 트랜잭션으로 제한 횟수만큼 재시도한다.
 
 브랜드 삭제는 Brand와 연결 Product를 `PESSIMISTIC_WRITE`로 잠근다. 삭제 중 주문·상품 수정이 해당 행을 바꾸지 못하게 하고, 삭제 완료 후에는 새 주문·수정이 거절되도록 한다. `@Version`은 잠금 없는 일반 수정 경로의 충돌 감지용으로 유지한다.
