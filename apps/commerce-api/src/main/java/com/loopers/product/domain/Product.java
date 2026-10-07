@@ -5,6 +5,7 @@ import com.loopers.support.error.CoreException;
 import com.loopers.support.error.ErrorCode;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
+import jakarta.persistence.Version;
 
 @Entity
 @Table(name = "product")
@@ -13,6 +14,8 @@ public class Product extends BaseEntity {
     private Long brandId;
     private String name;
     private long price;
+    @Version
+    private Long version;
     protected Product() {
     }
 
