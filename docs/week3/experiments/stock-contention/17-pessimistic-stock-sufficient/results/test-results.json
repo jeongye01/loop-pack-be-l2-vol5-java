@@ -1,0 +1,566 @@
+{
+  "schemaVersion": 1,
+  "experimentId": "stock-contention/17-pessimistic-stock-sufficient",
+  "gitSha": "d46d3d8f0675b99e79cb7cc00736d813fcf852dd",
+  "workingTreeChanges": true,
+  "config": {
+    "spring.jpa.show-sql": false,
+    "datasource.mysql-jpa.main.maximum-pool-size": 200,
+    "datasource.mysql-jpa.main.minimum-idle": 200,
+    "datasource.mysql-jpa.main.connection-timeout": 3000,
+    "concurrency.transaction-retry.max-retries": 0,
+    "concurrency.transaction-retry.backoff-ms": 0
+  },
+  "rounds": [
+    {
+      "round": 1,
+      "recordedAt": "2026-10-07T23:47:42.260010+00:00",
+      "gradleExitCode": 1,
+      "tests": [
+        {
+          "suite": "com.loopers.order.application.OrderConcurrencyTest",
+          "name": "[동시성] 한 고객의 잔액 10000원·충분한 재고에서 서로 다른 4000원 DRAFT 주문 3건을 동시에 확정하면 성공 2·잔액 부족 1·기술 오류 0·최종 잔액 2000원이다.",
+          "status": "failed",
+          "seconds": 0.482,
+          "failure": "org.gradle.internal.exceptions.DefaultMultiCauseException: Multiple Failures (5 failures)\n\torg.opentest4j.AssertionFailedError: \nexpected: 2L\n but was: 3L\n\torg.opentest4j.AssertionFailedError: \nexpected: 1L\n but was: 0L\n\torg.opentest4j.AssertionFailedError: \nexpected: 2000L\n but was: 6000L\n\torg.opentest4j.AssertionFailedError: \nexpected: -2000L\n but was: 6000L\n\torg.opentest4j.AssertionFailedError: \nexpected: 8\n but was: 7",
+          "source": "build/serializable-experiment/tests-01/TEST-com.loopers.order.application.OrderConcurrencyTest.xml"
+        },
+        {
+          "suite": "com.loopers.order.application.OrderConcurrencyTest",
+          "name": "[동시성] 재고 5개에 주문 8건을 동시에 확정하면 성공 5·재고 부족 3·최종 재고 0이다.",
+          "status": "passed",
+          "seconds": 0.438,
+          "failure": null,
+          "source": "build/serializable-experiment/tests-01/TEST-com.loopers.order.application.OrderConcurrencyTest.xml"
+        },
+        {
+          "suite": "com.loopers.order.application.OrderConcurrencyTest",
+          "name": "[INV-ORDERITEM-40][INV-ORDER-36·43·44] 상품 수정과 주문 확정이 어느 순서로 실행되어도 최종 상품 Updated Air·1,100원·재고 4개, 주문 CONFIRMED·결제액 1,000원·품목 Air·1,000원을 유지한다.",
+          "status": "passed",
+          "seconds": 0.261,
+          "failure": null,
+          "source": "build/serializable-experiment/tests-01/TEST-com.loopers.order.application.OrderConcurrencyTest.xml"
+        },
+        {
+          "suite": "com.loopers.order.application.OrderConcurrencyTest",
+          "name": "[동시성] 같은 DRAFT 주문을 두 번 동시에 확정하면 한 건만 성공하고 재고·포인트는 한 번만 차감된다.",
+          "status": "failed",
+          "seconds": 0.256,
+          "failure": "org.gradle.internal.exceptions.DefaultMultiCauseException: Multiple Failures (3 failures)\n\torg.opentest4j.AssertionFailedError: \nexpected: 1L\n but was: 2L\n\torg.opentest4j.AssertionFailedError: \nexpected: 1L\n but was: 0L\n\torg.opentest4j.AssertionFailedError: \nexpected: 4\n but was: 3",
+          "source": "build/serializable-experiment/tests-01/TEST-com.loopers.order.application.OrderConcurrencyTest.xml"
+        },
+        {
+          "suite": "com.loopers.order.application.OrderConcurrencyTest",
+          "name": "[동시성] 2000원 충전과 7000원 결제가 모두 성공하면 최종 잔액은 5000원이다.",
+          "status": "failed",
+          "seconds": 0.207,
+          "failure": "org.gradle.internal.exceptions.DefaultMultiCauseException: Multiple Failures (2 failures)\n\torg.opentest4j.AssertionFailedError: \nexpected: 5000L\n but was: 3000L\n\torg.opentest4j.AssertionFailedError: \nexpected: 5000L\n but was: 3000L",
+          "source": "build/serializable-experiment/tests-01/TEST-com.loopers.order.application.OrderConcurrencyTest.xml"
+        },
+        {
+          "suite": "com.loopers.experiment.IsolationProbeTest",
+          "name": "verifiesActualConnectionIsolation()",
+          "status": "passed",
+          "seconds": 0.392,
+          "failure": null,
+          "source": "build/serializable-experiment/tests-01/TEST-com.loopers.experiment.IsolationProbeTest.xml"
+        }
+      ]
+    },
+    {
+      "round": 2,
+      "recordedAt": "2026-10-07T23:48:04.874642+00:00",
+      "gradleExitCode": 1,
+      "tests": [
+        {
+          "suite": "com.loopers.order.application.OrderConcurrencyTest",
+          "name": "[동시성] 한 고객의 잔액 10000원·충분한 재고에서 서로 다른 4000원 DRAFT 주문 3건을 동시에 확정하면 성공 2·잔액 부족 1·기술 오류 0·최종 잔액 2000원이다.",
+          "status": "failed",
+          "seconds": 0.947,
+          "failure": "org.gradle.internal.exceptions.DefaultMultiCauseException: Multiple Failures (5 failures)\n\torg.opentest4j.AssertionFailedError: \nexpected: 2L\n but was: 3L\n\torg.opentest4j.AssertionFailedError: \nexpected: 1L\n but was: 0L\n\torg.opentest4j.AssertionFailedError: \nexpected: 2000L\n but was: 6000L\n\torg.opentest4j.AssertionFailedError: \nexpected: -2000L\n but was: 6000L\n\torg.opentest4j.AssertionFailedError: \nexpected: 8\n but was: 7",
+          "source": "build/serializable-experiment/tests-02/TEST-com.loopers.order.application.OrderConcurrencyTest.xml"
+        },
+        {
+          "suite": "com.loopers.order.application.OrderConcurrencyTest",
+          "name": "[동시성] 재고 5개에 주문 8건을 동시에 확정하면 성공 5·재고 부족 3·최종 재고 0이다.",
+          "status": "passed",
+          "seconds": 0.361,
+          "failure": null,
+          "source": "build/serializable-experiment/tests-02/TEST-com.loopers.order.application.OrderConcurrencyTest.xml"
+        },
+        {
+          "suite": "com.loopers.order.application.OrderConcurrencyTest",
+          "name": "[INV-ORDERITEM-40][INV-ORDER-36·43·44] 상품 수정과 주문 확정이 어느 순서로 실행되어도 최종 상품 Updated Air·1,100원·재고 4개, 주문 CONFIRMED·결제액 1,000원·품목 Air·1,000원을 유지한다.",
+          "status": "passed",
+          "seconds": 0.251,
+          "failure": null,
+          "source": "build/serializable-experiment/tests-02/TEST-com.loopers.order.application.OrderConcurrencyTest.xml"
+        },
+        {
+          "suite": "com.loopers.order.application.OrderConcurrencyTest",
+          "name": "[동시성] 같은 DRAFT 주문을 두 번 동시에 확정하면 한 건만 성공하고 재고·포인트는 한 번만 차감된다.",
+          "status": "failed",
+          "seconds": 0.293,
+          "failure": "org.gradle.internal.exceptions.DefaultMultiCauseException: Multiple Failures (3 failures)\n\torg.opentest4j.AssertionFailedError: \nexpected: 1L\n but was: 2L\n\torg.opentest4j.AssertionFailedError: \nexpected: 1L\n but was: 0L\n\torg.opentest4j.AssertionFailedError: \nexpected: 4\n but was: 3",
+          "source": "build/serializable-experiment/tests-02/TEST-com.loopers.order.application.OrderConcurrencyTest.xml"
+        },
+        {
+          "suite": "com.loopers.order.application.OrderConcurrencyTest",
+          "name": "[동시성] 2000원 충전과 7000원 결제가 모두 성공하면 최종 잔액은 5000원이다.",
+          "status": "failed",
+          "seconds": 0.237,
+          "failure": "org.gradle.internal.exceptions.DefaultMultiCauseException: Multiple Failures (2 failures)\n\torg.opentest4j.AssertionFailedError: \nexpected: 5000L\n but was: 3000L\n\torg.opentest4j.AssertionFailedError: \nexpected: 5000L\n but was: 3000L",
+          "source": "build/serializable-experiment/tests-02/TEST-com.loopers.order.application.OrderConcurrencyTest.xml"
+        },
+        {
+          "suite": "com.loopers.experiment.IsolationProbeTest",
+          "name": "verifiesActualConnectionIsolation()",
+          "status": "passed",
+          "seconds": 0.005,
+          "failure": null,
+          "source": "build/serializable-experiment/tests-02/TEST-com.loopers.experiment.IsolationProbeTest.xml"
+        }
+      ]
+    },
+    {
+      "round": 3,
+      "recordedAt": "2026-10-07T23:48:29.502357+00:00",
+      "gradleExitCode": 1,
+      "tests": [
+        {
+          "suite": "com.loopers.order.application.OrderConcurrencyTest",
+          "name": "[동시성] 한 고객의 잔액 10000원·충분한 재고에서 서로 다른 4000원 DRAFT 주문 3건을 동시에 확정하면 성공 2·잔액 부족 1·기술 오류 0·최종 잔액 2000원이다.",
+          "status": "failed",
+          "seconds": 1.292,
+          "failure": "org.gradle.internal.exceptions.DefaultMultiCauseException: Multiple Failures (5 failures)\n\torg.opentest4j.AssertionFailedError: \nexpected: 2L\n but was: 3L\n\torg.opentest4j.AssertionFailedError: \nexpected: 1L\n but was: 0L\n\torg.opentest4j.AssertionFailedError: \nexpected: 2000L\n but was: 6000L\n\torg.opentest4j.AssertionFailedError: \nexpected: -2000L\n but was: 6000L\n\torg.opentest4j.AssertionFailedError: \nexpected: 8\n but was: 7",
+          "source": "build/serializable-experiment/tests-03/TEST-com.loopers.order.application.OrderConcurrencyTest.xml"
+        },
+        {
+          "suite": "com.loopers.order.application.OrderConcurrencyTest",
+          "name": "[동시성] 재고 5개에 주문 8건을 동시에 확정하면 성공 5·재고 부족 3·최종 재고 0이다.",
+          "status": "passed",
+          "seconds": 0.468,
+          "failure": null,
+          "source": "build/serializable-experiment/tests-03/TEST-com.loopers.order.application.OrderConcurrencyTest.xml"
+        },
+        {
+          "suite": "com.loopers.order.application.OrderConcurrencyTest",
+          "name": "[INV-ORDERITEM-40][INV-ORDER-36·43·44] 상품 수정과 주문 확정이 어느 순서로 실행되어도 최종 상품 Updated Air·1,100원·재고 4개, 주문 CONFIRMED·결제액 1,000원·품목 Air·1,000원을 유지한다.",
+          "status": "passed",
+          "seconds": 0.624,
+          "failure": null,
+          "source": "build/serializable-experiment/tests-03/TEST-com.loopers.order.application.OrderConcurrencyTest.xml"
+        },
+        {
+          "suite": "com.loopers.order.application.OrderConcurrencyTest",
+          "name": "[동시성] 같은 DRAFT 주문을 두 번 동시에 확정하면 한 건만 성공하고 재고·포인트는 한 번만 차감된다.",
+          "status": "failed",
+          "seconds": 0.703,
+          "failure": "org.gradle.internal.exceptions.DefaultMultiCauseException: Multiple Failures (3 failures)\n\torg.opentest4j.AssertionFailedError: \nexpected: 1L\n but was: 2L\n\torg.opentest4j.AssertionFailedError: \nexpected: 1L\n but was: 0L\n\torg.opentest4j.AssertionFailedError: \nexpected: 4\n but was: 3",
+          "source": "build/serializable-experiment/tests-03/TEST-com.loopers.order.application.OrderConcurrencyTest.xml"
+        },
+        {
+          "suite": "com.loopers.order.application.OrderConcurrencyTest",
+          "name": "[동시성] 2000원 충전과 7000원 결제가 모두 성공하면 최종 잔액은 5000원이다.",
+          "status": "failed",
+          "seconds": 0.534,
+          "failure": "org.gradle.internal.exceptions.DefaultMultiCauseException: Multiple Failures (2 failures)\n\torg.opentest4j.AssertionFailedError: \nexpected: 5000L\n but was: 3000L\n\torg.opentest4j.AssertionFailedError: \nexpected: 5000L\n but was: 3000L",
+          "source": "build/serializable-experiment/tests-03/TEST-com.loopers.order.application.OrderConcurrencyTest.xml"
+        },
+        {
+          "suite": "com.loopers.experiment.IsolationProbeTest",
+          "name": "verifiesActualConnectionIsolation()",
+          "status": "passed",
+          "seconds": 0.005,
+          "failure": null,
+          "source": "build/serializable-experiment/tests-03/TEST-com.loopers.experiment.IsolationProbeTest.xml"
+        }
+      ]
+    },
+    {
+      "round": 4,
+      "recordedAt": "2026-10-07T23:48:56.166176+00:00",
+      "gradleExitCode": 1,
+      "tests": [
+        {
+          "suite": "com.loopers.order.application.OrderConcurrencyTest",
+          "name": "[동시성] 한 고객의 잔액 10000원·충분한 재고에서 서로 다른 4000원 DRAFT 주문 3건을 동시에 확정하면 성공 2·잔액 부족 1·기술 오류 0·최종 잔액 2000원이다.",
+          "status": "failed",
+          "seconds": 0.855,
+          "failure": "org.gradle.internal.exceptions.DefaultMultiCauseException: Multiple Failures (5 failures)\n\torg.opentest4j.AssertionFailedError: \nexpected: 2L\n but was: 3L\n\torg.opentest4j.AssertionFailedError: \nexpected: 1L\n but was: 0L\n\torg.opentest4j.AssertionFailedError: \nexpected: 2000L\n but was: 6000L\n\torg.opentest4j.AssertionFailedError: \nexpected: -2000L\n but was: 6000L\n\torg.opentest4j.AssertionFailedError: \nexpected: 8\n but was: 7",
+          "source": "build/serializable-experiment/tests-04/TEST-com.loopers.order.application.OrderConcurrencyTest.xml"
+        },
+        {
+          "suite": "com.loopers.order.application.OrderConcurrencyTest",
+          "name": "[동시성] 재고 5개에 주문 8건을 동시에 확정하면 성공 5·재고 부족 3·최종 재고 0이다.",
+          "status": "passed",
+          "seconds": 0.409,
+          "failure": null,
+          "source": "build/serializable-experiment/tests-04/TEST-com.loopers.order.application.OrderConcurrencyTest.xml"
+        },
+        {
+          "suite": "com.loopers.order.application.OrderConcurrencyTest",
+          "name": "[INV-ORDERITEM-40][INV-ORDER-36·43·44] 상품 수정과 주문 확정이 어느 순서로 실행되어도 최종 상품 Updated Air·1,100원·재고 4개, 주문 CONFIRMED·결제액 1,000원·품목 Air·1,000원을 유지한다.",
+          "status": "passed",
+          "seconds": 0.341,
+          "failure": null,
+          "source": "build/serializable-experiment/tests-04/TEST-com.loopers.order.application.OrderConcurrencyTest.xml"
+        },
+        {
+          "suite": "com.loopers.order.application.OrderConcurrencyTest",
+          "name": "[동시성] 같은 DRAFT 주문을 두 번 동시에 확정하면 한 건만 성공하고 재고·포인트는 한 번만 차감된다.",
+          "status": "failed",
+          "seconds": 0.315,
+          "failure": "org.gradle.internal.exceptions.DefaultMultiCauseException: Multiple Failures (3 failures)\n\torg.opentest4j.AssertionFailedError: \nexpected: 1L\n but was: 2L\n\torg.opentest4j.AssertionFailedError: \nexpected: 1L\n but was: 0L\n\torg.opentest4j.AssertionFailedError: \nexpected: 4\n but was: 3",
+          "source": "build/serializable-experiment/tests-04/TEST-com.loopers.order.application.OrderConcurrencyTest.xml"
+        },
+        {
+          "suite": "com.loopers.order.application.OrderConcurrencyTest",
+          "name": "[동시성] 2000원 충전과 7000원 결제가 모두 성공하면 최종 잔액은 5000원이다.",
+          "status": "failed",
+          "seconds": 0.305,
+          "failure": "org.gradle.internal.exceptions.DefaultMultiCauseException: Multiple Failures (2 failures)\n\torg.opentest4j.AssertionFailedError: \nexpected: 5000L\n but was: 3000L\n\torg.opentest4j.AssertionFailedError: \nexpected: 5000L\n but was: 3000L",
+          "source": "build/serializable-experiment/tests-04/TEST-com.loopers.order.application.OrderConcurrencyTest.xml"
+        },
+        {
+          "suite": "com.loopers.experiment.IsolationProbeTest",
+          "name": "verifiesActualConnectionIsolation()",
+          "status": "passed",
+          "seconds": 0.007,
+          "failure": null,
+          "source": "build/serializable-experiment/tests-04/TEST-com.loopers.experiment.IsolationProbeTest.xml"
+        }
+      ]
+    },
+    {
+      "round": 5,
+      "recordedAt": "2026-10-07T23:49:19.184508+00:00",
+      "gradleExitCode": 1,
+      "tests": [
+        {
+          "suite": "com.loopers.order.application.OrderConcurrencyTest",
+          "name": "[동시성] 한 고객의 잔액 10000원·충분한 재고에서 서로 다른 4000원 DRAFT 주문 3건을 동시에 확정하면 성공 2·잔액 부족 1·기술 오류 0·최종 잔액 2000원이다.",
+          "status": "failed",
+          "seconds": 0.845,
+          "failure": "org.gradle.internal.exceptions.DefaultMultiCauseException: Multiple Failures (5 failures)\n\torg.opentest4j.AssertionFailedError: \nexpected: 2L\n but was: 3L\n\torg.opentest4j.AssertionFailedError: \nexpected: 1L\n but was: 0L\n\torg.opentest4j.AssertionFailedError: \nexpected: 2000L\n but was: 6000L\n\torg.opentest4j.AssertionFailedError: \nexpected: -2000L\n but was: 6000L\n\torg.opentest4j.AssertionFailedError: \nexpected: 8\n but was: 7",
+          "source": "build/serializable-experiment/tests-05/TEST-com.loopers.order.application.OrderConcurrencyTest.xml"
+        },
+        {
+          "suite": "com.loopers.order.application.OrderConcurrencyTest",
+          "name": "[동시성] 재고 5개에 주문 8건을 동시에 확정하면 성공 5·재고 부족 3·최종 재고 0이다.",
+          "status": "passed",
+          "seconds": 0.382,
+          "failure": null,
+          "source": "build/serializable-experiment/tests-05/TEST-com.loopers.order.application.OrderConcurrencyTest.xml"
+        },
+        {
+          "suite": "com.loopers.order.application.OrderConcurrencyTest",
+          "name": "[INV-ORDERITEM-40][INV-ORDER-36·43·44] 상품 수정과 주문 확정이 어느 순서로 실행되어도 최종 상품 Updated Air·1,100원·재고 4개, 주문 CONFIRMED·결제액 1,000원·품목 Air·1,000원을 유지한다.",
+          "status": "passed",
+          "seconds": 0.298,
+          "failure": null,
+          "source": "build/serializable-experiment/tests-05/TEST-com.loopers.order.application.OrderConcurrencyTest.xml"
+        },
+        {
+          "suite": "com.loopers.order.application.OrderConcurrencyTest",
+          "name": "[동시성] 같은 DRAFT 주문을 두 번 동시에 확정하면 한 건만 성공하고 재고·포인트는 한 번만 차감된다.",
+          "status": "failed",
+          "seconds": 0.227,
+          "failure": "org.gradle.internal.exceptions.DefaultMultiCauseException: Multiple Failures (3 failures)\n\torg.opentest4j.AssertionFailedError: \nexpected: 1L\n but was: 2L\n\torg.opentest4j.AssertionFailedError: \nexpected: 1L\n but was: 0L\n\torg.opentest4j.AssertionFailedError: \nexpected: 4\n but was: 3",
+          "source": "build/serializable-experiment/tests-05/TEST-com.loopers.order.application.OrderConcurrencyTest.xml"
+        },
+        {
+          "suite": "com.loopers.order.application.OrderConcurrencyTest",
+          "name": "[동시성] 2000원 충전과 7000원 결제가 모두 성공하면 최종 잔액은 5000원이다.",
+          "status": "failed",
+          "seconds": 0.217,
+          "failure": "org.gradle.internal.exceptions.DefaultMultiCauseException: Multiple Failures (2 failures)\n\torg.opentest4j.AssertionFailedError: \nexpected: 5000L\n but was: 3000L\n\torg.opentest4j.AssertionFailedError: \nexpected: 5000L\n but was: 3000L",
+          "source": "build/serializable-experiment/tests-05/TEST-com.loopers.order.application.OrderConcurrencyTest.xml"
+        },
+        {
+          "suite": "com.loopers.experiment.IsolationProbeTest",
+          "name": "verifiesActualConnectionIsolation()",
+          "status": "passed",
+          "seconds": 0.006,
+          "failure": null,
+          "source": "build/serializable-experiment/tests-05/TEST-com.loopers.experiment.IsolationProbeTest.xml"
+        }
+      ]
+    },
+    {
+      "round": 6,
+      "recordedAt": "2026-10-07T23:49:47.477010+00:00",
+      "gradleExitCode": 1,
+      "tests": [
+        {
+          "suite": "com.loopers.order.application.OrderConcurrencyTest",
+          "name": "[동시성] 한 고객의 잔액 10000원·충분한 재고에서 서로 다른 4000원 DRAFT 주문 3건을 동시에 확정하면 성공 2·잔액 부족 1·기술 오류 0·최종 잔액 2000원이다.",
+          "status": "failed",
+          "seconds": 0.916,
+          "failure": "org.gradle.internal.exceptions.DefaultMultiCauseException: Multiple Failures (5 failures)\n\torg.opentest4j.AssertionFailedError: \nexpected: 2L\n but was: 3L\n\torg.opentest4j.AssertionFailedError: \nexpected: 1L\n but was: 0L\n\torg.opentest4j.AssertionFailedError: \nexpected: 2000L\n but was: 6000L\n\torg.opentest4j.AssertionFailedError: \nexpected: -2000L\n but was: 6000L\n\torg.opentest4j.AssertionFailedError: \nexpected: 8\n but was: 7",
+          "source": "build/serializable-experiment/tests-06/TEST-com.loopers.order.application.OrderConcurrencyTest.xml"
+        },
+        {
+          "suite": "com.loopers.order.application.OrderConcurrencyTest",
+          "name": "[동시성] 재고 5개에 주문 8건을 동시에 확정하면 성공 5·재고 부족 3·최종 재고 0이다.",
+          "status": "passed",
+          "seconds": 0.862,
+          "failure": null,
+          "source": "build/serializable-experiment/tests-06/TEST-com.loopers.order.application.OrderConcurrencyTest.xml"
+        },
+        {
+          "suite": "com.loopers.order.application.OrderConcurrencyTest",
+          "name": "[INV-ORDERITEM-40][INV-ORDER-36·43·44] 상품 수정과 주문 확정이 어느 순서로 실행되어도 최종 상품 Updated Air·1,100원·재고 4개, 주문 CONFIRMED·결제액 1,000원·품목 Air·1,000원을 유지한다.",
+          "status": "passed",
+          "seconds": 0.305,
+          "failure": null,
+          "source": "build/serializable-experiment/tests-06/TEST-com.loopers.order.application.OrderConcurrencyTest.xml"
+        },
+        {
+          "suite": "com.loopers.order.application.OrderConcurrencyTest",
+          "name": "[동시성] 같은 DRAFT 주문을 두 번 동시에 확정하면 한 건만 성공하고 재고·포인트는 한 번만 차감된다.",
+          "status": "failed",
+          "seconds": 0.416,
+          "failure": "org.gradle.internal.exceptions.DefaultMultiCauseException: Multiple Failures (3 failures)\n\torg.opentest4j.AssertionFailedError: \nexpected: 1L\n but was: 2L\n\torg.opentest4j.AssertionFailedError: \nexpected: 1L\n but was: 0L\n\torg.opentest4j.AssertionFailedError: \nexpected: 4\n but was: 3",
+          "source": "build/serializable-experiment/tests-06/TEST-com.loopers.order.application.OrderConcurrencyTest.xml"
+        },
+        {
+          "suite": "com.loopers.order.application.OrderConcurrencyTest",
+          "name": "[동시성] 2000원 충전과 7000원 결제가 모두 성공하면 최종 잔액은 5000원이다.",
+          "status": "failed",
+          "seconds": 0.248,
+          "failure": "org.gradle.internal.exceptions.DefaultMultiCauseException: Multiple Failures (2 failures)\n\torg.opentest4j.AssertionFailedError: \nexpected: 5000L\n but was: 3000L\n\torg.opentest4j.AssertionFailedError: \nexpected: 5000L\n but was: 3000L",
+          "source": "build/serializable-experiment/tests-06/TEST-com.loopers.order.application.OrderConcurrencyTest.xml"
+        },
+        {
+          "suite": "com.loopers.experiment.IsolationProbeTest",
+          "name": "verifiesActualConnectionIsolation()",
+          "status": "passed",
+          "seconds": 0.007,
+          "failure": null,
+          "source": "build/serializable-experiment/tests-06/TEST-com.loopers.experiment.IsolationProbeTest.xml"
+        }
+      ]
+    },
+    {
+      "round": 7,
+      "recordedAt": "2026-10-07T23:50:11.908758+00:00",
+      "gradleExitCode": 1,
+      "tests": [
+        {
+          "suite": "com.loopers.order.application.OrderConcurrencyTest",
+          "name": "[동시성] 한 고객의 잔액 10000원·충분한 재고에서 서로 다른 4000원 DRAFT 주문 3건을 동시에 확정하면 성공 2·잔액 부족 1·기술 오류 0·최종 잔액 2000원이다.",
+          "status": "failed",
+          "seconds": 0.875,
+          "failure": "org.gradle.internal.exceptions.DefaultMultiCauseException: Multiple Failures (5 failures)\n\torg.opentest4j.AssertionFailedError: \nexpected: 2L\n but was: 3L\n\torg.opentest4j.AssertionFailedError: \nexpected: 1L\n but was: 0L\n\torg.opentest4j.AssertionFailedError: \nexpected: 2000L\n but was: 6000L\n\torg.opentest4j.AssertionFailedError: \nexpected: -2000L\n but was: 6000L\n\torg.opentest4j.AssertionFailedError: \nexpected: 8\n but was: 7",
+          "source": "build/serializable-experiment/tests-07/TEST-com.loopers.order.application.OrderConcurrencyTest.xml"
+        },
+        {
+          "suite": "com.loopers.order.application.OrderConcurrencyTest",
+          "name": "[동시성] 재고 5개에 주문 8건을 동시에 확정하면 성공 5·재고 부족 3·최종 재고 0이다.",
+          "status": "passed",
+          "seconds": 0.446,
+          "failure": null,
+          "source": "build/serializable-experiment/tests-07/TEST-com.loopers.order.application.OrderConcurrencyTest.xml"
+        },
+        {
+          "suite": "com.loopers.order.application.OrderConcurrencyTest",
+          "name": "[INV-ORDERITEM-40][INV-ORDER-36·43·44] 상품 수정과 주문 확정이 어느 순서로 실행되어도 최종 상품 Updated Air·1,100원·재고 4개, 주문 CONFIRMED·결제액 1,000원·품목 Air·1,000원을 유지한다.",
+          "status": "passed",
+          "seconds": 0.27,
+          "failure": null,
+          "source": "build/serializable-experiment/tests-07/TEST-com.loopers.order.application.OrderConcurrencyTest.xml"
+        },
+        {
+          "suite": "com.loopers.order.application.OrderConcurrencyTest",
+          "name": "[동시성] 같은 DRAFT 주문을 두 번 동시에 확정하면 한 건만 성공하고 재고·포인트는 한 번만 차감된다.",
+          "status": "failed",
+          "seconds": 0.345,
+          "failure": "org.gradle.internal.exceptions.DefaultMultiCauseException: Multiple Failures (3 failures)\n\torg.opentest4j.AssertionFailedError: \nexpected: 1L\n but was: 2L\n\torg.opentest4j.AssertionFailedError: \nexpected: 1L\n but was: 0L\n\torg.opentest4j.AssertionFailedError: \nexpected: 4\n but was: 3",
+          "source": "build/serializable-experiment/tests-07/TEST-com.loopers.order.application.OrderConcurrencyTest.xml"
+        },
+        {
+          "suite": "com.loopers.order.application.OrderConcurrencyTest",
+          "name": "[동시성] 2000원 충전과 7000원 결제가 모두 성공하면 최종 잔액은 5000원이다.",
+          "status": "failed",
+          "seconds": 0.23,
+          "failure": "org.gradle.internal.exceptions.DefaultMultiCauseException: Multiple Failures (2 failures)\n\torg.opentest4j.AssertionFailedError: \nexpected: 5000L\n but was: 3000L\n\torg.opentest4j.AssertionFailedError: \nexpected: 5000L\n but was: 3000L",
+          "source": "build/serializable-experiment/tests-07/TEST-com.loopers.order.application.OrderConcurrencyTest.xml"
+        },
+        {
+          "suite": "com.loopers.experiment.IsolationProbeTest",
+          "name": "verifiesActualConnectionIsolation()",
+          "status": "passed",
+          "seconds": 0.004,
+          "failure": null,
+          "source": "build/serializable-experiment/tests-07/TEST-com.loopers.experiment.IsolationProbeTest.xml"
+        }
+      ]
+    },
+    {
+      "round": 8,
+      "recordedAt": "2026-10-07T23:50:41.140795+00:00",
+      "gradleExitCode": 1,
+      "tests": [
+        {
+          "suite": "com.loopers.order.application.OrderConcurrencyTest",
+          "name": "[동시성] 한 고객의 잔액 10000원·충분한 재고에서 서로 다른 4000원 DRAFT 주문 3건을 동시에 확정하면 성공 2·잔액 부족 1·기술 오류 0·최종 잔액 2000원이다.",
+          "status": "failed",
+          "seconds": 0.941,
+          "failure": "org.gradle.internal.exceptions.DefaultMultiCauseException: Multiple Failures (5 failures)\n\torg.opentest4j.AssertionFailedError: \nexpected: 2L\n but was: 3L\n\torg.opentest4j.AssertionFailedError: \nexpected: 1L\n but was: 0L\n\torg.opentest4j.AssertionFailedError: \nexpected: 2000L\n but was: 6000L\n\torg.opentest4j.AssertionFailedError: \nexpected: -2000L\n but was: 6000L\n\torg.opentest4j.AssertionFailedError: \nexpected: 8\n but was: 7",
+          "source": "build/serializable-experiment/tests-08/TEST-com.loopers.order.application.OrderConcurrencyTest.xml"
+        },
+        {
+          "suite": "com.loopers.order.application.OrderConcurrencyTest",
+          "name": "[동시성] 재고 5개에 주문 8건을 동시에 확정하면 성공 5·재고 부족 3·최종 재고 0이다.",
+          "status": "passed",
+          "seconds": 0.491,
+          "failure": null,
+          "source": "build/serializable-experiment/tests-08/TEST-com.loopers.order.application.OrderConcurrencyTest.xml"
+        },
+        {
+          "suite": "com.loopers.order.application.OrderConcurrencyTest",
+          "name": "[INV-ORDERITEM-40][INV-ORDER-36·43·44] 상품 수정과 주문 확정이 어느 순서로 실행되어도 최종 상품 Updated Air·1,100원·재고 4개, 주문 CONFIRMED·결제액 1,000원·품목 Air·1,000원을 유지한다.",
+          "status": "passed",
+          "seconds": 0.357,
+          "failure": null,
+          "source": "build/serializable-experiment/tests-08/TEST-com.loopers.order.application.OrderConcurrencyTest.xml"
+        },
+        {
+          "suite": "com.loopers.order.application.OrderConcurrencyTest",
+          "name": "[동시성] 같은 DRAFT 주문을 두 번 동시에 확정하면 한 건만 성공하고 재고·포인트는 한 번만 차감된다.",
+          "status": "failed",
+          "seconds": 0.286,
+          "failure": "org.gradle.internal.exceptions.DefaultMultiCauseException: Multiple Failures (3 failures)\n\torg.opentest4j.AssertionFailedError: \nexpected: 1L\n but was: 2L\n\torg.opentest4j.AssertionFailedError: \nexpected: 1L\n but was: 0L\n\torg.opentest4j.AssertionFailedError: \nexpected: 4\n but was: 3",
+          "source": "build/serializable-experiment/tests-08/TEST-com.loopers.order.application.OrderConcurrencyTest.xml"
+        },
+        {
+          "suite": "com.loopers.order.application.OrderConcurrencyTest",
+          "name": "[동시성] 2000원 충전과 7000원 결제가 모두 성공하면 최종 잔액은 5000원이다.",
+          "status": "failed",
+          "seconds": 0.299,
+          "failure": "org.gradle.internal.exceptions.DefaultMultiCauseException: Multiple Failures (2 failures)\n\torg.opentest4j.AssertionFailedError: \nexpected: 5000L\n but was: 3000L\n\torg.opentest4j.AssertionFailedError: \nexpected: 5000L\n but was: 3000L",
+          "source": "build/serializable-experiment/tests-08/TEST-com.loopers.order.application.OrderConcurrencyTest.xml"
+        },
+        {
+          "suite": "com.loopers.experiment.IsolationProbeTest",
+          "name": "verifiesActualConnectionIsolation()",
+          "status": "passed",
+          "seconds": 0.005,
+          "failure": null,
+          "source": "build/serializable-experiment/tests-08/TEST-com.loopers.experiment.IsolationProbeTest.xml"
+        }
+      ]
+    },
+    {
+      "round": 9,
+      "recordedAt": "2026-10-07T23:51:09.281274+00:00",
+      "gradleExitCode": 1,
+      "tests": [
+        {
+          "suite": "com.loopers.order.application.OrderConcurrencyTest",
+          "name": "[동시성] 한 고객의 잔액 10000원·충분한 재고에서 서로 다른 4000원 DRAFT 주문 3건을 동시에 확정하면 성공 2·잔액 부족 1·기술 오류 0·최종 잔액 2000원이다.",
+          "status": "failed",
+          "seconds": 1.556,
+          "failure": "org.gradle.internal.exceptions.DefaultMultiCauseException: Multiple Failures (5 failures)\n\torg.opentest4j.AssertionFailedError: \nexpected: 2L\n but was: 3L\n\torg.opentest4j.AssertionFailedError: \nexpected: 1L\n but was: 0L\n\torg.opentest4j.AssertionFailedError: \nexpected: 2000L\n but was: 6000L\n\torg.opentest4j.AssertionFailedError: \nexpected: -2000L\n but was: 6000L\n\torg.opentest4j.AssertionFailedError: \nexpected: 8\n but was: 7",
+          "source": "build/serializable-experiment/tests-09/TEST-com.loopers.order.application.OrderConcurrencyTest.xml"
+        },
+        {
+          "suite": "com.loopers.order.application.OrderConcurrencyTest",
+          "name": "[동시성] 재고 5개에 주문 8건을 동시에 확정하면 성공 5·재고 부족 3·최종 재고 0이다.",
+          "status": "passed",
+          "seconds": 0.663,
+          "failure": null,
+          "source": "build/serializable-experiment/tests-09/TEST-com.loopers.order.application.OrderConcurrencyTest.xml"
+        },
+        {
+          "suite": "com.loopers.order.application.OrderConcurrencyTest",
+          "name": "[INV-ORDERITEM-40][INV-ORDER-36·43·44] 상품 수정과 주문 확정이 어느 순서로 실행되어도 최종 상품 Updated Air·1,100원·재고 4개, 주문 CONFIRMED·결제액 1,000원·품목 Air·1,000원을 유지한다.",
+          "status": "passed",
+          "seconds": 0.312,
+          "failure": null,
+          "source": "build/serializable-experiment/tests-09/TEST-com.loopers.order.application.OrderConcurrencyTest.xml"
+        },
+        {
+          "suite": "com.loopers.order.application.OrderConcurrencyTest",
+          "name": "[동시성] 같은 DRAFT 주문을 두 번 동시에 확정하면 한 건만 성공하고 재고·포인트는 한 번만 차감된다.",
+          "status": "failed",
+          "seconds": 0.416,
+          "failure": "org.gradle.internal.exceptions.DefaultMultiCauseException: Multiple Failures (3 failures)\n\torg.opentest4j.AssertionFailedError: \nexpected: 1L\n but was: 2L\n\torg.opentest4j.AssertionFailedError: \nexpected: 1L\n but was: 0L\n\torg.opentest4j.AssertionFailedError: \nexpected: 4\n but was: 3",
+          "source": "build/serializable-experiment/tests-09/TEST-com.loopers.order.application.OrderConcurrencyTest.xml"
+        },
+        {
+          "suite": "com.loopers.order.application.OrderConcurrencyTest",
+          "name": "[동시성] 2000원 충전과 7000원 결제가 모두 성공하면 최종 잔액은 5000원이다.",
+          "status": "failed",
+          "seconds": 0.286,
+          "failure": "org.gradle.internal.exceptions.DefaultMultiCauseException: Multiple Failures (2 failures)\n\torg.opentest4j.AssertionFailedError: \nexpected: 5000L\n but was: 3000L\n\torg.opentest4j.AssertionFailedError: \nexpected: 5000L\n but was: 3000L",
+          "source": "build/serializable-experiment/tests-09/TEST-com.loopers.order.application.OrderConcurrencyTest.xml"
+        },
+        {
+          "suite": "com.loopers.experiment.IsolationProbeTest",
+          "name": "verifiesActualConnectionIsolation()",
+          "status": "passed",
+          "seconds": 0.005,
+          "failure": null,
+          "source": "build/serializable-experiment/tests-09/TEST-com.loopers.experiment.IsolationProbeTest.xml"
+        }
+      ]
+    },
+    {
+      "round": 10,
+      "recordedAt": "2026-10-07T23:51:32.765429+00:00",
+      "gradleExitCode": 1,
+      "tests": [
+        {
+          "suite": "com.loopers.order.application.OrderConcurrencyTest",
+          "name": "[동시성] 한 고객의 잔액 10000원·충분한 재고에서 서로 다른 4000원 DRAFT 주문 3건을 동시에 확정하면 성공 2·잔액 부족 1·기술 오류 0·최종 잔액 2000원이다.",
+          "status": "failed",
+          "seconds": 0.853,
+          "failure": "org.gradle.internal.exceptions.DefaultMultiCauseException: Multiple Failures (5 failures)\n\torg.opentest4j.AssertionFailedError: \nexpected: 2L\n but was: 3L\n\torg.opentest4j.AssertionFailedError: \nexpected: 1L\n but was: 0L\n\torg.opentest4j.AssertionFailedError: \nexpected: 2000L\n but was: 6000L\n\torg.opentest4j.AssertionFailedError: \nexpected: -2000L\n but was: 6000L\n\torg.opentest4j.AssertionFailedError: \nexpected: 8\n but was: 7",
+          "source": "build/serializable-experiment/tests-10/TEST-com.loopers.order.application.OrderConcurrencyTest.xml"
+        },
+        {
+          "suite": "com.loopers.order.application.OrderConcurrencyTest",
+          "name": "[동시성] 재고 5개에 주문 8건을 동시에 확정하면 성공 5·재고 부족 3·최종 재고 0이다.",
+          "status": "passed",
+          "seconds": 0.407,
+          "failure": null,
+          "source": "build/serializable-experiment/tests-10/TEST-com.loopers.order.application.OrderConcurrencyTest.xml"
+        },
+        {
+          "suite": "com.loopers.order.application.OrderConcurrencyTest",
+          "name": "[INV-ORDERITEM-40][INV-ORDER-36·43·44] 상품 수정과 주문 확정이 어느 순서로 실행되어도 최종 상품 Updated Air·1,100원·재고 4개, 주문 CONFIRMED·결제액 1,000원·품목 Air·1,000원을 유지한다.",
+          "status": "passed",
+          "seconds": 0.281,
+          "failure": null,
+          "source": "build/serializable-experiment/tests-10/TEST-com.loopers.order.application.OrderConcurrencyTest.xml"
+        },
+        {
+          "suite": "com.loopers.order.application.OrderConcurrencyTest",
+          "name": "[동시성] 같은 DRAFT 주문을 두 번 동시에 확정하면 한 건만 성공하고 재고·포인트는 한 번만 차감된다.",
+          "status": "failed",
+          "seconds": 0.259,
+          "failure": "org.gradle.internal.exceptions.DefaultMultiCauseException: Multiple Failures (3 failures)\n\torg.opentest4j.AssertionFailedError: \nexpected: 1L\n but was: 2L\n\torg.opentest4j.AssertionFailedError: \nexpected: 1L\n but was: 0L\n\torg.opentest4j.AssertionFailedError: \nexpected: 4\n but was: 3",
+          "source": "build/serializable-experiment/tests-10/TEST-com.loopers.order.application.OrderConcurrencyTest.xml"
+        },
+        {
+          "suite": "com.loopers.order.application.OrderConcurrencyTest",
+          "name": "[동시성] 2000원 충전과 7000원 결제가 모두 성공하면 최종 잔액은 5000원이다.",
+          "status": "failed",
+          "seconds": 0.207,
+          "failure": "org.gradle.internal.exceptions.DefaultMultiCauseException: Multiple Failures (2 failures)\n\torg.opentest4j.AssertionFailedError: \nexpected: 5000L\n but was: 3000L\n\torg.opentest4j.AssertionFailedError: \nexpected: 5000L\n but was: 3000L",
+          "source": "build/serializable-experiment/tests-10/TEST-com.loopers.order.application.OrderConcurrencyTest.xml"
+        },
+        {
+          "suite": "com.loopers.experiment.IsolationProbeTest",
+          "name": "verifiesActualConnectionIsolation()",
+          "status": "passed",
+          "seconds": 0.005,
+          "failure": null,
+          "source": "build/serializable-experiment/tests-10/TEST-com.loopers.experiment.IsolationProbeTest.xml"
+        }
+      ]
+    }
+  ]
+}

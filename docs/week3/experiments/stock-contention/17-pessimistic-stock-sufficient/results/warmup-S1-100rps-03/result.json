@@ -1,0 +1,112 @@
+{
+  "schemaVersion": 1,
+  "experimentId": "stock-contention/17-pessimistic-stock-sufficient",
+  "runId": "warmup-S1-100rps-03",
+  "gitSha": "d46d3d8f0675b99e79cb7cc00736d813fcf852dd",
+  "workingTreeChanges": true,
+  "status": "completed",
+  "startedAt": "2026-10-07T23:45:14.139446+00:00",
+  "finishedAt": "2026-10-07T23:45:44.708203+00:00",
+  "config": {
+    "scenario": "S1",
+    "rps": 100,
+    "durationSeconds": 30,
+    "repetition": 3,
+    "vus": 200,
+    "initialStock": {
+      "1": 3400,
+      "2": 3400,
+      "3": 3400,
+      "4": 3400,
+      "5": 3400,
+      "6": 3400,
+      "7": 3400,
+      "8": 3400,
+      "9": 3400,
+      "10": 3400
+    },
+    "twoItemShare": null,
+    "randomSeed": 20261005,
+    "dataSha256": "835a3c0a318c2700d89048af58a70cf9f1598e2163acee51cd7f639c6b576ba6",
+    "applicationSessionIsolation": "REPEATABLE-READ\t200",
+    "jvmOptions": [],
+    "specId": "local-01",
+    "retryCount": 0
+  },
+  "requests": {
+    "planned": 3000,
+    "started": 3000,
+    "completed": 3000,
+    "notStarted": 0,
+    "incomplete": 0,
+    "success": 3000,
+    "businessRejection": 0,
+    "technicalError": 0,
+    "optimisticConflict": 0,
+    "errors": {}
+  },
+  "metrics": {
+    "measurementSeconds": 29.993,
+    "throughput": 100.02333877904844,
+    "successThroughput": 100.02333877904844,
+    "latencyMs": {
+      "count": 3000,
+      "p50": 7.0,
+      "p95": 11.0,
+      "p99": 103.05000000000109
+    },
+    "latencyByOutcomeMs": {
+      "success": {
+        "count": 3000,
+        "p50": 7.0,
+        "p95": 11.0,
+        "p99": 103.05000000000109
+      },
+      "businessRejection": {
+        "count": 0,
+        "p50": null,
+        "p95": null,
+        "p99": null
+      },
+      "technicalError": {
+        "count": 0,
+        "p50": null,
+        "p95": null,
+        "p99": null
+      }
+    },
+    "stockoutPhases": null,
+    "optimisticConflictRate": null,
+    "optimisticConflictRateReason": "not used"
+  },
+  "validation": {
+    "status": "passed",
+    "checks": [
+      "orderPaymentBalance",
+      "stock",
+      "orderItemsUnchanged",
+      "orderCount",
+      "uniqueOrderRequests"
+    ],
+    "failures": [],
+    "confirmedOrders": 3000,
+    "finalStock": {
+      "1": 400,
+      "2": 3400,
+      "3": 3400,
+      "4": 3400,
+      "5": 3400,
+      "6": 3400,
+      "7": 3400,
+      "8": 3400,
+      "9": 3400,
+      "10": 3400
+    }
+  },
+  "artifacts": {
+    "traces": "traces.json",
+    "environment": "environment.json",
+    "raw": "../../../../../../../build/serializable-experiment/warmup-S1-100rps-03"
+  },
+  "k6ExitCode": 0
+}
