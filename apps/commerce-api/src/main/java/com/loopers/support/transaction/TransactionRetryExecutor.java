@@ -20,7 +20,7 @@ public class TransactionRetryExecutor {
 
     public TransactionRetryExecutor(
         PlatformTransactionManager transactionManager,
-        @Value("${concurrency.transaction-retry.max-retries:1}") int maxRetries,
+        @Value("${concurrency.transaction-retry.max-retries:2}") int maxRetries,
         @Value("${concurrency.transaction-retry.backoff-ms:0}") long backoffMillis
     ) {
         this.newTransaction = new TransactionTemplate(transactionManager);

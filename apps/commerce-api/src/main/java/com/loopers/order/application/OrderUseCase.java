@@ -65,13 +65,9 @@ public class OrderUseCase {
         return orderRepository.save(new Order(buyerId, orderItems));
     }
 
-    @Transactional
     public Order confirm(Long buyerId, Long orderId) {
         try {
-            if (transactionRetryExecutor.isEnabled()) {
-                return transactionRetryExecutor.execute(() -> confirmInCurrentTransaction(buyerId, orderId));
-            }
-            return confirmInCurrentTransaction(buyerId, orderId);
+            return transactionRetryExecutor.execute(() -> confirmInCurrentTransaction(buyerId, orderId));
         } catch (OptimisticLockException | OptimisticLockingFailureException exception) {
             throw new CoreException(ErrorCode.ORDER_ALREADY_CONFIRMED);
         }
