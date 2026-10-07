@@ -15,6 +15,8 @@ public interface ProductRepository {
 
     Optional<Product> findForDelete(Long id);
 
+    List<Product> findAllForBrandDelete(Long brandId);
+
     List<Product> findAllByBrandId(Long brandId);
 
     List<Product> findAllByBrandIdAndName(Long brandId, String name);

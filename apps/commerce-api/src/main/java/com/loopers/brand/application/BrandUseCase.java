@@ -38,7 +38,8 @@ public class BrandUseCase {
 
     @Transactional
     public Brand update(Long brandId, String name) {
-        Brand brand = findRequired(brandId);
+        Brand brand = brandRepository.findForDelete(brandId)
+            .orElseThrow(() -> new CoreException(ErrorCode.BRAND_NOT_FOUND));
         if (brand.isDeleted()) {
             throw new CoreException(ErrorCode.BRAND_NOT_FOUND);
         }
@@ -68,7 +69,7 @@ public class BrandUseCase {
         if (brand.isDeleted()) {
             throw new CoreException(ErrorCode.BRAND_NOT_FOUND);
         }
-        List<Product> products = productRepository.findAllByBrandId(brandId);
+        List<Product> products = productRepository.findAllForBrandDelete(brandId);
         removalService.remove(brand, products);
         for (Product product : products) {
             productRepository.save(product);

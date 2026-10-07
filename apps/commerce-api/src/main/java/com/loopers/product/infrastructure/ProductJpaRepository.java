@@ -25,6 +25,10 @@ interface ProductJpaRepository extends JpaRepository<Product, Long> {
     @Query("select p from Product p where p.id = :id")
     Optional<Product> findForDelete(@Param("id") Long id);
 
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("select p from Product p where p.brandId = :brandId")
+    List<Product> findAllForBrandDelete(@Param("brandId") Long brandId);
+
     List<Product> findAllByBrandId(Long brandId);
 
     List<Product> findAllByBrandIdAndName(Long brandId, String name);

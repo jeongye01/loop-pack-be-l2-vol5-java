@@ -36,6 +36,11 @@ public class BrandRepositoryAdapter implements BrandRepository {
     }
 
     @Override
+    public Optional<Brand> findForDelete(Long id) {
+        return jpaRepository.findForDelete(id);
+    }
+
+    @Override
     public List<Brand> findAllByName(String name) {
         return jpaRepository.findAllByName(name);
     }
