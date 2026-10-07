@@ -1,0 +1,130 @@
+{
+  "schemaVersion": 1,
+  "experimentId": "stock-contention/13-optimistic-version-pool40",
+  "runId": "measure-S1-100rps-02",
+  "gitSha": "e9cf52d8e736d9306327c6687cb323996cd1c025",
+  "workingTreeChanges": true,
+  "status": "completed",
+  "startedAt": "2026-10-06T12:30:15.285969+00:00",
+  "finishedAt": "2026-10-06T12:31:16.050040+00:00",
+  "config": {
+    "scenario": "S1",
+    "rps": 100,
+    "durationSeconds": 60,
+    "repetition": 2,
+    "vus": 200,
+    "initialStock": {
+      "1": 1800,
+      "2": 6000,
+      "3": 6000,
+      "4": 6000,
+      "5": 6000,
+      "6": 6000,
+      "7": 6000,
+      "8": 6000,
+      "9": 6000,
+      "10": 6000
+    },
+    "twoItemShare": null,
+    "randomSeed": 20261005,
+    "dataSha256": "12c6cd98cd88a98a12528bcf996d60389d0c473e9abb998206bcec9cca64deea",
+    "applicationSessionIsolation": "REPEATABLE-READ\t30",
+    "jvmOptions": [],
+    "specId": "local-01",
+    "retryCount": 0
+  },
+  "requests": {
+    "planned": 6000,
+    "started": 6000,
+    "completed": 6000,
+    "notStarted": 0,
+    "incomplete": 0,
+    "success": 1800,
+    "businessRejection": 4149,
+    "technicalError": 51,
+    "optimisticConflict": 51,
+    "errors": {
+      "optimisticConflict": 51,
+      "INSUFFICIENT_STOCK": 4149
+    }
+  },
+  "metrics": {
+    "measurementSeconds": 59.996,
+    "throughput": 100.00666711114074,
+    "successThroughput": 30.00200013334222,
+    "latencyMs": {
+      "count": 6000,
+      "p50": 6.0,
+      "p95": 13.0,
+      "p99": 42.01000000000022
+    },
+    "latencyByOutcomeMs": {
+      "success": {
+        "count": 1800,
+        "p50": 6.0,
+        "p95": 11.0,
+        "p99": 20.0
+      },
+      "businessRejection": {
+        "count": 4149,
+        "p50": 6.0,
+        "p95": 14.0,
+        "p99": 54.52000000000044
+      },
+      "technicalError": {
+        "count": 51,
+        "p50": 13.0,
+        "p95": 73.0,
+        "p99": 98.0
+      }
+    },
+    "stockoutPhases": {
+      "boundaryNs": "1791289833853000000",
+      "boundaryMeaning": "first observed insufficient-stock response (not exact DB depletion time)",
+      "before": {
+        "count": 1851,
+        "p50": 6.0,
+        "p95": 12.0,
+        "p99": 27.0
+      },
+      "after": {
+        "count": 4149,
+        "p50": 6.0,
+        "p95": 14.0,
+        "p99": 54.52000000000044
+      }
+    },
+    "optimisticConflictRate": 0.0085,
+    "optimisticConflictRateReason": "JPA @Version conflict classified from server evidence"
+  },
+  "validation": {
+    "status": "passed",
+    "checks": [
+      "orderPaymentBalance",
+      "stock",
+      "orderItemsUnchanged",
+      "orderCount",
+      "uniqueOrderRequests"
+    ],
+    "failures": [],
+    "confirmedOrders": 1800,
+    "finalStock": {
+      "1": 0,
+      "2": 6000,
+      "3": 6000,
+      "4": 6000,
+      "5": 6000,
+      "6": 6000,
+      "7": 6000,
+      "8": 6000,
+      "9": 6000,
+      "10": 6000
+    }
+  },
+  "artifacts": {
+    "traces": "traces.json",
+    "environment": "environment.json",
+    "raw": "../../../../../../../build/serializable-experiment/measure-S1-100rps-02"
+  },
+  "k6ExitCode": 0
+}

@@ -1,0 +1,145 @@
+{
+  "schemaVersion": 1,
+  "experimentId": "order-product-contention/optimistic-version-retry1",
+  "runId": "measure-optimistic-admin-midpoint-rerun-order-product-v4-S1-100rps-01",
+  "gitSha": "5b174de45a1e1f3525af23459bc80ba61f5b2f98",
+  "workingTreeChanges": true,
+  "status": "completed",
+  "startedAt": "2026-10-07T00:24:29.629151+00:00",
+  "finishedAt": "2026-10-07T00:25:30.661069+00:00",
+  "config": {
+    "scenario": "S1",
+    "rps": 100,
+    "durationSeconds": 60,
+    "repetition": 1,
+    "vus": 200,
+    "initialStock": {
+      "1": 1800,
+      "2": 6000,
+      "3": 6000,
+      "4": 6000,
+      "5": 6000,
+      "6": 6000,
+      "7": 6000,
+      "8": 6000,
+      "9": 6000,
+      "10": 6000
+    },
+    "twoItemShare": null,
+    "randomSeed": 20261005,
+    "dataSha256": "d1d6d46cc0be93588b4d84a0c325ccfd64eae528501cdc84b9d4d46d5ebb66ba",
+    "applicationSessionIsolation": "REPEATABLE-READ\t200",
+    "jvmOptions": [],
+    "specId": "local-01",
+    "retryCount": 0
+  },
+  "requests": {
+    "planned": 6000,
+    "started": 6000,
+    "completed": 6000,
+    "notStarted": 0,
+    "incomplete": 0,
+    "success": 1800,
+    "businessRejection": 4154,
+    "technicalError": 46,
+    "optimisticConflict": 0,
+    "errors": {
+      "optimisticConflict": 46,
+      "INSUFFICIENT_STOCK": 4154
+    }
+  },
+  "admin": {
+    "planned": 1,
+    "completed": 1,
+    "success": 1,
+    "businessRejection": 0,
+    "technicalError": 0,
+    "errors": {}
+  },
+  "metrics": {
+    "measurementSeconds": 59.993,
+    "throughput": 100.0116680279366,
+    "successThroughput": 30.003500408380976,
+    "latencyMs": {
+      "count": 6000,
+      "p50": 6.0,
+      "p95": 13.0,
+      "p99": 96.03000000000065
+    },
+    "latencyByOutcomeMs": {
+      "success": {
+        "count": 1800,
+        "p50": 6.0,
+        "p95": 9.0,
+        "p99": 19.0
+      },
+      "businessRejection": {
+        "count": 4154,
+        "p50": 6.0,
+        "p95": 15.0,
+        "p99": 116.47000000000025
+      },
+      "technicalError": {
+        "count": 46,
+        "p50": 23.0,
+        "p95": 100.5,
+        "p99": 119.49999999999997
+      }
+    },
+    "stockoutPhases": {
+      "boundaryNs": "1791332688157000000",
+      "boundaryMeaning": "first observed insufficient-stock response (not exact DB depletion time)",
+      "before": {
+        "count": 1846,
+        "p50": 6.0,
+        "p95": 11.0,
+        "p99": 42.649999999999864
+      },
+      "after": {
+        "count": 4154,
+        "p50": 6.0,
+        "p95": 15.0,
+        "p99": 116.47000000000025
+      }
+    },
+    "adminLatencyMs": {
+      "count": 1,
+      "p50": 106.0,
+      "p95": 106.0,
+      "p99": 106.0
+    },
+    "optimisticConflictRate": null,
+    "optimisticConflictRateReason": "not used"
+  },
+  "validation": {
+    "status": "passed",
+    "checks": [
+      "orderPaymentBalance",
+      "stock",
+      "orderItemsUnchanged",
+      "orderCount",
+      "uniqueOrderRequests"
+    ],
+    "failures": [],
+    "confirmedOrders": 1800,
+    "finalStock": {
+      "1": 0,
+      "2": 6000,
+      "3": 6000,
+      "4": 6000,
+      "5": 6000,
+      "6": 6000,
+      "7": 6000,
+      "8": 6000,
+      "9": 6000,
+      "10": 6000
+    }
+  },
+  "artifacts": {
+    "traces": "traces.json",
+    "adminTraces": "admin-traces.json",
+    "environment": "environment.json",
+    "raw": "../../../../../../../build/serializable-experiment/measure-optimistic-admin-midpoint-rerun-order-product-v4-S1-100rps-01"
+  },
+  "k6ExitCode": 0
+}

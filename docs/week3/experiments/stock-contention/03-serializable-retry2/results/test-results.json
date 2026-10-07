@@ -1,0 +1,484 @@
+{
+  "schemaVersion": 1,
+  "experimentId": "stock-contention/03-serializable-retry2",
+  "gitSha": "4192562a37424b6faffa766708ed3d23b1a09152",
+  "workingTreeChanges": true,
+  "config": {
+    "datasource.mysql-jpa.main.transaction-isolation": "TRANSACTION_SERIALIZABLE",
+    "spring.jpa.show-sql": false,
+    "concurrency.transaction-retry.max-retries": 2,
+    "concurrency.transaction-retry.backoff-ms": 0
+  },
+  "rounds": [
+    {
+      "round": 1,
+      "recordedAt": "2026-10-05T18:35:38.684705+00:00",
+      "gradleExitCode": 0,
+      "tests": [
+        {
+          "suite": "com.loopers.order.application.OrderConcurrencyTest",
+          "name": "[동시성] 한 고객의 잔액 10000원·충분한 재고에서 서로 다른 4000원 DRAFT 주문 3건을 동시에 확정하면 성공 2·잔액 부족 1·기술 오류 0·최종 잔액 2000원이다.",
+          "status": "passed",
+          "seconds": 0.317,
+          "failure": null,
+          "source": "build/serializable-experiment/tests-01/TEST-com.loopers.order.application.OrderConcurrencyTest.xml"
+        },
+        {
+          "suite": "com.loopers.order.application.OrderConcurrencyTest",
+          "name": "[동시성] 재고 5개에 주문 8건을 동시에 확정하면 성공 5·재고 부족 3·최종 재고 0이다.",
+          "status": "passed",
+          "seconds": 0.247,
+          "failure": null,
+          "source": "build/serializable-experiment/tests-01/TEST-com.loopers.order.application.OrderConcurrencyTest.xml"
+        },
+        {
+          "suite": "com.loopers.order.application.OrderConcurrencyTest",
+          "name": "[동시성] 같은 DRAFT 주문을 두 번 동시에 확정하면 한 건만 성공하고 재고·포인트는 한 번만 차감된다.",
+          "status": "passed",
+          "seconds": 0.144,
+          "failure": null,
+          "source": "build/serializable-experiment/tests-01/TEST-com.loopers.order.application.OrderConcurrencyTest.xml"
+        },
+        {
+          "suite": "com.loopers.order.application.OrderConcurrencyTest",
+          "name": "[동시성] 2000원 충전과 7000원 결제가 모두 성공하면 최종 잔액은 5000원이다.",
+          "status": "passed",
+          "seconds": 0.158,
+          "failure": null,
+          "source": "build/serializable-experiment/tests-01/TEST-com.loopers.order.application.OrderConcurrencyTest.xml"
+        },
+        {
+          "suite": "com.loopers.experiment.IsolationProbeTest",
+          "name": "verifiesActualConnectionIsolation()",
+          "status": "passed",
+          "seconds": 0.414,
+          "failure": null,
+          "source": "build/serializable-experiment/tests-01/TEST-com.loopers.experiment.IsolationProbeTest.xml"
+        }
+      ]
+    },
+    {
+      "round": 2,
+      "recordedAt": "2026-10-05T18:35:59.548463+00:00",
+      "gradleExitCode": 1,
+      "tests": [
+        {
+          "suite": "com.loopers.order.application.OrderConcurrencyTest",
+          "name": "[동시성] 한 고객의 잔액 10000원·충분한 재고에서 서로 다른 4000원 DRAFT 주문 3건을 동시에 확정하면 성공 2·잔액 부족 1·기술 오류 0·최종 잔액 2000원이다.",
+          "status": "passed",
+          "seconds": 0.338,
+          "failure": null,
+          "source": "build/serializable-experiment/tests-02/TEST-com.loopers.order.application.OrderConcurrencyTest.xml"
+        },
+        {
+          "suite": "com.loopers.order.application.OrderConcurrencyTest",
+          "name": "[동시성] 재고 5개에 주문 8건을 동시에 확정하면 성공 5·재고 부족 3·최종 재고 0이다.",
+          "status": "failed",
+          "seconds": 0.305,
+          "failure": "org.gradle.internal.exceptions.DefaultMultiCauseException: Multiple Failures (2 failures)\n\torg.opentest4j.AssertionFailedError: \nexpected: 3L\n but was: 2L\n\tjava.lang.AssertionError: \nExpecting empty but was: [Outcome[orderId=3, buyerId=3, success=false, rejection=null, technical=org.springframework.dao.CannotAcquireLockException: could not execute statement [Deadlock found when trying to get lock; try restarting transaction] [update product set brand_id=?,deleted_at=?,name=?,price=?,quantity=?,updated_at=? where id=?]; SQL [update product set brand_id=?,deleted_at=?,name=?,price=?,quantity=?,updated_at=? where id=?]]]",
+          "source": "build/serializable-experiment/tests-02/TEST-com.loopers.order.application.OrderConcurrencyTest.xml"
+        },
+        {
+          "suite": "com.loopers.order.application.OrderConcurrencyTest",
+          "name": "[동시성] 같은 DRAFT 주문을 두 번 동시에 확정하면 한 건만 성공하고 재고·포인트는 한 번만 차감된다.",
+          "status": "passed",
+          "seconds": 0.18,
+          "failure": null,
+          "source": "build/serializable-experiment/tests-02/TEST-com.loopers.order.application.OrderConcurrencyTest.xml"
+        },
+        {
+          "suite": "com.loopers.order.application.OrderConcurrencyTest",
+          "name": "[동시성] 2000원 충전과 7000원 결제가 모두 성공하면 최종 잔액은 5000원이다.",
+          "status": "passed",
+          "seconds": 0.139,
+          "failure": null,
+          "source": "build/serializable-experiment/tests-02/TEST-com.loopers.order.application.OrderConcurrencyTest.xml"
+        },
+        {
+          "suite": "com.loopers.experiment.IsolationProbeTest",
+          "name": "verifiesActualConnectionIsolation()",
+          "status": "passed",
+          "seconds": 0.369,
+          "failure": null,
+          "source": "build/serializable-experiment/tests-02/TEST-com.loopers.experiment.IsolationProbeTest.xml"
+        }
+      ]
+    },
+    {
+      "round": 3,
+      "recordedAt": "2026-10-05T18:36:20.168180+00:00",
+      "gradleExitCode": 0,
+      "tests": [
+        {
+          "suite": "com.loopers.order.application.OrderConcurrencyTest",
+          "name": "[동시성] 한 고객의 잔액 10000원·충분한 재고에서 서로 다른 4000원 DRAFT 주문 3건을 동시에 확정하면 성공 2·잔액 부족 1·기술 오류 0·최종 잔액 2000원이다.",
+          "status": "passed",
+          "seconds": 0.708,
+          "failure": null,
+          "source": "build/serializable-experiment/tests-03/TEST-com.loopers.order.application.OrderConcurrencyTest.xml"
+        },
+        {
+          "suite": "com.loopers.order.application.OrderConcurrencyTest",
+          "name": "[동시성] 재고 5개에 주문 8건을 동시에 확정하면 성공 5·재고 부족 3·최종 재고 0이다.",
+          "status": "passed",
+          "seconds": 0.253,
+          "failure": null,
+          "source": "build/serializable-experiment/tests-03/TEST-com.loopers.order.application.OrderConcurrencyTest.xml"
+        },
+        {
+          "suite": "com.loopers.order.application.OrderConcurrencyTest",
+          "name": "[동시성] 같은 DRAFT 주문을 두 번 동시에 확정하면 한 건만 성공하고 재고·포인트는 한 번만 차감된다.",
+          "status": "passed",
+          "seconds": 0.159,
+          "failure": null,
+          "source": "build/serializable-experiment/tests-03/TEST-com.loopers.order.application.OrderConcurrencyTest.xml"
+        },
+        {
+          "suite": "com.loopers.order.application.OrderConcurrencyTest",
+          "name": "[동시성] 2000원 충전과 7000원 결제가 모두 성공하면 최종 잔액은 5000원이다.",
+          "status": "passed",
+          "seconds": 0.189,
+          "failure": null,
+          "source": "build/serializable-experiment/tests-03/TEST-com.loopers.order.application.OrderConcurrencyTest.xml"
+        },
+        {
+          "suite": "com.loopers.experiment.IsolationProbeTest",
+          "name": "verifiesActualConnectionIsolation()",
+          "status": "passed",
+          "seconds": 0.011,
+          "failure": null,
+          "source": "build/serializable-experiment/tests-03/TEST-com.loopers.experiment.IsolationProbeTest.xml"
+        }
+      ]
+    },
+    {
+      "round": 4,
+      "recordedAt": "2026-10-05T18:36:40.813738+00:00",
+      "gradleExitCode": 1,
+      "tests": [
+        {
+          "suite": "com.loopers.order.application.OrderConcurrencyTest",
+          "name": "[동시성] 한 고객의 잔액 10000원·충분한 재고에서 서로 다른 4000원 DRAFT 주문 3건을 동시에 확정하면 성공 2·잔액 부족 1·기술 오류 0·최종 잔액 2000원이다.",
+          "status": "passed",
+          "seconds": 0.333,
+          "failure": null,
+          "source": "build/serializable-experiment/tests-04/TEST-com.loopers.order.application.OrderConcurrencyTest.xml"
+        },
+        {
+          "suite": "com.loopers.order.application.OrderConcurrencyTest",
+          "name": "[동시성] 재고 5개에 주문 8건을 동시에 확정하면 성공 5·재고 부족 3·최종 재고 0이다.",
+          "status": "failed",
+          "seconds": 0.322,
+          "failure": "org.gradle.internal.exceptions.DefaultMultiCauseException: Multiple Failures (2 failures)\n\torg.opentest4j.AssertionFailedError: \nexpected: 3L\n but was: 2L\n\tjava.lang.AssertionError: \nExpecting empty but was: [Outcome[orderId=7, buyerId=7, success=false, rejection=null, technical=org.springframework.dao.CannotAcquireLockException: could not execute statement [Deadlock found when trying to get lock; try restarting transaction] [update product set brand_id=?,deleted_at=?,name=?,price=?,quantity=?,updated_at=? where id=?]; SQL [update product set brand_id=?,deleted_at=?,name=?,price=?,quantity=?,updated_at=? where id=?]]]",
+          "source": "build/serializable-experiment/tests-04/TEST-com.loopers.order.application.OrderConcurrencyTest.xml"
+        },
+        {
+          "suite": "com.loopers.order.application.OrderConcurrencyTest",
+          "name": "[동시성] 같은 DRAFT 주문을 두 번 동시에 확정하면 한 건만 성공하고 재고·포인트는 한 번만 차감된다.",
+          "status": "passed",
+          "seconds": 0.18,
+          "failure": null,
+          "source": "build/serializable-experiment/tests-04/TEST-com.loopers.order.application.OrderConcurrencyTest.xml"
+        },
+        {
+          "suite": "com.loopers.order.application.OrderConcurrencyTest",
+          "name": "[동시성] 2000원 충전과 7000원 결제가 모두 성공하면 최종 잔액은 5000원이다.",
+          "status": "passed",
+          "seconds": 0.138,
+          "failure": null,
+          "source": "build/serializable-experiment/tests-04/TEST-com.loopers.order.application.OrderConcurrencyTest.xml"
+        },
+        {
+          "suite": "com.loopers.experiment.IsolationProbeTest",
+          "name": "verifiesActualConnectionIsolation()",
+          "status": "passed",
+          "seconds": 0.371,
+          "failure": null,
+          "source": "build/serializable-experiment/tests-04/TEST-com.loopers.experiment.IsolationProbeTest.xml"
+        }
+      ]
+    },
+    {
+      "round": 5,
+      "recordedAt": "2026-10-05T18:37:02.564115+00:00",
+      "gradleExitCode": 1,
+      "tests": [
+        {
+          "suite": "com.loopers.order.application.OrderConcurrencyTest",
+          "name": "[동시성] 한 고객의 잔액 10000원·충분한 재고에서 서로 다른 4000원 DRAFT 주문 3건을 동시에 확정하면 성공 2·잔액 부족 1·기술 오류 0·최종 잔액 2000원이다.",
+          "status": "passed",
+          "seconds": 0.705,
+          "failure": null,
+          "source": "build/serializable-experiment/tests-05/TEST-com.loopers.order.application.OrderConcurrencyTest.xml"
+        },
+        {
+          "suite": "com.loopers.order.application.OrderConcurrencyTest",
+          "name": "[동시성] 재고 5개에 주문 8건을 동시에 확정하면 성공 5·재고 부족 3·최종 재고 0이다.",
+          "status": "failed",
+          "seconds": 0.345,
+          "failure": "org.gradle.internal.exceptions.DefaultMultiCauseException: Multiple Failures (2 failures)\n\torg.opentest4j.AssertionFailedError: \nexpected: 3L\n but was: 1L\n\tjava.lang.AssertionError: \nExpecting empty but was: [Outcome[orderId=3, buyerId=3, success=false, rejection=null, technical=org.springframework.dao.CannotAcquireLockException: could not execute statement [Deadlock found when trying to get lock; try restarting transaction] [update product set brand_id=?,deleted_at=?,name=?,price=?,quantity=?,updated_at=? where id=?]; SQL [update product set brand_id=?,deleted_at=?,name=?,price=?,quantity=?,updated_at=? where id=?]],\n    Outcome[orderId=8, buyerId=8, success=false, rejection=null, technical=org.springframework.dao.CannotAcquireLockException: could not execute statement [Deadlock found when trying to get lock; try restarting transaction] [update product set brand_id=?,deleted_at=?,name=?,price=?,quantity=?,updated_at=? where id=?]; SQL [update product set brand_id=?,deleted_at=?,name=?,price=?,quantity=?,updated_at=? where id=?]]]",
+          "source": "build/serializable-experiment/tests-05/TEST-com.loopers.order.application.OrderConcurrencyTest.xml"
+        },
+        {
+          "suite": "com.loopers.order.application.OrderConcurrencyTest",
+          "name": "[동시성] 같은 DRAFT 주문을 두 번 동시에 확정하면 한 건만 성공하고 재고·포인트는 한 번만 차감된다.",
+          "status": "passed",
+          "seconds": 0.159,
+          "failure": null,
+          "source": "build/serializable-experiment/tests-05/TEST-com.loopers.order.application.OrderConcurrencyTest.xml"
+        },
+        {
+          "suite": "com.loopers.order.application.OrderConcurrencyTest",
+          "name": "[동시성] 2000원 충전과 7000원 결제가 모두 성공하면 최종 잔액은 5000원이다.",
+          "status": "passed",
+          "seconds": 0.169,
+          "failure": null,
+          "source": "build/serializable-experiment/tests-05/TEST-com.loopers.order.application.OrderConcurrencyTest.xml"
+        },
+        {
+          "suite": "com.loopers.experiment.IsolationProbeTest",
+          "name": "verifiesActualConnectionIsolation()",
+          "status": "passed",
+          "seconds": 0.007,
+          "failure": null,
+          "source": "build/serializable-experiment/tests-05/TEST-com.loopers.experiment.IsolationProbeTest.xml"
+        }
+      ]
+    },
+    {
+      "round": 6,
+      "recordedAt": "2026-10-05T18:37:22.631391+00:00",
+      "gradleExitCode": 1,
+      "tests": [
+        {
+          "suite": "com.loopers.order.application.OrderConcurrencyTest",
+          "name": "[동시성] 한 고객의 잔액 10000원·충분한 재고에서 서로 다른 4000원 DRAFT 주문 3건을 동시에 확정하면 성공 2·잔액 부족 1·기술 오류 0·최종 잔액 2000원이다.",
+          "status": "passed",
+          "seconds": 0.717,
+          "failure": null,
+          "source": "build/serializable-experiment/tests-06/TEST-com.loopers.order.application.OrderConcurrencyTest.xml"
+        },
+        {
+          "suite": "com.loopers.order.application.OrderConcurrencyTest",
+          "name": "[동시성] 재고 5개에 주문 8건을 동시에 확정하면 성공 5·재고 부족 3·최종 재고 0이다.",
+          "status": "failed",
+          "seconds": 0.297,
+          "failure": "org.gradle.internal.exceptions.DefaultMultiCauseException: Multiple Failures (2 failures)\n\torg.opentest4j.AssertionFailedError: \nexpected: 3L\n but was: 2L\n\tjava.lang.AssertionError: \nExpecting empty but was: [Outcome[orderId=6, buyerId=6, success=false, rejection=null, technical=org.springframework.dao.CannotAcquireLockException: could not execute statement [Deadlock found when trying to get lock; try restarting transaction] [update product set brand_id=?,deleted_at=?,name=?,price=?,quantity=?,updated_at=? where id=?]; SQL [update product set brand_id=?,deleted_at=?,name=?,price=?,quantity=?,updated_at=? where id=?]]]",
+          "source": "build/serializable-experiment/tests-06/TEST-com.loopers.order.application.OrderConcurrencyTest.xml"
+        },
+        {
+          "suite": "com.loopers.order.application.OrderConcurrencyTest",
+          "name": "[동시성] 같은 DRAFT 주문을 두 번 동시에 확정하면 한 건만 성공하고 재고·포인트는 한 번만 차감된다.",
+          "status": "passed",
+          "seconds": 0.164,
+          "failure": null,
+          "source": "build/serializable-experiment/tests-06/TEST-com.loopers.order.application.OrderConcurrencyTest.xml"
+        },
+        {
+          "suite": "com.loopers.order.application.OrderConcurrencyTest",
+          "name": "[동시성] 2000원 충전과 7000원 결제가 모두 성공하면 최종 잔액은 5000원이다.",
+          "status": "passed",
+          "seconds": 0.177,
+          "failure": null,
+          "source": "build/serializable-experiment/tests-06/TEST-com.loopers.order.application.OrderConcurrencyTest.xml"
+        },
+        {
+          "suite": "com.loopers.experiment.IsolationProbeTest",
+          "name": "verifiesActualConnectionIsolation()",
+          "status": "passed",
+          "seconds": 0.007,
+          "failure": null,
+          "source": "build/serializable-experiment/tests-06/TEST-com.loopers.experiment.IsolationProbeTest.xml"
+        }
+      ]
+    },
+    {
+      "round": 7,
+      "recordedAt": "2026-10-05T18:37:42.409117+00:00",
+      "gradleExitCode": 1,
+      "tests": [
+        {
+          "suite": "com.loopers.order.application.OrderConcurrencyTest",
+          "name": "[동시성] 한 고객의 잔액 10000원·충분한 재고에서 서로 다른 4000원 DRAFT 주문 3건을 동시에 확정하면 성공 2·잔액 부족 1·기술 오류 0·최종 잔액 2000원이다.",
+          "status": "passed",
+          "seconds": 0.705,
+          "failure": null,
+          "source": "build/serializable-experiment/tests-07/TEST-com.loopers.order.application.OrderConcurrencyTest.xml"
+        },
+        {
+          "suite": "com.loopers.order.application.OrderConcurrencyTest",
+          "name": "[동시성] 재고 5개에 주문 8건을 동시에 확정하면 성공 5·재고 부족 3·최종 재고 0이다.",
+          "status": "failed",
+          "seconds": 0.321,
+          "failure": "org.gradle.internal.exceptions.DefaultMultiCauseException: Multiple Failures (2 failures)\n\torg.opentest4j.AssertionFailedError: \nexpected: 3L\n but was: 2L\n\tjava.lang.AssertionError: \nExpecting empty but was: [Outcome[orderId=7, buyerId=7, success=false, rejection=null, technical=org.springframework.dao.CannotAcquireLockException: could not execute statement [Deadlock found when trying to get lock; try restarting transaction] [update product set brand_id=?,deleted_at=?,name=?,price=?,quantity=?,updated_at=? where id=?]; SQL [update product set brand_id=?,deleted_at=?,name=?,price=?,quantity=?,updated_at=? where id=?]]]",
+          "source": "build/serializable-experiment/tests-07/TEST-com.loopers.order.application.OrderConcurrencyTest.xml"
+        },
+        {
+          "suite": "com.loopers.order.application.OrderConcurrencyTest",
+          "name": "[동시성] 같은 DRAFT 주문을 두 번 동시에 확정하면 한 건만 성공하고 재고·포인트는 한 번만 차감된다.",
+          "status": "passed",
+          "seconds": 0.159,
+          "failure": null,
+          "source": "build/serializable-experiment/tests-07/TEST-com.loopers.order.application.OrderConcurrencyTest.xml"
+        },
+        {
+          "suite": "com.loopers.order.application.OrderConcurrencyTest",
+          "name": "[동시성] 2000원 충전과 7000원 결제가 모두 성공하면 최종 잔액은 5000원이다.",
+          "status": "passed",
+          "seconds": 0.137,
+          "failure": null,
+          "source": "build/serializable-experiment/tests-07/TEST-com.loopers.order.application.OrderConcurrencyTest.xml"
+        },
+        {
+          "suite": "com.loopers.experiment.IsolationProbeTest",
+          "name": "verifiesActualConnectionIsolation()",
+          "status": "passed",
+          "seconds": 0.007,
+          "failure": null,
+          "source": "build/serializable-experiment/tests-07/TEST-com.loopers.experiment.IsolationProbeTest.xml"
+        }
+      ]
+    },
+    {
+      "round": 8,
+      "recordedAt": "2026-10-05T18:38:04.748647+00:00",
+      "gradleExitCode": 1,
+      "tests": [
+        {
+          "suite": "com.loopers.order.application.OrderConcurrencyTest",
+          "name": "[동시성] 한 고객의 잔액 10000원·충분한 재고에서 서로 다른 4000원 DRAFT 주문 3건을 동시에 확정하면 성공 2·잔액 부족 1·기술 오류 0·최종 잔액 2000원이다.",
+          "status": "passed",
+          "seconds": 0.898,
+          "failure": null,
+          "source": "build/serializable-experiment/tests-08/TEST-com.loopers.order.application.OrderConcurrencyTest.xml"
+        },
+        {
+          "suite": "com.loopers.order.application.OrderConcurrencyTest",
+          "name": "[동시성] 재고 5개에 주문 8건을 동시에 확정하면 성공 5·재고 부족 3·최종 재고 0이다.",
+          "status": "failed",
+          "seconds": 0.33,
+          "failure": "org.gradle.internal.exceptions.DefaultMultiCauseException: Multiple Failures (2 failures)\n\torg.opentest4j.AssertionFailedError: \nexpected: 3L\n but was: 1L\n\tjava.lang.AssertionError: \nExpecting empty but was: [Outcome[orderId=5, buyerId=5, success=false, rejection=null, technical=org.springframework.dao.CannotAcquireLockException: could not execute statement [Deadlock found when trying to get lock; try restarting transaction] [update product set brand_id=?,deleted_at=?,name=?,price=?,quantity=?,updated_at=? where id=?]; SQL [update product set brand_id=?,deleted_at=?,name=?,price=?,quantity=?,updated_at=? where id=?]],\n    Outcome[orderId=8, buyerId=8, success=false, rejection=null, technical=org.springframework.dao.CannotAcquireLockException: could not execute statement [Deadlock found when trying to get lock; try restarting transaction] [update product set brand_id=?,deleted_at=?,name=?,price=?,quantity=?,updated_at=? where id=?]; SQL [update product set brand_id=?,deleted_at=?,name=?,price=?,quantity=?,updated_at=? where id=?]]]",
+          "source": "build/serializable-experiment/tests-08/TEST-com.loopers.order.application.OrderConcurrencyTest.xml"
+        },
+        {
+          "suite": "com.loopers.order.application.OrderConcurrencyTest",
+          "name": "[동시성] 같은 DRAFT 주문을 두 번 동시에 확정하면 한 건만 성공하고 재고·포인트는 한 번만 차감된다.",
+          "status": "passed",
+          "seconds": 0.172,
+          "failure": null,
+          "source": "build/serializable-experiment/tests-08/TEST-com.loopers.order.application.OrderConcurrencyTest.xml"
+        },
+        {
+          "suite": "com.loopers.order.application.OrderConcurrencyTest",
+          "name": "[동시성] 2000원 충전과 7000원 결제가 모두 성공하면 최종 잔액은 5000원이다.",
+          "status": "passed",
+          "seconds": 0.216,
+          "failure": null,
+          "source": "build/serializable-experiment/tests-08/TEST-com.loopers.order.application.OrderConcurrencyTest.xml"
+        },
+        {
+          "suite": "com.loopers.experiment.IsolationProbeTest",
+          "name": "verifiesActualConnectionIsolation()",
+          "status": "passed",
+          "seconds": 0.008,
+          "failure": null,
+          "source": "build/serializable-experiment/tests-08/TEST-com.loopers.experiment.IsolationProbeTest.xml"
+        }
+      ]
+    },
+    {
+      "round": 9,
+      "recordedAt": "2026-10-05T18:38:24.944691+00:00",
+      "gradleExitCode": 1,
+      "tests": [
+        {
+          "suite": "com.loopers.order.application.OrderConcurrencyTest",
+          "name": "[동시성] 한 고객의 잔액 10000원·충분한 재고에서 서로 다른 4000원 DRAFT 주문 3건을 동시에 확정하면 성공 2·잔액 부족 1·기술 오류 0·최종 잔액 2000원이다.",
+          "status": "passed",
+          "seconds": 0.718,
+          "failure": null,
+          "source": "build/serializable-experiment/tests-09/TEST-com.loopers.order.application.OrderConcurrencyTest.xml"
+        },
+        {
+          "suite": "com.loopers.order.application.OrderConcurrencyTest",
+          "name": "[동시성] 재고 5개에 주문 8건을 동시에 확정하면 성공 5·재고 부족 3·최종 재고 0이다.",
+          "status": "failed",
+          "seconds": 0.298,
+          "failure": "org.gradle.internal.exceptions.DefaultMultiCauseException: Multiple Failures (2 failures)\n\torg.opentest4j.AssertionFailedError: \nexpected: 3L\n but was: 2L\n\tjava.lang.AssertionError: \nExpecting empty but was: [Outcome[orderId=4, buyerId=4, success=false, rejection=null, technical=org.springframework.dao.CannotAcquireLockException: could not execute statement [Deadlock found when trying to get lock; try restarting transaction] [update product set brand_id=?,deleted_at=?,name=?,price=?,quantity=?,updated_at=? where id=?]; SQL [update product set brand_id=?,deleted_at=?,name=?,price=?,quantity=?,updated_at=? where id=?]]]",
+          "source": "build/serializable-experiment/tests-09/TEST-com.loopers.order.application.OrderConcurrencyTest.xml"
+        },
+        {
+          "suite": "com.loopers.order.application.OrderConcurrencyTest",
+          "name": "[동시성] 같은 DRAFT 주문을 두 번 동시에 확정하면 한 건만 성공하고 재고·포인트는 한 번만 차감된다.",
+          "status": "passed",
+          "seconds": 0.152,
+          "failure": null,
+          "source": "build/serializable-experiment/tests-09/TEST-com.loopers.order.application.OrderConcurrencyTest.xml"
+        },
+        {
+          "suite": "com.loopers.order.application.OrderConcurrencyTest",
+          "name": "[동시성] 2000원 충전과 7000원 결제가 모두 성공하면 최종 잔액은 5000원이다.",
+          "status": "passed",
+          "seconds": 0.133,
+          "failure": null,
+          "source": "build/serializable-experiment/tests-09/TEST-com.loopers.order.application.OrderConcurrencyTest.xml"
+        },
+        {
+          "suite": "com.loopers.experiment.IsolationProbeTest",
+          "name": "verifiesActualConnectionIsolation()",
+          "status": "passed",
+          "seconds": 0.008,
+          "failure": null,
+          "source": "build/serializable-experiment/tests-09/TEST-com.loopers.experiment.IsolationProbeTest.xml"
+        }
+      ]
+    },
+    {
+      "round": 10,
+      "recordedAt": "2026-10-05T18:38:44.855348+00:00",
+      "gradleExitCode": 1,
+      "tests": [
+        {
+          "suite": "com.loopers.order.application.OrderConcurrencyTest",
+          "name": "[동시성] 한 고객의 잔액 10000원·충분한 재고에서 서로 다른 4000원 DRAFT 주문 3건을 동시에 확정하면 성공 2·잔액 부족 1·기술 오류 0·최종 잔액 2000원이다.",
+          "status": "passed",
+          "seconds": 0.71,
+          "failure": null,
+          "source": "build/serializable-experiment/tests-10/TEST-com.loopers.order.application.OrderConcurrencyTest.xml"
+        },
+        {
+          "suite": "com.loopers.order.application.OrderConcurrencyTest",
+          "name": "[동시성] 재고 5개에 주문 8건을 동시에 확정하면 성공 5·재고 부족 3·최종 재고 0이다.",
+          "status": "failed",
+          "seconds": 0.318,
+          "failure": "org.gradle.internal.exceptions.DefaultMultiCauseException: Multiple Failures (2 failures)\n\torg.opentest4j.AssertionFailedError: \nexpected: 3L\n but was: 1L\n\tjava.lang.AssertionError: \nExpecting empty but was: [Outcome[orderId=3, buyerId=3, success=false, rejection=null, technical=org.springframework.dao.CannotAcquireLockException: could not execute statement [Deadlock found when trying to get lock; try restarting transaction] [update product set brand_id=?,deleted_at=?,name=?,price=?,quantity=?,updated_at=? where id=?]; SQL [update product set brand_id=?,deleted_at=?,name=?,price=?,quantity=?,updated_at=? where id=?]],\n    Outcome[orderId=4, buyerId=4, success=false, rejection=null, technical=org.springframework.dao.CannotAcquireLockException: could not execute statement [Deadlock found when trying to get lock; try restarting transaction] [update product set brand_id=?,deleted_at=?,name=?,price=?,quantity=?,updated_at=? where id=?]; SQL [update product set brand_id=?,deleted_at=?,name=?,price=?,quantity=?,updated_at=? where id=?]]]",
+          "source": "build/serializable-experiment/tests-10/TEST-com.loopers.order.application.OrderConcurrencyTest.xml"
+        },
+        {
+          "suite": "com.loopers.order.application.OrderConcurrencyTest",
+          "name": "[동시성] 같은 DRAFT 주문을 두 번 동시에 확정하면 한 건만 성공하고 재고·포인트는 한 번만 차감된다.",
+          "status": "passed",
+          "seconds": 0.163,
+          "failure": null,
+          "source": "build/serializable-experiment/tests-10/TEST-com.loopers.order.application.OrderConcurrencyTest.xml"
+        },
+        {
+          "suite": "com.loopers.order.application.OrderConcurrencyTest",
+          "name": "[동시성] 2000원 충전과 7000원 결제가 모두 성공하면 최종 잔액은 5000원이다.",
+          "status": "passed",
+          "seconds": 0.158,
+          "failure": null,
+          "source": "build/serializable-experiment/tests-10/TEST-com.loopers.order.application.OrderConcurrencyTest.xml"
+        },
+        {
+          "suite": "com.loopers.experiment.IsolationProbeTest",
+          "name": "verifiesActualConnectionIsolation()",
+          "status": "passed",
+          "seconds": 0.007,
+          "failure": null,
+          "source": "build/serializable-experiment/tests-10/TEST-com.loopers.experiment.IsolationProbeTest.xml"
+        }
+      ]
+    }
+  ]
+}

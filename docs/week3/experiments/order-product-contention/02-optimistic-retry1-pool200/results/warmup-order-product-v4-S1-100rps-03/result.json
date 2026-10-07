@@ -1,0 +1,145 @@
+{
+  "schemaVersion": 1,
+  "experimentId": "order-product-contention/optimistic-version-retry1",
+  "runId": "warmup-order-product-v4-S1-100rps-03",
+  "gitSha": "477fc029a44912feceedcb48a7b8b35b7a1eeb32",
+  "workingTreeChanges": true,
+  "status": "completed",
+  "startedAt": "2026-10-06T22:52:03.522228+00:00",
+  "finishedAt": "2026-10-06T22:52:34.304698+00:00",
+  "config": {
+    "scenario": "S1",
+    "rps": 100,
+    "durationSeconds": 30,
+    "repetition": 3,
+    "vus": 200,
+    "initialStock": {
+      "1": 900,
+      "2": 3000,
+      "3": 3000,
+      "4": 3000,
+      "5": 3000,
+      "6": 3000,
+      "7": 3000,
+      "8": 3000,
+      "9": 3000,
+      "10": 3000
+    },
+    "twoItemShare": null,
+    "randomSeed": 20261005,
+    "dataSha256": "00eb06d95d1f21ca858d406ce3f105bbee0bc1d6556bd9d70a8a2fc7383c7c37",
+    "applicationSessionIsolation": "REPEATABLE-READ\t200",
+    "jvmOptions": [],
+    "specId": "local-01",
+    "retryCount": 0
+  },
+  "requests": {
+    "planned": 3000,
+    "started": 3000,
+    "completed": 3000,
+    "notStarted": 0,
+    "incomplete": 0,
+    "success": 900,
+    "businessRejection": 1980,
+    "technicalError": 120,
+    "optimisticConflict": 0,
+    "errors": {
+      "unclassified": 120,
+      "INSUFFICIENT_STOCK": 1980
+    }
+  },
+  "admin": {
+    "planned": 1,
+    "completed": 1,
+    "success": 1,
+    "businessRejection": 0,
+    "technicalError": 0,
+    "errors": {}
+  },
+  "metrics": {
+    "measurementSeconds": 29.997,
+    "throughput": 100.0100010001,
+    "successThroughput": 30.003000300030003,
+    "latencyMs": {
+      "count": 3000,
+      "p50": 7.0,
+      "p95": 20.0,
+      "p99": 503.02000000000044
+    },
+    "latencyByOutcomeMs": {
+      "success": {
+        "count": 900,
+        "p50": 7.0,
+        "p95": 13.0,
+        "p99": 60.09999999999991
+      },
+      "businessRejection": {
+        "count": 1980,
+        "p50": 6.0,
+        "p95": 9.0,
+        "p99": 18.0
+      },
+      "technicalError": {
+        "count": 120,
+        "p50": 278.0,
+        "p95": 667.3,
+        "p99": 692.1
+      }
+    },
+    "stockoutPhases": {
+      "boundaryNs": "1791327133772000000",
+      "boundaryMeaning": "first observed insufficient-stock response (not exact DB depletion time)",
+      "before": {
+        "count": 1020,
+        "p50": 7.0,
+        "p95": 331.0,
+        "p99": 654.0
+      },
+      "after": {
+        "count": 1980,
+        "p50": 6.0,
+        "p95": 9.0,
+        "p99": 18.0
+      }
+    },
+    "adminLatencyMs": {
+      "count": 1,
+      "p50": 109.0,
+      "p95": 109.0,
+      "p99": 109.0
+    },
+    "optimisticConflictRate": null,
+    "optimisticConflictRateReason": "not used"
+  },
+  "validation": {
+    "status": "passed",
+    "checks": [
+      "orderPaymentBalance",
+      "stock",
+      "orderItemsUnchanged",
+      "orderCount",
+      "uniqueOrderRequests"
+    ],
+    "failures": [],
+    "confirmedOrders": 900,
+    "finalStock": {
+      "1": 0,
+      "2": 3000,
+      "3": 3000,
+      "4": 3000,
+      "5": 3000,
+      "6": 3000,
+      "7": 3000,
+      "8": 3000,
+      "9": 3000,
+      "10": 3000
+    }
+  },
+  "artifacts": {
+    "traces": "traces.json",
+    "adminTraces": "admin-traces.json",
+    "environment": "environment.json",
+    "raw": "../../../../../../../build/serializable-experiment/warmup-order-product-v4-S1-100rps-03"
+  },
+  "k6ExitCode": 0
+}

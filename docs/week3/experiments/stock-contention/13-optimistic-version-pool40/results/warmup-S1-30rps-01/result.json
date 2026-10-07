@@ -1,0 +1,129 @@
+{
+  "schemaVersion": 1,
+  "experimentId": "stock-contention/13-optimistic-version-pool40",
+  "runId": "warmup-S1-30rps-01",
+  "gitSha": "e9cf52d8e736d9306327c6687cb323996cd1c025",
+  "workingTreeChanges": true,
+  "status": "completed",
+  "startedAt": "2026-10-06T12:22:35.381998+00:00",
+  "finishedAt": "2026-10-06T12:23:05.763719+00:00",
+  "config": {
+    "scenario": "S1",
+    "rps": 30,
+    "durationSeconds": 30,
+    "repetition": 1,
+    "vus": 200,
+    "initialStock": {
+      "1": 270,
+      "2": 900,
+      "3": 900,
+      "4": 900,
+      "5": 900,
+      "6": 900,
+      "7": 900,
+      "8": 900,
+      "9": 900,
+      "10": 900
+    },
+    "twoItemShare": null,
+    "randomSeed": 20261005,
+    "dataSha256": "ebcb99bf8ed4048a27543e2ee53403de739b0b39bf796701f9b59293da4e6f15",
+    "applicationSessionIsolation": "REPEATABLE-READ\t30",
+    "jvmOptions": [],
+    "specId": "local-01",
+    "retryCount": 0
+  },
+  "requests": {
+    "planned": 900,
+    "started": 900,
+    "completed": 900,
+    "notStarted": 0,
+    "incomplete": 0,
+    "success": 270,
+    "businessRejection": 630,
+    "technicalError": 0,
+    "optimisticConflict": 0,
+    "errors": {
+      "INSUFFICIENT_STOCK": 630
+    }
+  },
+  "metrics": {
+    "measurementSeconds": 29.976,
+    "throughput": 30.0240192153723,
+    "successThroughput": 9.00720576461169,
+    "latencyMs": {
+      "count": 900,
+      "p50": 14.0,
+      "p95": 23.0,
+      "p99": 40.01999999999998
+    },
+    "latencyByOutcomeMs": {
+      "success": {
+        "count": 270,
+        "p50": 15.0,
+        "p95": 20.0,
+        "p99": 23.0
+      },
+      "businessRejection": {
+        "count": 630,
+        "p50": 13.0,
+        "p95": 23.0,
+        "p99": 45.55000000000018
+      },
+      "technicalError": {
+        "count": 0,
+        "p50": null,
+        "p95": null,
+        "p99": null
+      }
+    },
+    "stockoutPhases": {
+      "boundaryNs": "1791289364437000000",
+      "boundaryMeaning": "first observed insufficient-stock response (not exact DB depletion time)",
+      "before": {
+        "count": 270,
+        "p50": 15.0,
+        "p95": 20.0,
+        "p99": 23.0
+      },
+      "after": {
+        "count": 630,
+        "p50": 13.0,
+        "p95": 23.0,
+        "p99": 45.55000000000018
+      }
+    },
+    "optimisticConflictRate": 0.0,
+    "optimisticConflictRateReason": "JPA @Version conflict classified from server evidence"
+  },
+  "validation": {
+    "status": "passed",
+    "checks": [
+      "orderPaymentBalance",
+      "stock",
+      "orderItemsUnchanged",
+      "orderCount",
+      "uniqueOrderRequests"
+    ],
+    "failures": [],
+    "confirmedOrders": 270,
+    "finalStock": {
+      "1": 0,
+      "2": 900,
+      "3": 900,
+      "4": 900,
+      "5": 900,
+      "6": 900,
+      "7": 900,
+      "8": 900,
+      "9": 900,
+      "10": 900
+    }
+  },
+  "artifacts": {
+    "traces": "traces.json",
+    "environment": "environment.json",
+    "raw": "../../../../../../../build/serializable-experiment/warmup-S1-30rps-01"
+  },
+  "k6ExitCode": 0
+}

@@ -1,0 +1,17 @@
+{
+  "runId": "measure-order-product-v4-S1-10rps-02",
+  "timestampResolution": "1ms",
+  "traces": [
+    {
+      "runId": "measure-order-product-v4-S1-10rps-02",
+      "requestId": "measure-order-product-v4-S1-10rps-02-300-admin",
+      "operation": "product.update.admin",
+      "startNs": "1791324246704000000",
+      "endNs": "1791324246831000000",
+      "latencyMs": 127,
+      "httpStatus": 200,
+      "outcome": "success",
+      "transportError": null
+    }
+  ]
+}

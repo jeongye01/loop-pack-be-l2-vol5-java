@@ -1,0 +1,9 @@
+{
+  "datasource.mysql-jpa.main.transaction-isolation": "TRANSACTION_SERIALIZABLE",
+  "spring.jpa.show-sql": false,
+  "datasource.mysql-jpa.main.maximum-pool-size": 200,
+  "datasource.mysql-jpa.main.minimum-idle": 200,
+  "datasource.mysql-jpa.main.connection-timeout": 3000,
+  "concurrency.transaction-retry.max-retries": 0,
+  "concurrency.transaction-retry.backoff-ms": 0
+}

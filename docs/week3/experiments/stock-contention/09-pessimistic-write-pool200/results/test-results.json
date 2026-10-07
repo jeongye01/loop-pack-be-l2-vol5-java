@@ -1,0 +1,486 @@
+{
+  "schemaVersion": 1,
+  "experimentId": "stock-contention/09-pessimistic-write-pool200",
+  "gitSha": "778e0af22ee157abb9b00dbf576d25c156b40b87",
+  "workingTreeChanges": true,
+  "config": {
+    "spring.jpa.show-sql": false,
+    "datasource.mysql-jpa.main.maximum-pool-size": 200,
+    "datasource.mysql-jpa.main.minimum-idle": 200,
+    "datasource.mysql-jpa.main.connection-timeout": 3000,
+    "concurrency.transaction-retry.max-retries": 0,
+    "concurrency.transaction-retry.backoff-ms": 0
+  },
+  "rounds": [
+    {
+      "round": 1,
+      "recordedAt": "2026-10-05T22:05:22.076745+00:00",
+      "gradleExitCode": 0,
+      "tests": [
+        {
+          "suite": "com.loopers.order.application.OrderConcurrencyTest",
+          "name": "[동시성] 한 고객의 잔액 10000원·충분한 재고에서 서로 다른 4000원 DRAFT 주문 3건을 동시에 확정하면 성공 2·잔액 부족 1·기술 오류 0·최종 잔액 2000원이다.",
+          "status": "passed",
+          "seconds": 0.364,
+          "failure": null,
+          "source": "build/serializable-experiment/tests-01/TEST-com.loopers.order.application.OrderConcurrencyTest.xml"
+        },
+        {
+          "suite": "com.loopers.order.application.OrderConcurrencyTest",
+          "name": "[동시성] 재고 5개에 주문 8건을 동시에 확정하면 성공 5·재고 부족 3·최종 재고 0이다.",
+          "status": "passed",
+          "seconds": 0.259,
+          "failure": null,
+          "source": "build/serializable-experiment/tests-01/TEST-com.loopers.order.application.OrderConcurrencyTest.xml"
+        },
+        {
+          "suite": "com.loopers.order.application.OrderConcurrencyTest",
+          "name": "[동시성] 같은 DRAFT 주문을 두 번 동시에 확정하면 한 건만 성공하고 재고·포인트는 한 번만 차감된다.",
+          "status": "passed",
+          "seconds": 0.162,
+          "failure": null,
+          "source": "build/serializable-experiment/tests-01/TEST-com.loopers.order.application.OrderConcurrencyTest.xml"
+        },
+        {
+          "suite": "com.loopers.order.application.OrderConcurrencyTest",
+          "name": "[동시성] 2000원 충전과 7000원 결제가 모두 성공하면 최종 잔액은 5000원이다.",
+          "status": "passed",
+          "seconds": 0.311,
+          "failure": null,
+          "source": "build/serializable-experiment/tests-01/TEST-com.loopers.order.application.OrderConcurrencyTest.xml"
+        },
+        {
+          "suite": "com.loopers.experiment.IsolationProbeTest",
+          "name": "verifiesActualConnectionIsolation()",
+          "status": "passed",
+          "seconds": 0.419,
+          "failure": null,
+          "source": "build/serializable-experiment/tests-01/TEST-com.loopers.experiment.IsolationProbeTest.xml"
+        }
+      ]
+    },
+    {
+      "round": 2,
+      "recordedAt": "2026-10-05T22:05:43.191784+00:00",
+      "gradleExitCode": 0,
+      "tests": [
+        {
+          "suite": "com.loopers.order.application.OrderConcurrencyTest",
+          "name": "[동시성] 한 고객의 잔액 10000원·충분한 재고에서 서로 다른 4000원 DRAFT 주문 3건을 동시에 확정하면 성공 2·잔액 부족 1·기술 오류 0·최종 잔액 2000원이다.",
+          "status": "passed",
+          "seconds": 0.345,
+          "failure": null,
+          "source": "build/serializable-experiment/tests-02/TEST-com.loopers.order.application.OrderConcurrencyTest.xml"
+        },
+        {
+          "suite": "com.loopers.order.application.OrderConcurrencyTest",
+          "name": "[동시성] 재고 5개에 주문 8건을 동시에 확정하면 성공 5·재고 부족 3·최종 재고 0이다.",
+          "status": "passed",
+          "seconds": 0.252,
+          "failure": null,
+          "source": "build/serializable-experiment/tests-02/TEST-com.loopers.order.application.OrderConcurrencyTest.xml"
+        },
+        {
+          "suite": "com.loopers.order.application.OrderConcurrencyTest",
+          "name": "[동시성] 같은 DRAFT 주문을 두 번 동시에 확정하면 한 건만 성공하고 재고·포인트는 한 번만 차감된다.",
+          "status": "passed",
+          "seconds": 0.18,
+          "failure": null,
+          "source": "build/serializable-experiment/tests-02/TEST-com.loopers.order.application.OrderConcurrencyTest.xml"
+        },
+        {
+          "suite": "com.loopers.order.application.OrderConcurrencyTest",
+          "name": "[동시성] 2000원 충전과 7000원 결제가 모두 성공하면 최종 잔액은 5000원이다.",
+          "status": "passed",
+          "seconds": 0.208,
+          "failure": null,
+          "source": "build/serializable-experiment/tests-02/TEST-com.loopers.order.application.OrderConcurrencyTest.xml"
+        },
+        {
+          "suite": "com.loopers.experiment.IsolationProbeTest",
+          "name": "verifiesActualConnectionIsolation()",
+          "status": "passed",
+          "seconds": 0.415,
+          "failure": null,
+          "source": "build/serializable-experiment/tests-02/TEST-com.loopers.experiment.IsolationProbeTest.xml"
+        }
+      ]
+    },
+    {
+      "round": 3,
+      "recordedAt": "2026-10-05T22:06:04.756058+00:00",
+      "gradleExitCode": 0,
+      "tests": [
+        {
+          "suite": "com.loopers.order.application.OrderConcurrencyTest",
+          "name": "[동시성] 한 고객의 잔액 10000원·충분한 재고에서 서로 다른 4000원 DRAFT 주문 3건을 동시에 확정하면 성공 2·잔액 부족 1·기술 오류 0·최종 잔액 2000원이다.",
+          "status": "passed",
+          "seconds": 0.376,
+          "failure": null,
+          "source": "build/serializable-experiment/tests-03/TEST-com.loopers.order.application.OrderConcurrencyTest.xml"
+        },
+        {
+          "suite": "com.loopers.order.application.OrderConcurrencyTest",
+          "name": "[동시성] 재고 5개에 주문 8건을 동시에 확정하면 성공 5·재고 부족 3·최종 재고 0이다.",
+          "status": "passed",
+          "seconds": 0.258,
+          "failure": null,
+          "source": "build/serializable-experiment/tests-03/TEST-com.loopers.order.application.OrderConcurrencyTest.xml"
+        },
+        {
+          "suite": "com.loopers.order.application.OrderConcurrencyTest",
+          "name": "[동시성] 같은 DRAFT 주문을 두 번 동시에 확정하면 한 건만 성공하고 재고·포인트는 한 번만 차감된다.",
+          "status": "passed",
+          "seconds": 0.195,
+          "failure": null,
+          "source": "build/serializable-experiment/tests-03/TEST-com.loopers.order.application.OrderConcurrencyTest.xml"
+        },
+        {
+          "suite": "com.loopers.order.application.OrderConcurrencyTest",
+          "name": "[동시성] 2000원 충전과 7000원 결제가 모두 성공하면 최종 잔액은 5000원이다.",
+          "status": "passed",
+          "seconds": 0.196,
+          "failure": null,
+          "source": "build/serializable-experiment/tests-03/TEST-com.loopers.order.application.OrderConcurrencyTest.xml"
+        },
+        {
+          "suite": "com.loopers.experiment.IsolationProbeTest",
+          "name": "verifiesActualConnectionIsolation()",
+          "status": "passed",
+          "seconds": 0.357,
+          "failure": null,
+          "source": "build/serializable-experiment/tests-03/TEST-com.loopers.experiment.IsolationProbeTest.xml"
+        }
+      ]
+    },
+    {
+      "round": 4,
+      "recordedAt": "2026-10-05T22:06:26.478852+00:00",
+      "gradleExitCode": 0,
+      "tests": [
+        {
+          "suite": "com.loopers.order.application.OrderConcurrencyTest",
+          "name": "[동시성] 한 고객의 잔액 10000원·충분한 재고에서 서로 다른 4000원 DRAFT 주문 3건을 동시에 확정하면 성공 2·잔액 부족 1·기술 오류 0·최종 잔액 2000원이다.",
+          "status": "passed",
+          "seconds": 0.359,
+          "failure": null,
+          "source": "build/serializable-experiment/tests-04/TEST-com.loopers.order.application.OrderConcurrencyTest.xml"
+        },
+        {
+          "suite": "com.loopers.order.application.OrderConcurrencyTest",
+          "name": "[동시성] 재고 5개에 주문 8건을 동시에 확정하면 성공 5·재고 부족 3·최종 재고 0이다.",
+          "status": "passed",
+          "seconds": 0.26,
+          "failure": null,
+          "source": "build/serializable-experiment/tests-04/TEST-com.loopers.order.application.OrderConcurrencyTest.xml"
+        },
+        {
+          "suite": "com.loopers.order.application.OrderConcurrencyTest",
+          "name": "[동시성] 같은 DRAFT 주문을 두 번 동시에 확정하면 한 건만 성공하고 재고·포인트는 한 번만 차감된다.",
+          "status": "passed",
+          "seconds": 0.173,
+          "failure": null,
+          "source": "build/serializable-experiment/tests-04/TEST-com.loopers.order.application.OrderConcurrencyTest.xml"
+        },
+        {
+          "suite": "com.loopers.order.application.OrderConcurrencyTest",
+          "name": "[동시성] 2000원 충전과 7000원 결제가 모두 성공하면 최종 잔액은 5000원이다.",
+          "status": "passed",
+          "seconds": 0.247,
+          "failure": null,
+          "source": "build/serializable-experiment/tests-04/TEST-com.loopers.order.application.OrderConcurrencyTest.xml"
+        },
+        {
+          "suite": "com.loopers.experiment.IsolationProbeTest",
+          "name": "verifiesActualConnectionIsolation()",
+          "status": "passed",
+          "seconds": 0.372,
+          "failure": null,
+          "source": "build/serializable-experiment/tests-04/TEST-com.loopers.experiment.IsolationProbeTest.xml"
+        }
+      ]
+    },
+    {
+      "round": 5,
+      "recordedAt": "2026-10-05T22:06:47.855214+00:00",
+      "gradleExitCode": 0,
+      "tests": [
+        {
+          "suite": "com.loopers.order.application.OrderConcurrencyTest",
+          "name": "[동시성] 한 고객의 잔액 10000원·충분한 재고에서 서로 다른 4000원 DRAFT 주문 3건을 동시에 확정하면 성공 2·잔액 부족 1·기술 오류 0·최종 잔액 2000원이다.",
+          "status": "passed",
+          "seconds": 0.354,
+          "failure": null,
+          "source": "build/serializable-experiment/tests-05/TEST-com.loopers.order.application.OrderConcurrencyTest.xml"
+        },
+        {
+          "suite": "com.loopers.order.application.OrderConcurrencyTest",
+          "name": "[동시성] 재고 5개에 주문 8건을 동시에 확정하면 성공 5·재고 부족 3·최종 재고 0이다.",
+          "status": "passed",
+          "seconds": 0.274,
+          "failure": null,
+          "source": "build/serializable-experiment/tests-05/TEST-com.loopers.order.application.OrderConcurrencyTest.xml"
+        },
+        {
+          "suite": "com.loopers.order.application.OrderConcurrencyTest",
+          "name": "[동시성] 같은 DRAFT 주문을 두 번 동시에 확정하면 한 건만 성공하고 재고·포인트는 한 번만 차감된다.",
+          "status": "passed",
+          "seconds": 0.188,
+          "failure": null,
+          "source": "build/serializable-experiment/tests-05/TEST-com.loopers.order.application.OrderConcurrencyTest.xml"
+        },
+        {
+          "suite": "com.loopers.order.application.OrderConcurrencyTest",
+          "name": "[동시성] 2000원 충전과 7000원 결제가 모두 성공하면 최종 잔액은 5000원이다.",
+          "status": "passed",
+          "seconds": 0.215,
+          "failure": null,
+          "source": "build/serializable-experiment/tests-05/TEST-com.loopers.order.application.OrderConcurrencyTest.xml"
+        },
+        {
+          "suite": "com.loopers.experiment.IsolationProbeTest",
+          "name": "verifiesActualConnectionIsolation()",
+          "status": "passed",
+          "seconds": 0.366,
+          "failure": null,
+          "source": "build/serializable-experiment/tests-05/TEST-com.loopers.experiment.IsolationProbeTest.xml"
+        }
+      ]
+    },
+    {
+      "round": 6,
+      "recordedAt": "2026-10-05T22:07:10.624164+00:00",
+      "gradleExitCode": 0,
+      "tests": [
+        {
+          "suite": "com.loopers.order.application.OrderConcurrencyTest",
+          "name": "[동시성] 한 고객의 잔액 10000원·충분한 재고에서 서로 다른 4000원 DRAFT 주문 3건을 동시에 확정하면 성공 2·잔액 부족 1·기술 오류 0·최종 잔액 2000원이다.",
+          "status": "passed",
+          "seconds": 0.378,
+          "failure": null,
+          "source": "build/serializable-experiment/tests-06/TEST-com.loopers.order.application.OrderConcurrencyTest.xml"
+        },
+        {
+          "suite": "com.loopers.order.application.OrderConcurrencyTest",
+          "name": "[동시성] 재고 5개에 주문 8건을 동시에 확정하면 성공 5·재고 부족 3·최종 재고 0이다.",
+          "status": "passed",
+          "seconds": 0.255,
+          "failure": null,
+          "source": "build/serializable-experiment/tests-06/TEST-com.loopers.order.application.OrderConcurrencyTest.xml"
+        },
+        {
+          "suite": "com.loopers.order.application.OrderConcurrencyTest",
+          "name": "[동시성] 같은 DRAFT 주문을 두 번 동시에 확정하면 한 건만 성공하고 재고·포인트는 한 번만 차감된다.",
+          "status": "passed",
+          "seconds": 0.171,
+          "failure": null,
+          "source": "build/serializable-experiment/tests-06/TEST-com.loopers.order.application.OrderConcurrencyTest.xml"
+        },
+        {
+          "suite": "com.loopers.order.application.OrderConcurrencyTest",
+          "name": "[동시성] 2000원 충전과 7000원 결제가 모두 성공하면 최종 잔액은 5000원이다.",
+          "status": "passed",
+          "seconds": 0.253,
+          "failure": null,
+          "source": "build/serializable-experiment/tests-06/TEST-com.loopers.order.application.OrderConcurrencyTest.xml"
+        },
+        {
+          "suite": "com.loopers.experiment.IsolationProbeTest",
+          "name": "verifiesActualConnectionIsolation()",
+          "status": "passed",
+          "seconds": 0.38,
+          "failure": null,
+          "source": "build/serializable-experiment/tests-06/TEST-com.loopers.experiment.IsolationProbeTest.xml"
+        }
+      ]
+    },
+    {
+      "round": 7,
+      "recordedAt": "2026-10-05T22:07:32.567734+00:00",
+      "gradleExitCode": 0,
+      "tests": [
+        {
+          "suite": "com.loopers.order.application.OrderConcurrencyTest",
+          "name": "[동시성] 한 고객의 잔액 10000원·충분한 재고에서 서로 다른 4000원 DRAFT 주문 3건을 동시에 확정하면 성공 2·잔액 부족 1·기술 오류 0·최종 잔액 2000원이다.",
+          "status": "passed",
+          "seconds": 0.453,
+          "failure": null,
+          "source": "build/serializable-experiment/tests-07/TEST-com.loopers.order.application.OrderConcurrencyTest.xml"
+        },
+        {
+          "suite": "com.loopers.order.application.OrderConcurrencyTest",
+          "name": "[동시성] 재고 5개에 주문 8건을 동시에 확정하면 성공 5·재고 부족 3·최종 재고 0이다.",
+          "status": "passed",
+          "seconds": 0.425,
+          "failure": null,
+          "source": "build/serializable-experiment/tests-07/TEST-com.loopers.order.application.OrderConcurrencyTest.xml"
+        },
+        {
+          "suite": "com.loopers.order.application.OrderConcurrencyTest",
+          "name": "[동시성] 같은 DRAFT 주문을 두 번 동시에 확정하면 한 건만 성공하고 재고·포인트는 한 번만 차감된다.",
+          "status": "passed",
+          "seconds": 0.197,
+          "failure": null,
+          "source": "build/serializable-experiment/tests-07/TEST-com.loopers.order.application.OrderConcurrencyTest.xml"
+        },
+        {
+          "suite": "com.loopers.order.application.OrderConcurrencyTest",
+          "name": "[동시성] 2000원 충전과 7000원 결제가 모두 성공하면 최종 잔액은 5000원이다.",
+          "status": "passed",
+          "seconds": 0.189,
+          "failure": null,
+          "source": "build/serializable-experiment/tests-07/TEST-com.loopers.order.application.OrderConcurrencyTest.xml"
+        },
+        {
+          "suite": "com.loopers.experiment.IsolationProbeTest",
+          "name": "verifiesActualConnectionIsolation()",
+          "status": "passed",
+          "seconds": 0.392,
+          "failure": null,
+          "source": "build/serializable-experiment/tests-07/TEST-com.loopers.experiment.IsolationProbeTest.xml"
+        }
+      ]
+    },
+    {
+      "round": 8,
+      "recordedAt": "2026-10-05T22:07:54.667084+00:00",
+      "gradleExitCode": 0,
+      "tests": [
+        {
+          "suite": "com.loopers.order.application.OrderConcurrencyTest",
+          "name": "[동시성] 한 고객의 잔액 10000원·충분한 재고에서 서로 다른 4000원 DRAFT 주문 3건을 동시에 확정하면 성공 2·잔액 부족 1·기술 오류 0·최종 잔액 2000원이다.",
+          "status": "passed",
+          "seconds": 0.363,
+          "failure": null,
+          "source": "build/serializable-experiment/tests-08/TEST-com.loopers.order.application.OrderConcurrencyTest.xml"
+        },
+        {
+          "suite": "com.loopers.order.application.OrderConcurrencyTest",
+          "name": "[동시성] 재고 5개에 주문 8건을 동시에 확정하면 성공 5·재고 부족 3·최종 재고 0이다.",
+          "status": "passed",
+          "seconds": 0.282,
+          "failure": null,
+          "source": "build/serializable-experiment/tests-08/TEST-com.loopers.order.application.OrderConcurrencyTest.xml"
+        },
+        {
+          "suite": "com.loopers.order.application.OrderConcurrencyTest",
+          "name": "[동시성] 같은 DRAFT 주문을 두 번 동시에 확정하면 한 건만 성공하고 재고·포인트는 한 번만 차감된다.",
+          "status": "passed",
+          "seconds": 0.171,
+          "failure": null,
+          "source": "build/serializable-experiment/tests-08/TEST-com.loopers.order.application.OrderConcurrencyTest.xml"
+        },
+        {
+          "suite": "com.loopers.order.application.OrderConcurrencyTest",
+          "name": "[동시성] 2000원 충전과 7000원 결제가 모두 성공하면 최종 잔액은 5000원이다.",
+          "status": "passed",
+          "seconds": 0.263,
+          "failure": null,
+          "source": "build/serializable-experiment/tests-08/TEST-com.loopers.order.application.OrderConcurrencyTest.xml"
+        },
+        {
+          "suite": "com.loopers.experiment.IsolationProbeTest",
+          "name": "verifiesActualConnectionIsolation()",
+          "status": "passed",
+          "seconds": 0.353,
+          "failure": null,
+          "source": "build/serializable-experiment/tests-08/TEST-com.loopers.experiment.IsolationProbeTest.xml"
+        }
+      ]
+    },
+    {
+      "round": 9,
+      "recordedAt": "2026-10-05T22:08:17.018328+00:00",
+      "gradleExitCode": 0,
+      "tests": [
+        {
+          "suite": "com.loopers.order.application.OrderConcurrencyTest",
+          "name": "[동시성] 한 고객의 잔액 10000원·충분한 재고에서 서로 다른 4000원 DRAFT 주문 3건을 동시에 확정하면 성공 2·잔액 부족 1·기술 오류 0·최종 잔액 2000원이다.",
+          "status": "passed",
+          "seconds": 0.356,
+          "failure": null,
+          "source": "build/serializable-experiment/tests-09/TEST-com.loopers.order.application.OrderConcurrencyTest.xml"
+        },
+        {
+          "suite": "com.loopers.order.application.OrderConcurrencyTest",
+          "name": "[동시성] 재고 5개에 주문 8건을 동시에 확정하면 성공 5·재고 부족 3·최종 재고 0이다.",
+          "status": "passed",
+          "seconds": 0.255,
+          "failure": null,
+          "source": "build/serializable-experiment/tests-09/TEST-com.loopers.order.application.OrderConcurrencyTest.xml"
+        },
+        {
+          "suite": "com.loopers.order.application.OrderConcurrencyTest",
+          "name": "[동시성] 같은 DRAFT 주문을 두 번 동시에 확정하면 한 건만 성공하고 재고·포인트는 한 번만 차감된다.",
+          "status": "passed",
+          "seconds": 0.172,
+          "failure": null,
+          "source": "build/serializable-experiment/tests-09/TEST-com.loopers.order.application.OrderConcurrencyTest.xml"
+        },
+        {
+          "suite": "com.loopers.order.application.OrderConcurrencyTest",
+          "name": "[동시성] 2000원 충전과 7000원 결제가 모두 성공하면 최종 잔액은 5000원이다.",
+          "status": "passed",
+          "seconds": 0.216,
+          "failure": null,
+          "source": "build/serializable-experiment/tests-09/TEST-com.loopers.order.application.OrderConcurrencyTest.xml"
+        },
+        {
+          "suite": "com.loopers.experiment.IsolationProbeTest",
+          "name": "verifiesActualConnectionIsolation()",
+          "status": "passed",
+          "seconds": 0.357,
+          "failure": null,
+          "source": "build/serializable-experiment/tests-09/TEST-com.loopers.experiment.IsolationProbeTest.xml"
+        }
+      ]
+    },
+    {
+      "round": 10,
+      "recordedAt": "2026-10-05T22:08:42.170637+00:00",
+      "gradleExitCode": 0,
+      "tests": [
+        {
+          "suite": "com.loopers.order.application.OrderConcurrencyTest",
+          "name": "[동시성] 한 고객의 잔액 10000원·충분한 재고에서 서로 다른 4000원 DRAFT 주문 3건을 동시에 확정하면 성공 2·잔액 부족 1·기술 오류 0·최종 잔액 2000원이다.",
+          "status": "passed",
+          "seconds": 0.403,
+          "failure": null,
+          "source": "build/serializable-experiment/tests-10/TEST-com.loopers.order.application.OrderConcurrencyTest.xml"
+        },
+        {
+          "suite": "com.loopers.order.application.OrderConcurrencyTest",
+          "name": "[동시성] 재고 5개에 주문 8건을 동시에 확정하면 성공 5·재고 부족 3·최종 재고 0이다.",
+          "status": "passed",
+          "seconds": 0.248,
+          "failure": null,
+          "source": "build/serializable-experiment/tests-10/TEST-com.loopers.order.application.OrderConcurrencyTest.xml"
+        },
+        {
+          "suite": "com.loopers.order.application.OrderConcurrencyTest",
+          "name": "[동시성] 같은 DRAFT 주문을 두 번 동시에 확정하면 한 건만 성공하고 재고·포인트는 한 번만 차감된다.",
+          "status": "passed",
+          "seconds": 0.168,
+          "failure": null,
+          "source": "build/serializable-experiment/tests-10/TEST-com.loopers.order.application.OrderConcurrencyTest.xml"
+        },
+        {
+          "suite": "com.loopers.order.application.OrderConcurrencyTest",
+          "name": "[동시성] 2000원 충전과 7000원 결제가 모두 성공하면 최종 잔액은 5000원이다.",
+          "status": "passed",
+          "seconds": 0.297,
+          "failure": null,
+          "source": "build/serializable-experiment/tests-10/TEST-com.loopers.order.application.OrderConcurrencyTest.xml"
+        },
+        {
+          "suite": "com.loopers.experiment.IsolationProbeTest",
+          "name": "verifiesActualConnectionIsolation()",
+          "status": "passed",
+          "seconds": 0.358,
+          "failure": null,
+          "source": "build/serializable-experiment/tests-10/TEST-com.loopers.experiment.IsolationProbeTest.xml"
+        }
+      ]
+    }
+  ]
+}

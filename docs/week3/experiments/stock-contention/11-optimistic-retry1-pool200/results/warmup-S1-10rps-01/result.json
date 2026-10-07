@@ -1,0 +1,129 @@
+{
+  "schemaVersion": 1,
+  "experimentId": "stock-contention/11-optimistic-retry1-pool200",
+  "runId": "warmup-S1-10rps-01",
+  "gitSha": "451e27ba67d8967df3039593287a22081ae7a6aa",
+  "workingTreeChanges": true,
+  "status": "completed",
+  "startedAt": "2026-10-06T09:26:40.780506+00:00",
+  "finishedAt": "2026-10-06T09:27:13.833578+00:00",
+  "config": {
+    "scenario": "S1",
+    "rps": 10,
+    "durationSeconds": 30,
+    "repetition": 1,
+    "vus": 200,
+    "initialStock": {
+      "1": 90,
+      "2": 300,
+      "3": 300,
+      "4": 300,
+      "5": 300,
+      "6": 300,
+      "7": 300,
+      "8": 300,
+      "9": 300,
+      "10": 300
+    },
+    "twoItemShare": null,
+    "randomSeed": 20261005,
+    "dataSha256": "27d1efd1660b7c1014cd29925593eb9512c2a0de82fb23be064961a03959bddb",
+    "applicationSessionIsolation": "REPEATABLE-READ\t200",
+    "jvmOptions": [],
+    "specId": "local-01",
+    "retryCount": 1
+  },
+  "requests": {
+    "planned": 300,
+    "started": 300,
+    "completed": 300,
+    "notStarted": 0,
+    "incomplete": 0,
+    "success": 90,
+    "businessRejection": 210,
+    "technicalError": 0,
+    "optimisticConflict": 0,
+    "errors": {
+      "INSUFFICIENT_STOCK": 210
+    }
+  },
+  "metrics": {
+    "measurementSeconds": 29.913,
+    "throughput": 10.029084344599339,
+    "successThroughput": 3.0087253033798014,
+    "latencyMs": {
+      "count": 300,
+      "p50": 17.0,
+      "p95": 26.0,
+      "p99": 32.01999999999998
+    },
+    "latencyByOutcomeMs": {
+      "success": {
+        "count": 90,
+        "p50": 23.0,
+        "p95": 29.0,
+        "p99": 39.17999999999998
+      },
+      "businessRejection": {
+        "count": 210,
+        "p50": 16.0,
+        "p95": 21.0,
+        "p99": 27.909999999999997
+      },
+      "technicalError": {
+        "count": 0,
+        "p50": null,
+        "p95": null,
+        "p99": null
+      }
+    },
+    "stockoutPhases": {
+      "boundaryNs": "1791278809847000000",
+      "boundaryMeaning": "first observed insufficient-stock response (not exact DB depletion time)",
+      "before": {
+        "count": 90,
+        "p50": 23.0,
+        "p95": 29.0,
+        "p99": 39.17999999999998
+      },
+      "after": {
+        "count": 210,
+        "p50": 16.0,
+        "p95": 21.0,
+        "p99": 27.909999999999997
+      }
+    },
+    "optimisticConflictRate": 0.0,
+    "optimisticConflictRateReason": "JPA @Version conflict classified from server evidence"
+  },
+  "validation": {
+    "status": "passed",
+    "checks": [
+      "orderPaymentBalance",
+      "stock",
+      "orderItemsUnchanged",
+      "orderCount",
+      "uniqueOrderRequests"
+    ],
+    "failures": [],
+    "confirmedOrders": 90,
+    "finalStock": {
+      "1": 0,
+      "2": 300,
+      "3": 300,
+      "4": 300,
+      "5": 300,
+      "6": 300,
+      "7": 300,
+      "8": 300,
+      "9": 300,
+      "10": 300
+    }
+  },
+  "artifacts": {
+    "traces": "traces.json",
+    "environment": "environment.json",
+    "raw": "../../../../../../../build/serializable-experiment/warmup-S1-10rps-01"
+  },
+  "k6ExitCode": 0
+}

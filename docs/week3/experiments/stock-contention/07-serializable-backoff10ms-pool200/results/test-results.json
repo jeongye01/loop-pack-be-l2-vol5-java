@@ -1,0 +1,487 @@
+{
+  "schemaVersion": 1,
+  "experimentId": "stock-contention/07-serializable-backoff10ms-pool200",
+  "gitSha": "01a5c5b179eab74a08de6ccf25a0231a8b02a348",
+  "workingTreeChanges": true,
+  "config": {
+    "datasource.mysql-jpa.main.transaction-isolation": "TRANSACTION_SERIALIZABLE",
+    "spring.jpa.show-sql": false,
+    "datasource.mysql-jpa.main.maximum-pool-size": 200,
+    "datasource.mysql-jpa.main.minimum-idle": 200,
+    "datasource.mysql-jpa.main.connection-timeout": 3000,
+    "concurrency.transaction-retry.max-retries": 1,
+    "concurrency.transaction-retry.backoff-ms": 10
+  },
+  "rounds": [
+    {
+      "round": 1,
+      "recordedAt": "2026-10-05T20:47:46.702858+00:00",
+      "gradleExitCode": 1,
+      "tests": [
+        {
+          "suite": "com.loopers.order.application.OrderConcurrencyTest",
+          "name": "[동시성] 한 고객의 잔액 10000원·충분한 재고에서 서로 다른 4000원 DRAFT 주문 3건을 동시에 확정하면 성공 2·잔액 부족 1·기술 오류 0·최종 잔액 2000원이다.",
+          "status": "failed",
+          "seconds": 0.793,
+          "failure": "org.gradle.internal.exceptions.DefaultMultiCauseException: Multiple Failures (2 failures)\n\torg.opentest4j.AssertionFailedError: \nexpected: 1L\n but was: 0L\n\tjava.lang.AssertionError: \nExpecting empty but was: [Outcome[orderId=3, buyerId=1, success=false, rejection=null, technical=org.springframework.dao.CannotAcquireLockException: could not execute statement [Deadlock found when trying to get lock; try restarting transaction] [update users set deleted_at=?,balance=?,updated_at=? where id=?]; SQL [update users set deleted_at=?,balance=?,updated_at=? where id=?]]]",
+          "source": "build/serializable-experiment/tests-01/TEST-com.loopers.order.application.OrderConcurrencyTest.xml"
+        },
+        {
+          "suite": "com.loopers.order.application.OrderConcurrencyTest",
+          "name": "[동시성] 재고 5개에 주문 8건을 동시에 확정하면 성공 5·재고 부족 3·최종 재고 0이다.",
+          "status": "failed",
+          "seconds": 0.337,
+          "failure": "org.gradle.internal.exceptions.DefaultMultiCauseException: Multiple Failures (4 failures)\n\torg.opentest4j.AssertionFailedError: \nexpected: 5L\n but was: 2L\n\torg.opentest4j.AssertionFailedError: \nexpected: 3L\n but was: 0L\n\tjava.lang.AssertionError: \nExpecting empty but was: [Outcome[orderId=1, buyerId=1, success=false, rejection=null, technical=org.springframework.dao.CannotAcquireLockException: could not execute statement [Deadlock found when trying to get lock; try restarting transaction] [update product set brand_id=?,deleted_at=?,name=?,price=?,quantity=?,updated_at=? where id=?]; SQL [update product set brand_id=?,deleted_at=?,name=?,price=?,quantity=?,updated_at=? where id=?]],\n    Outcome[orderId=2, buyerId=2, success=false, rejection=null, technical=org.springframework.dao.CannotAcquireLockException: could not execute statement [Deadlock found when trying to get lock; try restarting transaction] [update product set brand_id=?,deleted_at=?,name=?,price=?,quantity=?,updated_at=? where id=?]; SQL [update product set brand_id=?,deleted_at=?,name=?,price=?,quantity=?,updated_at=? where id=?]],\n    Outcome[orderId=3, buyerId=3, success=false, rejection=null, technical=org.springframework.dao.CannotAcquireLockException: could not execute statement [Deadlock found when trying to get lock; try restarting transaction] [update product set brand_id=?,deleted_at=?,name=?,price=?,quantity=?,updated_at=? where id=?]; SQL [update product set brand_id=?,deleted_at=?,name=?,price=?,quantity=?,updated_at=? where id=?]],\n    Outcome[orderId=5, buyerId=5, success=false, rejection=null, technical=org.springframework.dao.CannotAcquireLockException: could not execute statement [Deadlock found when trying to get lock; try restarting transaction] [update product set brand_id=?,deleted_at=?,name=?,price=?,quantity=?,updated_at=? where id=?]; SQL [update product set brand_id=?,deleted_at=?,name=?,price=?,quantity=?,updated_at=? where id=?]],\n    Outcome[orderId=7, buyerId=7, success=false, rejection=null, technical=org.springframework.dao.CannotAcquireLockException: could not execute statement [Deadlock found when trying to get lock; try restarting transaction] [update product set brand_id=?,deleted_at=?,name=?,price=?,quantity=?,updated_at=? where id=?]; SQL [update product set brand_id=?,deleted_at=?,name=?,price=?,quantity=?,updated_at=? where id=?]],\n    Outcome[orderId=8, buyerId=8, success=false, rejection=null, technical=org.springframework.dao.CannotAcquireLockException: could not execute statement [Deadlock found when trying to get lock; try restarting transaction] [update product set brand_id=?,deleted_at=?,name=?,price=?,quantity=?,updated_at=? where id=?]; SQL [update product set brand_id=?,deleted_at=?,name=?,price=?,quantity=?,updated_at=? where id=?]]]\n\torg.opentest4j.AssertionFailedError: \nexpected: 0\n but was: 3",
+          "source": "build/serializable-experiment/tests-01/TEST-com.loopers.order.application.OrderConcurrencyTest.xml"
+        },
+        {
+          "suite": "com.loopers.order.application.OrderConcurrencyTest",
+          "name": "[동시성] 같은 DRAFT 주문을 두 번 동시에 확정하면 한 건만 성공하고 재고·포인트는 한 번만 차감된다.",
+          "status": "passed",
+          "seconds": 0.189,
+          "failure": null,
+          "source": "build/serializable-experiment/tests-01/TEST-com.loopers.order.application.OrderConcurrencyTest.xml"
+        },
+        {
+          "suite": "com.loopers.order.application.OrderConcurrencyTest",
+          "name": "[동시성] 2000원 충전과 7000원 결제가 모두 성공하면 최종 잔액은 5000원이다.",
+          "status": "passed",
+          "seconds": 0.272,
+          "failure": null,
+          "source": "build/serializable-experiment/tests-01/TEST-com.loopers.order.application.OrderConcurrencyTest.xml"
+        },
+        {
+          "suite": "com.loopers.experiment.IsolationProbeTest",
+          "name": "verifiesActualConnectionIsolation()",
+          "status": "passed",
+          "seconds": 0.009,
+          "failure": null,
+          "source": "build/serializable-experiment/tests-01/TEST-com.loopers.experiment.IsolationProbeTest.xml"
+        }
+      ]
+    },
+    {
+      "round": 2,
+      "recordedAt": "2026-10-05T20:48:08.615498+00:00",
+      "gradleExitCode": 1,
+      "tests": [
+        {
+          "suite": "com.loopers.order.application.OrderConcurrencyTest",
+          "name": "[동시성] 한 고객의 잔액 10000원·충분한 재고에서 서로 다른 4000원 DRAFT 주문 3건을 동시에 확정하면 성공 2·잔액 부족 1·기술 오류 0·최종 잔액 2000원이다.",
+          "status": "failed",
+          "seconds": 0.75,
+          "failure": "org.gradle.internal.exceptions.DefaultMultiCauseException: Multiple Failures (2 failures)\n\torg.opentest4j.AssertionFailedError: \nexpected: 1L\n but was: 0L\n\tjava.lang.AssertionError: \nExpecting empty but was: [Outcome[orderId=3, buyerId=1, success=false, rejection=null, technical=org.springframework.dao.CannotAcquireLockException: could not execute statement [Deadlock found when trying to get lock; try restarting transaction] [update users set deleted_at=?,balance=?,updated_at=? where id=?]; SQL [update users set deleted_at=?,balance=?,updated_at=? where id=?]]]",
+          "source": "build/serializable-experiment/tests-02/TEST-com.loopers.order.application.OrderConcurrencyTest.xml"
+        },
+        {
+          "suite": "com.loopers.order.application.OrderConcurrencyTest",
+          "name": "[동시성] 재고 5개에 주문 8건을 동시에 확정하면 성공 5·재고 부족 3·최종 재고 0이다.",
+          "status": "failed",
+          "seconds": 0.311,
+          "failure": "org.gradle.internal.exceptions.DefaultMultiCauseException: Multiple Failures (4 failures)\n\torg.opentest4j.AssertionFailedError: \nexpected: 5L\n but was: 2L\n\torg.opentest4j.AssertionFailedError: \nexpected: 3L\n but was: 0L\n\tjava.lang.AssertionError: \nExpecting empty but was: [Outcome[orderId=1, buyerId=1, success=false, rejection=null, technical=org.springframework.dao.CannotAcquireLockException: could not execute statement [Deadlock found when trying to get lock; try restarting transaction] [update product set brand_id=?,deleted_at=?,name=?,price=?,quantity=?,updated_at=? where id=?]; SQL [update product set brand_id=?,deleted_at=?,name=?,price=?,quantity=?,updated_at=? where id=?]],\n    Outcome[orderId=4, buyerId=4, success=false, rejection=null, technical=org.springframework.dao.CannotAcquireLockException: could not execute statement [Deadlock found when trying to get lock; try restarting transaction] [update product set brand_id=?,deleted_at=?,name=?,price=?,quantity=?,updated_at=? where id=?]; SQL [update product set brand_id=?,deleted_at=?,name=?,price=?,quantity=?,updated_at=? where id=?]],\n    Outcome[orderId=5, buyerId=5, success=false, rejection=null, technical=org.springframework.dao.CannotAcquireLockException: could not execute statement [Deadlock found when trying to get lock; try restarting transaction] [update product set brand_id=?,deleted_at=?,name=?,price=?,quantity=?,updated_at=? where id=?]; SQL [update product set brand_id=?,deleted_at=?,name=?,price=?,quantity=?,updated_at=? where id=?]],\n    Outcome[orderId=6, buyerId=6, success=false, rejection=null, technical=org.springframework.dao.CannotAcquireLockException: could not execute statement [Deadlock found when trying to get lock; try restarting transaction] [update product set brand_id=?,deleted_at=?,name=?,price=?,quantity=?,updated_at=? where id=?]; SQL [update product set brand_id=?,deleted_at=?,name=?,price=?,quantity=?,updated_at=? where id=?]],\n    Outcome[orderId=7, buyerId=7, success=false, rejection=null, technical=org.springframework.dao.CannotAcquireLockException: could not execute statement [Deadlock found when trying to get lock; try restarting transaction] [update product set brand_id=?,deleted_at=?,name=?,price=?,quantity=?,updated_at=? where id=?]; SQL [update product set brand_id=?,deleted_at=?,name=?,price=?,quantity=?,updated_at=? where id=?]],\n    Outcome[orderId=8, buyerId=8, success=false, rejection=null, technical=org.springframework.dao.CannotAcquireLockException: could not execute statement [Deadlock found when trying to get lock; try restarting transaction] [update product set brand_id=?,deleted_at=?,name=?,price=?,quantity=?,updated_at=? where id=?]; SQL [update product set brand_id=?,deleted_at=?,name=?,price=?,quantity=?,updated_at=? where id=?]]]\n\torg.opentest4j.AssertionFailedError: \nexpected: 0\n but was: 3",
+          "source": "build/serializable-experiment/tests-02/TEST-com.loopers.order.application.OrderConcurrencyTest.xml"
+        },
+        {
+          "suite": "com.loopers.order.application.OrderConcurrencyTest",
+          "name": "[동시성] 같은 DRAFT 주문을 두 번 동시에 확정하면 한 건만 성공하고 재고·포인트는 한 번만 차감된다.",
+          "status": "passed",
+          "seconds": 0.195,
+          "failure": null,
+          "source": "build/serializable-experiment/tests-02/TEST-com.loopers.order.application.OrderConcurrencyTest.xml"
+        },
+        {
+          "suite": "com.loopers.order.application.OrderConcurrencyTest",
+          "name": "[동시성] 2000원 충전과 7000원 결제가 모두 성공하면 최종 잔액은 5000원이다.",
+          "status": "passed",
+          "seconds": 0.265,
+          "failure": null,
+          "source": "build/serializable-experiment/tests-02/TEST-com.loopers.order.application.OrderConcurrencyTest.xml"
+        },
+        {
+          "suite": "com.loopers.experiment.IsolationProbeTest",
+          "name": "verifiesActualConnectionIsolation()",
+          "status": "passed",
+          "seconds": 0.006,
+          "failure": null,
+          "source": "build/serializable-experiment/tests-02/TEST-com.loopers.experiment.IsolationProbeTest.xml"
+        }
+      ]
+    },
+    {
+      "round": 3,
+      "recordedAt": "2026-10-05T20:48:33.111236+00:00",
+      "gradleExitCode": 1,
+      "tests": [
+        {
+          "suite": "com.loopers.order.application.OrderConcurrencyTest",
+          "name": "[동시성] 한 고객의 잔액 10000원·충분한 재고에서 서로 다른 4000원 DRAFT 주문 3건을 동시에 확정하면 성공 2·잔액 부족 1·기술 오류 0·최종 잔액 2000원이다.",
+          "status": "failed",
+          "seconds": 0.772,
+          "failure": "org.gradle.internal.exceptions.DefaultMultiCauseException: Multiple Failures (2 failures)\n\torg.opentest4j.AssertionFailedError: \nexpected: 1L\n but was: 0L\n\tjava.lang.AssertionError: \nExpecting empty but was: [Outcome[orderId=3, buyerId=1, success=false, rejection=null, technical=org.springframework.dao.CannotAcquireLockException: could not execute statement [Deadlock found when trying to get lock; try restarting transaction] [update users set deleted_at=?,balance=?,updated_at=? where id=?]; SQL [update users set deleted_at=?,balance=?,updated_at=? where id=?]]]",
+          "source": "build/serializable-experiment/tests-03/TEST-com.loopers.order.application.OrderConcurrencyTest.xml"
+        },
+        {
+          "suite": "com.loopers.order.application.OrderConcurrencyTest",
+          "name": "[동시성] 재고 5개에 주문 8건을 동시에 확정하면 성공 5·재고 부족 3·최종 재고 0이다.",
+          "status": "failed",
+          "seconds": 0.329,
+          "failure": "org.gradle.internal.exceptions.DefaultMultiCauseException: Multiple Failures (4 failures)\n\torg.opentest4j.AssertionFailedError: \nexpected: 5L\n but was: 2L\n\torg.opentest4j.AssertionFailedError: \nexpected: 3L\n but was: 0L\n\tjava.lang.AssertionError: \nExpecting empty but was: [Outcome[orderId=1, buyerId=1, success=false, rejection=null, technical=org.springframework.dao.CannotAcquireLockException: could not execute statement [Deadlock found when trying to get lock; try restarting transaction] [update product set brand_id=?,deleted_at=?,name=?,price=?,quantity=?,updated_at=? where id=?]; SQL [update product set brand_id=?,deleted_at=?,name=?,price=?,quantity=?,updated_at=? where id=?]],\n    Outcome[orderId=3, buyerId=3, success=false, rejection=null, technical=org.springframework.dao.CannotAcquireLockException: could not execute statement [Deadlock found when trying to get lock; try restarting transaction] [update product set brand_id=?,deleted_at=?,name=?,price=?,quantity=?,updated_at=? where id=?]; SQL [update product set brand_id=?,deleted_at=?,name=?,price=?,quantity=?,updated_at=? where id=?]],\n    Outcome[orderId=4, buyerId=4, success=false, rejection=null, technical=org.springframework.dao.CannotAcquireLockException: could not execute statement [Deadlock found when trying to get lock; try restarting transaction] [update product set brand_id=?,deleted_at=?,name=?,price=?,quantity=?,updated_at=? where id=?]; SQL [update product set brand_id=?,deleted_at=?,name=?,price=?,quantity=?,updated_at=? where id=?]],\n    Outcome[orderId=6, buyerId=6, success=false, rejection=null, technical=org.springframework.dao.CannotAcquireLockException: could not execute statement [Deadlock found when trying to get lock; try restarting transaction] [update product set brand_id=?,deleted_at=?,name=?,price=?,quantity=?,updated_at=? where id=?]; SQL [update product set brand_id=?,deleted_at=?,name=?,price=?,quantity=?,updated_at=? where id=?]],\n    Outcome[orderId=7, buyerId=7, success=false, rejection=null, technical=org.springframework.dao.CannotAcquireLockException: could not execute statement [Deadlock found when trying to get lock; try restarting transaction] [update product set brand_id=?,deleted_at=?,name=?,price=?,quantity=?,updated_at=? where id=?]; SQL [update product set brand_id=?,deleted_at=?,name=?,price=?,quantity=?,updated_at=? where id=?]],\n    Outcome[orderId=8, buyerId=8, success=false, rejection=null, technical=org.springframework.dao.CannotAcquireLockException: could not execute statement [Deadlock found when trying to get lock; try restarting transaction] [update product set brand_id=?,deleted_at=?,name=?,price=?,quantity=?,updated_at=? where id=?]; SQL [update product set brand_id=?,deleted_at=?,name=?,price=?,quantity=?,updated_at=? where id=?]]]\n\torg.opentest4j.AssertionFailedError: \nexpected: 0\n but was: 3",
+          "source": "build/serializable-experiment/tests-03/TEST-com.loopers.order.application.OrderConcurrencyTest.xml"
+        },
+        {
+          "suite": "com.loopers.order.application.OrderConcurrencyTest",
+          "name": "[동시성] 같은 DRAFT 주문을 두 번 동시에 확정하면 한 건만 성공하고 재고·포인트는 한 번만 차감된다.",
+          "status": "passed",
+          "seconds": 0.206,
+          "failure": null,
+          "source": "build/serializable-experiment/tests-03/TEST-com.loopers.order.application.OrderConcurrencyTest.xml"
+        },
+        {
+          "suite": "com.loopers.order.application.OrderConcurrencyTest",
+          "name": "[동시성] 2000원 충전과 7000원 결제가 모두 성공하면 최종 잔액은 5000원이다.",
+          "status": "passed",
+          "seconds": 0.254,
+          "failure": null,
+          "source": "build/serializable-experiment/tests-03/TEST-com.loopers.order.application.OrderConcurrencyTest.xml"
+        },
+        {
+          "suite": "com.loopers.experiment.IsolationProbeTest",
+          "name": "verifiesActualConnectionIsolation()",
+          "status": "passed",
+          "seconds": 0.007,
+          "failure": null,
+          "source": "build/serializable-experiment/tests-03/TEST-com.loopers.experiment.IsolationProbeTest.xml"
+        }
+      ]
+    },
+    {
+      "round": 4,
+      "recordedAt": "2026-10-05T20:48:55.130846+00:00",
+      "gradleExitCode": 1,
+      "tests": [
+        {
+          "suite": "com.loopers.order.application.OrderConcurrencyTest",
+          "name": "[동시성] 한 고객의 잔액 10000원·충분한 재고에서 서로 다른 4000원 DRAFT 주문 3건을 동시에 확정하면 성공 2·잔액 부족 1·기술 오류 0·최종 잔액 2000원이다.",
+          "status": "failed",
+          "seconds": 0.742,
+          "failure": "org.gradle.internal.exceptions.DefaultMultiCauseException: Multiple Failures (2 failures)\n\torg.opentest4j.AssertionFailedError: \nexpected: 1L\n but was: 0L\n\tjava.lang.AssertionError: \nExpecting empty but was: [Outcome[orderId=3, buyerId=1, success=false, rejection=null, technical=org.springframework.dao.CannotAcquireLockException: could not execute statement [Deadlock found when trying to get lock; try restarting transaction] [update users set deleted_at=?,balance=?,updated_at=? where id=?]; SQL [update users set deleted_at=?,balance=?,updated_at=? where id=?]]]",
+          "source": "build/serializable-experiment/tests-04/TEST-com.loopers.order.application.OrderConcurrencyTest.xml"
+        },
+        {
+          "suite": "com.loopers.order.application.OrderConcurrencyTest",
+          "name": "[동시성] 재고 5개에 주문 8건을 동시에 확정하면 성공 5·재고 부족 3·최종 재고 0이다.",
+          "status": "failed",
+          "seconds": 0.29,
+          "failure": "org.gradle.internal.exceptions.DefaultMultiCauseException: Multiple Failures (4 failures)\n\torg.opentest4j.AssertionFailedError: \nexpected: 5L\n but was: 2L\n\torg.opentest4j.AssertionFailedError: \nexpected: 3L\n but was: 0L\n\tjava.lang.AssertionError: \nExpecting empty but was: [Outcome[orderId=1, buyerId=1, success=false, rejection=null, technical=org.springframework.dao.CannotAcquireLockException: could not execute statement [Deadlock found when trying to get lock; try restarting transaction] [update product set brand_id=?,deleted_at=?,name=?,price=?,quantity=?,updated_at=? where id=?]; SQL [update product set brand_id=?,deleted_at=?,name=?,price=?,quantity=?,updated_at=? where id=?]],\n    Outcome[orderId=2, buyerId=2, success=false, rejection=null, technical=org.springframework.dao.CannotAcquireLockException: could not execute statement [Deadlock found when trying to get lock; try restarting transaction] [update product set brand_id=?,deleted_at=?,name=?,price=?,quantity=?,updated_at=? where id=?]; SQL [update product set brand_id=?,deleted_at=?,name=?,price=?,quantity=?,updated_at=? where id=?]],\n    Outcome[orderId=3, buyerId=3, success=false, rejection=null, technical=org.springframework.dao.CannotAcquireLockException: could not execute statement [Deadlock found when trying to get lock; try restarting transaction] [update product set brand_id=?,deleted_at=?,name=?,price=?,quantity=?,updated_at=? where id=?]; SQL [update product set brand_id=?,deleted_at=?,name=?,price=?,quantity=?,updated_at=? where id=?]],\n    Outcome[orderId=4, buyerId=4, success=false, rejection=null, technical=org.springframework.dao.CannotAcquireLockException: could not execute statement [Deadlock found when trying to get lock; try restarting transaction] [update product set brand_id=?,deleted_at=?,name=?,price=?,quantity=?,updated_at=? where id=?]; SQL [update product set brand_id=?,deleted_at=?,name=?,price=?,quantity=?,updated_at=? where id=?]],\n    Outcome[orderId=7, buyerId=7, success=false, rejection=null, technical=org.springframework.dao.CannotAcquireLockException: could not execute statement [Deadlock found when trying to get lock; try restarting transaction] [update product set brand_id=?,deleted_at=?,name=?,price=?,quantity=?,updated_at=? where id=?]; SQL [update product set brand_id=?,deleted_at=?,name=?,price=?,quantity=?,updated_at=? where id=?]],\n    Outcome[orderId=8, buyerId=8, success=false, rejection=null, technical=org.springframework.dao.CannotAcquireLockException: could not execute statement [Deadlock found when trying to get lock; try restarting transaction] [update product set brand_id=?,deleted_at=?,name=?,price=?,quantity=?,updated_at=? where id=?]; SQL [update product set brand_id=?,deleted_at=?,name=?,price=?,quantity=?,updated_at=? where id=?]]]\n\torg.opentest4j.AssertionFailedError: \nexpected: 0\n but was: 3",
+          "source": "build/serializable-experiment/tests-04/TEST-com.loopers.order.application.OrderConcurrencyTest.xml"
+        },
+        {
+          "suite": "com.loopers.order.application.OrderConcurrencyTest",
+          "name": "[동시성] 같은 DRAFT 주문을 두 번 동시에 확정하면 한 건만 성공하고 재고·포인트는 한 번만 차감된다.",
+          "status": "passed",
+          "seconds": 0.205,
+          "failure": null,
+          "source": "build/serializable-experiment/tests-04/TEST-com.loopers.order.application.OrderConcurrencyTest.xml"
+        },
+        {
+          "suite": "com.loopers.order.application.OrderConcurrencyTest",
+          "name": "[동시성] 2000원 충전과 7000원 결제가 모두 성공하면 최종 잔액은 5000원이다.",
+          "status": "passed",
+          "seconds": 0.26,
+          "failure": null,
+          "source": "build/serializable-experiment/tests-04/TEST-com.loopers.order.application.OrderConcurrencyTest.xml"
+        },
+        {
+          "suite": "com.loopers.experiment.IsolationProbeTest",
+          "name": "verifiesActualConnectionIsolation()",
+          "status": "passed",
+          "seconds": 0.007,
+          "failure": null,
+          "source": "build/serializable-experiment/tests-04/TEST-com.loopers.experiment.IsolationProbeTest.xml"
+        }
+      ]
+    },
+    {
+      "round": 5,
+      "recordedAt": "2026-10-05T20:49:16.929656+00:00",
+      "gradleExitCode": 1,
+      "tests": [
+        {
+          "suite": "com.loopers.order.application.OrderConcurrencyTest",
+          "name": "[동시성] 한 고객의 잔액 10000원·충분한 재고에서 서로 다른 4000원 DRAFT 주문 3건을 동시에 확정하면 성공 2·잔액 부족 1·기술 오류 0·최종 잔액 2000원이다.",
+          "status": "failed",
+          "seconds": 0.743,
+          "failure": "org.gradle.internal.exceptions.DefaultMultiCauseException: Multiple Failures (2 failures)\n\torg.opentest4j.AssertionFailedError: \nexpected: 1L\n but was: 0L\n\tjava.lang.AssertionError: \nExpecting empty but was: [Outcome[orderId=3, buyerId=1, success=false, rejection=null, technical=org.springframework.dao.CannotAcquireLockException: could not execute statement [Deadlock found when trying to get lock; try restarting transaction] [update users set deleted_at=?,balance=?,updated_at=? where id=?]; SQL [update users set deleted_at=?,balance=?,updated_at=? where id=?]]]",
+          "source": "build/serializable-experiment/tests-05/TEST-com.loopers.order.application.OrderConcurrencyTest.xml"
+        },
+        {
+          "suite": "com.loopers.order.application.OrderConcurrencyTest",
+          "name": "[동시성] 재고 5개에 주문 8건을 동시에 확정하면 성공 5·재고 부족 3·최종 재고 0이다.",
+          "status": "failed",
+          "seconds": 0.309,
+          "failure": "org.gradle.internal.exceptions.DefaultMultiCauseException: Multiple Failures (4 failures)\n\torg.opentest4j.AssertionFailedError: \nexpected: 5L\n but was: 2L\n\torg.opentest4j.AssertionFailedError: \nexpected: 3L\n but was: 0L\n\tjava.lang.AssertionError: \nExpecting empty but was: [Outcome[orderId=2, buyerId=2, success=false, rejection=null, technical=org.springframework.dao.CannotAcquireLockException: could not execute statement [Deadlock found when trying to get lock; try restarting transaction] [update product set brand_id=?,deleted_at=?,name=?,price=?,quantity=?,updated_at=? where id=?]; SQL [update product set brand_id=?,deleted_at=?,name=?,price=?,quantity=?,updated_at=? where id=?]],\n    Outcome[orderId=3, buyerId=3, success=false, rejection=null, technical=org.springframework.dao.CannotAcquireLockException: could not execute statement [Deadlock found when trying to get lock; try restarting transaction] [update product set brand_id=?,deleted_at=?,name=?,price=?,quantity=?,updated_at=? where id=?]; SQL [update product set brand_id=?,deleted_at=?,name=?,price=?,quantity=?,updated_at=? where id=?]],\n    Outcome[orderId=4, buyerId=4, success=false, rejection=null, technical=org.springframework.dao.CannotAcquireLockException: could not execute statement [Deadlock found when trying to get lock; try restarting transaction] [update product set brand_id=?,deleted_at=?,name=?,price=?,quantity=?,updated_at=? where id=?]; SQL [update product set brand_id=?,deleted_at=?,name=?,price=?,quantity=?,updated_at=? where id=?]],\n    Outcome[orderId=5, buyerId=5, success=false, rejection=null, technical=org.springframework.dao.CannotAcquireLockException: could not execute statement [Deadlock found when trying to get lock; try restarting transaction] [update product set brand_id=?,deleted_at=?,name=?,price=?,quantity=?,updated_at=? where id=?]; SQL [update product set brand_id=?,deleted_at=?,name=?,price=?,quantity=?,updated_at=? where id=?]],\n    Outcome[orderId=7, buyerId=7, success=false, rejection=null, technical=org.springframework.dao.CannotAcquireLockException: could not execute statement [Deadlock found when trying to get lock; try restarting transaction] [update product set brand_id=?,deleted_at=?,name=?,price=?,quantity=?,updated_at=? where id=?]; SQL [update product set brand_id=?,deleted_at=?,name=?,price=?,quantity=?,updated_at=? where id=?]],\n    Outcome[orderId=8, buyerId=8, success=false, rejection=null, technical=org.springframework.dao.CannotAcquireLockException: could not execute statement [Deadlock found when trying to get lock; try restarting transaction] [update product set brand_id=?,deleted_at=?,name=?,price=?,quantity=?,updated_at=? where id=?]; SQL [update product set brand_id=?,deleted_at=?,name=?,price=?,quantity=?,updated_at=? where id=?]]]\n\torg.opentest4j.AssertionFailedError: \nexpected: 0\n but was: 3",
+          "source": "build/serializable-experiment/tests-05/TEST-com.loopers.order.application.OrderConcurrencyTest.xml"
+        },
+        {
+          "suite": "com.loopers.order.application.OrderConcurrencyTest",
+          "name": "[동시성] 같은 DRAFT 주문을 두 번 동시에 확정하면 한 건만 성공하고 재고·포인트는 한 번만 차감된다.",
+          "status": "passed",
+          "seconds": 0.193,
+          "failure": null,
+          "source": "build/serializable-experiment/tests-05/TEST-com.loopers.order.application.OrderConcurrencyTest.xml"
+        },
+        {
+          "suite": "com.loopers.order.application.OrderConcurrencyTest",
+          "name": "[동시성] 2000원 충전과 7000원 결제가 모두 성공하면 최종 잔액은 5000원이다.",
+          "status": "passed",
+          "seconds": 0.223,
+          "failure": null,
+          "source": "build/serializable-experiment/tests-05/TEST-com.loopers.order.application.OrderConcurrencyTest.xml"
+        },
+        {
+          "suite": "com.loopers.experiment.IsolationProbeTest",
+          "name": "verifiesActualConnectionIsolation()",
+          "status": "passed",
+          "seconds": 0.012,
+          "failure": null,
+          "source": "build/serializable-experiment/tests-05/TEST-com.loopers.experiment.IsolationProbeTest.xml"
+        }
+      ]
+    },
+    {
+      "round": 6,
+      "recordedAt": "2026-10-05T20:49:39.754942+00:00",
+      "gradleExitCode": 1,
+      "tests": [
+        {
+          "suite": "com.loopers.order.application.OrderConcurrencyTest",
+          "name": "[동시성] 한 고객의 잔액 10000원·충분한 재고에서 서로 다른 4000원 DRAFT 주문 3건을 동시에 확정하면 성공 2·잔액 부족 1·기술 오류 0·최종 잔액 2000원이다.",
+          "status": "failed",
+          "seconds": 0.767,
+          "failure": "org.gradle.internal.exceptions.DefaultMultiCauseException: Multiple Failures (2 failures)\n\torg.opentest4j.AssertionFailedError: \nexpected: 1L\n but was: 0L\n\tjava.lang.AssertionError: \nExpecting empty but was: [Outcome[orderId=3, buyerId=1, success=false, rejection=null, technical=org.springframework.dao.CannotAcquireLockException: could not execute statement [Deadlock found when trying to get lock; try restarting transaction] [update users set deleted_at=?,balance=?,updated_at=? where id=?]; SQL [update users set deleted_at=?,balance=?,updated_at=? where id=?]]]",
+          "source": "build/serializable-experiment/tests-06/TEST-com.loopers.order.application.OrderConcurrencyTest.xml"
+        },
+        {
+          "suite": "com.loopers.order.application.OrderConcurrencyTest",
+          "name": "[동시성] 재고 5개에 주문 8건을 동시에 확정하면 성공 5·재고 부족 3·최종 재고 0이다.",
+          "status": "failed",
+          "seconds": 0.351,
+          "failure": "org.gradle.internal.exceptions.DefaultMultiCauseException: Multiple Failures (4 failures)\n\torg.opentest4j.AssertionFailedError: \nexpected: 5L\n but was: 2L\n\torg.opentest4j.AssertionFailedError: \nexpected: 3L\n but was: 0L\n\tjava.lang.AssertionError: \nExpecting empty but was: [Outcome[orderId=1, buyerId=1, success=false, rejection=null, technical=org.springframework.dao.CannotAcquireLockException: could not execute statement [Deadlock found when trying to get lock; try restarting transaction] [update product set brand_id=?,deleted_at=?,name=?,price=?,quantity=?,updated_at=? where id=?]; SQL [update product set brand_id=?,deleted_at=?,name=?,price=?,quantity=?,updated_at=? where id=?]],\n    Outcome[orderId=3, buyerId=3, success=false, rejection=null, technical=org.springframework.dao.CannotAcquireLockException: could not execute statement [Deadlock found when trying to get lock; try restarting transaction] [update product set brand_id=?,deleted_at=?,name=?,price=?,quantity=?,updated_at=? where id=?]; SQL [update product set brand_id=?,deleted_at=?,name=?,price=?,quantity=?,updated_at=? where id=?]],\n    Outcome[orderId=4, buyerId=4, success=false, rejection=null, technical=org.springframework.dao.CannotAcquireLockException: could not execute statement [Deadlock found when trying to get lock; try restarting transaction] [update product set brand_id=?,deleted_at=?,name=?,price=?,quantity=?,updated_at=? where id=?]; SQL [update product set brand_id=?,deleted_at=?,name=?,price=?,quantity=?,updated_at=? where id=?]],\n    Outcome[orderId=5, buyerId=5, success=false, rejection=null, technical=org.springframework.dao.CannotAcquireLockException: could not execute statement [Deadlock found when trying to get lock; try restarting transaction] [update product set brand_id=?,deleted_at=?,name=?,price=?,quantity=?,updated_at=? where id=?]; SQL [update product set brand_id=?,deleted_at=?,name=?,price=?,quantity=?,updated_at=? where id=?]],\n    Outcome[orderId=6, buyerId=6, success=false, rejection=null, technical=org.springframework.dao.CannotAcquireLockException: could not execute statement [Deadlock found when trying to get lock; try restarting transaction] [update product set brand_id=?,deleted_at=?,name=?,price=?,quantity=?,updated_at=? where id=?]; SQL [update product set brand_id=?,deleted_at=?,name=?,price=?,quantity=?,updated_at=? where id=?]],\n    Outcome[orderId=8, buyerId=8, success=false, rejection=null, technical=org.springframework.dao.CannotAcquireLockException: could not execute statement [Deadlock found when trying to get lock; try restarting transaction] [update product set brand_id=?,deleted_at=?,name=?,price=?,quantity=?,updated_at=? where id=?]; SQL [update product set brand_id=?,deleted_at=?,name=?,price=?,quantity=?,updated_at=? where id=?]]]\n\torg.opentest4j.AssertionFailedError: \nexpected: 0\n but was: 3",
+          "source": "build/serializable-experiment/tests-06/TEST-com.loopers.order.application.OrderConcurrencyTest.xml"
+        },
+        {
+          "suite": "com.loopers.order.application.OrderConcurrencyTest",
+          "name": "[동시성] 같은 DRAFT 주문을 두 번 동시에 확정하면 한 건만 성공하고 재고·포인트는 한 번만 차감된다.",
+          "status": "passed",
+          "seconds": 0.18,
+          "failure": null,
+          "source": "build/serializable-experiment/tests-06/TEST-com.loopers.order.application.OrderConcurrencyTest.xml"
+        },
+        {
+          "suite": "com.loopers.order.application.OrderConcurrencyTest",
+          "name": "[동시성] 2000원 충전과 7000원 결제가 모두 성공하면 최종 잔액은 5000원이다.",
+          "status": "passed",
+          "seconds": 0.169,
+          "failure": null,
+          "source": "build/serializable-experiment/tests-06/TEST-com.loopers.order.application.OrderConcurrencyTest.xml"
+        },
+        {
+          "suite": "com.loopers.experiment.IsolationProbeTest",
+          "name": "verifiesActualConnectionIsolation()",
+          "status": "passed",
+          "seconds": 0.009,
+          "failure": null,
+          "source": "build/serializable-experiment/tests-06/TEST-com.loopers.experiment.IsolationProbeTest.xml"
+        }
+      ]
+    },
+    {
+      "round": 7,
+      "recordedAt": "2026-10-05T20:50:01.307484+00:00",
+      "gradleExitCode": 1,
+      "tests": [
+        {
+          "suite": "com.loopers.order.application.OrderConcurrencyTest",
+          "name": "[동시성] 한 고객의 잔액 10000원·충분한 재고에서 서로 다른 4000원 DRAFT 주문 3건을 동시에 확정하면 성공 2·잔액 부족 1·기술 오류 0·최종 잔액 2000원이다.",
+          "status": "failed",
+          "seconds": 0.852,
+          "failure": "org.gradle.internal.exceptions.DefaultMultiCauseException: Multiple Failures (2 failures)\n\torg.opentest4j.AssertionFailedError: \nexpected: 1L\n but was: 0L\n\tjava.lang.AssertionError: \nExpecting empty but was: [Outcome[orderId=3, buyerId=1, success=false, rejection=null, technical=org.springframework.dao.CannotAcquireLockException: could not execute statement [Deadlock found when trying to get lock; try restarting transaction] [update users set deleted_at=?,balance=?,updated_at=? where id=?]; SQL [update users set deleted_at=?,balance=?,updated_at=? where id=?]]]",
+          "source": "build/serializable-experiment/tests-07/TEST-com.loopers.order.application.OrderConcurrencyTest.xml"
+        },
+        {
+          "suite": "com.loopers.order.application.OrderConcurrencyTest",
+          "name": "[동시성] 재고 5개에 주문 8건을 동시에 확정하면 성공 5·재고 부족 3·최종 재고 0이다.",
+          "status": "failed",
+          "seconds": 0.285,
+          "failure": "org.gradle.internal.exceptions.DefaultMultiCauseException: Multiple Failures (4 failures)\n\torg.opentest4j.AssertionFailedError: \nexpected: 5L\n but was: 2L\n\torg.opentest4j.AssertionFailedError: \nexpected: 3L\n but was: 0L\n\tjava.lang.AssertionError: \nExpecting empty but was: [Outcome[orderId=1, buyerId=1, success=false, rejection=null, technical=org.springframework.dao.CannotAcquireLockException: could not execute statement [Deadlock found when trying to get lock; try restarting transaction] [update product set brand_id=?,deleted_at=?,name=?,price=?,quantity=?,updated_at=? where id=?]; SQL [update product set brand_id=?,deleted_at=?,name=?,price=?,quantity=?,updated_at=? where id=?]],\n    Outcome[orderId=2, buyerId=2, success=false, rejection=null, technical=org.springframework.dao.CannotAcquireLockException: could not execute statement [Deadlock found when trying to get lock; try restarting transaction] [update product set brand_id=?,deleted_at=?,name=?,price=?,quantity=?,updated_at=? where id=?]; SQL [update product set brand_id=?,deleted_at=?,name=?,price=?,quantity=?,updated_at=? where id=?]],\n    Outcome[orderId=4, buyerId=4, success=false, rejection=null, technical=org.springframework.dao.CannotAcquireLockException: could not execute statement [Deadlock found when trying to get lock; try restarting transaction] [update product set brand_id=?,deleted_at=?,name=?,price=?,quantity=?,updated_at=? where id=?]; SQL [update product set brand_id=?,deleted_at=?,name=?,price=?,quantity=?,updated_at=? where id=?]],\n    Outcome[orderId=5, buyerId=5, success=false, rejection=null, technical=org.springframework.dao.CannotAcquireLockException: could not execute statement [Deadlock found when trying to get lock; try restarting transaction] [update product set brand_id=?,deleted_at=?,name=?,price=?,quantity=?,updated_at=? where id=?]; SQL [update product set brand_id=?,deleted_at=?,name=?,price=?,quantity=?,updated_at=? where id=?]],\n    Outcome[orderId=6, buyerId=6, success=false, rejection=null, technical=org.springframework.dao.CannotAcquireLockException: could not execute statement [Deadlock found when trying to get lock; try restarting transaction] [update product set brand_id=?,deleted_at=?,name=?,price=?,quantity=?,updated_at=? where id=?]; SQL [update product set brand_id=?,deleted_at=?,name=?,price=?,quantity=?,updated_at=? where id=?]],\n    Outcome[orderId=8, buyerId=8, success=false, rejection=null, technical=org.springframework.dao.CannotAcquireLockException: could not execute statement [Deadlock found when trying to get lock; try restarting transaction] [update product set brand_id=?,deleted_at=?,name=?,price=?,quantity=?,updated_at=? where id=?]; SQL [update product set brand_id=?,deleted_at=?,name=?,price=?,quantity=?,updated_at=? where id=?]]]\n\torg.opentest4j.AssertionFailedError: \nexpected: 0\n but was: 3",
+          "source": "build/serializable-experiment/tests-07/TEST-com.loopers.order.application.OrderConcurrencyTest.xml"
+        },
+        {
+          "suite": "com.loopers.order.application.OrderConcurrencyTest",
+          "name": "[동시성] 같은 DRAFT 주문을 두 번 동시에 확정하면 한 건만 성공하고 재고·포인트는 한 번만 차감된다.",
+          "status": "passed",
+          "seconds": 0.172,
+          "failure": null,
+          "source": "build/serializable-experiment/tests-07/TEST-com.loopers.order.application.OrderConcurrencyTest.xml"
+        },
+        {
+          "suite": "com.loopers.order.application.OrderConcurrencyTest",
+          "name": "[동시성] 2000원 충전과 7000원 결제가 모두 성공하면 최종 잔액은 5000원이다.",
+          "status": "passed",
+          "seconds": 0.227,
+          "failure": null,
+          "source": "build/serializable-experiment/tests-07/TEST-com.loopers.order.application.OrderConcurrencyTest.xml"
+        },
+        {
+          "suite": "com.loopers.experiment.IsolationProbeTest",
+          "name": "verifiesActualConnectionIsolation()",
+          "status": "passed",
+          "seconds": 0.007,
+          "failure": null,
+          "source": "build/serializable-experiment/tests-07/TEST-com.loopers.experiment.IsolationProbeTest.xml"
+        }
+      ]
+    },
+    {
+      "round": 8,
+      "recordedAt": "2026-10-05T20:50:28.281270+00:00",
+      "gradleExitCode": 1,
+      "tests": [
+        {
+          "suite": "com.loopers.order.application.OrderConcurrencyTest",
+          "name": "[동시성] 한 고객의 잔액 10000원·충분한 재고에서 서로 다른 4000원 DRAFT 주문 3건을 동시에 확정하면 성공 2·잔액 부족 1·기술 오류 0·최종 잔액 2000원이다.",
+          "status": "failed",
+          "seconds": 1.034,
+          "failure": "org.gradle.internal.exceptions.DefaultMultiCauseException: Multiple Failures (2 failures)\n\torg.opentest4j.AssertionFailedError: \nexpected: 1L\n but was: 0L\n\tjava.lang.AssertionError: \nExpecting empty but was: [Outcome[orderId=3, buyerId=1, success=false, rejection=null, technical=org.springframework.dao.CannotAcquireLockException: could not execute statement [Deadlock found when trying to get lock; try restarting transaction] [update users set deleted_at=?,balance=?,updated_at=? where id=?]; SQL [update users set deleted_at=?,balance=?,updated_at=? where id=?]]]",
+          "source": "build/serializable-experiment/tests-08/TEST-com.loopers.order.application.OrderConcurrencyTest.xml"
+        },
+        {
+          "suite": "com.loopers.order.application.OrderConcurrencyTest",
+          "name": "[동시성] 재고 5개에 주문 8건을 동시에 확정하면 성공 5·재고 부족 3·최종 재고 0이다.",
+          "status": "failed",
+          "seconds": 0.538,
+          "failure": "org.gradle.internal.exceptions.DefaultMultiCauseException: Multiple Failures (4 failures)\n\torg.opentest4j.AssertionFailedError: \nexpected: 5L\n but was: 2L\n\torg.opentest4j.AssertionFailedError: \nexpected: 3L\n but was: 0L\n\tjava.lang.AssertionError: \nExpecting empty but was: [Outcome[orderId=1, buyerId=1, success=false, rejection=null, technical=org.springframework.dao.CannotAcquireLockException: could not execute statement [Deadlock found when trying to get lock; try restarting transaction] [update product set brand_id=?,deleted_at=?,name=?,price=?,quantity=?,updated_at=? where id=?]; SQL [update product set brand_id=?,deleted_at=?,name=?,price=?,quantity=?,updated_at=? where id=?]],\n    Outcome[orderId=3, buyerId=3, success=false, rejection=null, technical=org.springframework.dao.CannotAcquireLockException: could not execute statement [Deadlock found when trying to get lock; try restarting transaction] [update product set brand_id=?,deleted_at=?,name=?,price=?,quantity=?,updated_at=? where id=?]; SQL [update product set brand_id=?,deleted_at=?,name=?,price=?,quantity=?,updated_at=? where id=?]],\n    Outcome[orderId=5, buyerId=5, success=false, rejection=null, technical=org.springframework.dao.CannotAcquireLockException: could not execute statement [Deadlock found when trying to get lock; try restarting transaction] [update product set brand_id=?,deleted_at=?,name=?,price=?,quantity=?,updated_at=? where id=?]; SQL [update product set brand_id=?,deleted_at=?,name=?,price=?,quantity=?,updated_at=? where id=?]],\n    Outcome[orderId=6, buyerId=6, success=false, rejection=null, technical=org.springframework.dao.CannotAcquireLockException: could not execute statement [Deadlock found when trying to get lock; try restarting transaction] [update product set brand_id=?,deleted_at=?,name=?,price=?,quantity=?,updated_at=? where id=?]; SQL [update product set brand_id=?,deleted_at=?,name=?,price=?,quantity=?,updated_at=? where id=?]],\n    Outcome[orderId=7, buyerId=7, success=false, rejection=null, technical=org.springframework.dao.CannotAcquireLockException: could not execute statement [Deadlock found when trying to get lock; try restarting transaction] [update product set brand_id=?,deleted_at=?,name=?,price=?,quantity=?,updated_at=? where id=?]; SQL [update product set brand_id=?,deleted_at=?,name=?,price=?,quantity=?,updated_at=? where id=?]],\n    Outcome[orderId=8, buyerId=8, success=false, rejection=null, technical=org.springframework.dao.CannotAcquireLockException: could not execute statement [Deadlock found when trying to get lock; try restarting transaction] [update product set brand_id=?,deleted_at=?,name=?,price=?,quantity=?,updated_at=? where id=?]; SQL [update product set brand_id=?,deleted_at=?,name=?,price=?,quantity=?,updated_at=? where id=?]]]\n\torg.opentest4j.AssertionFailedError: \nexpected: 0\n but was: 3",
+          "source": "build/serializable-experiment/tests-08/TEST-com.loopers.order.application.OrderConcurrencyTest.xml"
+        },
+        {
+          "suite": "com.loopers.order.application.OrderConcurrencyTest",
+          "name": "[동시성] 같은 DRAFT 주문을 두 번 동시에 확정하면 한 건만 성공하고 재고·포인트는 한 번만 차감된다.",
+          "status": "passed",
+          "seconds": 0.609,
+          "failure": null,
+          "source": "build/serializable-experiment/tests-08/TEST-com.loopers.order.application.OrderConcurrencyTest.xml"
+        },
+        {
+          "suite": "com.loopers.order.application.OrderConcurrencyTest",
+          "name": "[동시성] 2000원 충전과 7000원 결제가 모두 성공하면 최종 잔액은 5000원이다.",
+          "status": "passed",
+          "seconds": 0.435,
+          "failure": null,
+          "source": "build/serializable-experiment/tests-08/TEST-com.loopers.order.application.OrderConcurrencyTest.xml"
+        },
+        {
+          "suite": "com.loopers.experiment.IsolationProbeTest",
+          "name": "verifiesActualConnectionIsolation()",
+          "status": "passed",
+          "seconds": 0.015,
+          "failure": null,
+          "source": "build/serializable-experiment/tests-08/TEST-com.loopers.experiment.IsolationProbeTest.xml"
+        }
+      ]
+    },
+    {
+      "round": 9,
+      "recordedAt": "2026-10-05T20:50:59.585507+00:00",
+      "gradleExitCode": 1,
+      "tests": [
+        {
+          "suite": "com.loopers.order.application.OrderConcurrencyTest",
+          "name": "[동시성] 한 고객의 잔액 10000원·충분한 재고에서 서로 다른 4000원 DRAFT 주문 3건을 동시에 확정하면 성공 2·잔액 부족 1·기술 오류 0·최종 잔액 2000원이다.",
+          "status": "failed",
+          "seconds": 1.035,
+          "failure": "org.gradle.internal.exceptions.DefaultMultiCauseException: Multiple Failures (2 failures)\n\torg.opentest4j.AssertionFailedError: \nexpected: 1L\n but was: 0L\n\tjava.lang.AssertionError: \nExpecting empty but was: [Outcome[orderId=3, buyerId=1, success=false, rejection=null, technical=org.springframework.dao.CannotAcquireLockException: could not execute statement [Deadlock found when trying to get lock; try restarting transaction] [update users set deleted_at=?,balance=?,updated_at=? where id=?]; SQL [update users set deleted_at=?,balance=?,updated_at=? where id=?]]]",
+          "source": "build/serializable-experiment/tests-09/TEST-com.loopers.order.application.OrderConcurrencyTest.xml"
+        },
+        {
+          "suite": "com.loopers.order.application.OrderConcurrencyTest",
+          "name": "[동시성] 재고 5개에 주문 8건을 동시에 확정하면 성공 5·재고 부족 3·최종 재고 0이다.",
+          "status": "failed",
+          "seconds": 0.446,
+          "failure": "org.gradle.internal.exceptions.DefaultMultiCauseException: Multiple Failures (4 failures)\n\torg.opentest4j.AssertionFailedError: \nexpected: 5L\n but was: 3L\n\torg.opentest4j.AssertionFailedError: \nexpected: 3L\n but was: 0L\n\tjava.lang.AssertionError: \nExpecting empty but was: [Outcome[orderId=1, buyerId=1, success=false, rejection=null, technical=org.springframework.dao.CannotAcquireLockException: could not execute statement [Deadlock found when trying to get lock; try restarting transaction] [update product set brand_id=?,deleted_at=?,name=?,price=?,quantity=?,updated_at=? where id=?]; SQL [update product set brand_id=?,deleted_at=?,name=?,price=?,quantity=?,updated_at=? where id=?]],\n    Outcome[orderId=2, buyerId=2, success=false, rejection=null, technical=org.springframework.dao.CannotAcquireLockException: could not execute statement [Deadlock found when trying to get lock; try restarting transaction] [update product set brand_id=?,deleted_at=?,name=?,price=?,quantity=?,updated_at=? where id=?]; SQL [update product set brand_id=?,deleted_at=?,name=?,price=?,quantity=?,updated_at=? where id=?]],\n    Outcome[orderId=4, buyerId=4, success=false, rejection=null, technical=org.springframework.dao.CannotAcquireLockException: could not execute statement [Deadlock found when trying to get lock; try restarting transaction] [update product set brand_id=?,deleted_at=?,name=?,price=?,quantity=?,updated_at=? where id=?]; SQL [update product set brand_id=?,deleted_at=?,name=?,price=?,quantity=?,updated_at=? where id=?]],\n    Outcome[orderId=5, buyerId=5, success=false, rejection=null, technical=org.springframework.dao.CannotAcquireLockException: could not execute statement [Deadlock found when trying to get lock; try restarting transaction] [update product set brand_id=?,deleted_at=?,name=?,price=?,quantity=?,updated_at=? where id=?]; SQL [update product set brand_id=?,deleted_at=?,name=?,price=?,quantity=?,updated_at=? where id=?]],\n    Outcome[orderId=6, buyerId=6, success=false, rejection=null, technical=org.springframework.dao.CannotAcquireLockException: could not execute statement [Deadlock found when trying to get lock; try restarting transaction] [update product set brand_id=?,deleted_at=?,name=?,price=?,quantity=?,updated_at=? where id=?]; SQL [update product set brand_id=?,deleted_at=?,name=?,price=?,quantity=?,updated_at=? where id=?]]]\n\torg.opentest4j.AssertionFailedError: \nexpected: 0\n but was: 2",
+          "source": "build/serializable-experiment/tests-09/TEST-com.loopers.order.application.OrderConcurrencyTest.xml"
+        },
+        {
+          "suite": "com.loopers.order.application.OrderConcurrencyTest",
+          "name": "[동시성] 같은 DRAFT 주문을 두 번 동시에 확정하면 한 건만 성공하고 재고·포인트는 한 번만 차감된다.",
+          "status": "passed",
+          "seconds": 0.329,
+          "failure": null,
+          "source": "build/serializable-experiment/tests-09/TEST-com.loopers.order.application.OrderConcurrencyTest.xml"
+        },
+        {
+          "suite": "com.loopers.order.application.OrderConcurrencyTest",
+          "name": "[동시성] 2000원 충전과 7000원 결제가 모두 성공하면 최종 잔액은 5000원이다.",
+          "status": "passed",
+          "seconds": 0.249,
+          "failure": null,
+          "source": "build/serializable-experiment/tests-09/TEST-com.loopers.order.application.OrderConcurrencyTest.xml"
+        },
+        {
+          "suite": "com.loopers.experiment.IsolationProbeTest",
+          "name": "verifiesActualConnectionIsolation()",
+          "status": "passed",
+          "seconds": 0.012,
+          "failure": null,
+          "source": "build/serializable-experiment/tests-09/TEST-com.loopers.experiment.IsolationProbeTest.xml"
+        }
+      ]
+    },
+    {
+      "round": 10,
+      "recordedAt": "2026-10-05T20:51:29.260531+00:00",
+      "gradleExitCode": 1,
+      "tests": [
+        {
+          "suite": "com.loopers.order.application.OrderConcurrencyTest",
+          "name": "[동시성] 한 고객의 잔액 10000원·충분한 재고에서 서로 다른 4000원 DRAFT 주문 3건을 동시에 확정하면 성공 2·잔액 부족 1·기술 오류 0·최종 잔액 2000원이다.",
+          "status": "failed",
+          "seconds": 1.052,
+          "failure": "org.gradle.internal.exceptions.DefaultMultiCauseException: Multiple Failures (2 failures)\n\torg.opentest4j.AssertionFailedError: \nexpected: 1L\n but was: 0L\n\tjava.lang.AssertionError: \nExpecting empty but was: [Outcome[orderId=3, buyerId=1, success=false, rejection=null, technical=org.springframework.dao.CannotAcquireLockException: could not execute statement [Deadlock found when trying to get lock; try restarting transaction] [update users set deleted_at=?,balance=?,updated_at=? where id=?]; SQL [update users set deleted_at=?,balance=?,updated_at=? where id=?]]]",
+          "source": "build/serializable-experiment/tests-10/TEST-com.loopers.order.application.OrderConcurrencyTest.xml"
+        },
+        {
+          "suite": "com.loopers.order.application.OrderConcurrencyTest",
+          "name": "[동시성] 재고 5개에 주문 8건을 동시에 확정하면 성공 5·재고 부족 3·최종 재고 0이다.",
+          "status": "failed",
+          "seconds": 0.429,
+          "failure": "org.gradle.internal.exceptions.DefaultMultiCauseException: Multiple Failures (4 failures)\n\torg.opentest4j.AssertionFailedError: \nexpected: 5L\n but was: 2L\n\torg.opentest4j.AssertionFailedError: \nexpected: 3L\n but was: 0L\n\tjava.lang.AssertionError: \nExpecting empty but was: [Outcome[orderId=1, buyerId=1, success=false, rejection=null, technical=org.springframework.dao.CannotAcquireLockException: could not execute statement [Deadlock found when trying to get lock; try restarting transaction] [update product set brand_id=?,deleted_at=?,name=?,price=?,quantity=?,updated_at=? where id=?]; SQL [update product set brand_id=?,deleted_at=?,name=?,price=?,quantity=?,updated_at=? where id=?]],\n    Outcome[orderId=4, buyerId=4, success=false, rejection=null, technical=org.springframework.dao.CannotAcquireLockException: could not execute statement [Deadlock found when trying to get lock; try restarting transaction] [update product set brand_id=?,deleted_at=?,name=?,price=?,quantity=?,updated_at=? where id=?]; SQL [update product set brand_id=?,deleted_at=?,name=?,price=?,quantity=?,updated_at=? where id=?]],\n    Outcome[orderId=5, buyerId=5, success=false, rejection=null, technical=org.springframework.dao.CannotAcquireLockException: could not execute statement [Deadlock found when trying to get lock; try restarting transaction] [update product set brand_id=?,deleted_at=?,name=?,price=?,quantity=?,updated_at=? where id=?]; SQL [update product set brand_id=?,deleted_at=?,name=?,price=?,quantity=?,updated_at=? where id=?]],\n    Outcome[orderId=6, buyerId=6, success=false, rejection=null, technical=org.springframework.dao.CannotAcquireLockException: could not execute statement [Deadlock found when trying to get lock; try restarting transaction] [update product set brand_id=?,deleted_at=?,name=?,price=?,quantity=?,updated_at=? where id=?]; SQL [update product set brand_id=?,deleted_at=?,name=?,price=?,quantity=?,updated_at=? where id=?]],\n    Outcome[orderId=7, buyerId=7, success=false, rejection=null, technical=org.springframework.dao.CannotAcquireLockException: could not execute statement [Deadlock found when trying to get lock; try restarting transaction] [update product set brand_id=?,deleted_at=?,name=?,price=?,quantity=?,updated_at=? where id=?]; SQL [update product set brand_id=?,deleted_at=?,name=?,price=?,quantity=?,updated_at=? where id=?]],\n    Outcome[orderId=8, buyerId=8, success=false, rejection=null, technical=org.springframework.dao.CannotAcquireLockException: could not execute statement [Deadlock found when trying to get lock; try restarting transaction] [update product set brand_id=?,deleted_at=?,name=?,price=?,quantity=?,updated_at=? where id=?]; SQL [update product set brand_id=?,deleted_at=?,name=?,price=?,quantity=?,updated_at=? where id=?]]]\n\torg.opentest4j.AssertionFailedError: \nexpected: 0\n but was: 3",
+          "source": "build/serializable-experiment/tests-10/TEST-com.loopers.order.application.OrderConcurrencyTest.xml"
+        },
+        {
+          "suite": "com.loopers.order.application.OrderConcurrencyTest",
+          "name": "[동시성] 같은 DRAFT 주문을 두 번 동시에 확정하면 한 건만 성공하고 재고·포인트는 한 번만 차감된다.",
+          "status": "passed",
+          "seconds": 0.286,
+          "failure": null,
+          "source": "build/serializable-experiment/tests-10/TEST-com.loopers.order.application.OrderConcurrencyTest.xml"
+        },
+        {
+          "suite": "com.loopers.order.application.OrderConcurrencyTest",
+          "name": "[동시성] 2000원 충전과 7000원 결제가 모두 성공하면 최종 잔액은 5000원이다.",
+          "status": "passed",
+          "seconds": 0.274,
+          "failure": null,
+          "source": "build/serializable-experiment/tests-10/TEST-com.loopers.order.application.OrderConcurrencyTest.xml"
+        },
+        {
+          "suite": "com.loopers.experiment.IsolationProbeTest",
+          "name": "verifiesActualConnectionIsolation()",
+          "status": "passed",
+          "seconds": 0.011,
+          "failure": null,
+          "source": "build/serializable-experiment/tests-10/TEST-com.loopers.experiment.IsolationProbeTest.xml"
+        }
+      ]
+    }
+  ]
+}

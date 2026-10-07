@@ -1,0 +1,467 @@
+{
+  "schemaVersion": 1,
+  "experimentId": "stock-contention/10-optimistic-version-pool200",
+  "gitSha": "393db74",
+  "workingTreeChanges": true,
+  "config": {
+    "spring.jpa.show-sql": false,
+    "datasource.mysql-jpa.main.maximum-pool-size": 200,
+    "datasource.mysql-jpa.main.minimum-idle": 200,
+    "datasource.mysql-jpa.main.connection-timeout": 3000,
+    "concurrency.lock.strategy": "optimistic",
+    "concurrency.transaction-retry.max-retries": 0,
+    "concurrency.transaction-retry.backoff-ms": 0
+  },
+  "rounds": [
+    {
+      "round": 1,
+      "tests": [
+        {
+          "suite": "com.loopers.order.application.OrderConcurrencyTest",
+          "name": "[동시성] 한 고객의 잔액 10000원·충분한 재고에서 서로 다른 4000원 DRAFT 주문 3건을 동시에 확정하면 성공 2·잔액 부족 1·기술 오류 0·최종 잔액 2000원이다.",
+          "status": "failed",
+          "seconds": 0.363,
+          "failure": "org.gradle.internal.exceptions.DefaultMultiCauseException: Multiple Failures (5 failures)\n\torg.opentest4j.AssertionFailedError: \nexpected: 2L\n but was: 1L\n\torg.opentest4j.AssertionFailedError: \nexpected: 1L\n but was: 0L\n\tjava.lang.AssertionError: \nExpecting empty but was: [Outcome[orderId=1, buyerId=1, success=false, rejection=null, technical=org.springframework.orm.ObjectOptimisticLockingFailureException: Row was updated or deleted by another transaction (or unsaved-value mapping was incorrect): [com.loopers.user.domain.User#1]],\n    Outcome[orderId=2, buyerId=1, success=false, rejection=null, technical=org.springframework.orm.ObjectOptimisticLockingFailureException: Row was updated or deleted by another transaction (or unsaved-value mapping was incorrect): [com.loopers.user.domain.User#1]]]\n\torg.opentest4j.AssertionFailedError: \nexpected: 2000L\n but was: 6000L\n\torg.opentest4j.AssertionFailedError: \nexpected: 8\n but was: 9",
+          "source": "build/serializable-experiment/tests-01/TEST-com.loopers.order.application.OrderConcurrencyTest.xml"
+        },
+        {
+          "suite": "com.loopers.order.application.OrderConcurrencyTest",
+          "name": "[동시성] 재고 5개에 주문 8건을 동시에 확정하면 성공 5·재고 부족 3·최종 재고 0이다.",
+          "status": "failed",
+          "seconds": 0.276,
+          "failure": "org.gradle.internal.exceptions.DefaultMultiCauseException: Multiple Failures (4 failures)\n\torg.opentest4j.AssertionFailedError: \nexpected: 5L\n but was: 1L\n\torg.opentest4j.AssertionFailedError: \nexpected: 3L\n but was: 0L\n\tjava.lang.AssertionError: \nExpecting empty but was: [Outcome[orderId=1, buyerId=1, success=false, rejection=null, technical=org.springframework.orm.ObjectOptimisticLockingFailureException: Row was updated or deleted by another transaction (or unsaved-value mapping was incorrect): [com.loopers.product.domain.Product#1]],\n    Outcome[orderId=2, buyerId=2, success=false, rejection=null, technical=org.springframework.orm.ObjectOptimisticLockingFailureException: Row was updated or deleted by another transaction (or unsaved-value mapping was incorrect): [com.loopers.product.domain.Product#1]],\n    Outcome[orderId=4, buyerId=4, success=false, rejection=null, technical=org.springframework.orm.ObjectOptimisticLockingFailureException: Row was updated or deleted by another transaction (or unsaved-value mapping was incorrect): [com.loopers.product.domain.Product#1]],\n    Outcome[orderId=5, buyerId=5, success=false, rejection=null, technical=org.springframework.orm.ObjectOptimisticLockingFailureException: Row was updated or deleted by another transaction (or unsaved-value mapping was incorrect): [com.loopers.product.domain.Product#1]],\n    Outcome[orderId=6, buyerId=6, success=false, rejection=null, technical=org.springframework.orm.ObjectOptimisticLockingFailureException: Row was updated or deleted by another transaction (or unsaved-value mapping was incorrect): [com.loopers.product.domain.Product#1]],\n    Outcome[orderId=7, buyerId=7, success=false, rejection=null, technical=org.springframework.orm.ObjectOptimisticLockingFailureException: Row was updated or deleted by another transaction (or unsaved-value mapping was incorrect): [com.loopers.product.domain.Product#1]],\n    Outcome[orderId=8, buyerId=8, success=false, rejection=null, technical=org.springframework.orm.ObjectOptimisticLockingFailureException: Row was updated or deleted by another transaction (or unsaved-value mapping was incorrect): [com.loopers.product.domain.Product#1]]]\n\torg.opentest4j.AssertionFailedError: \nexpected: 0\n but was: 4",
+          "source": "build/serializable-experiment/tests-01/TEST-com.loopers.order.application.OrderConcurrencyTest.xml"
+        },
+        {
+          "suite": "com.loopers.order.application.OrderConcurrencyTest",
+          "name": "[동시성] 같은 DRAFT 주문을 두 번 동시에 확정하면 한 건만 성공하고 재고·포인트는 한 번만 차감된다.",
+          "status": "failed",
+          "seconds": 0.183,
+          "failure": "org.gradle.internal.exceptions.DefaultMultiCauseException: Multiple Failures (2 failures)\n\torg.opentest4j.AssertionFailedError: \nexpected: 1L\n but was: 0L\n\tjava.lang.AssertionError: \nExpecting empty but was: [Outcome[orderId=1, buyerId=1, success=false, rejection=null, technical=org.springframework.orm.ObjectOptimisticLockingFailureException: Row was updated or deleted by another transaction (or unsaved-value mapping was incorrect): [com.loopers.order.domain.Order#1]]]",
+          "source": "build/serializable-experiment/tests-01/TEST-com.loopers.order.application.OrderConcurrencyTest.xml"
+        },
+        {
+          "suite": "com.loopers.order.application.OrderConcurrencyTest",
+          "name": "[동시성] 2000원 충전과 7000원 결제가 모두 성공하면 최종 잔액은 5000원이다.",
+          "status": "failed",
+          "seconds": 0.275,
+          "failure": "org.gradle.internal.exceptions.DefaultMultiCauseException: Multiple Failures (7 failures)\n\torg.opentest4j.AssertionFailedError: \nexpected: 2L\n but was: 1L\n\torg.opentest4j.AssertionFailedError: \nexpected: 0L\n but was: 1L\n\torg.opentest4j.AssertionFailedError: \nexpected: 5000L\n but was: 12000L\n\torg.opentest4j.AssertionFailedError: \nexpected: 5000L\n but was: 12000L\n\torg.opentest4j.AssertionFailedError: \nexpected: CONFIRMED\n but was: DRAFT\n\tjava.lang.NullPointerException: Cannot invoke \"com.loopers.order.domain.PaymentResult.amount()\" because the return value of \"com.loopers.order.domain.Order.getPaymentResult()\" is null\n\torg.opentest4j.AssertionFailedError: \nexpected: 0\n but was: 1",
+          "source": "build/serializable-experiment/tests-01/TEST-com.loopers.order.application.OrderConcurrencyTest.xml"
+        },
+        {
+          "suite": "com.loopers.experiment.IsolationProbeTest",
+          "name": "verifiesActualConnectionIsolation()",
+          "status": "passed",
+          "seconds": 0.398,
+          "failure": null,
+          "source": "build/serializable-experiment/tests-01/TEST-com.loopers.experiment.IsolationProbeTest.xml"
+        }
+      ]
+    },
+    {
+      "round": 2,
+      "tests": [
+        {
+          "suite": "com.loopers.order.application.OrderConcurrencyTest",
+          "name": "[동시성] 한 고객의 잔액 10000원·충분한 재고에서 서로 다른 4000원 DRAFT 주문 3건을 동시에 확정하면 성공 2·잔액 부족 1·기술 오류 0·최종 잔액 2000원이다.",
+          "status": "failed",
+          "seconds": 0.727,
+          "failure": "org.gradle.internal.exceptions.DefaultMultiCauseException: Multiple Failures (5 failures)\n\torg.opentest4j.AssertionFailedError: \nexpected: 2L\n but was: 1L\n\torg.opentest4j.AssertionFailedError: \nexpected: 1L\n but was: 0L\n\tjava.lang.AssertionError: \nExpecting empty but was: [Outcome[orderId=2, buyerId=1, success=false, rejection=null, technical=org.springframework.orm.ObjectOptimisticLockingFailureException: Row was updated or deleted by another transaction (or unsaved-value mapping was incorrect): [com.loopers.user.domain.User#1]],\n    Outcome[orderId=3, buyerId=1, success=false, rejection=null, technical=org.springframework.orm.ObjectOptimisticLockingFailureException: Row was updated or deleted by another transaction (or unsaved-value mapping was incorrect): [com.loopers.user.domain.User#1]]]\n\torg.opentest4j.AssertionFailedError: \nexpected: 2000L\n but was: 6000L\n\torg.opentest4j.AssertionFailedError: \nexpected: 8\n but was: 9",
+          "source": "build/serializable-experiment/tests-02/TEST-com.loopers.order.application.OrderConcurrencyTest.xml"
+        },
+        {
+          "suite": "com.loopers.order.application.OrderConcurrencyTest",
+          "name": "[동시성] 재고 5개에 주문 8건을 동시에 확정하면 성공 5·재고 부족 3·최종 재고 0이다.",
+          "status": "failed",
+          "seconds": 0.318,
+          "failure": "org.gradle.internal.exceptions.DefaultMultiCauseException: Multiple Failures (4 failures)\n\torg.opentest4j.AssertionFailedError: \nexpected: 5L\n but was: 1L\n\torg.opentest4j.AssertionFailedError: \nexpected: 3L\n but was: 0L\n\tjava.lang.AssertionError: \nExpecting empty but was: [Outcome[orderId=1, buyerId=1, success=false, rejection=null, technical=org.springframework.orm.ObjectOptimisticLockingFailureException: Row was updated or deleted by another transaction (or unsaved-value mapping was incorrect): [com.loopers.product.domain.Product#1]],\n    Outcome[orderId=2, buyerId=2, success=false, rejection=null, technical=org.springframework.orm.ObjectOptimisticLockingFailureException: Row was updated or deleted by another transaction (or unsaved-value mapping was incorrect): [com.loopers.product.domain.Product#1]],\n    Outcome[orderId=3, buyerId=3, success=false, rejection=null, technical=org.springframework.orm.ObjectOptimisticLockingFailureException: Row was updated or deleted by another transaction (or unsaved-value mapping was incorrect): [com.loopers.product.domain.Product#1]],\n    Outcome[orderId=4, buyerId=4, success=false, rejection=null, technical=org.springframework.orm.ObjectOptimisticLockingFailureException: Row was updated or deleted by another transaction (or unsaved-value mapping was incorrect): [com.loopers.product.domain.Product#1]],\n    Outcome[orderId=6, buyerId=6, success=false, rejection=null, technical=org.springframework.orm.ObjectOptimisticLockingFailureException: Row was updated or deleted by another transaction (or unsaved-value mapping was incorrect): [com.loopers.product.domain.Product#1]],\n    Outcome[orderId=7, buyerId=7, success=false, rejection=null, technical=org.springframework.orm.ObjectOptimisticLockingFailureException: Row was updated or deleted by another transaction (or unsaved-value mapping was incorrect): [com.loopers.product.domain.Product#1]],\n    Outcome[orderId=8, buyerId=8, success=false, rejection=null, technical=org.springframework.orm.ObjectOptimisticLockingFailureException: Row was updated or deleted by another transaction (or unsaved-value mapping was incorrect): [com.loopers.product.domain.Product#1]]]\n\torg.opentest4j.AssertionFailedError: \nexpected: 0\n but was: 4",
+          "source": "build/serializable-experiment/tests-02/TEST-com.loopers.order.application.OrderConcurrencyTest.xml"
+        },
+        {
+          "suite": "com.loopers.order.application.OrderConcurrencyTest",
+          "name": "[동시성] 같은 DRAFT 주문을 두 번 동시에 확정하면 한 건만 성공하고 재고·포인트는 한 번만 차감된다.",
+          "status": "failed",
+          "seconds": 0.241,
+          "failure": "org.gradle.internal.exceptions.DefaultMultiCauseException: Multiple Failures (2 failures)\n\torg.opentest4j.AssertionFailedError: \nexpected: 1L\n but was: 0L\n\tjava.lang.AssertionError: \nExpecting empty but was: [Outcome[orderId=1, buyerId=1, success=false, rejection=null, technical=org.springframework.orm.ObjectOptimisticLockingFailureException: Row was updated or deleted by another transaction (or unsaved-value mapping was incorrect): [com.loopers.order.domain.Order#1]]]",
+          "source": "build/serializable-experiment/tests-02/TEST-com.loopers.order.application.OrderConcurrencyTest.xml"
+        },
+        {
+          "suite": "com.loopers.order.application.OrderConcurrencyTest",
+          "name": "[동시성] 2000원 충전과 7000원 결제가 모두 성공하면 최종 잔액은 5000원이다.",
+          "status": "failed",
+          "seconds": 0.267,
+          "failure": "org.gradle.internal.exceptions.DefaultMultiCauseException: Multiple Failures (7 failures)\n\torg.opentest4j.AssertionFailedError: \nexpected: 2L\n but was: 1L\n\torg.opentest4j.AssertionFailedError: \nexpected: 0L\n but was: 1L\n\torg.opentest4j.AssertionFailedError: \nexpected: 5000L\n but was: 12000L\n\torg.opentest4j.AssertionFailedError: \nexpected: 5000L\n but was: 12000L\n\torg.opentest4j.AssertionFailedError: \nexpected: CONFIRMED\n but was: DRAFT\n\tjava.lang.NullPointerException: Cannot invoke \"com.loopers.order.domain.PaymentResult.amount()\" because the return value of \"com.loopers.order.domain.Order.getPaymentResult()\" is null\n\torg.opentest4j.AssertionFailedError: \nexpected: 0\n but was: 1",
+          "source": "build/serializable-experiment/tests-02/TEST-com.loopers.order.application.OrderConcurrencyTest.xml"
+        },
+        {
+          "suite": "com.loopers.experiment.IsolationProbeTest",
+          "name": "verifiesActualConnectionIsolation()",
+          "status": "passed",
+          "seconds": 0.009,
+          "failure": null,
+          "source": "build/serializable-experiment/tests-02/TEST-com.loopers.experiment.IsolationProbeTest.xml"
+        }
+      ]
+    },
+    {
+      "round": 3,
+      "tests": [
+        {
+          "suite": "com.loopers.order.application.OrderConcurrencyTest",
+          "name": "[동시성] 한 고객의 잔액 10000원·충분한 재고에서 서로 다른 4000원 DRAFT 주문 3건을 동시에 확정하면 성공 2·잔액 부족 1·기술 오류 0·최종 잔액 2000원이다.",
+          "status": "failed",
+          "seconds": 0.789,
+          "failure": "org.gradle.internal.exceptions.DefaultMultiCauseException: Multiple Failures (5 failures)\n\torg.opentest4j.AssertionFailedError: \nexpected: 2L\n but was: 1L\n\torg.opentest4j.AssertionFailedError: \nexpected: 1L\n but was: 0L\n\tjava.lang.AssertionError: \nExpecting empty but was: [Outcome[orderId=1, buyerId=1, success=false, rejection=null, technical=org.springframework.orm.ObjectOptimisticLockingFailureException: Row was updated or deleted by another transaction (or unsaved-value mapping was incorrect): [com.loopers.user.domain.User#1]],\n    Outcome[orderId=2, buyerId=1, success=false, rejection=null, technical=org.springframework.orm.ObjectOptimisticLockingFailureException: Row was updated or deleted by another transaction (or unsaved-value mapping was incorrect): [com.loopers.user.domain.User#1]]]\n\torg.opentest4j.AssertionFailedError: \nexpected: 2000L\n but was: 6000L\n\torg.opentest4j.AssertionFailedError: \nexpected: 8\n but was: 9",
+          "source": "build/serializable-experiment/tests-03/TEST-com.loopers.order.application.OrderConcurrencyTest.xml"
+        },
+        {
+          "suite": "com.loopers.order.application.OrderConcurrencyTest",
+          "name": "[동시성] 재고 5개에 주문 8건을 동시에 확정하면 성공 5·재고 부족 3·최종 재고 0이다.",
+          "status": "failed",
+          "seconds": 0.291,
+          "failure": "org.gradle.internal.exceptions.DefaultMultiCauseException: Multiple Failures (4 failures)\n\torg.opentest4j.AssertionFailedError: \nexpected: 5L\n but was: 1L\n\torg.opentest4j.AssertionFailedError: \nexpected: 3L\n but was: 0L\n\tjava.lang.AssertionError: \nExpecting empty but was: [Outcome[orderId=1, buyerId=1, success=false, rejection=null, technical=org.springframework.orm.ObjectOptimisticLockingFailureException: Row was updated or deleted by another transaction (or unsaved-value mapping was incorrect): [com.loopers.product.domain.Product#1]],\n    Outcome[orderId=2, buyerId=2, success=false, rejection=null, technical=org.springframework.orm.ObjectOptimisticLockingFailureException: Row was updated or deleted by another transaction (or unsaved-value mapping was incorrect): [com.loopers.product.domain.Product#1]],\n    Outcome[orderId=4, buyerId=4, success=false, rejection=null, technical=org.springframework.orm.ObjectOptimisticLockingFailureException: Row was updated or deleted by another transaction (or unsaved-value mapping was incorrect): [com.loopers.product.domain.Product#1]],\n    Outcome[orderId=5, buyerId=5, success=false, rejection=null, technical=org.springframework.orm.ObjectOptimisticLockingFailureException: Row was updated or deleted by another transaction (or unsaved-value mapping was incorrect): [com.loopers.product.domain.Product#1]],\n    Outcome[orderId=6, buyerId=6, success=false, rejection=null, technical=org.springframework.orm.ObjectOptimisticLockingFailureException: Row was updated or deleted by another transaction (or unsaved-value mapping was incorrect): [com.loopers.product.domain.Product#1]],\n    Outcome[orderId=7, buyerId=7, success=false, rejection=null, technical=org.springframework.orm.ObjectOptimisticLockingFailureException: Row was updated or deleted by another transaction (or unsaved-value mapping was incorrect): [com.loopers.product.domain.Product#1]],\n    Outcome[orderId=8, buyerId=8, success=false, rejection=null, technical=org.springframework.orm.ObjectOptimisticLockingFailureException: Row was updated or deleted by another transaction (or unsaved-value mapping was incorrect): [com.loopers.product.domain.Product#1]]]\n\torg.opentest4j.AssertionFailedError: \nexpected: 0\n but was: 4",
+          "source": "build/serializable-experiment/tests-03/TEST-com.loopers.order.application.OrderConcurrencyTest.xml"
+        },
+        {
+          "suite": "com.loopers.order.application.OrderConcurrencyTest",
+          "name": "[동시성] 같은 DRAFT 주문을 두 번 동시에 확정하면 한 건만 성공하고 재고·포인트는 한 번만 차감된다.",
+          "status": "failed",
+          "seconds": 0.229,
+          "failure": "org.gradle.internal.exceptions.DefaultMultiCauseException: Multiple Failures (2 failures)\n\torg.opentest4j.AssertionFailedError: \nexpected: 1L\n but was: 0L\n\tjava.lang.AssertionError: \nExpecting empty but was: [Outcome[orderId=1, buyerId=1, success=false, rejection=null, technical=org.springframework.orm.ObjectOptimisticLockingFailureException: Row was updated or deleted by another transaction (or unsaved-value mapping was incorrect): [com.loopers.order.domain.Order#1]]]",
+          "source": "build/serializable-experiment/tests-03/TEST-com.loopers.order.application.OrderConcurrencyTest.xml"
+        },
+        {
+          "suite": "com.loopers.order.application.OrderConcurrencyTest",
+          "name": "[동시성] 2000원 충전과 7000원 결제가 모두 성공하면 최종 잔액은 5000원이다.",
+          "status": "failed",
+          "seconds": 0.189,
+          "failure": "org.gradle.internal.exceptions.DefaultMultiCauseException: Multiple Failures (7 failures)\n\torg.opentest4j.AssertionFailedError: \nexpected: 2L\n but was: 1L\n\torg.opentest4j.AssertionFailedError: \nexpected: 0L\n but was: 1L\n\torg.opentest4j.AssertionFailedError: \nexpected: 5000L\n but was: 12000L\n\torg.opentest4j.AssertionFailedError: \nexpected: 5000L\n but was: 12000L\n\torg.opentest4j.AssertionFailedError: \nexpected: CONFIRMED\n but was: DRAFT\n\tjava.lang.NullPointerException: Cannot invoke \"com.loopers.order.domain.PaymentResult.amount()\" because the return value of \"com.loopers.order.domain.Order.getPaymentResult()\" is null\n\torg.opentest4j.AssertionFailedError: \nexpected: 0\n but was: 1",
+          "source": "build/serializable-experiment/tests-03/TEST-com.loopers.order.application.OrderConcurrencyTest.xml"
+        },
+        {
+          "suite": "com.loopers.experiment.IsolationProbeTest",
+          "name": "verifiesActualConnectionIsolation()",
+          "status": "passed",
+          "seconds": 0.007,
+          "failure": null,
+          "source": "build/serializable-experiment/tests-03/TEST-com.loopers.experiment.IsolationProbeTest.xml"
+        }
+      ]
+    },
+    {
+      "round": 4,
+      "tests": [
+        {
+          "suite": "com.loopers.order.application.OrderConcurrencyTest",
+          "name": "[동시성] 한 고객의 잔액 10000원·충분한 재고에서 서로 다른 4000원 DRAFT 주문 3건을 동시에 확정하면 성공 2·잔액 부족 1·기술 오류 0·최종 잔액 2000원이다.",
+          "status": "failed",
+          "seconds": 0.743,
+          "failure": "org.gradle.internal.exceptions.DefaultMultiCauseException: Multiple Failures (5 failures)\n\torg.opentest4j.AssertionFailedError: \nexpected: 2L\n but was: 1L\n\torg.opentest4j.AssertionFailedError: \nexpected: 1L\n but was: 0L\n\tjava.lang.AssertionError: \nExpecting empty but was: [Outcome[orderId=1, buyerId=1, success=false, rejection=null, technical=org.springframework.orm.ObjectOptimisticLockingFailureException: Row was updated or deleted by another transaction (or unsaved-value mapping was incorrect): [com.loopers.user.domain.User#1]],\n    Outcome[orderId=3, buyerId=1, success=false, rejection=null, technical=org.springframework.orm.ObjectOptimisticLockingFailureException: Row was updated or deleted by another transaction (or unsaved-value mapping was incorrect): [com.loopers.user.domain.User#1]]]\n\torg.opentest4j.AssertionFailedError: \nexpected: 2000L\n but was: 6000L\n\torg.opentest4j.AssertionFailedError: \nexpected: 8\n but was: 9",
+          "source": "build/serializable-experiment/tests-04/TEST-com.loopers.order.application.OrderConcurrencyTest.xml"
+        },
+        {
+          "suite": "com.loopers.order.application.OrderConcurrencyTest",
+          "name": "[동시성] 재고 5개에 주문 8건을 동시에 확정하면 성공 5·재고 부족 3·최종 재고 0이다.",
+          "status": "failed",
+          "seconds": 0.335,
+          "failure": "org.gradle.internal.exceptions.DefaultMultiCauseException: Multiple Failures (4 failures)\n\torg.opentest4j.AssertionFailedError: \nexpected: 5L\n but was: 1L\n\torg.opentest4j.AssertionFailedError: \nexpected: 3L\n but was: 0L\n\tjava.lang.AssertionError: \nExpecting empty but was: [Outcome[orderId=2, buyerId=2, success=false, rejection=null, technical=org.springframework.orm.ObjectOptimisticLockingFailureException: Row was updated or deleted by another transaction (or unsaved-value mapping was incorrect): [com.loopers.product.domain.Product#1]],\n    Outcome[orderId=3, buyerId=3, success=false, rejection=null, technical=org.springframework.orm.ObjectOptimisticLockingFailureException: Row was updated or deleted by another transaction (or unsaved-value mapping was incorrect): [com.loopers.product.domain.Product#1]],\n    Outcome[orderId=4, buyerId=4, success=false, rejection=null, technical=org.springframework.orm.ObjectOptimisticLockingFailureException: Row was updated or deleted by another transaction (or unsaved-value mapping was incorrect): [com.loopers.product.domain.Product#1]],\n    Outcome[orderId=5, buyerId=5, success=false, rejection=null, technical=org.springframework.orm.ObjectOptimisticLockingFailureException: Row was updated or deleted by another transaction (or unsaved-value mapping was incorrect): [com.loopers.product.domain.Product#1]],\n    Outcome[orderId=6, buyerId=6, success=false, rejection=null, technical=org.springframework.orm.ObjectOptimisticLockingFailureException: Row was updated or deleted by another transaction (or unsaved-value mapping was incorrect): [com.loopers.product.domain.Product#1]],\n    Outcome[orderId=7, buyerId=7, success=false, rejection=null, technical=org.springframework.orm.ObjectOptimisticLockingFailureException: Row was updated or deleted by another transaction (or unsaved-value mapping was incorrect): [com.loopers.product.domain.Product#1]],\n    Outcome[orderId=8, buyerId=8, success=false, rejection=null, technical=org.springframework.orm.ObjectOptimisticLockingFailureException: Row was updated or deleted by another transaction (or unsaved-value mapping was incorrect): [com.loopers.product.domain.Product#1]]]\n\torg.opentest4j.AssertionFailedError: \nexpected: 0\n but was: 4",
+          "source": "build/serializable-experiment/tests-04/TEST-com.loopers.order.application.OrderConcurrencyTest.xml"
+        },
+        {
+          "suite": "com.loopers.order.application.OrderConcurrencyTest",
+          "name": "[동시성] 같은 DRAFT 주문을 두 번 동시에 확정하면 한 건만 성공하고 재고·포인트는 한 번만 차감된다.",
+          "status": "failed",
+          "seconds": 0.208,
+          "failure": "org.gradle.internal.exceptions.DefaultMultiCauseException: Multiple Failures (2 failures)\n\torg.opentest4j.AssertionFailedError: \nexpected: 1L\n but was: 0L\n\tjava.lang.AssertionError: \nExpecting empty but was: [Outcome[orderId=1, buyerId=1, success=false, rejection=null, technical=org.springframework.orm.ObjectOptimisticLockingFailureException: Row was updated or deleted by another transaction (or unsaved-value mapping was incorrect): [com.loopers.order.domain.Order#1]]]",
+          "source": "build/serializable-experiment/tests-04/TEST-com.loopers.order.application.OrderConcurrencyTest.xml"
+        },
+        {
+          "suite": "com.loopers.order.application.OrderConcurrencyTest",
+          "name": "[동시성] 2000원 충전과 7000원 결제가 모두 성공하면 최종 잔액은 5000원이다.",
+          "status": "failed",
+          "seconds": 0.203,
+          "failure": "org.gradle.internal.exceptions.DefaultMultiCauseException: Multiple Failures (7 failures)\n\torg.opentest4j.AssertionFailedError: \nexpected: 2L\n but was: 1L\n\torg.opentest4j.AssertionFailedError: \nexpected: 0L\n but was: 1L\n\torg.opentest4j.AssertionFailedError: \nexpected: 5000L\n but was: 12000L\n\torg.opentest4j.AssertionFailedError: \nexpected: 5000L\n but was: 12000L\n\torg.opentest4j.AssertionFailedError: \nexpected: CONFIRMED\n but was: DRAFT\n\tjava.lang.NullPointerException: Cannot invoke \"com.loopers.order.domain.PaymentResult.amount()\" because the return value of \"com.loopers.order.domain.Order.getPaymentResult()\" is null\n\torg.opentest4j.AssertionFailedError: \nexpected: 0\n but was: 1",
+          "source": "build/serializable-experiment/tests-04/TEST-com.loopers.order.application.OrderConcurrencyTest.xml"
+        },
+        {
+          "suite": "com.loopers.experiment.IsolationProbeTest",
+          "name": "verifiesActualConnectionIsolation()",
+          "status": "passed",
+          "seconds": 0.009,
+          "failure": null,
+          "source": "build/serializable-experiment/tests-04/TEST-com.loopers.experiment.IsolationProbeTest.xml"
+        }
+      ]
+    },
+    {
+      "round": 5,
+      "tests": [
+        {
+          "suite": "com.loopers.order.application.OrderConcurrencyTest",
+          "name": "[동시성] 한 고객의 잔액 10000원·충분한 재고에서 서로 다른 4000원 DRAFT 주문 3건을 동시에 확정하면 성공 2·잔액 부족 1·기술 오류 0·최종 잔액 2000원이다.",
+          "status": "failed",
+          "seconds": 0.741,
+          "failure": "org.gradle.internal.exceptions.DefaultMultiCauseException: Multiple Failures (5 failures)\n\torg.opentest4j.AssertionFailedError: \nexpected: 2L\n but was: 1L\n\torg.opentest4j.AssertionFailedError: \nexpected: 1L\n but was: 0L\n\tjava.lang.AssertionError: \nExpecting empty but was: [Outcome[orderId=1, buyerId=1, success=false, rejection=null, technical=org.springframework.orm.ObjectOptimisticLockingFailureException: Row was updated or deleted by another transaction (or unsaved-value mapping was incorrect): [com.loopers.user.domain.User#1]],\n    Outcome[orderId=3, buyerId=1, success=false, rejection=null, technical=org.springframework.orm.ObjectOptimisticLockingFailureException: Row was updated or deleted by another transaction (or unsaved-value mapping was incorrect): [com.loopers.user.domain.User#1]]]\n\torg.opentest4j.AssertionFailedError: \nexpected: 2000L\n but was: 6000L\n\torg.opentest4j.AssertionFailedError: \nexpected: 8\n but was: 9",
+          "source": "build/serializable-experiment/tests-05/TEST-com.loopers.order.application.OrderConcurrencyTest.xml"
+        },
+        {
+          "suite": "com.loopers.order.application.OrderConcurrencyTest",
+          "name": "[동시성] 재고 5개에 주문 8건을 동시에 확정하면 성공 5·재고 부족 3·최종 재고 0이다.",
+          "status": "failed",
+          "seconds": 0.264,
+          "failure": "org.gradle.internal.exceptions.DefaultMultiCauseException: Multiple Failures (4 failures)\n\torg.opentest4j.AssertionFailedError: \nexpected: 5L\n but was: 1L\n\torg.opentest4j.AssertionFailedError: \nexpected: 3L\n but was: 0L\n\tjava.lang.AssertionError: \nExpecting empty but was: [Outcome[orderId=1, buyerId=1, success=false, rejection=null, technical=org.springframework.orm.ObjectOptimisticLockingFailureException: Row was updated or deleted by another transaction (or unsaved-value mapping was incorrect): [com.loopers.product.domain.Product#1]],\n    Outcome[orderId=2, buyerId=2, success=false, rejection=null, technical=org.springframework.orm.ObjectOptimisticLockingFailureException: Row was updated or deleted by another transaction (or unsaved-value mapping was incorrect): [com.loopers.product.domain.Product#1]],\n    Outcome[orderId=3, buyerId=3, success=false, rejection=null, technical=org.springframework.orm.ObjectOptimisticLockingFailureException: Row was updated or deleted by another transaction (or unsaved-value mapping was incorrect): [com.loopers.product.domain.Product#1]],\n    Outcome[orderId=4, buyerId=4, success=false, rejection=null, technical=org.springframework.orm.ObjectOptimisticLockingFailureException: Row was updated or deleted by another transaction (or unsaved-value mapping was incorrect): [com.loopers.product.domain.Product#1]],\n    Outcome[orderId=5, buyerId=5, success=false, rejection=null, technical=org.springframework.orm.ObjectOptimisticLockingFailureException: Row was updated or deleted by another transaction (or unsaved-value mapping was incorrect): [com.loopers.product.domain.Product#1]],\n    Outcome[orderId=7, buyerId=7, success=false, rejection=null, technical=org.springframework.orm.ObjectOptimisticLockingFailureException: Row was updated or deleted by another transaction (or unsaved-value mapping was incorrect): [com.loopers.product.domain.Product#1]],\n    Outcome[orderId=8, buyerId=8, success=false, rejection=null, technical=org.springframework.orm.ObjectOptimisticLockingFailureException: Row was updated or deleted by another transaction (or unsaved-value mapping was incorrect): [com.loopers.product.domain.Product#1]]]\n\torg.opentest4j.AssertionFailedError: \nexpected: 0\n but was: 4",
+          "source": "build/serializable-experiment/tests-05/TEST-com.loopers.order.application.OrderConcurrencyTest.xml"
+        },
+        {
+          "suite": "com.loopers.order.application.OrderConcurrencyTest",
+          "name": "[동시성] 같은 DRAFT 주문을 두 번 동시에 확정하면 한 건만 성공하고 재고·포인트는 한 번만 차감된다.",
+          "status": "failed",
+          "seconds": 0.186,
+          "failure": "org.gradle.internal.exceptions.DefaultMultiCauseException: Multiple Failures (2 failures)\n\torg.opentest4j.AssertionFailedError: \nexpected: 1L\n but was: 0L\n\tjava.lang.AssertionError: \nExpecting empty but was: [Outcome[orderId=1, buyerId=1, success=false, rejection=null, technical=org.springframework.orm.ObjectOptimisticLockingFailureException: Row was updated or deleted by another transaction (or unsaved-value mapping was incorrect): [com.loopers.order.domain.Order#1]]]",
+          "source": "build/serializable-experiment/tests-05/TEST-com.loopers.order.application.OrderConcurrencyTest.xml"
+        },
+        {
+          "suite": "com.loopers.order.application.OrderConcurrencyTest",
+          "name": "[동시성] 2000원 충전과 7000원 결제가 모두 성공하면 최종 잔액은 5000원이다.",
+          "status": "failed",
+          "seconds": 0.263,
+          "failure": "org.gradle.internal.exceptions.DefaultMultiCauseException: Multiple Failures (7 failures)\n\torg.opentest4j.AssertionFailedError: \nexpected: 2L\n but was: 1L\n\torg.opentest4j.AssertionFailedError: \nexpected: 0L\n but was: 1L\n\torg.opentest4j.AssertionFailedError: \nexpected: 5000L\n but was: 12000L\n\torg.opentest4j.AssertionFailedError: \nexpected: 5000L\n but was: 12000L\n\torg.opentest4j.AssertionFailedError: \nexpected: CONFIRMED\n but was: DRAFT\n\tjava.lang.NullPointerException: Cannot invoke \"com.loopers.order.domain.PaymentResult.amount()\" because the return value of \"com.loopers.order.domain.Order.getPaymentResult()\" is null\n\torg.opentest4j.AssertionFailedError: \nexpected: 0\n but was: 1",
+          "source": "build/serializable-experiment/tests-05/TEST-com.loopers.order.application.OrderConcurrencyTest.xml"
+        },
+        {
+          "suite": "com.loopers.experiment.IsolationProbeTest",
+          "name": "verifiesActualConnectionIsolation()",
+          "status": "passed",
+          "seconds": 0.008,
+          "failure": null,
+          "source": "build/serializable-experiment/tests-05/TEST-com.loopers.experiment.IsolationProbeTest.xml"
+        }
+      ]
+    },
+    {
+      "round": 6,
+      "tests": [
+        {
+          "suite": "com.loopers.order.application.OrderConcurrencyTest",
+          "name": "[동시성] 한 고객의 잔액 10000원·충분한 재고에서 서로 다른 4000원 DRAFT 주문 3건을 동시에 확정하면 성공 2·잔액 부족 1·기술 오류 0·최종 잔액 2000원이다.",
+          "status": "failed",
+          "seconds": 0.74,
+          "failure": "org.gradle.internal.exceptions.DefaultMultiCauseException: Multiple Failures (5 failures)\n\torg.opentest4j.AssertionFailedError: \nexpected: 2L\n but was: 1L\n\torg.opentest4j.AssertionFailedError: \nexpected: 1L\n but was: 0L\n\tjava.lang.AssertionError: \nExpecting empty but was: [Outcome[orderId=1, buyerId=1, success=false, rejection=null, technical=org.springframework.orm.ObjectOptimisticLockingFailureException: Row was updated or deleted by another transaction (or unsaved-value mapping was incorrect): [com.loopers.user.domain.User#1]],\n    Outcome[orderId=2, buyerId=1, success=false, rejection=null, technical=org.springframework.orm.ObjectOptimisticLockingFailureException: Row was updated or deleted by another transaction (or unsaved-value mapping was incorrect): [com.loopers.user.domain.User#1]]]\n\torg.opentest4j.AssertionFailedError: \nexpected: 2000L\n but was: 6000L\n\torg.opentest4j.AssertionFailedError: \nexpected: 8\n but was: 9",
+          "source": "build/serializable-experiment/tests-06/TEST-com.loopers.order.application.OrderConcurrencyTest.xml"
+        },
+        {
+          "suite": "com.loopers.order.application.OrderConcurrencyTest",
+          "name": "[동시성] 재고 5개에 주문 8건을 동시에 확정하면 성공 5·재고 부족 3·최종 재고 0이다.",
+          "status": "failed",
+          "seconds": 0.266,
+          "failure": "org.gradle.internal.exceptions.DefaultMultiCauseException: Multiple Failures (4 failures)\n\torg.opentest4j.AssertionFailedError: \nexpected: 5L\n but was: 1L\n\torg.opentest4j.AssertionFailedError: \nexpected: 3L\n but was: 0L\n\tjava.lang.AssertionError: \nExpecting empty but was: [Outcome[orderId=2, buyerId=2, success=false, rejection=null, technical=org.springframework.orm.ObjectOptimisticLockingFailureException: Row was updated or deleted by another transaction (or unsaved-value mapping was incorrect): [com.loopers.product.domain.Product#1]],\n    Outcome[orderId=3, buyerId=3, success=false, rejection=null, technical=org.springframework.orm.ObjectOptimisticLockingFailureException: Row was updated or deleted by another transaction (or unsaved-value mapping was incorrect): [com.loopers.product.domain.Product#1]],\n    Outcome[orderId=4, buyerId=4, success=false, rejection=null, technical=org.springframework.orm.ObjectOptimisticLockingFailureException: Row was updated or deleted by another transaction (or unsaved-value mapping was incorrect): [com.loopers.product.domain.Product#1]],\n    Outcome[orderId=5, buyerId=5, success=false, rejection=null, technical=org.springframework.orm.ObjectOptimisticLockingFailureException: Row was updated or deleted by another transaction (or unsaved-value mapping was incorrect): [com.loopers.product.domain.Product#1]],\n    Outcome[orderId=6, buyerId=6, success=false, rejection=null, technical=org.springframework.orm.ObjectOptimisticLockingFailureException: Row was updated or deleted by another transaction (or unsaved-value mapping was incorrect): [com.loopers.product.domain.Product#1]],\n    Outcome[orderId=7, buyerId=7, success=false, rejection=null, technical=org.springframework.orm.ObjectOptimisticLockingFailureException: Row was updated or deleted by another transaction (or unsaved-value mapping was incorrect): [com.loopers.product.domain.Product#1]],\n    Outcome[orderId=8, buyerId=8, success=false, rejection=null, technical=org.springframework.orm.ObjectOptimisticLockingFailureException: Row was updated or deleted by another transaction (or unsaved-value mapping was incorrect): [com.loopers.product.domain.Product#1]]]\n\torg.opentest4j.AssertionFailedError: \nexpected: 0\n but was: 4",
+          "source": "build/serializable-experiment/tests-06/TEST-com.loopers.order.application.OrderConcurrencyTest.xml"
+        },
+        {
+          "suite": "com.loopers.order.application.OrderConcurrencyTest",
+          "name": "[동시성] 같은 DRAFT 주문을 두 번 동시에 확정하면 한 건만 성공하고 재고·포인트는 한 번만 차감된다.",
+          "status": "failed",
+          "seconds": 0.189,
+          "failure": "org.gradle.internal.exceptions.DefaultMultiCauseException: Multiple Failures (2 failures)\n\torg.opentest4j.AssertionFailedError: \nexpected: 1L\n but was: 0L\n\tjava.lang.AssertionError: \nExpecting empty but was: [Outcome[orderId=1, buyerId=1, success=false, rejection=null, technical=org.springframework.orm.ObjectOptimisticLockingFailureException: Row was updated or deleted by another transaction (or unsaved-value mapping was incorrect): [com.loopers.order.domain.Order#1]]]",
+          "source": "build/serializable-experiment/tests-06/TEST-com.loopers.order.application.OrderConcurrencyTest.xml"
+        },
+        {
+          "suite": "com.loopers.order.application.OrderConcurrencyTest",
+          "name": "[동시성] 2000원 충전과 7000원 결제가 모두 성공하면 최종 잔액은 5000원이다.",
+          "status": "failed",
+          "seconds": 0.171,
+          "failure": "org.gradle.internal.exceptions.DefaultMultiCauseException: Multiple Failures (7 failures)\n\torg.opentest4j.AssertionFailedError: \nexpected: 2L\n but was: 1L\n\torg.opentest4j.AssertionFailedError: \nexpected: 0L\n but was: 1L\n\torg.opentest4j.AssertionFailedError: \nexpected: 5000L\n but was: 12000L\n\torg.opentest4j.AssertionFailedError: \nexpected: 5000L\n but was: 12000L\n\torg.opentest4j.AssertionFailedError: \nexpected: CONFIRMED\n but was: DRAFT\n\tjava.lang.NullPointerException: Cannot invoke \"com.loopers.order.domain.PaymentResult.amount()\" because the return value of \"com.loopers.order.domain.Order.getPaymentResult()\" is null\n\torg.opentest4j.AssertionFailedError: \nexpected: 0\n but was: 1",
+          "source": "build/serializable-experiment/tests-06/TEST-com.loopers.order.application.OrderConcurrencyTest.xml"
+        },
+        {
+          "suite": "com.loopers.experiment.IsolationProbeTest",
+          "name": "verifiesActualConnectionIsolation()",
+          "status": "passed",
+          "seconds": 0.007,
+          "failure": null,
+          "source": "build/serializable-experiment/tests-06/TEST-com.loopers.experiment.IsolationProbeTest.xml"
+        }
+      ]
+    },
+    {
+      "round": 7,
+      "tests": [
+        {
+          "suite": "com.loopers.order.application.OrderConcurrencyTest",
+          "name": "[동시성] 한 고객의 잔액 10000원·충분한 재고에서 서로 다른 4000원 DRAFT 주문 3건을 동시에 확정하면 성공 2·잔액 부족 1·기술 오류 0·최종 잔액 2000원이다.",
+          "status": "failed",
+          "seconds": 0.838,
+          "failure": "org.gradle.internal.exceptions.DefaultMultiCauseException: Multiple Failures (5 failures)\n\torg.opentest4j.AssertionFailedError: \nexpected: 2L\n but was: 1L\n\torg.opentest4j.AssertionFailedError: \nexpected: 1L\n but was: 0L\n\tjava.lang.AssertionError: \nExpecting empty but was: [Outcome[orderId=1, buyerId=1, success=false, rejection=null, technical=org.springframework.orm.ObjectOptimisticLockingFailureException: Row was updated or deleted by another transaction (or unsaved-value mapping was incorrect): [com.loopers.user.domain.User#1]],\n    Outcome[orderId=2, buyerId=1, success=false, rejection=null, technical=org.springframework.orm.ObjectOptimisticLockingFailureException: Row was updated or deleted by another transaction (or unsaved-value mapping was incorrect): [com.loopers.user.domain.User#1]]]\n\torg.opentest4j.AssertionFailedError: \nexpected: 2000L\n but was: 6000L\n\torg.opentest4j.AssertionFailedError: \nexpected: 8\n but was: 9",
+          "source": "build/serializable-experiment/tests-07/TEST-com.loopers.order.application.OrderConcurrencyTest.xml"
+        },
+        {
+          "suite": "com.loopers.order.application.OrderConcurrencyTest",
+          "name": "[동시성] 재고 5개에 주문 8건을 동시에 확정하면 성공 5·재고 부족 3·최종 재고 0이다.",
+          "status": "failed",
+          "seconds": 0.322,
+          "failure": "org.gradle.internal.exceptions.DefaultMultiCauseException: Multiple Failures (4 failures)\n\torg.opentest4j.AssertionFailedError: \nexpected: 5L\n but was: 1L\n\torg.opentest4j.AssertionFailedError: \nexpected: 3L\n but was: 0L\n\tjava.lang.AssertionError: \nExpecting empty but was: [Outcome[orderId=1, buyerId=1, success=false, rejection=null, technical=org.springframework.orm.ObjectOptimisticLockingFailureException: Row was updated or deleted by another transaction (or unsaved-value mapping was incorrect): [com.loopers.product.domain.Product#1]],\n    Outcome[orderId=2, buyerId=2, success=false, rejection=null, technical=org.springframework.orm.ObjectOptimisticLockingFailureException: Row was updated or deleted by another transaction (or unsaved-value mapping was incorrect): [com.loopers.product.domain.Product#1]],\n    Outcome[orderId=3, buyerId=3, success=false, rejection=null, technical=org.springframework.orm.ObjectOptimisticLockingFailureException: Row was updated or deleted by another transaction (or unsaved-value mapping was incorrect): [com.loopers.product.domain.Product#1]],\n    Outcome[orderId=4, buyerId=4, success=false, rejection=null, technical=org.springframework.orm.ObjectOptimisticLockingFailureException: Row was updated or deleted by another transaction (or unsaved-value mapping was incorrect): [com.loopers.product.domain.Product#1]],\n    Outcome[orderId=5, buyerId=5, success=false, rejection=null, technical=org.springframework.orm.ObjectOptimisticLockingFailureException: Row was updated or deleted by another transaction (or unsaved-value mapping was incorrect): [com.loopers.product.domain.Product#1]],\n    Outcome[orderId=7, buyerId=7, success=false, rejection=null, technical=org.springframework.orm.ObjectOptimisticLockingFailureException: Row was updated or deleted by another transaction (or unsaved-value mapping was incorrect): [com.loopers.product.domain.Product#1]],\n    Outcome[orderId=8, buyerId=8, success=false, rejection=null, technical=org.springframework.orm.ObjectOptimisticLockingFailureException: Row was updated or deleted by another transaction (or unsaved-value mapping was incorrect): [com.loopers.product.domain.Product#1]]]\n\torg.opentest4j.AssertionFailedError: \nexpected: 0\n but was: 4",
+          "source": "build/serializable-experiment/tests-07/TEST-com.loopers.order.application.OrderConcurrencyTest.xml"
+        },
+        {
+          "suite": "com.loopers.order.application.OrderConcurrencyTest",
+          "name": "[동시성] 같은 DRAFT 주문을 두 번 동시에 확정하면 한 건만 성공하고 재고·포인트는 한 번만 차감된다.",
+          "status": "failed",
+          "seconds": 0.189,
+          "failure": "org.gradle.internal.exceptions.DefaultMultiCauseException: Multiple Failures (2 failures)\n\torg.opentest4j.AssertionFailedError: \nexpected: 1L\n but was: 0L\n\tjava.lang.AssertionError: \nExpecting empty but was: [Outcome[orderId=1, buyerId=1, success=false, rejection=null, technical=org.springframework.orm.ObjectOptimisticLockingFailureException: Row was updated or deleted by another transaction (or unsaved-value mapping was incorrect): [com.loopers.order.domain.Order#1]]]",
+          "source": "build/serializable-experiment/tests-07/TEST-com.loopers.order.application.OrderConcurrencyTest.xml"
+        },
+        {
+          "suite": "com.loopers.order.application.OrderConcurrencyTest",
+          "name": "[동시성] 2000원 충전과 7000원 결제가 모두 성공하면 최종 잔액은 5000원이다.",
+          "status": "failed",
+          "seconds": 0.166,
+          "failure": "org.gradle.internal.exceptions.DefaultMultiCauseException: Multiple Failures (7 failures)\n\torg.opentest4j.AssertionFailedError: \nexpected: 2L\n but was: 1L\n\torg.opentest4j.AssertionFailedError: \nexpected: 0L\n but was: 1L\n\torg.opentest4j.AssertionFailedError: \nexpected: 5000L\n but was: 12000L\n\torg.opentest4j.AssertionFailedError: \nexpected: 5000L\n but was: 12000L\n\torg.opentest4j.AssertionFailedError: \nexpected: CONFIRMED\n but was: DRAFT\n\tjava.lang.NullPointerException: Cannot invoke \"com.loopers.order.domain.PaymentResult.amount()\" because the return value of \"com.loopers.order.domain.Order.getPaymentResult()\" is null\n\torg.opentest4j.AssertionFailedError: \nexpected: 0\n but was: 1",
+          "source": "build/serializable-experiment/tests-07/TEST-com.loopers.order.application.OrderConcurrencyTest.xml"
+        },
+        {
+          "suite": "com.loopers.experiment.IsolationProbeTest",
+          "name": "verifiesActualConnectionIsolation()",
+          "status": "passed",
+          "seconds": 0.008,
+          "failure": null,
+          "source": "build/serializable-experiment/tests-07/TEST-com.loopers.experiment.IsolationProbeTest.xml"
+        }
+      ]
+    },
+    {
+      "round": 8,
+      "tests": [
+        {
+          "suite": "com.loopers.order.application.OrderConcurrencyTest",
+          "name": "[동시성] 한 고객의 잔액 10000원·충분한 재고에서 서로 다른 4000원 DRAFT 주문 3건을 동시에 확정하면 성공 2·잔액 부족 1·기술 오류 0·최종 잔액 2000원이다.",
+          "status": "failed",
+          "seconds": 0.737,
+          "failure": "org.gradle.internal.exceptions.DefaultMultiCauseException: Multiple Failures (5 failures)\n\torg.opentest4j.AssertionFailedError: \nexpected: 2L\n but was: 1L\n\torg.opentest4j.AssertionFailedError: \nexpected: 1L\n but was: 0L\n\tjava.lang.AssertionError: \nExpecting empty but was: [Outcome[orderId=1, buyerId=1, success=false, rejection=null, technical=org.springframework.orm.ObjectOptimisticLockingFailureException: Row was updated or deleted by another transaction (or unsaved-value mapping was incorrect): [com.loopers.user.domain.User#1]],\n    Outcome[orderId=3, buyerId=1, success=false, rejection=null, technical=org.springframework.orm.ObjectOptimisticLockingFailureException: Row was updated or deleted by another transaction (or unsaved-value mapping was incorrect): [com.loopers.user.domain.User#1]]]\n\torg.opentest4j.AssertionFailedError: \nexpected: 2000L\n but was: 6000L\n\torg.opentest4j.AssertionFailedError: \nexpected: 8\n but was: 9",
+          "source": "build/serializable-experiment/tests-08/TEST-com.loopers.order.application.OrderConcurrencyTest.xml"
+        },
+        {
+          "suite": "com.loopers.order.application.OrderConcurrencyTest",
+          "name": "[동시성] 재고 5개에 주문 8건을 동시에 확정하면 성공 5·재고 부족 3·최종 재고 0이다.",
+          "status": "failed",
+          "seconds": 0.35,
+          "failure": "org.gradle.internal.exceptions.DefaultMultiCauseException: Multiple Failures (4 failures)\n\torg.opentest4j.AssertionFailedError: \nexpected: 5L\n but was: 1L\n\torg.opentest4j.AssertionFailedError: \nexpected: 3L\n but was: 0L\n\tjava.lang.AssertionError: \nExpecting empty but was: [Outcome[orderId=1, buyerId=1, success=false, rejection=null, technical=org.springframework.orm.ObjectOptimisticLockingFailureException: Row was updated or deleted by another transaction (or unsaved-value mapping was incorrect): [com.loopers.product.domain.Product#1]],\n    Outcome[orderId=2, buyerId=2, success=false, rejection=null, technical=org.springframework.orm.ObjectOptimisticLockingFailureException: Row was updated or deleted by another transaction (or unsaved-value mapping was incorrect): [com.loopers.product.domain.Product#1]],\n    Outcome[orderId=3, buyerId=3, success=false, rejection=null, technical=org.springframework.orm.ObjectOptimisticLockingFailureException: Row was updated or deleted by another transaction (or unsaved-value mapping was incorrect): [com.loopers.product.domain.Product#1]],\n    Outcome[orderId=5, buyerId=5, success=false, rejection=null, technical=org.springframework.orm.ObjectOptimisticLockingFailureException: Row was updated or deleted by another transaction (or unsaved-value mapping was incorrect): [com.loopers.product.domain.Product#1]],\n    Outcome[orderId=6, buyerId=6, success=false, rejection=null, technical=org.springframework.orm.ObjectOptimisticLockingFailureException: Row was updated or deleted by another transaction (or unsaved-value mapping was incorrect): [com.loopers.product.domain.Product#1]],\n    Outcome[orderId=7, buyerId=7, success=false, rejection=null, technical=org.springframework.orm.ObjectOptimisticLockingFailureException: Row was updated or deleted by another transaction (or unsaved-value mapping was incorrect): [com.loopers.product.domain.Product#1]],\n    Outcome[orderId=8, buyerId=8, success=false, rejection=null, technical=org.springframework.orm.ObjectOptimisticLockingFailureException: Row was updated or deleted by another transaction (or unsaved-value mapping was incorrect): [com.loopers.product.domain.Product#1]]]\n\torg.opentest4j.AssertionFailedError: \nexpected: 0\n but was: 4",
+          "source": "build/serializable-experiment/tests-08/TEST-com.loopers.order.application.OrderConcurrencyTest.xml"
+        },
+        {
+          "suite": "com.loopers.order.application.OrderConcurrencyTest",
+          "name": "[동시성] 같은 DRAFT 주문을 두 번 동시에 확정하면 한 건만 성공하고 재고·포인트는 한 번만 차감된다.",
+          "status": "failed",
+          "seconds": 0.203,
+          "failure": "org.gradle.internal.exceptions.DefaultMultiCauseException: Multiple Failures (2 failures)\n\torg.opentest4j.AssertionFailedError: \nexpected: 1L\n but was: 0L\n\tjava.lang.AssertionError: \nExpecting empty but was: [Outcome[orderId=1, buyerId=1, success=false, rejection=null, technical=org.springframework.orm.ObjectOptimisticLockingFailureException: Row was updated or deleted by another transaction (or unsaved-value mapping was incorrect): [com.loopers.order.domain.Order#1]]]",
+          "source": "build/serializable-experiment/tests-08/TEST-com.loopers.order.application.OrderConcurrencyTest.xml"
+        },
+        {
+          "suite": "com.loopers.order.application.OrderConcurrencyTest",
+          "name": "[동시성] 2000원 충전과 7000원 결제가 모두 성공하면 최종 잔액은 5000원이다.",
+          "status": "failed",
+          "seconds": 0.205,
+          "failure": "org.gradle.internal.exceptions.DefaultMultiCauseException: Multiple Failures (7 failures)\n\torg.opentest4j.AssertionFailedError: \nexpected: 2L\n but was: 1L\n\torg.opentest4j.AssertionFailedError: \nexpected: 0L\n but was: 1L\n\torg.opentest4j.AssertionFailedError: \nexpected: 5000L\n but was: 12000L\n\torg.opentest4j.AssertionFailedError: \nexpected: 5000L\n but was: 12000L\n\torg.opentest4j.AssertionFailedError: \nexpected: CONFIRMED\n but was: DRAFT\n\tjava.lang.NullPointerException: Cannot invoke \"com.loopers.order.domain.PaymentResult.amount()\" because the return value of \"com.loopers.order.domain.Order.getPaymentResult()\" is null\n\torg.opentest4j.AssertionFailedError: \nexpected: 0\n but was: 1",
+          "source": "build/serializable-experiment/tests-08/TEST-com.loopers.order.application.OrderConcurrencyTest.xml"
+        },
+        {
+          "suite": "com.loopers.experiment.IsolationProbeTest",
+          "name": "verifiesActualConnectionIsolation()",
+          "status": "passed",
+          "seconds": 0.009,
+          "failure": null,
+          "source": "build/serializable-experiment/tests-08/TEST-com.loopers.experiment.IsolationProbeTest.xml"
+        }
+      ]
+    },
+    {
+      "round": 9,
+      "tests": [
+        {
+          "suite": "com.loopers.order.application.OrderConcurrencyTest",
+          "name": "[동시성] 한 고객의 잔액 10000원·충분한 재고에서 서로 다른 4000원 DRAFT 주문 3건을 동시에 확정하면 성공 2·잔액 부족 1·기술 오류 0·최종 잔액 2000원이다.",
+          "status": "failed",
+          "seconds": 0.792,
+          "failure": "org.gradle.internal.exceptions.DefaultMultiCauseException: Multiple Failures (5 failures)\n\torg.opentest4j.AssertionFailedError: \nexpected: 2L\n but was: 1L\n\torg.opentest4j.AssertionFailedError: \nexpected: 1L\n but was: 0L\n\tjava.lang.AssertionError: \nExpecting empty but was: [Outcome[orderId=2, buyerId=1, success=false, rejection=null, technical=org.springframework.orm.ObjectOptimisticLockingFailureException: Row was updated or deleted by another transaction (or unsaved-value mapping was incorrect): [com.loopers.user.domain.User#1]],\n    Outcome[orderId=3, buyerId=1, success=false, rejection=null, technical=org.springframework.orm.ObjectOptimisticLockingFailureException: Row was updated or deleted by another transaction (or unsaved-value mapping was incorrect): [com.loopers.user.domain.User#1]]]\n\torg.opentest4j.AssertionFailedError: \nexpected: 2000L\n but was: 6000L\n\torg.opentest4j.AssertionFailedError: \nexpected: 8\n but was: 9",
+          "source": "build/serializable-experiment/tests-09/TEST-com.loopers.order.application.OrderConcurrencyTest.xml"
+        },
+        {
+          "suite": "com.loopers.order.application.OrderConcurrencyTest",
+          "name": "[동시성] 재고 5개에 주문 8건을 동시에 확정하면 성공 5·재고 부족 3·최종 재고 0이다.",
+          "status": "failed",
+          "seconds": 0.336,
+          "failure": "org.gradle.internal.exceptions.DefaultMultiCauseException: Multiple Failures (4 failures)\n\torg.opentest4j.AssertionFailedError: \nexpected: 5L\n but was: 1L\n\torg.opentest4j.AssertionFailedError: \nexpected: 3L\n but was: 0L\n\tjava.lang.AssertionError: \nExpecting empty but was: [Outcome[orderId=1, buyerId=1, success=false, rejection=null, technical=org.springframework.orm.ObjectOptimisticLockingFailureException: Row was updated or deleted by another transaction (or unsaved-value mapping was incorrect): [com.loopers.product.domain.Product#1]],\n    Outcome[orderId=2, buyerId=2, success=false, rejection=null, technical=org.springframework.orm.ObjectOptimisticLockingFailureException: Row was updated or deleted by another transaction (or unsaved-value mapping was incorrect): [com.loopers.product.domain.Product#1]],\n    Outcome[orderId=3, buyerId=3, success=false, rejection=null, technical=org.springframework.orm.ObjectOptimisticLockingFailureException: Row was updated or deleted by another transaction (or unsaved-value mapping was incorrect): [com.loopers.product.domain.Product#1]],\n    Outcome[orderId=5, buyerId=5, success=false, rejection=null, technical=org.springframework.orm.ObjectOptimisticLockingFailureException: Row was updated or deleted by another transaction (or unsaved-value mapping was incorrect): [com.loopers.product.domain.Product#1]],\n    Outcome[orderId=6, buyerId=6, success=false, rejection=null, technical=org.springframework.orm.ObjectOptimisticLockingFailureException: Row was updated or deleted by another transaction (or unsaved-value mapping was incorrect): [com.loopers.product.domain.Product#1]],\n    Outcome[orderId=7, buyerId=7, success=false, rejection=null, technical=org.springframework.orm.ObjectOptimisticLockingFailureException: Row was updated or deleted by another transaction (or unsaved-value mapping was incorrect): [com.loopers.product.domain.Product#1]],\n    Outcome[orderId=8, buyerId=8, success=false, rejection=null, technical=org.springframework.orm.ObjectOptimisticLockingFailureException: Row was updated or deleted by another transaction (or unsaved-value mapping was incorrect): [com.loopers.product.domain.Product#1]]]\n\torg.opentest4j.AssertionFailedError: \nexpected: 0\n but was: 4",
+          "source": "build/serializable-experiment/tests-09/TEST-com.loopers.order.application.OrderConcurrencyTest.xml"
+        },
+        {
+          "suite": "com.loopers.order.application.OrderConcurrencyTest",
+          "name": "[동시성] 같은 DRAFT 주문을 두 번 동시에 확정하면 한 건만 성공하고 재고·포인트는 한 번만 차감된다.",
+          "status": "failed",
+          "seconds": 0.295,
+          "failure": "org.gradle.internal.exceptions.DefaultMultiCauseException: Multiple Failures (2 failures)\n\torg.opentest4j.AssertionFailedError: \nexpected: 1L\n but was: 0L\n\tjava.lang.AssertionError: \nExpecting empty but was: [Outcome[orderId=1, buyerId=1, success=false, rejection=null, technical=org.springframework.orm.ObjectOptimisticLockingFailureException: Row was updated or deleted by another transaction (or unsaved-value mapping was incorrect): [com.loopers.order.domain.Order#1]]]",
+          "source": "build/serializable-experiment/tests-09/TEST-com.loopers.order.application.OrderConcurrencyTest.xml"
+        },
+        {
+          "suite": "com.loopers.order.application.OrderConcurrencyTest",
+          "name": "[동시성] 2000원 충전과 7000원 결제가 모두 성공하면 최종 잔액은 5000원이다.",
+          "status": "failed",
+          "seconds": 0.187,
+          "failure": "org.gradle.internal.exceptions.DefaultMultiCauseException: Multiple Failures (7 failures)\n\torg.opentest4j.AssertionFailedError: \nexpected: 2L\n but was: 1L\n\torg.opentest4j.AssertionFailedError: \nexpected: 0L\n but was: 1L\n\torg.opentest4j.AssertionFailedError: \nexpected: 5000L\n but was: 12000L\n\torg.opentest4j.AssertionFailedError: \nexpected: 5000L\n but was: 12000L\n\torg.opentest4j.AssertionFailedError: \nexpected: CONFIRMED\n but was: DRAFT\n\tjava.lang.NullPointerException: Cannot invoke \"com.loopers.order.domain.PaymentResult.amount()\" because the return value of \"com.loopers.order.domain.Order.getPaymentResult()\" is null\n\torg.opentest4j.AssertionFailedError: \nexpected: 0\n but was: 1",
+          "source": "build/serializable-experiment/tests-09/TEST-com.loopers.order.application.OrderConcurrencyTest.xml"
+        },
+        {
+          "suite": "com.loopers.experiment.IsolationProbeTest",
+          "name": "verifiesActualConnectionIsolation()",
+          "status": "passed",
+          "seconds": 0.01,
+          "failure": null,
+          "source": "build/serializable-experiment/tests-09/TEST-com.loopers.experiment.IsolationProbeTest.xml"
+        }
+      ]
+    },
+    {
+      "round": 10,
+      "tests": [
+        {
+          "suite": "com.loopers.order.application.OrderConcurrencyTest",
+          "name": "[동시성] 한 고객의 잔액 10000원·충분한 재고에서 서로 다른 4000원 DRAFT 주문 3건을 동시에 확정하면 성공 2·잔액 부족 1·기술 오류 0·최종 잔액 2000원이다.",
+          "status": "failed",
+          "seconds": 0.842,
+          "failure": "org.gradle.internal.exceptions.DefaultMultiCauseException: Multiple Failures (5 failures)\n\torg.opentest4j.AssertionFailedError: \nexpected: 2L\n but was: 1L\n\torg.opentest4j.AssertionFailedError: \nexpected: 1L\n but was: 0L\n\tjava.lang.AssertionError: \nExpecting empty but was: [Outcome[orderId=2, buyerId=1, success=false, rejection=null, technical=org.springframework.orm.ObjectOptimisticLockingFailureException: Row was updated or deleted by another transaction (or unsaved-value mapping was incorrect): [com.loopers.user.domain.User#1]],\n    Outcome[orderId=3, buyerId=1, success=false, rejection=null, technical=org.springframework.orm.ObjectOptimisticLockingFailureException: Row was updated or deleted by another transaction (or unsaved-value mapping was incorrect): [com.loopers.user.domain.User#1]]]\n\torg.opentest4j.AssertionFailedError: \nexpected: 2000L\n but was: 6000L\n\torg.opentest4j.AssertionFailedError: \nexpected: 8\n but was: 9",
+          "source": "build/serializable-experiment/tests-10/TEST-com.loopers.order.application.OrderConcurrencyTest.xml"
+        },
+        {
+          "suite": "com.loopers.order.application.OrderConcurrencyTest",
+          "name": "[동시성] 재고 5개에 주문 8건을 동시에 확정하면 성공 5·재고 부족 3·최종 재고 0이다.",
+          "status": "failed",
+          "seconds": 0.322,
+          "failure": "org.gradle.internal.exceptions.DefaultMultiCauseException: Multiple Failures (4 failures)\n\torg.opentest4j.AssertionFailedError: \nexpected: 5L\n but was: 1L\n\torg.opentest4j.AssertionFailedError: \nexpected: 3L\n but was: 0L\n\tjava.lang.AssertionError: \nExpecting empty but was: [Outcome[orderId=2, buyerId=2, success=false, rejection=null, technical=org.springframework.orm.ObjectOptimisticLockingFailureException: Row was updated or deleted by another transaction (or unsaved-value mapping was incorrect): [com.loopers.product.domain.Product#1]],\n    Outcome[orderId=3, buyerId=3, success=false, rejection=null, technical=org.springframework.orm.ObjectOptimisticLockingFailureException: Row was updated or deleted by another transaction (or unsaved-value mapping was incorrect): [com.loopers.product.domain.Product#1]],\n    Outcome[orderId=4, buyerId=4, success=false, rejection=null, technical=org.springframework.orm.ObjectOptimisticLockingFailureException: Row was updated or deleted by another transaction (or unsaved-value mapping was incorrect): [com.loopers.product.domain.Product#1]],\n    Outcome[orderId=5, buyerId=5, success=false, rejection=null, technical=org.springframework.orm.ObjectOptimisticLockingFailureException: Row was updated or deleted by another transaction (or unsaved-value mapping was incorrect): [com.loopers.product.domain.Product#1]],\n    Outcome[orderId=6, buyerId=6, success=false, rejection=null, technical=org.springframework.orm.ObjectOptimisticLockingFailureException: Row was updated or deleted by another transaction (or unsaved-value mapping was incorrect): [com.loopers.product.domain.Product#1]],\n    Outcome[orderId=7, buyerId=7, success=false, rejection=null, technical=org.springframework.orm.ObjectOptimisticLockingFailureException: Row was updated or deleted by another transaction (or unsaved-value mapping was incorrect): [com.loopers.product.domain.Product#1]],\n    Outcome[orderId=8, buyerId=8, success=false, rejection=null, technical=org.springframework.orm.ObjectOptimisticLockingFailureException: Row was updated or deleted by another transaction (or unsaved-value mapping was incorrect): [com.loopers.product.domain.Product#1]]]\n\torg.opentest4j.AssertionFailedError: \nexpected: 0\n but was: 4",
+          "source": "build/serializable-experiment/tests-10/TEST-com.loopers.order.application.OrderConcurrencyTest.xml"
+        },
+        {
+          "suite": "com.loopers.order.application.OrderConcurrencyTest",
+          "name": "[동시성] 같은 DRAFT 주문을 두 번 동시에 확정하면 한 건만 성공하고 재고·포인트는 한 번만 차감된다.",
+          "status": "failed",
+          "seconds": 0.187,
+          "failure": "org.gradle.internal.exceptions.DefaultMultiCauseException: Multiple Failures (2 failures)\n\torg.opentest4j.AssertionFailedError: \nexpected: 1L\n but was: 0L\n\tjava.lang.AssertionError: \nExpecting empty but was: [Outcome[orderId=1, buyerId=1, success=false, rejection=null, technical=org.springframework.orm.ObjectOptimisticLockingFailureException: Row was updated or deleted by another transaction (or unsaved-value mapping was incorrect): [com.loopers.order.domain.Order#1]]]",
+          "source": "build/serializable-experiment/tests-10/TEST-com.loopers.order.application.OrderConcurrencyTest.xml"
+        },
+        {
+          "suite": "com.loopers.order.application.OrderConcurrencyTest",
+          "name": "[동시성] 2000원 충전과 7000원 결제가 모두 성공하면 최종 잔액은 5000원이다.",
+          "status": "failed",
+          "seconds": 0.302,
+          "failure": "org.gradle.internal.exceptions.DefaultMultiCauseException: Multiple Failures (7 failures)\n\torg.opentest4j.AssertionFailedError: \nexpected: 2L\n but was: 1L\n\torg.opentest4j.AssertionFailedError: \nexpected: 0L\n but was: 1L\n\torg.opentest4j.AssertionFailedError: \nexpected: 5000L\n but was: 12000L\n\torg.opentest4j.AssertionFailedError: \nexpected: 5000L\n but was: 12000L\n\torg.opentest4j.AssertionFailedError: \nexpected: CONFIRMED\n but was: DRAFT\n\tjava.lang.NullPointerException: Cannot invoke \"com.loopers.order.domain.PaymentResult.amount()\" because the return value of \"com.loopers.order.domain.Order.getPaymentResult()\" is null\n\torg.opentest4j.AssertionFailedError: \nexpected: 0\n but was: 1",
+          "source": "build/serializable-experiment/tests-10/TEST-com.loopers.order.application.OrderConcurrencyTest.xml"
+        },
+        {
+          "suite": "com.loopers.experiment.IsolationProbeTest",
+          "name": "verifiesActualConnectionIsolation()",
+          "status": "passed",
+          "seconds": 0.009,
+          "failure": null,
+          "source": "build/serializable-experiment/tests-10/TEST-com.loopers.experiment.IsolationProbeTest.xml"
+        }
+      ]
+    }
+  ]
+}

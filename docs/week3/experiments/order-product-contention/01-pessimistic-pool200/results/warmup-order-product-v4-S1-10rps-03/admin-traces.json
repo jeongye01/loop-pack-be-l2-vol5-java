@@ -1,0 +1,17 @@
+{
+  "runId": "warmup-order-product-v4-S1-10rps-03",
+  "timestampResolution": "1ms",
+  "traces": [
+    {
+      "runId": "warmup-order-product-v4-S1-10rps-03",
+      "requestId": "warmup-order-product-v4-S1-10rps-03-150-admin",
+      "operation": "product.update.admin",
+      "startNs": "1791324299975000000",
+      "endNs": "1791324300102000000",
+      "latencyMs": 127,
+      "httpStatus": 200,
+      "outcome": "success",
+      "transportError": null
+    }
+  ]
+}

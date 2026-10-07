@@ -1,0 +1,129 @@
+{
+  "schemaVersion": 1,
+  "experimentId": "stock-contention/11-optimistic-retry1-pool200",
+  "runId": "measure-S1-10rps-01",
+  "gitSha": "451e27ba67d8967df3039593287a22081ae7a6aa",
+  "workingTreeChanges": true,
+  "status": "completed",
+  "startedAt": "2026-10-06T09:27:20.208662+00:00",
+  "finishedAt": "2026-10-06T09:28:20.751458+00:00",
+  "config": {
+    "scenario": "S1",
+    "rps": 10,
+    "durationSeconds": 60,
+    "repetition": 1,
+    "vus": 200,
+    "initialStock": {
+      "1": 180,
+      "2": 600,
+      "3": 600,
+      "4": 600,
+      "5": 600,
+      "6": 600,
+      "7": 600,
+      "8": 600,
+      "9": 600,
+      "10": 600
+    },
+    "twoItemShare": null,
+    "randomSeed": 20261005,
+    "dataSha256": "b33ee6d6ee41c475048924ba64d5306ac5a14b5c30f9606acad58dfa9e3d2aa2",
+    "applicationSessionIsolation": "REPEATABLE-READ\t200",
+    "jvmOptions": [],
+    "specId": "local-01",
+    "retryCount": 1
+  },
+  "requests": {
+    "planned": 600,
+    "started": 600,
+    "completed": 600,
+    "notStarted": 0,
+    "incomplete": 0,
+    "success": 180,
+    "businessRejection": 420,
+    "technicalError": 0,
+    "optimisticConflict": 0,
+    "errors": {
+      "INSUFFICIENT_STOCK": 420
+    }
+  },
+  "metrics": {
+    "measurementSeconds": 59.912,
+    "throughput": 10.014688209373748,
+    "successThroughput": 3.0044064628121245,
+    "latencyMs": {
+      "count": 600,
+      "p50": 17.0,
+      "p95": 24.049999999999955,
+      "p99": 29.0
+    },
+    "latencyByOutcomeMs": {
+      "success": {
+        "count": 180,
+        "p50": 22.0,
+        "p95": 25.0,
+        "p99": 30.210000000000008
+      },
+      "businessRejection": {
+        "count": 420,
+        "p50": 16.0,
+        "p95": 20.0,
+        "p99": 26.0
+      },
+      "technicalError": {
+        "count": 0,
+        "p50": null,
+        "p95": null,
+        "p99": null
+      }
+    },
+    "stockoutPhases": {
+      "boundaryNs": "1791278858261000000",
+      "boundaryMeaning": "first observed insufficient-stock response (not exact DB depletion time)",
+      "before": {
+        "count": 180,
+        "p50": 22.0,
+        "p95": 25.0,
+        "p99": 30.210000000000008
+      },
+      "after": {
+        "count": 420,
+        "p50": 16.0,
+        "p95": 20.0,
+        "p99": 26.0
+      }
+    },
+    "optimisticConflictRate": 0.0,
+    "optimisticConflictRateReason": "JPA @Version conflict classified from server evidence"
+  },
+  "validation": {
+    "status": "passed",
+    "checks": [
+      "orderPaymentBalance",
+      "stock",
+      "orderItemsUnchanged",
+      "orderCount",
+      "uniqueOrderRequests"
+    ],
+    "failures": [],
+    "confirmedOrders": 180,
+    "finalStock": {
+      "1": 0,
+      "2": 600,
+      "3": 600,
+      "4": 600,
+      "5": 600,
+      "6": 600,
+      "7": 600,
+      "8": 600,
+      "9": 600,
+      "10": 600
+    }
+  },
+  "artifacts": {
+    "traces": "traces.json",
+    "environment": "environment.json",
+    "raw": "../../../../../../../build/serializable-experiment/measure-S1-10rps-01"
+  },
+  "k6ExitCode": 0
+}

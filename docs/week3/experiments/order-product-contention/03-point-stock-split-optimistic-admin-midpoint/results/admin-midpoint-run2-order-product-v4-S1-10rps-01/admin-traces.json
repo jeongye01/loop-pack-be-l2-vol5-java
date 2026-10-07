@@ -1,0 +1,19 @@
+{
+  "runId": "admin-midpoint-run2-order-product-v4-S1-10rps-01",
+  "timestampResolution": "1ms",
+  "traces": [
+    {
+      "runId": "admin-midpoint-run2-order-product-v4-S1-10rps-01",
+      "requestId": "admin-midpoint-run2-order-product-v4-S1-10rps-01-300-admin",
+      "operation": "product.update.admin",
+      "startNs": "1791330049675000000",
+      "endNs": "1791330049920000000",
+      "latencyMs": 245,
+      "httpStatus": 200,
+      "outcome": "success",
+      "transportError": null,
+      "lockWaitMs": null,
+      "lockWaitStatus": "not_applicable_optimistic_lock"
+    }
+  ]
+}

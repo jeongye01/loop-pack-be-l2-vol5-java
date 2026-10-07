@@ -1,0 +1,19 @@
+{
+  "runId": "pessimistic-admin-midpoint-rerun-order-product-v4-S1-100rps-03",
+  "timestampResolution": "1ms",
+  "traces": [
+    {
+      "runId": "pessimistic-admin-midpoint-rerun-order-product-v4-S1-100rps-03",
+      "requestId": "pessimistic-admin-midpoint-rerun-order-product-v4-S1-100rps-03-3000-admin",
+      "operation": "product.update.admin",
+      "startNs": "1791331999711000000",
+      "endNs": "1791331999846000000",
+      "latencyMs": 135,
+      "httpStatus": 200,
+      "outcome": "success",
+      "transportError": null,
+      "lockWaitMs": null,
+      "lockWaitStatus": "not_applicable_optimistic_lock"
+    }
+  ]
+}

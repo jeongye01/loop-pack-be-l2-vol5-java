@@ -1,0 +1,5 @@
+gradle.projectsEvaluated {
+    def app = gradle.rootProject.project(':apps:commerce-api')
+    app.sourceSets.test.java.srcDir(new File(gradle.rootProject.rootDir,
+        'docs/week3/experiments/stock-contention/02-serializable-retry/support/java'))
+}

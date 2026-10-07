@@ -1,0 +1,126 @@
+{
+  "schemaVersion": 1,
+  "experimentId": "stock-contention/12-pessimistic-pool40",
+  "runId": "warmup-S1-100rps-01",
+  "gitSha": "7128e08e790227e94dba6dfff5f827d7f1a19a41",
+  "workingTreeChanges": true,
+  "status": "completed",
+  "startedAt": "2026-10-06T11:39:52.999814+00:00",
+  "finishedAt": "2026-10-06T11:40:23.534005+00:00",
+  "config": {
+    "scenario": "S1",
+    "rps": 100,
+    "durationSeconds": 30,
+    "repetition": 1,
+    "vus": 200,
+    "initialStock": {
+      "1": 900,
+      "2": 3000,
+      "3": 3000,
+      "4": 3000,
+      "5": 3000,
+      "6": 3000,
+      "7": 3000,
+      "8": 3000,
+      "9": 3000,
+      "10": 3000
+    },
+    "twoItemShare": null,
+    "randomSeed": 20261005,
+    "dataSha256": "7c7bfa386a2fcc243b8fe88b17c41188a17f24bcbe6c5a3ab116c5774f2775fd",
+    "applicationSessionIsolation": "REPEATABLE-READ\t31",
+    "jvmOptions": [],
+    "specId": "local-01",
+    "retryCount": 0
+  },
+  "requests": {
+    "planned": 3000,
+    "started": 3000,
+    "completed": 3000,
+    "notStarted": 0,
+    "incomplete": 0,
+    "success": 900,
+    "businessRejection": 2100,
+    "technicalError": 0,
+    "errors": {
+      "INSUFFICIENT_STOCK": 2100
+    }
+  },
+  "metrics": {
+    "measurementSeconds": 29.993,
+    "throughput": 100.02333877904844,
+    "successThroughput": 30.007001633714534,
+    "latencyMs": {
+      "count": 3000,
+      "p50": 7.0,
+      "p95": 18.0,
+      "p99": 60.030000000000655
+    },
+    "latencyByOutcomeMs": {
+      "success": {
+        "count": 900,
+        "p50": 7.0,
+        "p95": 16.0,
+        "p99": 49.00999999999999
+      },
+      "businessRejection": {
+        "count": 2100,
+        "p50": 6.0,
+        "p95": 19.0,
+        "p99": 66.01000000000022
+      },
+      "technicalError": {
+        "count": 0,
+        "p50": null,
+        "p95": null,
+        "p99": null
+      }
+    },
+    "stockoutPhases": {
+      "boundaryNs": "1791286802053000000",
+      "boundaryMeaning": "first observed insufficient-stock response (not exact DB depletion time)",
+      "before": {
+        "count": 900,
+        "p50": 7.0,
+        "p95": 16.0,
+        "p99": 49.00999999999999
+      },
+      "after": {
+        "count": 2100,
+        "p50": 6.0,
+        "p95": 19.0,
+        "p99": 66.01000000000022
+      }
+    }
+  },
+  "validation": {
+    "status": "passed",
+    "checks": [
+      "orderPaymentBalance",
+      "stock",
+      "orderItemsUnchanged",
+      "orderCount",
+      "uniqueOrderRequests"
+    ],
+    "failures": [],
+    "confirmedOrders": 900,
+    "finalStock": {
+      "1": 0,
+      "2": 3000,
+      "3": 3000,
+      "4": 3000,
+      "5": 3000,
+      "6": 3000,
+      "7": 3000,
+      "8": 3000,
+      "9": 3000,
+      "10": 3000
+    }
+  },
+  "artifacts": {
+    "traces": "traces.json",
+    "environment": "environment.json",
+    "raw": "../../../../../../../build/serializable-experiment/warmup-S1-100rps-01"
+  },
+  "k6ExitCode": 0
+}

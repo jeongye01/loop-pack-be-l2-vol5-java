@@ -1,0 +1,135 @@
+{
+  "schemaVersion": 1,
+  "experimentId": "external-api/01-pessimistic-pool40",
+  "runId": "warmup-S1-10rps-01",
+  "gitSha": "9477e3177a6c2a07cbcaccda1046e188ff01b53c",
+  "workingTreeChanges": true,
+  "status": "completed",
+  "startedAt": "2026-10-06T14:37:54.229282+00:00",
+  "finishedAt": "2026-10-06T14:38:24.847120+00:00",
+  "config": {
+    "scenario": "S1",
+    "rps": 10,
+    "durationSeconds": 30,
+    "repetition": 1,
+    "vus": 200,
+    "initialStock": {
+      "1": 90,
+      "2": 300,
+      "3": 300,
+      "4": 300,
+      "5": 300,
+      "6": 300,
+      "7": 300,
+      "8": 300,
+      "9": 300,
+      "10": 300
+    },
+    "twoItemShare": null,
+    "randomSeed": 20261005,
+    "dataSha256": "27d1efd1660b7c1014cd29925593eb9512c2a0de82fb23be064961a03959bddb",
+    "applicationSessionIsolation": "REPEATABLE-READ\t30",
+    "jvmOptions": [],
+    "specId": "local-01",
+    "retryCount": 0,
+    "externalApi": {
+      "provider": "fake-payment",
+      "authorizeDelayMs": 300,
+      "callPlacement": "outside-db-transaction"
+    }
+  },
+  "requests": {
+    "planned": 300,
+    "started": 300,
+    "completed": 300,
+    "notStarted": 0,
+    "incomplete": 0,
+    "success": 90,
+    "businessRejection": 210,
+    "technicalError": 0,
+    "errors": {
+      "INSUFFICIENT_STOCK": 210
+    }
+  },
+  "metrics": {
+    "measurementSeconds": 30.229,
+    "throughput": 9.924244930364882,
+    "successThroughput": 2.9772734791094644,
+    "latencyMs": {
+      "count": 300,
+      "p50": 333.5,
+      "p95": 346.1,
+      "p99": 362.01
+    },
+    "latencyByOutcomeMs": {
+      "success": {
+        "count": 90,
+        "p50": 337.0,
+        "p95": 358.1,
+        "p99": 364.43
+      },
+      "businessRejection": {
+        "count": 210,
+        "p50": 332.0,
+        "p95": 342.0,
+        "p99": 345.0
+      },
+      "technicalError": {
+        "count": 0,
+        "p50": null,
+        "p95": null,
+        "p99": null
+      }
+    },
+    "stockoutPhases": {
+      "boundaryNs": "1791297483625000000",
+      "boundaryMeaning": "first observed insufficient-stock response (not exact DB depletion time)",
+      "before": {
+        "count": 90,
+        "p50": 337.0,
+        "p95": 358.1,
+        "p99": 364.43
+      },
+      "after": {
+        "count": 210,
+        "p50": 332.0,
+        "p95": 342.0,
+        "p99": 345.0
+      }
+    },
+    "externalApi": {
+      "authorizeDelayMs": 300,
+      "callPlacement": "outside-db-transaction"
+    }
+  },
+  "validation": {
+    "status": "passed",
+    "checks": [
+      "orderPaymentBalance",
+      "stock",
+      "orderItemsUnchanged",
+      "orderCount",
+      "uniqueOrderRequests"
+    ],
+    "failures": [],
+    "confirmedOrders": 90,
+    "finalStock": {
+      "1": 0,
+      "2": 300,
+      "3": 300,
+      "4": 300,
+      "5": 300,
+      "6": 300,
+      "7": 300,
+      "8": 300,
+      "9": 300,
+      "10": 300
+    }
+  },
+  "artifacts": {
+    "traces": "traces.json",
+    "environment": "environment.json",
+    "raw": "../../../../../../../build/serializable-experiment/warmup-S1-10rps-01"
+  },
+  "k6ExitCode": 0
+}

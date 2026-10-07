@@ -1,0 +1,144 @@
+{
+  "schemaVersion": 1,
+  "experimentId": "order-product-contention/optimistic-version-retry1",
+  "runId": "admin-midpoint-run2-order-product-v4-S1-10rps-01",
+  "gitSha": "c7bc3b712d60eb7e958e7d425aae2d5e1ecc449b",
+  "workingTreeChanges": true,
+  "status": "completed",
+  "startedAt": "2026-10-06T23:40:19.631100+00:00",
+  "finishedAt": "2026-10-06T23:41:20.300015+00:00",
+  "config": {
+    "scenario": "S1",
+    "rps": 10,
+    "durationSeconds": 60,
+    "repetition": 1,
+    "vus": 200,
+    "initialStock": {
+      "1": 180,
+      "2": 600,
+      "3": 600,
+      "4": 600,
+      "5": 600,
+      "6": 600,
+      "7": 600,
+      "8": 600,
+      "9": 600,
+      "10": 600
+    },
+    "twoItemShare": null,
+    "randomSeed": 20261005,
+    "dataSha256": "b084df5d191ee864d721626f41f7a34402856528cea62f8761050327e36496ec",
+    "applicationSessionIsolation": "REPEATABLE-READ\t200",
+    "jvmOptions": [],
+    "specId": "local-01",
+    "retryCount": 0
+  },
+  "requests": {
+    "planned": 600,
+    "started": 600,
+    "completed": 600,
+    "notStarted": 0,
+    "incomplete": 0,
+    "success": 180,
+    "businessRejection": 418,
+    "technicalError": 2,
+    "optimisticConflict": 2,
+    "errors": {
+      "optimisticConflict": 2
+    }
+  },
+  "admin": {
+    "planned": 1,
+    "completed": 1,
+    "success": 1,
+    "businessRejection": 0,
+    "technicalError": 0,
+    "errors": {}
+  },
+  "metrics": {
+    "measurementSeconds": 59.92,
+    "throughput": 10.013351134846461,
+    "successThroughput": 3.0040053404539386,
+    "latencyMs": {
+      "count": 600,
+      "p50": 33.0,
+      "p95": 55.049999999999955,
+      "p99": 72.37999999999965
+    },
+    "latencyByOutcomeMs": {
+      "success": {
+        "count": 180,
+        "p50": 45.0,
+        "p95": 61.10000000000002,
+        "p99": 80.82000000000033
+      },
+      "businessRejection": {
+        "count": 418,
+        "p50": 32.0,
+        "p95": 42.0,
+        "p99": 49.48999999999995
+      },
+      "technicalError": {
+        "count": 2,
+        "p50": 214.0,
+        "p95": 259.0,
+        "p99": 263.0
+      }
+    },
+    "stockoutPhases": {
+      "boundaryNs": "1791330037922000000",
+      "boundaryMeaning": "first observed insufficient-stock response (not exact DB depletion time)",
+      "before": {
+        "count": 182,
+        "p50": 45.5,
+        "p95": 63.0,
+        "p99": 182.99999999999977
+      },
+      "after": {
+        "count": 418,
+        "p50": 32.0,
+        "p95": 42.0,
+        "p99": 49.48999999999995
+      }
+    },
+    "adminLatencyMs": {
+      "count": 1,
+      "p50": 245.0,
+      "p95": 245.0,
+      "p99": 245.0
+    },
+    "optimisticConflictRate": 0.0033333333333333335,
+    "optimisticConflictRateReason": "classified from server evidence: Row was updated or deleted by another transaction"
+  },
+  "validation": {
+    "status": "passed",
+    "checks": [
+      "orderPaymentBalance",
+      "stock",
+      "orderItemsUnchanged",
+      "orderCount",
+      "uniqueOrderRequests"
+    ],
+    "failures": [],
+    "confirmedOrders": 180,
+    "finalStock": {
+      "1": 0,
+      "2": 600,
+      "3": 600,
+      "4": 600,
+      "5": 600,
+      "6": 600,
+      "7": 600,
+      "8": 600,
+      "9": 600,
+      "10": 600
+    }
+  },
+  "artifacts": {
+    "traces": "traces.json",
+    "adminTraces": "admin-traces.json",
+    "environment": "environment.json",
+    "raw": "../../../../../../../build/serializable-experiment/admin-midpoint-run2-order-product-v4-S1-10rps-01"
+  },
+  "k6ExitCode": 0
+}

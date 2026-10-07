@@ -1,0 +1,130 @@
+{
+  "schemaVersion": 1,
+  "experimentId": "stock-contention/04-serializable-backoff10ms",
+  "runId": "warmup-S1-100rps-03",
+  "gitSha": "4192562a37424b6faffa766708ed3d23b1a09152",
+  "workingTreeChanges": true,
+  "status": "completed",
+  "startedAt": "2026-10-05T19:17:56.582739+00:00",
+  "finishedAt": "2026-10-05T19:18:27.170512+00:00",
+  "config": {
+    "scenario": "S1",
+    "rps": 100,
+    "durationSeconds": 30,
+    "repetition": 3,
+    "vus": 200,
+    "initialStock": {
+      "1": 900,
+      "2": 3000,
+      "3": 3000,
+      "4": 3000,
+      "5": 3000,
+      "6": 3000,
+      "7": 3000,
+      "8": 3000,
+      "9": 3000,
+      "10": 3000
+    },
+    "twoItemShare": null,
+    "randomSeed": 20261005,
+    "dataSha256": "7c7bfa386a2fcc243b8fe88b17c41188a17f24bcbe6c5a3ab116c5774f2775fd",
+    "applicationSessionIsolation": "SERIALIZABLE\t32",
+    "jvmOptions": [],
+    "specId": "local-01",
+    "retryCount": 1
+  },
+  "requests": {
+    "planned": 3000,
+    "started": 3000,
+    "completed": 3000,
+    "notStarted": 0,
+    "incomplete": 0,
+    "success": 900,
+    "businessRejection": 2099,
+    "technicalError": 1,
+    "optimisticConflict": 0,
+    "errors": {
+      "deadlock": 1,
+      "INSUFFICIENT_STOCK": 2099
+    }
+  },
+  "metrics": {
+    "measurementSeconds": 29.995,
+    "throughput": 100.01666944490748,
+    "successThroughput": 30.005000833472245,
+    "latencyMs": {
+      "count": 3000,
+      "p50": 6.0,
+      "p95": 8.0,
+      "p99": 16.01000000000022
+    },
+    "latencyByOutcomeMs": {
+      "success": {
+        "count": 900,
+        "p50": 6.0,
+        "p95": 8.0,
+        "p99": 17.00999999999999
+      },
+      "businessRejection": {
+        "count": 2099,
+        "p50": 6.0,
+        "p95": 8.0,
+        "p99": 16.0
+      },
+      "technicalError": {
+        "count": 1,
+        "p50": 43.0,
+        "p95": 43.0,
+        "p99": 43.0
+      }
+    },
+    "stockoutPhases": {
+      "boundaryNs": "1791227885655000000",
+      "boundaryMeaning": "first observed insufficient-stock response (not exact DB depletion time)",
+      "before": {
+        "count": 901,
+        "p50": 6.0,
+        "p95": 8.0,
+        "p99": 18.0
+      },
+      "after": {
+        "count": 2099,
+        "p50": 6.0,
+        "p95": 8.0,
+        "p99": 16.0
+      }
+    },
+    "optimisticConflictRate": null,
+    "optimisticConflictRateReason": "not used"
+  },
+  "validation": {
+    "status": "passed",
+    "checks": [
+      "orderPaymentBalance",
+      "stock",
+      "orderItemsUnchanged",
+      "orderCount",
+      "uniqueOrderRequests"
+    ],
+    "failures": [],
+    "confirmedOrders": 900,
+    "finalStock": {
+      "1": 0,
+      "2": 3000,
+      "3": 3000,
+      "4": 3000,
+      "5": 3000,
+      "6": 3000,
+      "7": 3000,
+      "8": 3000,
+      "9": 3000,
+      "10": 3000
+    }
+  },
+  "artifacts": {
+    "traces": "traces.json",
+    "environment": "environment.json",
+    "raw": "../../../../../../../build/serializable-experiment/warmup-S1-100rps-03"
+  },
+  "k6ExitCode": 0
+}
