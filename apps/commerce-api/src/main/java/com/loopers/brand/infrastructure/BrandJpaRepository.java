@@ -14,6 +14,10 @@ interface BrandJpaRepository extends JpaRepository<Brand, Long> {
 
     List<Brand> findAllByName(String name);
 
+    @Lock(LockModeType.PESSIMISTIC_READ)
+    @Query("select b from Brand b where b.id = :id")
+    Optional<Brand> findForProductCreate(@Param("id") Long id);
+
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("select b from Brand b where b.id = :id")
     Optional<Brand> findForWrite(@Param("id") Long id);

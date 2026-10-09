@@ -177,7 +177,7 @@ public class ProductUseCase {
     }
 
     private Brand requireActiveBrand(Long brandId) {
-        Brand brand = brandRepository.findById(brandId)
+        Brand brand = brandRepository.findForProductCreate(brandId)
             .orElseThrow(() -> new CoreException(ErrorCode.BRAND_NOT_FOUND));
         if (brand.isDeleted()) {
             throw new CoreException(ErrorCode.BRAND_NOT_FOUND);
