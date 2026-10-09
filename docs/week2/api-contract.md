@@ -148,7 +148,7 @@
 | 요청 | `POST /api/v1/orders/{orderId}/confirm` |
 | 입력 | path `orderId` |
 | 성공 | `200`, 주문 상세 `id`, `status=CONFIRMED`, `items`(상품 ID·이름, 수량, 단가, 품목 금액), `totalAmount`, `payment`(결제액 `amount`, 결제 시각 `paidAt`). 재고·잔액이 차감된다. |
-| 오류 | `400 INVALID_REQUEST`: `orderId`가 정수가 아님 · `404 ORDER_NOT_FOUND`: 없거나 다른 고객의 주문 · `409 ORDER_ALREADY_CONFIRMED` · `409 PRODUCT_NOT_AVAILABLE`: 삭제된 상품이 있음 · `409 INSUFFICIENT_STOCK` · `409 INSUFFICIENT_POINT` |
+| 오류 | `400 INVALID_REQUEST`: `orderId`가 정수가 아님 · `404 ORDER_NOT_FOUND`: 없거나 다른 고객의 주문 · `409 ORDER_ALREADY_CONFIRMED` · `409 PRODUCT_NOT_AVAILABLE`: 삭제된 상품이 있음 · `409 INSUFFICIENT_STOCK` · `409 INSUFFICIENT_POINT` · `409 POINT_CONFLICT`: 포인트 버전 충돌로 주문 확정 재시도 2회를 소진함. 최신 잔액을 확인한 뒤 다시 요청 · `500 INTERNAL_ERROR`: 한도 초과 충돌의 대상을 확인할 수 없거나 주문이 아직 DRAFT인 경우 등 내부 오류 |
 
 
 ### C-11. 내 주문 목록
@@ -390,6 +390,7 @@
 | `409` | `PRODUCT_NOT_AVAILABLE`        | 확정하려는 주문의 상품이 삭제되었다.                                                                                                 | 주문한 상품 중 판매하지 않는 상품이 있습니다.            |
 | `409` | `INSUFFICIENT_STOCK`           | 확정하려는 주문의 수량보다 재고가 적다.                                                                                               | 재고가 부족합니다.                            |
 | `409` | `INSUFFICIENT_POINT`           | 확정하려는 주문의 금액보다 잔액이 적다.                                                                                               | 포인트 잔액이 부족합니다.                        |
+| `409` | `POINT_CONFLICT` | 주문 확정의 포인트 버전 충돌이 최대 2회 재시도 후에도 해소되지 않았다. 이번 확정의 변경은 롤백된다. | 포인트 잔액이 변경되었습니다. 최신 잔액을 확인한 뒤 다시 시도해 주세요. |
 | `409` | `POINT_BALANCE_LIMIT_EXCEEDED` | 충전 후 잔액이 표현할 수 있는 범위를 넘는다.                                                                                           | 충전할 수 있는 한도를 넘었습니다.                   |
 | `500` | `INTERNAL_ERROR`               | 요청과 관계없는 내부 오류이다. 예: 결제액이 없는 결제 결과, 0 이하의 수량으로 재고 차감([ADR-003](./decisions.md#adr-003-재고-차감-수량이-0-이하이면-내부-오류로-거절한다)) | 일시적인 오류가 발생했습니다.                      |
 

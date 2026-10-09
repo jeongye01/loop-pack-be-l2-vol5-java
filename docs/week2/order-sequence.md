@@ -100,6 +100,6 @@ sequenceDiagram
 - Product는 중복 제거한 ID를 정렬한 뒤 개별 조회로 공유락을 획득한다. Stock도 같은 순서로 배타락을 획득한다. 잠금은 commit·rollback까지 유지한다.
 - Point·Order는 `@Version`으로 충돌을 검사한다. 충전도 Point 버전을 사용하되 자동 재시도하지 않는다.
 - 업무 검증 오류나 저장 오류가 발생하면 주문·재고·잔액·결제 결과 전체를 rollback한다. 재고·잔액 부족 등 업무 예외는 낙관적 충돌 재시도 대상이 아니다.
-- 현재 재시도를 소진한 낙관적 충돌은 대상과 관계없이 `ORDER_ALREADY_CONFIRMED`로 변환된다. Point 충돌과 Order 충돌의 응답 구분은 아직 보완이 필요하다.
+- 재시도를 소진한 충돌에서 Spring 예외의 엔티티 이름, JPA 예외의 엔티티 또는 Hibernate 원인의 엔티티 이름으로 Point를 확인하면 `409 POINT_CONFLICT`로 안내한다. 그 외 충돌은 실패 트랜잭션 종료 후 새 조회 트랜잭션에서 본인 주문의 상태를 확인하고 실제 `CONFIRMED`일 때만 `ORDER_ALREADY_CONFIRMED`로 응답한다. 아직 DRAFT이거나 충돌 대상을 확인할 수 없으면 원래 예외를 전달해 기존 `500 INTERNAL_ERROR` 계약으로 처리하며, 재고·잔액 부족으로 바꾸지 않는다. 외부 트랜잭션에 참여하는 경우에는 실패한 경계에서 주문을 다시 조회하지 않는다.
 
 정상 HTTP 경로에서는 commit이 끝난 뒤 성공 응답을 보낸다. 여러 repository의 `save()`는 독립 commit을 수행하지 않으며, 최종 `flush()`도 commit과 구분된다.

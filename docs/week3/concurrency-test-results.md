@@ -25,8 +25,23 @@
 
 - 위 결과는 현재 구현의 이번 실행 결과이며, 가능한 모든 스케줄에서 성공을 보장한다는 의미는 아니다.
 - 주문 확정은 Point·Order 버전 충돌 시 전체 트랜잭션을 최대 2회 재시도한다. 포인트 충전 자체는 자동 재시도하지 않으므로 충전 쪽에 실제 버전 충돌이 발생하면 실패할 수 있다.
-- 재시도를 소진한 포인트 충돌도 현재는 `ORDER_ALREADY_CONFIRMED`로 변환된다. 충돌 대상별 응답 구분은 별도 보완 항목이다.
+- 재시도를 소진한 충돌은 Point임을 확인할 수 있으면 `POINT_CONFLICT`로 안내한다. 그 외에는 실패한 트랜잭션 종료 후 주문을 재조회해 실제 확정된 경우에만 `ORDER_ALREADY_CONFIRMED`로 응답하고, 확인되지 않은 충돌은 원래 예외를 전달한다.
 - 포인트 경쟁 사례는 같은 상품의 Stock 배타락도 거치므로, 이 사례만으로 재고가 서로 다른 주문 사이의 Point 버전 충돌을 강제 재현했다고 볼 수는 없다.
+
+## 재시도 한도 초과 검증 (2026-10-09)
+
+`OrderConfirmationConflictHttpTest` 4건이 통과했다. 실패 트랜잭션 전체를 새로 시작하며 최초 포함 3회 시도한 뒤의 HTTP 응답과 DB 상태를 확인한다.
+
+| 시나리오 | 응답·DB 결과 |
+| --- | --- |
+| 별도 DB 트랜잭션에서 매 시도마다 Point 잔액·버전 변경 | `409 POINT_CONFLICT`, 주문 DRAFT·결제 결과 없음·재고 5 유지. 경쟁 트랜잭션의 증가 3,000원만 반영돼 잔액 13,000원 |
+| 엔티티가 포함된 JPA Point 충돌 주입 | `409 POINT_CONFLICT`, 주문·재고·잔액 전체 rollback |
+| 아직 DRAFT인 Order 충돌 주입 | `500 INTERNAL_ERROR`, 이미 확정됐다고 응답하지 않고 전체 rollback |
+| 충돌 대상 정보가 없는 예외 주입 | `500 INTERNAL_ERROR`, 충돌 대상을 추측하지 않고 전체 rollback |
+
+관련 주문 동시성 4건·주문 트랜잭션 2건·ArchUnit 1건과 main·test Checkstyle도 같은 실행에서 통과했다.
+
+`OrderConflictHandlingTest` 1건은 재시도 소진 후 재조회한 주문이 실제 확정돼 있을 때 기존 `ORDER_ALREADY_CONFIRMED`로 연결되는 분기를 검증한다. 최종 `./gradlew :apps:commerce-api:check`에서 이 테스트와 HTTP 충돌 4건을 포함한 전체 회귀 테스트·Checkstyle·ArchUnit이 통과했다(`BUILD SUCCESSFUL`, 2분 57초).
 
 ## 개선 전 대조 기록 (2026-10-04)
 

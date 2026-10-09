@@ -323,8 +323,15 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorEnvelope'
         '409':
-          description: ORDER_ALREADY_CONFIRMED, PRODUCT_NOT_AVAILABLE, INSUFFICIENT_STOCK 또는 INSUFFICIENT_POINT
-          x-error-codes: [ORDER_ALREADY_CONFIRMED, PRODUCT_NOT_AVAILABLE, INSUFFICIENT_STOCK, INSUFFICIENT_POINT]
+          description: ORDER_ALREADY_CONFIRMED, PRODUCT_NOT_AVAILABLE, INSUFFICIENT_STOCK, INSUFFICIENT_POINT 또는 재시도 한도 초과 POINT_CONFLICT
+          x-error-codes: [ORDER_ALREADY_CONFIRMED, PRODUCT_NOT_AVAILABLE, INSUFFICIENT_STOCK, INSUFFICIENT_POINT, POINT_CONFLICT]
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '500':
+          description: INTERNAL_ERROR - 충돌 대상을 확인할 수 없거나 아직 DRAFT인 주문의 충돌 한도를 소진한 경우 등 내부 오류
+          x-error-codes: [INTERNAL_ERROR]
           content:
             application/json:
               schema:
@@ -902,6 +909,7 @@ components:
             - PRODUCT_NOT_AVAILABLE
             - INSUFFICIENT_STOCK
             - INSUFFICIENT_POINT
+            - POINT_CONFLICT
             - POINT_BALANCE_LIMIT_EXCEEDED
             - INTERNAL_ERROR
         message:

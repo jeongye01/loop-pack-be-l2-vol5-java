@@ -4,6 +4,7 @@ import com.loopers.order.domain.Order;
 import com.loopers.order.domain.OrderConfirmService;
 import com.loopers.order.domain.OrderItem;
 import com.loopers.order.domain.OrderRepository;
+import com.loopers.order.domain.OrderStatus;
 import com.loopers.product.domain.Product;
 import com.loopers.product.domain.ProductRepository;
 import com.loopers.product.domain.Stock;
@@ -18,9 +19,12 @@ import com.loopers.user.domain.Point;
 import com.loopers.user.domain.PointRepository;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.OptimisticLockException;
+import org.hibernate.StaleObjectStateException;
 import org.springframework.stereotype.Service;
 import org.springframework.dao.OptimisticLockingFailureException;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.time.ZonedDateTime;
 import java.util.List;
@@ -77,8 +81,37 @@ public class OrderUseCase {
         try {
             return transactionRetryExecutor.execute(() -> confirmInCurrentTransaction(buyerId, orderId), 2);
         } catch (OptimisticLockException | OptimisticLockingFailureException exception) {
-            throw new CoreException(ErrorCode.ORDER_ALREADY_CONFIRMED);
+            if (isPointConflict(exception)) {
+                throw new CoreException(ErrorCode.POINT_CONFLICT);
+            }
+            if (!TransactionSynchronizationManager.isActualTransactionActive()) {
+                boolean alreadyConfirmed = transactionRetryExecutor.execute(() -> orderRepository.findById(orderId)
+                    .filter(order -> order.isOwnedBy(buyerId))
+                    .map(order -> order.getStatus() == OrderStatus.CONFIRMED)
+                    .orElse(false), 0);
+                if (alreadyConfirmed) {
+                    throw new CoreException(ErrorCode.ORDER_ALREADY_CONFIRMED);
+                }
+            }
+            throw exception;
         }
+    }
+
+    private boolean isPointConflict(Throwable exception) {
+        for (Throwable cause = exception; cause != null; cause = cause.getCause()) {
+            if (cause instanceof ObjectOptimisticLockingFailureException conflict
+                && Point.class.getName().equals(conflict.getPersistentClassName())) {
+                return true;
+            }
+            if (cause instanceof OptimisticLockException conflict && conflict.getEntity() instanceof Point) {
+                return true;
+            }
+            if (cause instanceof StaleObjectStateException conflict
+                && Point.class.getName().equals(conflict.getEntityName())) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private Order confirmInCurrentTransaction(Long buyerId, Long orderId) {
