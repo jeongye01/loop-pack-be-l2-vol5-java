@@ -1,8 +1,0 @@
-{
-  "spring.jpa.show-sql": false,
-  "datasource.mysql-jpa.main.maximum-pool-size": 40,
-  "datasource.mysql-jpa.main.minimum-idle": 30,
-  "datasource.mysql-jpa.main.connection-timeout": 3000,
-  "concurrency.transaction-retry.max-retries": 1,
-  "concurrency.transaction-retry.backoff-ms": 0
-}

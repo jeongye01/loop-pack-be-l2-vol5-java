@@ -1,6 +1,0 @@
-{
-  "datasource.mysql-jpa.main.transaction-isolation": "TRANSACTION_SERIALIZABLE",
-  "spring.jpa.show-sql": false,
-  "concurrency.transaction-retry.max-retries": 2,
-  "concurrency.transaction-retry.backoff-ms": 0
-}
