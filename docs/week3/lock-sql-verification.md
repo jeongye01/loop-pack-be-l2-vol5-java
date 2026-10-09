@@ -46,7 +46,7 @@ SPRING_APPLICATION_JSON='{"spring":{"jpa":{"show-sql":true}},"logging":{"level":
 
 - 주문 확정: `OrderUseCase.confirm` → `ProductRepository.findForOrder` → `StockRepository.findForOrderByProductId` → `PointRepository.findForOrderByUserId`
 - 관리자 재고 변경: `ProductUseCase.changeStock` → `ProductRepository.findForStock` → `StockRepository.findForStockUpdateByProductId`
-- 브랜드 수정: `BrandUseCase.update` → `BrandRepository.findById` → `BrandRepository.save` (`@Version` 충돌 검사, 재시도 없음)
+- 브랜드 수정: `BrandUseCase.update` → `BrandRepository.findForWrite` → `BrandRepository.save` (배타락)
 - 브랜드 삭제: `BrandUseCase.delete` → `BrandRepository.findForWrite` → `ProductRepository.findAllForBrandDelete`
 - 상품 수정·삭제: `ProductUseCase.update/delete` → `ProductRepository.findForWrite`
 - 좋아요 등록: `LikeUseCase.register` → `ProductRepository.findForLike`
