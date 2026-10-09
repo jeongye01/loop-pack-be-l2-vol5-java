@@ -27,7 +27,7 @@ public class PointUseCase {
     }
 
     public long charge(Long userId, long amount) {
-        return transactionRetryExecutor.execute(() -> chargeInCurrentTransaction(userId, amount));
+        return transactionRetryExecutor.execute(() -> chargeInCurrentTransaction(userId, amount), 0);
     }
 
     private long chargeInCurrentTransaction(Long userId, long amount) {

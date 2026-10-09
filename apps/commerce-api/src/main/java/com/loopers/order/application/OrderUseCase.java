@@ -24,6 +24,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.ZonedDateTime;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 public class OrderUseCase {
@@ -59,8 +61,14 @@ public class OrderUseCase {
     public Order create(Long buyerId, List<ItemCommand> items) {
         requireUser(buyerId);
         List<ItemCommand> requestedItems = items == null ? List.of() : items;
+        Map<Long, Product> products = requestedItems.stream()
+            .map(ItemCommand::productId)
+            .distinct()
+            .sorted()
+            .map(this::requireActiveProduct)
+            .collect(Collectors.toMap(Product::getId, product -> product));
         List<OrderItem> orderItems = requestedItems.stream()
-            .map(command -> OrderItem.of(requireActiveProduct(command.productId()), command.quantity()))
+            .map(command -> OrderItem.of(products.get(command.productId()), command.quantity()))
             .toList();
         return orderRepository.save(new Order(buyerId, orderItems));
     }
@@ -157,7 +165,7 @@ public class OrderUseCase {
     }
 
     private Product requireActiveProduct(Long productId) {
-        Product product = productRepository.findById(productId)
+        Product product = productRepository.findForOrder(productId)
             .orElseThrow(() -> new CoreException(ErrorCode.PRODUCT_NOT_FOUND));
         if (product.isDeleted()) {
             throw new CoreException(ErrorCode.PRODUCT_NOT_FOUND);

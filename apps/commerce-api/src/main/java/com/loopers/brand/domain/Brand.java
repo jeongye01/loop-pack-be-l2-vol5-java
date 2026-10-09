@@ -5,12 +5,15 @@ import com.loopers.support.error.CoreException;
 import com.loopers.support.error.ErrorCode;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
+import jakarta.persistence.Version;
 
 @Entity
 @Table(name = "brand")
 public class Brand extends BaseEntity {
 
     private String name;
+    @Version
+    private Long version;
 
     protected Brand() {
     }
