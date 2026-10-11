@@ -7,6 +7,8 @@ public interface LikeRepository {
 
     Like save(Like like);
 
+    void delete(Like like);
+
     Optional<Like> findByUserIdAndProductId(Long userId, Long productId);
 
     List<Like> findAllByUserId(Long userId, int page, int size);

@@ -44,16 +44,10 @@ public class LikeUseCase {
     public boolean register(Long userId, Long productId) {
         requireUser(userId);
         requireActiveProduct(productId);
-        Like existing = likeRepository.findByUserIdAndProductId(userId, productId).orElse(null);
-        if (existing == null) {
-            likeRepository.save(new Like(userId, productId));
-            return true;
-        }
-        if (!existing.isCanceled()) {
+        if (likeRepository.findByUserIdAndProductId(userId, productId).isPresent()) {
             return false;
         }
-        existing.reregister(userId);
-        likeRepository.save(existing);
+        likeRepository.save(new Like(userId, productId));
         return true;
     }
 
@@ -61,10 +55,9 @@ public class LikeUseCase {
     public void cancel(Long userId, Long productId) {
         requireUser(userId);
         likeRepository.findByUserIdAndProductId(userId, productId)
-            .filter(like -> !like.isCanceled())
             .ifPresent(like -> {
                 like.cancel(userId);
-                likeRepository.save(like);
+                likeRepository.delete(like);
             });
     }
 
