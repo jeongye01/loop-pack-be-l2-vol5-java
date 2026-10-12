@@ -1,0 +1,16 @@
+{
+  "label": "warmup",
+  "startedAt": "2026-10-12T15:44:28.342758+00:00",
+  "targetRps": 1,
+  "durationSeconds": 15,
+  "vus": 100,
+  "exitCode": 0,
+  "completed": 16,
+  "rpsIncludingDrain": 1.0408258068075082,
+  "dropped": 0,
+  "failureRate": 0,
+  "invalidResponseRate": 0,
+  "p50ms": 392.04949999999997,
+  "p95ms": 449.5199999999999,
+  "p99ms": 487.04879999999997
+}

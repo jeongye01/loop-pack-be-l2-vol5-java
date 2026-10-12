@@ -1,0 +1,16 @@
+{
+  "label": "04-5rps",
+  "startedAt": "2026-10-12T15:46:42.658454+00:00",
+  "targetRps": 5,
+  "durationSeconds": 30,
+  "vus": 100,
+  "exitCode": 0,
+  "completed": 151,
+  "rpsIncludingDrain": 4.954302790647208,
+  "dropped": 0,
+  "failureRate": 0,
+  "invalidResponseRate": 0,
+  "p50ms": 647.037,
+  "p95ms": 792.1324999999999,
+  "p99ms": 897.358
+}

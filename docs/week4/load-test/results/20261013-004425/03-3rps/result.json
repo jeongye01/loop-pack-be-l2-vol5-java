@@ -1,0 +1,16 @@
+{
+  "label": "03-3rps",
+  "startedAt": "2026-10-12T15:46:04.872870+00:00",
+  "targetRps": 3,
+  "durationSeconds": 30,
+  "vus": 100,
+  "exitCode": 0,
+  "completed": 91,
+  "rpsIncludingDrain": 2.996495318832206,
+  "dropped": 0,
+  "failureRate": 0,
+  "invalidResponseRate": 0,
+  "p50ms": 394.192,
+  "p95ms": 618.7665,
+  "p99ms": 789.4198
+}

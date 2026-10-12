@@ -6,6 +6,9 @@ import com.loopers.product.domain.Product;
 import com.loopers.product.domain.ProductRepository;
 import com.loopers.product.domain.ProductSort;
 import jakarta.persistence.EntityManager;
+import org.springframework.test.util.ReflectionTestUtils;
+import com.loopers.support.error.CoreException;
+import com.loopers.support.error.ErrorCode;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -18,6 +21,7 @@ import com.loopers.testcontainers.MySqlTestContainersConfig;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @SpringBootTest
 @Import(MySqlTestContainersConfig.class)
@@ -198,5 +202,35 @@ class ProductRepositoryIntegrationTest {
     private void flushAndClear() {
         entityManager.flush();
         entityManager.clear();
+    }
+
+    @DisplayName("DB에서 발견한 생성 시 이름 중복을 기존 도메인 오류로 반환한다")
+    @Test
+    void translatesDatabaseDuplicateOnInsert() {
+        productRepository.save(new Product(1L, "동일 이름", 100L));
+        assertThatThrownBy(() -> productRepository.save(new Product(1L, "동일 이름", 100L)))
+            .isInstanceOfSatisfying(CoreException.class,
+                error -> assertThat(error.getErrorCode()).isEqualTo(ErrorCode.DUPLICATE_PRODUCT_NAME));
+    }
+
+    @DisplayName("수정 SQL의 이름 중복도 commit 이전에 기존 도메인 오류로 반환한다")
+    @Test
+    void translatesDatabaseDuplicateOnUpdate() {
+        productRepository.save(new Product(1L, "동일 이름", 100L));
+        Product target = productRepository.save(new Product(1L, "다른 이름", 100L));
+        target.update("동일 이름", 100L, 1L);
+        assertThatThrownBy(() -> productRepository.save(target))
+            .isInstanceOfSatisfying(CoreException.class,
+                error -> assertThat(error.getErrorCode()).isEqualTo(ErrorCode.DUPLICATE_PRODUCT_NAME));
+    }
+
+    @DisplayName("이름 중복과 관계없는 DB 오류를 이름 중복으로 변환하지 않는다")
+    @Test
+    void doesNotTranslateOtherConstraintFailures() {
+        Product invalid = new Product(1L, "정상 이름", 100L);
+        ReflectionTestUtils.setField(invalid, "price", 0L);
+        assertThatThrownBy(() -> productRepository.save(invalid))
+            .isInstanceOf(jakarta.persistence.PersistenceException.class)
+            .isNotInstanceOf(CoreException.class);
     }
 }

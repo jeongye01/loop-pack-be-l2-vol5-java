@@ -1,0 +1,7 @@
+time="2026-10-13T00:50:27+09:00" level=warning msg="Request Failed" error="Get \"http://127.0.0.1:18080/api/v1/products?brandId=7&sort=price_asc&page=0&size=20\": request timeout"
+time="2026-10-13T00:50:27+09:00" level=warning msg="Request Failed" error="Get \"http://127.0.0.1:18080/api/v1/products?brandId=7&sort=price_asc&page=0&size=20\": request timeout"
+time="2026-10-13T00:50:27+09:00" level=warning msg="Request Failed" error="Get \"http://127.0.0.1:18080/api/v1/products?brandId=7&sort=price_asc&page=0&size=20\": request timeout"
+time="2026-10-13T00:50:27+09:00" level=warning msg="Request Failed" error="Get \"http://127.0.0.1:18080/api/v1/products?brandId=7&sort=price_asc&page=0&size=20\": request timeout"
+time="2026-10-13T00:50:28+09:00" level=warning msg="Request Failed" error="Get \"http://127.0.0.1:18080/api/v1/products?brandId=7&sort=price_asc&page=0&size=20\": request timeout"
+time="2026-10-13T00:50:28+09:00" level=warning msg="Request Failed" error="Get \"http://127.0.0.1:18080/api/v1/products?brandId=7&sort=price_asc&page=0&size=20\": request timeout"
+time="2026-10-13T00:50:29+09:00" level=warning msg="Request Failed" error="Get \"http://127.0.0.1:18080/api/v1/products?brandId=7&sort=price_asc&page=0&size=20\": request timeout"

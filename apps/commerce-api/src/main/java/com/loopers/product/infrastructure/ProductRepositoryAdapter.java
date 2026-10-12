@@ -4,6 +4,9 @@ import com.loopers.product.domain.Product;
 import com.loopers.product.domain.ProductRepository;
 import com.loopers.product.domain.ProductSort;
 import jakarta.persistence.EntityManager;
+import com.loopers.support.error.CoreException;
+import com.loopers.support.error.DatabaseConstraintErrors;
+import com.loopers.support.error.ErrorCode;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -28,11 +31,22 @@ public class ProductRepositoryAdapter implements ProductRepository {
 
     @Override
     public Product save(Product product) {
-        if (product.getId() == 0L) {
-            entityManager.persist(product);
-            return product;
+        try {
+            Product saved;
+            if (product.getId() == 0L) {
+                entityManager.persist(product);
+                saved = product;
+            } else {
+                saved = jpaRepository.save(product);
+            }
+            entityManager.flush();
+            return saved;
+        } catch (RuntimeException failure) {
+            if (DatabaseConstraintErrors.isDuplicateKey(failure, "uk_product_active_name")) {
+                throw new CoreException(ErrorCode.DUPLICATE_PRODUCT_NAME);
+            }
+            throw failure;
         }
-        return jpaRepository.save(product);
     }
 
     @Override

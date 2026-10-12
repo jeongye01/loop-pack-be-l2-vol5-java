@@ -3,6 +3,9 @@ package com.loopers.brand.infrastructure;
 import com.loopers.brand.domain.Brand;
 import com.loopers.brand.domain.BrandRepository;
 import jakarta.persistence.EntityManager;
+import com.loopers.support.error.CoreException;
+import com.loopers.support.error.DatabaseConstraintErrors;
+import com.loopers.support.error.ErrorCode;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
@@ -23,11 +26,22 @@ public class BrandRepositoryAdapter implements BrandRepository {
 
     @Override
     public Brand save(Brand brand) {
-        if (brand.getId() == 0L) {
-            entityManager.persist(brand);
-            return brand;
+        try {
+            Brand saved;
+            if (brand.getId() == 0L) {
+                entityManager.persist(brand);
+                saved = brand;
+            } else {
+                saved = jpaRepository.save(brand);
+            }
+            entityManager.flush();
+            return saved;
+        } catch (RuntimeException failure) {
+            if (DatabaseConstraintErrors.isDuplicateKey(failure, "uk_brand_active_name")) {
+                throw new CoreException(ErrorCode.DUPLICATE_BRAND_NAME);
+            }
+            throw failure;
         }
-        return jpaRepository.save(brand);
     }
 
     @Override

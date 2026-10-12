@@ -9,6 +9,8 @@ import com.loopers.testcontainers.MySqlTestContainersConfig;
 import com.loopers.user.domain.User;
 import com.loopers.utils.DatabaseCleanUp;
 import jakarta.persistence.EntityManager;
+import com.loopers.brand.infrastructure.BrandRepositoryAdapter;
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -38,6 +40,7 @@ import static com.loopers.support.http.ApiHttp.isNullOrAbsent;
 import static com.loopers.support.http.ApiHttp.nonAdmin;
 import static com.loopers.support.http.ApiHttp.success;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.doReturn;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
@@ -68,6 +71,9 @@ class BrandHttpTest {
 
     @Autowired
     private DatabaseCleanUp databaseCleanUp;
+
+    @MockitoSpyBean
+    private BrandRepositoryAdapter repositoryAdapter;
 
     private CommerceFixture fixture;
 
@@ -632,5 +638,19 @@ class BrandHttpTest {
             mockMvc.perform(get(ADMIN_BRANDS).param("page", page).param("size", size).with(admin()))
                 .andExpect(failure(HttpStatus.BAD_REQUEST, "INVALID_REQUEST"));
         }
+    }
+
+    @DisplayName("서비스 사전 검사 이후 DB에서 발견한 이름 중복도 409로 응답한다")
+    @ParameterizedTest
+    @ValueSource(booleans = {false, true})
+    void returnsConflictForDatabaseDuplicate(boolean update) throws Exception {
+        fixture.brand("DB 중복 이름");
+        Brand target = fixture.brand("변경 대상");
+        // A concurrent writer can commit after the application's preliminary lookup.
+        doReturn(java.util.List.of()).when(repositoryAdapter).findAllByName("DB 중복 이름");
+        var request = update ? put(ADMIN_BRAND, target.getId()) : post(ADMIN_BRANDS);
+        mockMvc.perform(request.with(admin()).with(csrf())
+                .contentType(MediaType.APPLICATION_JSON).content("{\"name\":\"DB 중복 이름\"}"))
+            .andExpect(failure(HttpStatus.CONFLICT, "DUPLICATE_BRAND_NAME"));
     }
 }

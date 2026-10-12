@@ -8,6 +8,8 @@ import com.loopers.testcontainers.MySqlTestContainersConfig;
 import com.loopers.user.domain.User;
 import com.loopers.utils.DatabaseCleanUp;
 import jakarta.persistence.EntityManager;
+import com.loopers.product.infrastructure.ProductRepositoryAdapter;
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -40,6 +42,7 @@ import static com.loopers.support.http.ApiHttp.ids;
 import static com.loopers.support.http.ApiHttp.isNullOrAbsent;
 import static com.loopers.support.http.ApiHttp.success;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.doReturn;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
@@ -73,6 +76,9 @@ class ProductHttpTest {
 
     @Autowired
     private DatabaseCleanUp databaseCleanUp;
+
+    @MockitoSpyBean
+    private ProductRepositoryAdapter repositoryAdapter;
 
     private CommerceFixture fixture;
 
@@ -1135,5 +1141,21 @@ class ProductHttpTest {
             () -> assertThat(found.path("price").asLong()).isEqualTo(price),
             () -> assertThat(found.path("stock").asInt(-1)).isEqualTo(stock)
         );
+    }
+
+    @DisplayName("서비스 사전 검사 이후 DB에서 발견한 상품명 중복도 409로 응답한다")
+    @ParameterizedTest
+    @ValueSource(booleans = {false, true})
+    void returnsConflictForDatabaseDuplicate(boolean update) throws Exception {
+        Brand brand = fixture.brand("브랜드");
+        fixture.product(brand, "DB 중복 이름", 100L, 0);
+        Product target = fixture.product(brand, "변경 대상", 100L, 0);
+        doReturn(java.util.List.of()).when(repositoryAdapter)
+            .findAllByBrandIdAndName(brand.getId(), "DB 중복 이름");
+        var request = update ? put(ADMIN_PRODUCT, target.getId()) : post(ADMIN_PRODUCTS);
+        mockMvc.perform(request.with(admin()).with(csrf())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"brandId\":" + brand.getId() + ",\"name\":\"DB 중복 이름\",\"price\":100}"))
+            .andExpect(failure(HttpStatus.CONFLICT, "DUPLICATE_PRODUCT_NAME"));
     }
 }

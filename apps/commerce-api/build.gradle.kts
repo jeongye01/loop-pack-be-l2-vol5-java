@@ -1,5 +1,16 @@
+import org.springframework.boot.gradle.tasks.bundling.BootJar
+
 plugins {
     checkstyle
+}
+
+// Only the current bootJar enters the Docker build context, even if old JARs remain in libs/.
+tasks.register<Sync>("prepareDocker") {
+    group = "build"
+    description = "Prepare the executable JAR for the commerce-api Docker image"
+    from(tasks.named<BootJar>("bootJar").flatMap { it.archiveFile })
+    into(layout.buildDirectory.dir("docker"))
+    rename { "app.jar" }
 }
 
 checkstyle {

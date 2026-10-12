@@ -1,0 +1,34 @@
+[
+  {
+    "label": "01-5rps",
+    "startedAt": "2026-10-12T15:51:27.436849+00:00",
+    "targetRps": 5,
+    "durationSeconds": 30,
+    "vus": 100,
+    "exitCode": 0,
+    "completed": 150,
+    "rpsIncludingDrain": 4.954858922944479,
+    "dropped": 0,
+    "failureRate": 0,
+    "invalidResponseRate": 0,
+    "p50ms": 610.573,
+    "p95ms": 690.0983999999999,
+    "p99ms": 780.7160299999999
+  },
+  {
+    "label": "02-6rps",
+    "startedAt": "2026-10-12T15:52:06.701978+00:00",
+    "targetRps": 6,
+    "durationSeconds": 30,
+    "vus": 100,
+    "exitCode": 0,
+    "completed": 181,
+    "rpsIncludingDrain": 5.648773495230718,
+    "dropped": 0,
+    "failureRate": 0,
+    "invalidResponseRate": 0,
+    "p50ms": 940.251,
+    "p95ms": 3440.433,
+    "p99ms": 3636.1418
+  }
+]

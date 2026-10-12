@@ -1,0 +1,16 @@
+{
+  "label": "01-8rps",
+  "startedAt": "2026-10-12T15:53:37.562812+00:00",
+  "targetRps": 8,
+  "durationSeconds": 20,
+  "vus": 100,
+  "exitCode": 0,
+  "completed": 161,
+  "rpsIncludingDrain": 6.50431650278819,
+  "dropped": 0,
+  "failureRate": 0.8074534161490683,
+  "invalidResponseRate": 0.8074534161490683,
+  "p50ms": 4999.851,
+  "p95ms": 5000.846,
+  "p99ms": 5002.186
+}

@@ -1,0 +1,50 @@
+[
+  {
+    "label": "01-1rps",
+    "startedAt": "2026-10-12T17:31:05.555879+00:00",
+    "targetRps": 1,
+    "durationSeconds": 30,
+    "vus": 100,
+    "exitCode": 0,
+    "completed": 31,
+    "rpsIncludingDrain": 0.9991272784372411,
+    "dropped": 0,
+    "failureRate": 0,
+    "invalidResponseRate": 0,
+    "p50ms": 798.525,
+    "p95ms": 838.8655,
+    "p99ms": 905.1409
+  },
+  {
+    "label": "02-2rps",
+    "startedAt": "2026-10-12T17:31:59.526115+00:00",
+    "targetRps": 2,
+    "durationSeconds": 30,
+    "vus": 100,
+    "exitCode": 0,
+    "completed": 61,
+    "rpsIncludingDrain": 1.9571711279526935,
+    "dropped": 0,
+    "failureRate": 0,
+    "invalidResponseRate": 0,
+    "p50ms": 1271.416,
+    "p95ms": 1398.434,
+    "p99ms": 1451.8772
+  },
+  {
+    "label": "03-3rps",
+    "startedAt": "2026-10-12T17:32:52.497672+00:00",
+    "targetRps": 3,
+    "durationSeconds": 30,
+    "vus": 100,
+    "exitCode": 0,
+    "completed": 91,
+    "rpsIncludingDrain": 2.5996220149590252,
+    "dropped": 0,
+    "failureRate": 0.9010989010989011,
+    "invalidResponseRate": 0.9010989010989011,
+    "p50ms": 4790.03,
+    "p95ms": 4805.231,
+    "p99ms": 4806.1218
+  }
+]
