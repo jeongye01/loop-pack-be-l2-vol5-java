@@ -12,8 +12,8 @@ from collections import Counter
 from datetime import datetime, timezone
 
 HERE = Path(__file__).resolve().parent
-ROOT = HERE.parents[2]
-DATA = HERE.parent / 'seed-data/uniform-10k-v1'
+ROOT = HERE.parents[3]
+DATA = ROOT / 'docs/week4/seed-data/uniform-10k-v1'
 URL = 'http://127.0.0.1:18080/api/v1/products?brandId=7&sort=price_asc&page=0&size=20'
 
 

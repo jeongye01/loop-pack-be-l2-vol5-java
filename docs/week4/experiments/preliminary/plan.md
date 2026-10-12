@@ -1,9 +1,11 @@
 # 상품 목록 조회 성능 실험 계획
 
+> 이 문서는 초기 검토 자료다. 현재 실행 절차는 [week4 공통 프로토콜](../protocol.md), 첫 실험은 [baseline 계획](../01-baseline/plan.md), 실제 장비는 [EC2 사양](../environments/ec2.md)을 따른다. 아래의 기존 부하 후보를 확정값으로 사용하지 않으며, 공통 부하 레벨은 baseline 완료 후 선정한다.
+
 - 작성일: 2026-10-13
 - 상태: 검토 초안. 아래 부하·수집 설정은 제안이며 아직 적용하지 않았다.
 - 목적: 같은 상품 목록을 반환하면서 SQL·인덱스 개선과 캐시가 줄이는 비용을 확인한다.
-- 근거: [week4 과제](../../../.handoff/week4-과제.md), [예비 측정](report.md), [week3 프로토콜](../../week3/experiments/protocol.md).
+- 근거: [week4 과제](../../../../.handoff/week4-%EA%B3%BC%EC%A0%9C.md), [예비 측정](report.md), [week3 프로토콜](../../../week3/experiments/protocol.md).
 
 ## 1. 측정할 요청과 비교 순서
 
@@ -95,7 +97,7 @@ EC2 인스턴스 종류·힙·컨테이너 제한은 예산과 장비 선정 뒤
 | `environment.json` | 시작/종료의 호스트·OS·Java·CPU·메모리·swap·프로세스·Docker/DB 자원·MySQL·k6·시계열 | 사양과 실행 중 자원 압박을 함께 보존 |
 | 별도 로그·집계 | Tomcat access log, Hikari/Tomcat 사용량, DB 행 잠금 대기, 요청 시작·완료 건수, 정합성 검증 | Trace와 requestId/시간 구간으로 연결. 시스템 전체 지표를 개별 요청 값으로 오인하지 않음 |
 
-확인 자료: [초기 Trace 원본](../../week3/experiments/stock-contention/09-pessimistic-write-pool200/results/measure-S1-100rps-01/traces.json), 후반 로컬 산출물 `build/stock-contention-24-timing/warmup/results/*/traces.json` 및 `environment.json`. build와 week3 실험 파일 일부는 Git 추적 밖이므로 재현에 필요한 계측은 별도로 보존해야 한다.
+확인 자료: [초기 Trace 원본](../../../week3/experiments/stock-contention/09-pessimistic-write-pool200/results/measure-S1-100rps-01/traces.json), 후반 로컬 산출물 `build/stock-contention-24-timing/warmup/results/*/traces.json` 및 `environment.json`. build와 week3 실험 파일 일부는 Git 추적 밖이므로 재현에 필요한 계측은 별도로 보존해야 한다.
 
 기본 `startNs/endNs`는 이름과 달리 원본의 시간 해상도가 **1ms**였다. 후반 JVM 내부 단조 시각과 같은 시계로 취급하지 않는다.
 
@@ -159,9 +161,9 @@ Run별 `environment.json`, `result.json`, `traces.jsonl`, 서버 로그, SQL 계
 
 | 대상 | 변경 책임 | 확인 방법 |
 | --- | --- | --- |
-| `docs/week4/load-test/products.js` | 요청 ID·클라이언트 구간·오류/불일치 분리 | 단일 요청·잘못된 응답·timeout에서 기록 확인 |
-| `docs/week4/load-test/probe.py` | 고정 스펙·반복·회복 조건·원본 수집·실패 Run 보존 | 작은 Run으로 준비/측정 분리·중단·집계 확인 |
-| 신규 `docs/week4/load-test/support/` 계측 설정/코드 | 서버 요청·JDBC·커넥션 연결, 운영 경로 영향 제한 | 구현 방식 확정 후 파일명·계측 경계와 관련 테스트 먼저 제안 |
+| `docs/week4/experiments/preliminary/products.js` | 요청 ID·클라이언트 구간·오류/불일치 분리 | 단일 요청·잘못된 응답·timeout에서 기록 확인 |
+| `docs/week4/experiments/preliminary/probe.py` | 고정 스펙·반복·회복 조건·원본 수집·실패 Run 보존 | 작은 Run으로 준비/측정 분리·중단·집계 확인 |
+| 신규 `docs/week4/experiments/preliminary/support/` 계측 설정/코드 | 서버 요청·JDBC·커넥션 연결, 운영 경로 영향 제한 | 구현 방식 확정 후 파일명·계측 경계와 관련 테스트 먼저 제안 |
 | 실험 전용 monitoring/Compose 설정 | 수집 간격·자원 설정·실제 endpoint 고정 | 적용 설정과 수집값 대조 |
 
 이번 변경은 이 계획 문서만 추가한다. 실행 코드 변경 시 관련 테스트와 기존 lint·ArchUnit을 확인하고, 과제 완료 시 상품·브랜드·좋아요·주문 회귀를 함께 실행한다.

@@ -2,6 +2,8 @@
 
 작성일: 2026-10-13
 
+이 폴더는 기존 로컬·시드니 예비 측정의 보관본이다. 서울 정식 실험은 [experiments](../README.md)에서 관리한다. 아래 주소·도구·중단 조건은 당시 기록이며 서울 실행에 사용하지 않는다.
+
 본 실험의 부하 단계를 정하기 위한 짧은 로컬 탐색이다. 애플리케이션·MySQL·k6가 같은 Mac 자원을 공유한다. 결과는 운영 환경의 최대 처리량을 뜻하지 않는다.
 
 ## 고정 요청
@@ -21,7 +23,7 @@ X-USER-ID: 1
 ./gradlew :apps:commerce-api:bootRun \
   --args='--spring.profiles.active=local,perf --server.port=18080 --management.server.port=18081 --spring.jpa.hibernate.ddl-auto=none --spring.jpa.show-sql=false'
 
-python3 docs/week4/load-test/probe.py --rates 1,2,3,5 --duration 30 --warmup 15 --vus 100
+python3 docs/week4/experiments/preliminary/probe.py --rates 1,2,3,5 --duration 30 --warmup 15 --vus 100
 ```
 
 - week3의 k6 `constant-arrival-rate`, 준비 실행과 측정 분리, JSON 원본 저장 방식을 재사용했다.
@@ -37,7 +39,7 @@ python3 docs/week4/load-test/probe.py --rates 1,2,3,5 --duration 30 --warmup 15 
 ### EC2 예비 탐색
 
 ```bash
-python3 docs/week4/load-test/ec2_probe.py
+python3 docs/week4/experiments/preliminary/ec2_probe.py
 ```
 
 현재 배포한 앱 `3.106.241.33`과 DB `16.176.204.86` 전용 실행 파일이다. SSH 키 경로는 파일 상단의 `KEY`를 사용한다. `products.js`의 동일 요청·5초 timeout·응답 검증과 `probe.py`의 CSV 기준 검증을 재사용한다. DB 초기화나 인덱스 변경은 하지 않는다.

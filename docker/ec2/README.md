@@ -1,6 +1,8 @@
-# Week4 EC2 deployment
+# Week4 EC2 deployment · 시드니 기록
 
 작성일: 2026-10-13
+
+서울의 현재 배포는 [seoul.md](seoul.md)를 참고한다. 아래는 기존 시드니 배포 기록이다.
 
 [시스템 구성도](../../docs/week4/system-architecture.md)
 
@@ -13,7 +15,7 @@
 - 앱 JAR 전송 및 EC2에서 amd64 이미지 빌드 완료. Compose 설정 검증 완료.
 - 앱→DB의 3306/6379/6380 연결 확인. 앱 컨테이너 healthy, Actuator health UP·Prometheus HTTP 200.
 - 앱 서버 내부에서 상품 목록 API 호출 성공. 기존 기준 응답과 모든 데이터 필드·상품 순서 일치 확인.
-- 로컬→퍼블릭 IP:8080의 HTTP 200·기준 응답 일치 확인. EC2 부하 탐색 결과는 `docs/week4/load-test/results/ec2-*`에 별도 기록한다.
+- 로컬→퍼블릭 IP:8080의 HTTP 200·기준 응답 일치 확인. EC2 부하 탐색 결과는 `docs/week4/experiments/preliminary/results/ec2-*`에 별도 기록한다.
 
 ## 실제 환경
 

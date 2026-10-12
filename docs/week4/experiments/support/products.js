@@ -1,0 +1,55 @@
+import http from 'k6/http';
+import exec from 'k6/execution';
+import { Trend } from 'k6/metrics';
+
+const config = JSON.parse(open(__ENV.CONFIG_FILE));
+const expected = JSON.parse(open(__ENV.EXPECTED_FILE));
+const latency = new Trend('client_latency_ms', true);
+function canonical(value) {
+  if (Array.isArray(value)) return value.map(canonical);
+  if (value !== null && typeof value === 'object') {
+    return Object.fromEntries(Object.keys(value).sort().map(k => [k, canonical(value[k])]));
+  }
+  return value;
+}
+const expectedData = JSON.stringify(canonical(expected.data));
+export const options = {
+  scenarios: { products: {
+    executor: 'constant-arrival-rate', rate: Math.round(config.rps * 100), timeUnit: '100s',
+    duration: `${config.durationSeconds}s`, preAllocatedVUs: config.vus, maxVUs: config.vus,
+    gracefulStop: `${config.gracefulStopSeconds}s`,
+  } },
+  maxRedirects: 0, summaryTrendStats: ['avg', 'min', 'max', 'p(50)', 'p(95)', 'p(99)'],
+};
+function emit(event) { console.log('TRACE_JSON ' + JSON.stringify(event)); }
+export default function () {
+  const requestId = `${config.runId}-${exec.scenario.iterationInTest}`;
+  emit({event:'start', runId:config.runId, requestId, at:Date.now()});
+  const startedAtMs = Date.now();
+  const response = http.get(config.url, {
+    headers: {'X-USER-ID': String(config.userId), 'X-Run-ID': config.runId, 'X-Request-ID': requestId},
+    timeout: `${config.timeoutSeconds}s`, tags: {name:'product.list'},
+  });
+  const finishedAtMs = Date.now();
+  const latencyMs = finishedAtMs - startedAtMs;
+  let outcome, difference = null;
+  if (response.status === 0) outcome = response.error_code === 1050 ? 'timeout' : 'transport_error';
+  else if (response.status !== 200) outcome = 'http_error';
+  else {
+    try {
+      const body = response.json();
+      outcome = body.meta?.result === 'SUCCESS' && JSON.stringify(canonical(body.data)) === expectedData
+        ? 'success' : 'mismatch';
+      if (outcome === 'mismatch') difference = {expected: expected.data, actual: body};
+    } catch (_) { outcome = 'mismatch'; difference = {error:'invalid JSON', body:response.body}; }
+  }
+  latency.add(latencyMs, {outcome});
+  emit({event:'end', runId:config.runId, requestId, operation:'product.list',
+    input:config.input, startedAtMs, finishedAtMs, latencyMs, httpStatus:response.status || null,
+    outcome, errorCode:response.error_code || null, error:response.error || null,
+    timings:response.timings, difference});
+  if (outcome === 'mismatch') exec.test.abort('Product response differs from expected CSV');
+}
+export function handleSummary(data) {
+  return { [__ENV.SUMMARY_FILE]: JSON.stringify(data, null, 2) };
+}

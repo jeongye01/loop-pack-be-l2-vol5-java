@@ -45,7 +45,7 @@
 - 6 RPS는 p95 약 3.44~4.86초로 증가했다. 8 RPS는 요청 약 80.75%가 실패했다.
 - 최초 6 RPS 실행의 MySQL CPU 샘플 평균은 약 759%, 최대 약 883%였다. Docker CPU는 여러 코어 합산 수치이며 호스트 전체 사용률과 동일하지 않다. 같은 실행의 k6 프로세스 CPU 샘플 최대는 6.4%였다.
 - 초기 10 RPS 서버 로그에서 Hikari `total=40, active=40, idle=0` 및 연결 획득 timeout을 확인했다. 풀 증설이 해결책이라는 의미는 아니다.
-- 코드상 상품 20개에 각각 `countByProductId`를 호출한다. [ProductUseCase](../../../apps/commerce-api/src/main/java/com/loopers/product/application/ProductUseCase.java)의 목록 조회 경로다.
+- 코드상 상품 20개에 각각 `countByProductId`를 호출한다. [ProductUseCase](../../../../apps/commerce-api/src/main/java/com/loopers/product/application/ProductUseCase.java)의 목록 조회 경로다.
 - 실제 `product_like` 인덱스는 PK와 `(user_id, product_id)` 유일 인덱스다. 상품별 COUNT에 대응하는 SELECT의 EXPLAIN은 `Using index for skip scan`을 표시했다. [읽기 전용 확인 결과](results/query-evidence.txt).
 - 좋아요 집계 반복과 인덱스 접근 비용이 다음 분석 대상이다. 이번에는 요청당 SQL 수 전체를 계측하거나 실제 API SQL의 EXPLAIN ANALYZE까지 수행하지 않았으므로 원인별 비용을 확정하지 않는다.
 

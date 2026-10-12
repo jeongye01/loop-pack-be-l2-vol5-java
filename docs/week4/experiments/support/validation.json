@@ -1,0 +1,37 @@
+{
+  "checkedAt": "2026-10-12T21:34:31.144431+00:00",
+  "java": {
+    "command": "./gradlew :apps:commerce-api:check",
+    "tests": 370,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "result": "BUILD SUCCESSFUL",
+    "includes": [
+      "Checkstyle",
+      "ArchUnit",
+      "ExperimentTraceTest",
+      "ExperimentHttpTest"
+    ]
+  },
+  "aggregation": {
+    "command": "python3 -m unittest discover -s docs/week4/experiments/support -p 'test_*.py' -v",
+    "tests": 4,
+    "result": "passed"
+  },
+  "k6LocalSmoke": {
+    "method": "Temporary local HTTP server; products.js with --log-format raw; one-second runs",
+    "outcomes": [
+      "success",
+      "mismatch",
+      "http_error",
+      "timeout"
+    ],
+    "checks": [
+      "client JSON events parse",
+      "outcome matches each fixture",
+      "mismatch aborts k6"
+    ],
+    "result": "passed"
+  }
+}
