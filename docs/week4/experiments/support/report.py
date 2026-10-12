@@ -95,13 +95,13 @@ def write_report(experiment):
         c, q, m = r['config'], r.get('requests', {}), r.get('metrics', {})
         def number(value): return '—' if value is None else f'{value:.2f}'
         latency = m.get('latencyMs', {})
-        rows.append(f"| [{r['runId']}](results/{r['runId']}/result.json) | {c['phase']} | {c['rps']} | "
+        rows.append(f"| [{r['runId']}](results/{r['runId']}/result.json) | {c['phase']} | {c['rps']} | {c.get('timeoutSeconds', '—')} | "
                     f"{q.get('completed','—')} | {q.get('byOutcome',{}).get('success',0)} | {q.get('dropped','—')} | "
                     f"{number(m.get('successRps'))} | {number(latency.get('p95'))} | "
                     f"{number(m.get('serverDurationMs',{}).get('p95'))} | {r['status']} |")
     generated = '\n'.join(['<!-- GENERATED START -->',
-        '| Run | 구분 | 목표 RPS | 완료 | 성공 | 미시작 | 성공 RPS | 전체 latency p95(ms) | 서버 p95(ms) | 상태 |',
-        '| --- | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | --- |', *rows,
+        '| Run | 구분 | 목표 RPS | timeout(초) | 완료 | 성공 | 미시작 | 성공 RPS | 전체 latency p95(ms) | 서버 p95(ms) | 상태 |',
+        '| --- | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | --- |', *rows,
         '<!-- GENERATED END -->'])
     path = experiment/'report.md'
     if path.exists() and '<!-- GENERATED START -->' in path.read_text():

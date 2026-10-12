@@ -1,0 +1,303 @@
+[
+  {
+    "runId": "20261012T213720-diagnostic-1p0-7d62bf",
+    "phase": "diagnostic",
+    "rps": 1.0,
+    "queries": [
+      {
+        "sql": "select count(l1_0.id) from product_like l1_0 where l1_0.product_id=?",
+        "callsPerRequest": 20.0,
+        "meanTotalMsPerRequest": 639.4902166666667,
+        "shareOfSqlTimePercent": 96.1845828923989
+      },
+      {
+        "sql": "select s1_0.id,s1_0.created_at,s1_0.deleted_at,s1_0.product_id,s1_0.quantity,s1_0.updated_at from stock s1_0 where s1_0.product_id=?",
+        "callsPerRequest": 20.0,
+        "meanTotalMsPerRequest": 21.383790333333334,
+        "shareOfSqlTimePercent": 3.2162977638519177
+      },
+      {
+        "sql": "select count(p1_0.id) from product p1_0 where p1_0.deleted_at is null and (? is null or p1_0.brand_id=?)",
+        "callsPerRequest": 1.0,
+        "meanTotalMsPerRequest": 1.6219413333333332,
+        "shareOfSqlTimePercent": 0.24395330304783344
+      },
+      {
+        "sql": "select p1_0.id,p1_0.active_name_key,p1_0.brand_id,p1_0.created_at,p1_0.deleted_at,p1_0.name,p1_0.price,p1_0.updated_at from product p1_0 where p1_0.deleted_at is null and (? is null or p1_0.brand_id=?) order by p1_0.price,p1_0.id limit ?",
+        "callsPerRequest": 1.0,
+        "meanTotalMsPerRequest": 1.1175046666666666,
+        "shareOfSqlTimePercent": 0.1680818837290671
+      },
+      {
+        "sql": "select u1_0.id,u1_0.created_at,u1_0.deleted_at,u1_0.updated_at from users u1_0 where u1_0.id=?",
+        "callsPerRequest": 1.0,
+        "meanTotalMsPerRequest": 0.7386486666666666,
+        "shareOfSqlTimePercent": 0.11109882849762635
+      },
+      {
+        "sql": "select b1_0.id,b1_0.active_name_key,b1_0.created_at,b1_0.deleted_at,b1_0.name,b1_0.updated_at from brand b1_0 where b1_0.id=?",
+        "callsPerRequest": 1.0,
+        "meanTotalMsPerRequest": 0.505194,
+        "shareOfSqlTimePercent": 0.07598532847465127
+      }
+    ]
+  },
+  {
+    "runId": "20261012T213848-warmup-1p0-1b1358",
+    "phase": "warmup",
+    "rps": 1.0,
+    "queries": [
+      {
+        "sql": "select count(l1_0.id) from product_like l1_0 where l1_0.product_id=?",
+        "callsPerRequest": 20.0,
+        "meanTotalMsPerRequest": 616.1731212666667,
+        "shareOfSqlTimePercent": 97.07993210990651
+      },
+      {
+        "sql": "select s1_0.id,s1_0.created_at,s1_0.deleted_at,s1_0.product_id,s1_0.quantity,s1_0.updated_at from stock s1_0 where s1_0.product_id=?",
+        "callsPerRequest": 20.0,
+        "meanTotalMsPerRequest": 15.679264233333333,
+        "shareOfSqlTimePercent": 2.4703153298479155
+      },
+      {
+        "sql": "select count(p1_0.id) from product p1_0 where p1_0.deleted_at is null and (? is null or p1_0.brand_id=?)",
+        "callsPerRequest": 1.0,
+        "meanTotalMsPerRequest": 1.0244642333333334,
+        "shareOfSqlTimePercent": 0.1614074272123036
+      },
+      {
+        "sql": "select p1_0.id,p1_0.active_name_key,p1_0.brand_id,p1_0.created_at,p1_0.deleted_at,p1_0.name,p1_0.price,p1_0.updated_at from product p1_0 where p1_0.deleted_at is null and (? is null or p1_0.brand_id=?) order by p1_0.price,p1_0.id limit ?",
+        "callsPerRequest": 1.0,
+        "meanTotalMsPerRequest": 0.7940472,
+        "shareOfSqlTimePercent": 0.12510452924268364
+      },
+      {
+        "sql": "select u1_0.id,u1_0.created_at,u1_0.deleted_at,u1_0.updated_at from users u1_0 where u1_0.id=?",
+        "callsPerRequest": 1.0,
+        "meanTotalMsPerRequest": 0.5918663666666667,
+        "shareOfSqlTimePercent": 0.09325032967361503
+      },
+      {
+        "sql": "select b1_0.id,b1_0.active_name_key,b1_0.created_at,b1_0.deleted_at,b1_0.name,b1_0.updated_at from brand b1_0 where b1_0.id=?",
+        "callsPerRequest": 1.0,
+        "meanTotalMsPerRequest": 0.4442331666666667,
+        "shareOfSqlTimePercent": 0.06999027411697939
+      }
+    ]
+  },
+  {
+    "runId": "20261012T213947-measure-1p0-7a739b",
+    "phase": "measure",
+    "rps": 1.0,
+    "queries": [
+      {
+        "sql": "select count(l1_0.id) from product_like l1_0 where l1_0.product_id=?",
+        "callsPerRequest": 20.0,
+        "meanTotalMsPerRequest": 614.0281110819673,
+        "shareOfSqlTimePercent": 97.46831346953073
+      },
+      {
+        "sql": "select s1_0.id,s1_0.created_at,s1_0.deleted_at,s1_0.product_id,s1_0.quantity,s1_0.updated_at from stock s1_0 where s1_0.product_id=?",
+        "callsPerRequest": 20.0,
+        "meanTotalMsPerRequest": 13.538886393442622,
+        "shareOfSqlTimePercent": 2.14910750698232
+      },
+      {
+        "sql": "select count(p1_0.id) from product p1_0 where p1_0.deleted_at is null and (? is null or p1_0.brand_id=?)",
+        "callsPerRequest": 1.0,
+        "meanTotalMsPerRequest": 0.9012218524590164,
+        "shareOfSqlTimePercent": 0.14305627451857925
+      },
+      {
+        "sql": "select p1_0.id,p1_0.active_name_key,p1_0.brand_id,p1_0.created_at,p1_0.deleted_at,p1_0.name,p1_0.price,p1_0.updated_at from product p1_0 where p1_0.deleted_at is null and (? is null or p1_0.brand_id=?) order by p1_0.price,p1_0.id limit ?",
+        "callsPerRequest": 1.0,
+        "meanTotalMsPerRequest": 0.6504796393442622,
+        "shareOfSqlTimePercent": 0.10325448012703503
+      },
+      {
+        "sql": "select u1_0.id,u1_0.created_at,u1_0.deleted_at,u1_0.updated_at from users u1_0 where u1_0.id=?",
+        "callsPerRequest": 1.0,
+        "meanTotalMsPerRequest": 0.5154444262295081,
+        "shareOfSqlTimePercent": 0.08181954214332963
+      },
+      {
+        "sql": "select b1_0.id,b1_0.active_name_key,b1_0.created_at,b1_0.deleted_at,b1_0.name,b1_0.updated_at from brand b1_0 where b1_0.id=?",
+        "callsPerRequest": 1.0,
+        "meanTotalMsPerRequest": 0.34301454098360656,
+        "shareOfSqlTimePercent": 0.05444872669801
+      }
+    ]
+  },
+  {
+    "runId": "20261012T214124-warmup-2p0-39cc6a",
+    "phase": "warmup",
+    "rps": 2.0,
+    "queries": [
+      {
+        "sql": "select count(l1_0.id) from product_like l1_0 where l1_0.product_id=?",
+        "callsPerRequest": 20.0,
+        "meanTotalMsPerRequest": 1854.20177485,
+        "shareOfSqlTimePercent": 98.62281765231064
+      },
+      {
+        "sql": "select s1_0.id,s1_0.created_at,s1_0.deleted_at,s1_0.product_id,s1_0.quantity,s1_0.updated_at from stock s1_0 where s1_0.product_id=?",
+        "callsPerRequest": 20.0,
+        "meanTotalMsPerRequest": 22.121900933333333,
+        "shareOfSqlTimePercent": 1.1766379643591431
+      },
+      {
+        "sql": "select count(p1_0.id) from product p1_0 where p1_0.deleted_at is null and (? is null or p1_0.brand_id=?)",
+        "callsPerRequest": 1.0,
+        "meanTotalMsPerRequest": 1.5637274499999998,
+        "shareOfSqlTimePercent": 0.08317282900440467
+      },
+      {
+        "sql": "select p1_0.id,p1_0.active_name_key,p1_0.brand_id,p1_0.created_at,p1_0.deleted_at,p1_0.name,p1_0.price,p1_0.updated_at from product p1_0 where p1_0.deleted_at is null and (? is null or p1_0.brand_id=?) order by p1_0.price,p1_0.id limit ?",
+        "callsPerRequest": 1.0,
+        "meanTotalMsPerRequest": 0.9983498333333334,
+        "shareOfSqlTimePercent": 0.05310105669271793
+      },
+      {
+        "sql": "select u1_0.id,u1_0.created_at,u1_0.deleted_at,u1_0.updated_at from users u1_0 where u1_0.id=?",
+        "callsPerRequest": 1.0,
+        "meanTotalMsPerRequest": 0.7444267166666666,
+        "shareOfSqlTimePercent": 0.03959518393798553
+      },
+      {
+        "sql": "select b1_0.id,b1_0.active_name_key,b1_0.created_at,b1_0.deleted_at,b1_0.name,b1_0.updated_at from brand b1_0 where b1_0.id=?",
+        "callsPerRequest": 1.0,
+        "meanTotalMsPerRequest": 0.46391911666666663,
+        "shareOfSqlTimePercent": 0.024675313695101488
+      }
+    ]
+  },
+  {
+    "runId": "20261012T214248-measure-2p0-b872ac",
+    "phase": "measure",
+    "rps": 2.0,
+    "queries": [
+      {
+        "sql": "select count(l1_0.id) from product_like l1_0 where l1_0.product_id=?",
+        "callsPerRequest": 20.0,
+        "meanTotalMsPerRequest": 4825.386621578513,
+        "shareOfSqlTimePercent": 98.3915364713966
+      },
+      {
+        "sql": "select s1_0.id,s1_0.created_at,s1_0.deleted_at,s1_0.product_id,s1_0.quantity,s1_0.updated_at from stock s1_0 where s1_0.product_id=?",
+        "callsPerRequest": 20.0,
+        "meanTotalMsPerRequest": 69.67788193388431,
+        "shareOfSqlTimePercent": 1.420759495392466
+      },
+      {
+        "sql": "select count(p1_0.id) from product p1_0 where p1_0.deleted_at is null and (? is null or p1_0.brand_id=?)",
+        "callsPerRequest": 1.0,
+        "meanTotalMsPerRequest": 3.7343264132231404,
+        "shareOfSqlTimePercent": 0.07614438848063732
+      },
+      {
+        "sql": "select u1_0.id,u1_0.created_at,u1_0.deleted_at,u1_0.updated_at from users u1_0 where u1_0.id=?",
+        "callsPerRequest": 1.0,
+        "meanTotalMsPerRequest": 3.34997,
+        "shareOfSqlTimePercent": 0.06830720961489728
+      },
+      {
+        "sql": "select p1_0.id,p1_0.active_name_key,p1_0.brand_id,p1_0.created_at,p1_0.deleted_at,p1_0.name,p1_0.price,p1_0.updated_at from product p1_0 where p1_0.deleted_at is null and (? is null or p1_0.brand_id=?) order by p1_0.price,p1_0.id limit ?",
+        "callsPerRequest": 1.0,
+        "meanTotalMsPerRequest": 1.213688561983471,
+        "shareOfSqlTimePercent": 0.024747588489033693
+      },
+      {
+        "sql": "select b1_0.id,b1_0.active_name_key,b1_0.created_at,b1_0.deleted_at,b1_0.name,b1_0.updated_at from brand b1_0 where b1_0.id=?",
+        "callsPerRequest": 1.0,
+        "meanTotalMsPerRequest": 0.9075276446280992,
+        "shareOfSqlTimePercent": 0.018504846626365482
+      }
+    ]
+  },
+  {
+    "runId": "20261012T214446-warmup-1p5-19b33c",
+    "phase": "warmup",
+    "rps": 1.5,
+    "queries": [
+      {
+        "sql": "select count(l1_0.id) from product_like l1_0 where l1_0.product_id=?",
+        "callsPerRequest": 20.0,
+        "meanTotalMsPerRequest": 598.4661161521739,
+        "shareOfSqlTimePercent": 97.87748901536088
+      },
+      {
+        "sql": "select s1_0.id,s1_0.created_at,s1_0.deleted_at,s1_0.product_id,s1_0.quantity,s1_0.updated_at from stock s1_0 where s1_0.product_id=?",
+        "callsPerRequest": 20.0,
+        "meanTotalMsPerRequest": 10.928464282608696,
+        "shareOfSqlTimePercent": 1.7873203075440496
+      },
+      {
+        "sql": "select count(p1_0.id) from product p1_0 where p1_0.deleted_at is null and (? is null or p1_0.brand_id=?)",
+        "callsPerRequest": 1.0,
+        "meanTotalMsPerRequest": 0.7399891956521738,
+        "shareOfSqlTimePercent": 0.12102319983394816
+      },
+      {
+        "sql": "select p1_0.id,p1_0.active_name_key,p1_0.brand_id,p1_0.created_at,p1_0.deleted_at,p1_0.name,p1_0.price,p1_0.updated_at from product p1_0 where p1_0.deleted_at is null and (? is null or p1_0.brand_id=?) order by p1_0.price,p1_0.id limit ?",
+        "callsPerRequest": 1.0,
+        "meanTotalMsPerRequest": 0.6001479130434783,
+        "shareOfSqlTimePercent": 0.0981525422762089
+      },
+      {
+        "sql": "select u1_0.id,u1_0.created_at,u1_0.deleted_at,u1_0.updated_at from users u1_0 where u1_0.id=?",
+        "callsPerRequest": 1.0,
+        "meanTotalMsPerRequest": 0.40526880434782614,
+        "shareOfSqlTimePercent": 0.06628059947797715
+      },
+      {
+        "sql": "select b1_0.id,b1_0.active_name_key,b1_0.created_at,b1_0.deleted_at,b1_0.name,b1_0.updated_at from brand b1_0 where b1_0.id=?",
+        "callsPerRequest": 1.0,
+        "meanTotalMsPerRequest": 0.30409765217391305,
+        "shareOfSqlTimePercent": 0.04973433550694278
+      }
+    ]
+  },
+  {
+    "runId": "20261012T214637-measure-1p5-8365e6",
+    "phase": "measure",
+    "rps": 1.5,
+    "queries": [
+      {
+        "sql": "select count(l1_0.id) from product_like l1_0 where l1_0.product_id=?",
+        "callsPerRequest": 20.0,
+        "meanTotalMsPerRequest": 612.6514469780219,
+        "shareOfSqlTimePercent": 97.91503961337855
+      },
+      {
+        "sql": "select s1_0.id,s1_0.created_at,s1_0.deleted_at,s1_0.product_id,s1_0.quantity,s1_0.updated_at from stock s1_0 where s1_0.product_id=?",
+        "callsPerRequest": 20.0,
+        "meanTotalMsPerRequest": 11.040676197802199,
+        "shareOfSqlTimePercent": 1.764540429307219
+      },
+      {
+        "sql": "select count(p1_0.id) from product p1_0 where p1_0.deleted_at is null and (? is null or p1_0.brand_id=?)",
+        "callsPerRequest": 1.0,
+        "meanTotalMsPerRequest": 0.8014344175824176,
+        "shareOfSqlTimePercent": 0.1280866684183682
+      },
+      {
+        "sql": "select p1_0.id,p1_0.active_name_key,p1_0.brand_id,p1_0.created_at,p1_0.deleted_at,p1_0.name,p1_0.price,p1_0.updated_at from product p1_0 where p1_0.deleted_at is null and (? is null or p1_0.brand_id=?) order by p1_0.price,p1_0.id limit ?",
+        "callsPerRequest": 1.0,
+        "meanTotalMsPerRequest": 0.5764271868131868,
+        "shareOfSqlTimePercent": 0.0921256141798785
+      },
+      {
+        "sql": "select u1_0.id,u1_0.created_at,u1_0.deleted_at,u1_0.updated_at from users u1_0 where u1_0.id=?",
+        "callsPerRequest": 1.0,
+        "meanTotalMsPerRequest": 0.39019876923076924,
+        "shareOfSqlTimePercent": 0.062362258564441005
+      },
+      {
+        "sql": "select b1_0.id,b1_0.active_name_key,b1_0.created_at,b1_0.deleted_at,b1_0.name,b1_0.updated_at from brand b1_0 where b1_0.id=?",
+        "callsPerRequest": 1.0,
+        "meanTotalMsPerRequest": 0.2367976263736264,
+        "shareOfSqlTimePercent": 0.03784541615154205
+      }
+    ]
+  }
+]
