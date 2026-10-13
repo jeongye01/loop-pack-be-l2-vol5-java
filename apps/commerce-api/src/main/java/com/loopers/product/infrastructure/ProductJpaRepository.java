@@ -70,6 +70,29 @@ interface ProductJpaRepository extends JpaRepository<Product, Long> {
         Pageable pageable
     );
 
+    interface RankedCandidate {
+        Long getProductId();
+        Long getEligibleProductId();
+    }
+
+    @Query(value = """
+        select ranked.product_id as productId, p.id as eligibleProductId
+        from (
+            select product_id, count(*) as like_count
+            from product_like
+            group by product_id
+            order by like_count desc, product_id asc
+            limit :limit offset :offset
+        ) ranked
+        left join product p force index (idx_product_likes_filter)
+          on p.id = ranked.product_id and p.deleted_at is null
+        order by ranked.like_count desc, ranked.product_id asc
+        """, nativeQuery = true)
+    List<RankedCandidate> findRankedCandidates(
+        @Param("offset") long offset,
+        @Param("limit") int limit
+    );
+
     @Query(value = """
         select p.* from (
             select candidate.id, l.like_count

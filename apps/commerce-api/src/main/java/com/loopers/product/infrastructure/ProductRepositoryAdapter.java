@@ -15,6 +15,9 @@ import org.springframework.stereotype.Component;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Component
 public class ProductRepositoryAdapter implements ProductRepository {
@@ -116,6 +119,9 @@ public class ProductRepositoryAdapter implements ProductRepository {
     }
 
     private List<Product> findCustomerProductsByLikes(Long brandId, Pageable pageable) {
+        if (brandId == null) {
+            return findUnfilteredProductsByLikes(pageable);
+        }
         List<Product> liked = jpaRepository.findLikedCustomerProducts(
             brandId, pageable.getOffset(), pageable.getPageSize()
         );
@@ -132,6 +138,52 @@ public class ProductRepositoryAdapter implements ProductRepository {
         }
         List<Product> result = new ArrayList<>(liked);
         result.addAll(jpaRepository.findUnlikedCustomerProducts(brandId, zeroOffset, remaining));
+        return result;
+    }
+
+    private List<Product> findUnfilteredProductsByLikes(Pageable pageable) {
+        int pageSize = pageable.getPageSize();
+        long remainingSkip = pageable.getOffset();
+        long candidateOffset = 0;
+        int batchSize = (int) Math.min(1024L, remainingSkip + pageSize);
+        List<Long> selectedIds = new ArrayList<>();
+
+        while (selectedIds.size() < pageSize) {
+            List<ProductJpaRepository.RankedCandidate> candidates =
+                jpaRepository.findRankedCandidates(candidateOffset, batchSize);
+            for (ProductJpaRepository.RankedCandidate candidate : candidates) {
+                if (candidate.getEligibleProductId() == null) {
+                    continue;
+                }
+                if (remainingSkip > 0) {
+                    remainingSkip--;
+                } else {
+                    selectedIds.add(candidate.getEligibleProductId());
+                    if (selectedIds.size() == pageSize) {
+                        break;
+                    }
+                }
+            }
+            candidateOffset += candidates.size();
+            if (selectedIds.size() == pageSize || candidates.size() < batchSize) {
+                break;
+            }
+            batchSize = Math.min(1024, batchSize * 2);
+        }
+
+        List<Product> result = new ArrayList<>();
+        if (!selectedIds.isEmpty()) {
+            Map<Long, Product> products = jpaRepository.findAllById(selectedIds).stream()
+                .collect(Collectors.toMap(Product::getId, Function.identity()));
+            for (Long id : selectedIds) {
+                result.add(products.get(id));
+            }
+        }
+        if (result.size() < pageSize) {
+            result.addAll(jpaRepository.findUnlikedCustomerProducts(
+                null, remainingSkip, pageSize - result.size()
+            ));
+        }
         return result;
     }
 
