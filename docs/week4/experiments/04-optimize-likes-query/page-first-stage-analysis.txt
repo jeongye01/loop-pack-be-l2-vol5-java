@@ -1,0 +1,56 @@
+RUN 1
+RUN 1
+EXPLAIN
+-> Nested loop inner join  (cost=14.5 rows=0) (actual time=881..881 rows=20 loops=1)
+    -> Sort: `page`.like_count DESC, `page`.id  (cost=2.6..2.6 rows=0) (actual time=881..881 rows=20 loops=1)
+        -> Table scan on page  (cost=2.5..2.5 rows=0) (actual time=881..881 rows=20 loops=1)
+            -> Materialize  (cost=0..0 rows=0) (actual time=881..881 rows=20 loops=1)
+                -> Limit: 20 row(s)  (actual time=881..881 rows=20 loops=1)
+                    -> Sort: l.like_count DESC, candidate.id, limit input to 20 row(s) per chunk  (actual time=881..881 rows=20 loops=1)
+                        -> Stream results  (cost=873907 rows=218628) (actual time=139..862 rows=210000 loops=1)
+                            -> Nested loop inner join  (cost=873907 rows=218628) (actual time=139..841 rows=210000 loops=1)
+                                -> Table scan on l  (cost=162103..164838 rows=218628) (actual time=139..170 rows=210000 loops=1)
+                                    -> Materialize  (cost=162103..162103 rows=218628) (actual time=139..139 rows=210000 loops=1)
+                                        -> Group aggregate: count(0)  (cost=140240 rows=218628) (actual time=0.248..125 rows=210000 loops=1)
+                                            -> Covering index scan on product_like using idx_product_like_product_id  (cost=71482 rows=687578) (actual time=0.244..80.4 rows=690000 loops=1)
+                                -> Filter: (candidate.deleted_at is null)  (cost=0.999 rows=1) (actual time=0.00271..0.00302 rows=1 loops=210000)
+                                    -> Covering index lookup on candidate using idx_product_likes_filter (deleted_at=NULL, id=l.product_id)  (cost=0.999 rows=1) (actual time=0.00258..0.00283 rows=1 loops=210000)
+    -> Single-row index lookup on p using PRIMARY (id=`page`.id)  (cost=0.602 rows=1) (actual time=0.0059..0.00592 rows=1 loops=20)
+
+RUN 2
+RUN 2
+EXPLAIN
+-> Nested loop inner join  (cost=14.5 rows=0) (actual time=873..873 rows=20 loops=1)
+    -> Sort: `page`.like_count DESC, `page`.id  (cost=2.6..2.6 rows=0) (actual time=873..873 rows=20 loops=1)
+        -> Table scan on page  (cost=2.5..2.5 rows=0) (actual time=873..873 rows=20 loops=1)
+            -> Materialize  (cost=0..0 rows=0) (actual time=873..873 rows=20 loops=1)
+                -> Limit: 20 row(s)  (actual time=873..873 rows=20 loops=1)
+                    -> Sort: l.like_count DESC, candidate.id, limit input to 20 row(s) per chunk  (actual time=873..873 rows=20 loops=1)
+                        -> Stream results  (cost=873907 rows=218628) (actual time=136..854 rows=210000 loops=1)
+                            -> Nested loop inner join  (cost=873907 rows=218628) (actual time=136..833 rows=210000 loops=1)
+                                -> Table scan on l  (cost=162103..164838 rows=218628) (actual time=135..164 rows=210000 loops=1)
+                                    -> Materialize  (cost=162103..162103 rows=218628) (actual time=135..135 rows=210000 loops=1)
+                                        -> Group aggregate: count(0)  (cost=140240 rows=218628) (actual time=0.252..122 rows=210000 loops=1)
+                                            -> Covering index scan on product_like using idx_product_like_product_id  (cost=71482 rows=687578) (actual time=0.248..78 rows=690000 loops=1)
+                                -> Filter: (candidate.deleted_at is null)  (cost=0.999 rows=1) (actual time=0.0027..0.00301 rows=1 loops=210000)
+                                    -> Covering index lookup on candidate using idx_product_likes_filter (deleted_at=NULL, id=l.product_id)  (cost=0.999 rows=1) (actual time=0.00258..0.00283 rows=1 loops=210000)
+    -> Single-row index lookup on p using PRIMARY (id=`page`.id)  (cost=0.602 rows=1) (actual time=0.006..0.00602 rows=1 loops=20)
+
+RUN 3
+RUN 3
+EXPLAIN
+-> Nested loop inner join  (cost=14.5 rows=0) (actual time=898..898 rows=20 loops=1)
+    -> Sort: `page`.like_count DESC, `page`.id  (cost=2.6..2.6 rows=0) (actual time=898..898 rows=20 loops=1)
+        -> Table scan on page  (cost=2.5..2.5 rows=0) (actual time=898..898 rows=20 loops=1)
+            -> Materialize  (cost=0..0 rows=0) (actual time=898..898 rows=20 loops=1)
+                -> Limit: 20 row(s)  (actual time=898..898 rows=20 loops=1)
+                    -> Sort: l.like_count DESC, candidate.id, limit input to 20 row(s) per chunk  (actual time=898..898 rows=20 loops=1)
+                        -> Stream results  (cost=873907 rows=218628) (actual time=132..878 rows=210000 loops=1)
+                            -> Nested loop inner join  (cost=873907 rows=218628) (actual time=132..856 rows=210000 loops=1)
+                                -> Table scan on l  (cost=162103..164838 rows=218628) (actual time=132..161 rows=210000 loops=1)
+                                    -> Materialize  (cost=162103..162103 rows=218628) (actual time=132..132 rows=210000 loops=1)
+                                        -> Group aggregate: count(0)  (cost=140240 rows=218628) (actual time=0.237..119 rows=210000 loops=1)
+                                            -> Covering index scan on product_like using idx_product_like_product_id  (cost=71482 rows=687578) (actual time=0.234..76 rows=690000 loops=1)
+                                -> Filter: (candidate.deleted_at is null)  (cost=0.999 rows=1) (actual time=0.0028..0.00313 rows=1 loops=210000)
+                                    -> Covering index lookup on candidate using idx_product_likes_filter (deleted_at=NULL, id=l.product_id)  (cost=0.999 rows=1) (actual time=0.00267..0.00294 rows=1 loops=210000)
+    -> Single-row index lookup on p using PRIMARY (id=`page`.id)  (cost=0.602 rows=1) (actual time=0.00595..0.00598 rows=1 loops=20)
