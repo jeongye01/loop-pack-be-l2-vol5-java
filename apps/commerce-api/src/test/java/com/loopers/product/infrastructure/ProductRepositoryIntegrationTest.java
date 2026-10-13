@@ -65,6 +65,24 @@ class ProductRepositoryIntegrationTest {
             .extracting(Product::getId).containsExactly(zero.getId());
         assertThat(productRepository.findCustomerProducts(1L, ProductSort.LIKES_DESC, 3, 1)).isEmpty();
 
+        Product nextZero = productRepository.save(new Product(1L, "Next zero", 100L));
+        flushAndClear();
+        assertThat(productRepository.findCustomerProducts(1L, ProductSort.LIKES_DESC, 0, 3))
+            .extracting(Product::getId).containsExactly(first.getId(), second.getId(), zero.getId());
+        assertThat(productRepository.findCustomerProducts(1L, ProductSort.LIKES_DESC, 1, 3))
+            .extracting(Product::getId).containsExactly(nextZero.getId());
+        assertThat(productRepository.findCustomerProducts(1L, ProductSort.LIKES_DESC, 1, 2))
+            .extracting(Product::getId).containsExactly(zero.getId(), nextZero.getId());
+        assertThat(productRepository.findCustomerProducts(1L, ProductSort.LIKES_DESC, 2, 2)).isEmpty();
+
+        entityManager.createQuery("delete from Like").executeUpdate();
+        flushAndClear();
+        assertThat(productRepository.findCustomerProducts(1L, ProductSort.LIKES_DESC, 0, 2))
+            .extracting(Product::getId).containsExactly(zero.getId(), first.getId());
+        assertThat(productRepository.findCustomerProducts(1L, ProductSort.LIKES_DESC, 1, 2))
+            .extracting(Product::getId).containsExactly(second.getId(), nextZero.getId());
+        assertThat(productRepository.findCustomerProducts(1L, ProductSort.LIKES_DESC, 2, 2)).isEmpty();
+        assertThat(productRepository.findCustomerProducts(99L, ProductSort.LIKES_DESC, 0, 2)).isEmpty();
     }
 
     @DisplayName("[R-ADMIN-12] 삭제된 상품은 고객 조회에서 제외한다.")

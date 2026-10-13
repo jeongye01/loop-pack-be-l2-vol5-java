@@ -12,6 +12,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -110,8 +111,26 @@ public class ProductRepositoryAdapter implements ProductRepository {
         return switch (sort) {
             case LATEST -> jpaRepository.findCustomerProductsByLatest(brandId, pageable);
             case PRICE_ASC -> jpaRepository.findCustomerProductsByPrice(brandId, pageable);
-            case LIKES_DESC -> jpaRepository.findCustomerProductsByLikes(brandId, pageable);
+            case LIKES_DESC -> findCustomerProductsByLikes(brandId, pageable);
         };
+    }
+
+    private List<Product> findCustomerProductsByLikes(Long brandId, Pageable pageable) {
+        List<Product> liked = jpaRepository.findLikedCustomerProducts(brandId, pageable);
+        int remaining = pageable.getPageSize() - liked.size();
+        if (remaining == 0) {
+            return liked;
+        }
+
+        // A partial positive page reaches the zero-like segment at its first row.
+        // An empty positive page needs the filtered positive count to translate the offset.
+        long zeroOffset = 0;
+        if (liked.isEmpty() && pageable.getOffset() > 0) {
+            zeroOffset = Math.max(0, pageable.getOffset() - jpaRepository.countLikedCustomerProducts(brandId));
+        }
+        List<Product> result = new ArrayList<>(liked);
+        result.addAll(jpaRepository.findUnlikedCustomerProducts(brandId, zeroOffset, remaining));
+        return result;
     }
 
     @Override

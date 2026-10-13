@@ -71,19 +71,40 @@ interface ProductJpaRepository extends JpaRepository<Product, Long> {
     );
 
     @Query(value = """
-        select p.* from product p
-        left join (
+        select p.* from (
             select product_id, count(*) as like_count
             from product_like
             group by product_id
-        ) l on l.product_id = p.id
+        ) l join product p on p.id = l.product_id
         where p.deleted_at is null
           and (:brandId is null or p.brand_id = :brandId)
-        order by coalesce(l.like_count, 0) desc, p.id asc
+        order by l.like_count desc, p.id asc
         """, nativeQuery = true)
-    List<Product> findCustomerProductsByLikes(
+    List<Product> findLikedCustomerProducts(
         @Param("brandId") Long brandId,
         Pageable pageable
     );
 
+    @Query(value = """
+        select count(*) from (
+            select product_id from product_like group by product_id
+        ) l join product p on p.id = l.product_id
+        where p.deleted_at is null
+          and (:brandId is null or p.brand_id = :brandId)
+        """, nativeQuery = true)
+    long countLikedCustomerProducts(@Param("brandId") Long brandId);
+
+    @Query(value = """
+        select p.* from product p
+        where p.deleted_at is null
+          and (:brandId is null or p.brand_id = :brandId)
+          and not exists (select 1 from product_like l where l.product_id = p.id)
+        order by p.id asc
+        limit :limit offset :offset
+        """, nativeQuery = true)
+    List<Product> findUnlikedCustomerProducts(
+        @Param("brandId") Long brandId,
+        @Param("offset") long offset,
+        @Param("limit") int limit
+    );
 }
