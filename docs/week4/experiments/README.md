@@ -4,6 +4,7 @@
 - [실험 계획서 템플릿](experiment-plan-template.md)
 - [서울 EC2 장비 사양](environments/ec2-seoul.md) · [시스템 구성도](../system-architecture.md)
 - [01. Baseline](01-baseline/plan.md): 현재 데이터 분포와 부하 한계 탐색
+- [02. Baseline 재측정](02-baseline/plan.md): 100만 상품 편중 데이터로 같은 실험 반복
 - [예비 측정 보관본](preliminary/README.md): 기존 로컬·시드니 결과
 
 ## 공통 인프라
