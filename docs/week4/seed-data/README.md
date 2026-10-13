@@ -4,7 +4,21 @@
 
 실제 상품 모델에 맞는 CSV를 생성·검증하고, 격리된 MySQL DB에 반복 적재한다. 모든 명령은 저장소 루트에서 실행한다. Java 21, 프로젝트 Gradle wrapper, Python 3.11 이상, MySQL 8 클라이언트, Docker가 필요하다.
 
-## 현재 데이터셋
+현재 서울 앱은 `skewed-1m-v1` 데이터셋의 `perf_skewed_1m_v1` DB를 사용한다. 상품 100만·브랜드 1천·사용자 24만·좋아요 69만·재고 100만 건이다. [분포와 적재 결과](million-product-plan.md)
+
+편중 버전 생성·검증 명령(출력 폴더가 없을 때):
+
+```bash
+./gradlew -I docs/week4/seed-data/scripts/seed.gradle :apps:commerce-api:generateCatalogCsv \
+  -PdatasetDir=docs/week4/seed-data/skewed-1m-v1 -PseedValue=42 -PdatasetProfile=skewed-1m
+python3 docs/week4/seed-data/scripts/validate.py docs/week4/seed-data/skewed-1m-v1 --write-manifest
+```
+
+100만 상품 버전의 CSV는 크기가 커서 Git에서 제외한다. 생성 코드·조건·체크섬은 추적하며 위 명령으로 동일하게 재생성할 수 있다.
+
+아래는 보존한 기존 `uniform-10k-v1`의 설명과 로컬 실행 예시다.
+
+## 기존 데이터셋
 
 원본 경로: `docs/week4/seed-data/uniform-10k-v1/`
 
@@ -93,7 +107,7 @@ docker compose -f docs/week4/seed-data/compose.yml exec -e MYSQL_PWD=root mysql 
 PERF_DB_NAME=perf_uniform_10k_v2 ./gradlew -I docs/week4/seed-data/scripts/seed.gradle :apps:commerce-api:initCatalogSchema
 ```
 
-향후 브랜드 편중 실험은 원본 묶음을 복사하고 `products.csv`의 `brand_id`만 변경한다. 현재 생성기·검증기는 균등 버전용이므로 편중 버전에서는 분포 설정·검증을 함께 확장한다. 원본 데이터셋은 유지한다.
+생성기·검증기는 균등 버전과 `skewed-1m` 편중 버전을 구분해 검증한다. 기존 데이터셋은 유지한다.
 
 ## 확인 결과
 

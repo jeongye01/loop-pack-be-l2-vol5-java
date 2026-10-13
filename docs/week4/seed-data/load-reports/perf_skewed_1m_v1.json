@@ -1,0 +1,31 @@
+{
+  "database": "perf_skewed_1m_v1",
+  "dataset": "skewed-1m-v1",
+  "verified": {
+    "brand": {
+      "rows": 1000,
+      "ordered_row_sha256": "b5049ba446f0658daaf3ce424b0ab4298ff27592091a55fde6c426e737518ec8",
+      "warnings": 0
+    },
+    "users": {
+      "rows": 240000,
+      "ordered_row_sha256": "fecc28b1f9dc6de0835aa5d74243c6bbc6fc3f8c682c0887d2c9f2f616e091d9",
+      "warnings": 0
+    },
+    "product": {
+      "rows": 1000000,
+      "ordered_row_sha256": "348994ad11908961ce5ece8a126e94f3c734d1cd2273b7271d485f7c01bc65e0",
+      "warnings": 0
+    },
+    "stock": {
+      "rows": 1000000,
+      "ordered_row_sha256": "dd2a03721bd2d46a329a87039c5be0b2acb36d7419a973ccdd3fd67d32e26dfe",
+      "warnings": 0
+    },
+    "product_like": {
+      "rows": 690000,
+      "ordered_row_sha256": "3fac32754b74e2f7ea4c3be9531da9009cb4e22d692443ef6bb1168f7b409878",
+      "warnings": 0
+    }
+  }
+}
