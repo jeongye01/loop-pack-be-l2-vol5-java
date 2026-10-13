@@ -7,6 +7,8 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 import java.util.Optional;
 
 @Component
@@ -51,6 +53,15 @@ public class LikeRepositoryAdapter implements LikeRepository {
     @Override
     public long countAllByUserId(Long userId) {
         return jpaRepository.countActiveProductLikesByUserId(userId);
+    }
+
+    @Override
+    public Map<Long, Long> countByProductIds(List<Long> productIds) {
+        if (productIds.isEmpty()) return Map.of();
+        return jpaRepository.countByProductIds(productIds).stream().collect(Collectors.toMap(
+            LikeJpaRepository.ProductLikeCount::getProductId,
+            LikeJpaRepository.ProductLikeCount::getLikeCount
+        ));
     }
 
     @Override

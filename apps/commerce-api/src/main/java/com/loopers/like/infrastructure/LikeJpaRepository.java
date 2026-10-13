@@ -15,6 +15,18 @@ interface LikeJpaRepository extends JpaRepository<Like, Long> {
 
     long countByProductId(Long productId);
 
+    interface ProductLikeCount {
+        Long getProductId();
+        Long getLikeCount();
+    }
+
+    @Query("""
+        select l.productId as productId, count(l) as likeCount
+        from Like l where l.productId in :productIds
+        group by l.productId
+        """)
+    List<ProductLikeCount> countByProductIds(@Param("productIds") List<Long> productIds);
+
     @Query("""
         select l from Like l, Product p
         where l.productId = p.id

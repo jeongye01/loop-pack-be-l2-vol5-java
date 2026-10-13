@@ -45,6 +45,11 @@ public class BrandRepositoryAdapter implements BrandRepository {
     }
 
     @Override
+    public List<Brand> findAllByIds(List<Long> ids) {
+        return ids.isEmpty() ? List.of() : jpaRepository.findAllById(ids);
+    }
+
+    @Override
     public Optional<Brand> findById(Long id) {
         return jpaRepository.findById(id);
     }

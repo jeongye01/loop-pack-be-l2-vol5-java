@@ -1,6 +1,7 @@
 package com.loopers.product.infrastructure;
 
 import com.loopers.product.domain.Product;
+import com.loopers.product.domain.RankedProduct;
 import com.loopers.product.domain.ProductRepository;
 import com.loopers.product.domain.ProductSort;
 import jakarta.persistence.EntityManager;
@@ -119,17 +120,21 @@ public class ProductRepositoryAdapter implements ProductRepository {
         return switch (sort) {
             case LATEST -> jpaRepository.findCustomerProductsByLatest(brandId, pageable);
             case PRICE_ASC -> jpaRepository.findCustomerProductsByPrice(brandId, pageable);
-            case LIKES_DESC -> findCustomerProductsByLikes(brandId, pageable);
+            case LIKES_DESC -> findCustomerProductsByLikes(brandId, offset, limit).stream()
+                .map(RankedProduct::product).toList();
         };
     }
 
-    private List<Product> findCustomerProductsByLikes(Long brandId, Pageable pageable) {
+    @Override
+    public List<RankedProduct> findCustomerProductsByLikes(Long brandId, long offset, int limit) {
+        Pageable pageable = new ProductWindow(offset, limit);
         if (brandId == null) {
             return findUnfilteredProductsByLikes(pageable);
         }
-        List<Product> liked = jpaRepository.findLikedCustomerProducts(
+        List<ProductJpaRepository.RankedCandidate> candidates = jpaRepository.findLikedCustomerProducts(
             brandId, pageable.getOffset(), pageable.getPageSize()
         );
+        List<RankedProduct> liked = loadRankedProducts(candidates);
         int remaining = pageable.getPageSize() - liked.size();
         if (remaining == 0) {
             return liked;
@@ -141,19 +146,20 @@ public class ProductRepositoryAdapter implements ProductRepository {
         if (liked.isEmpty() && pageable.getOffset() > 0) {
             zeroOffset = Math.max(0, pageable.getOffset() - jpaRepository.countLikedCustomerProducts(brandId));
         }
-        List<Product> result = new ArrayList<>(liked);
-        result.addAll(jpaRepository.findUnlikedCustomerProducts(brandId, zeroOffset, remaining));
+        List<RankedProduct> result = new ArrayList<>(liked);
+        result.addAll(jpaRepository.findUnlikedCustomerProducts(brandId, zeroOffset, remaining).stream()
+            .map(product -> new RankedProduct(product, 0)).toList());
         return result;
     }
 
-    private List<Product> findUnfilteredProductsByLikes(Pageable pageable) {
+    private List<RankedProduct> findUnfilteredProductsByLikes(Pageable pageable) {
         int pageSize = pageable.getPageSize();
         long remainingSkip = pageable.getOffset();
         long candidateOffset = 0;
         int batchSize = (int) Math.min(1024L, remainingSkip + pageSize);
-        List<Long> selectedIds = new ArrayList<>();
+        List<ProductJpaRepository.RankedCandidate> selected = new ArrayList<>();
 
-        while (selectedIds.size() < pageSize) {
+        while (selected.size() < pageSize) {
             List<ProductJpaRepository.RankedCandidate> candidates =
                 jpaRepository.findRankedCandidates(candidateOffset, batchSize);
             for (ProductJpaRepository.RankedCandidate candidate : candidates) {
@@ -163,33 +169,36 @@ public class ProductRepositoryAdapter implements ProductRepository {
                 if (remainingSkip > 0) {
                     remainingSkip--;
                 } else {
-                    selectedIds.add(candidate.getEligibleProductId());
-                    if (selectedIds.size() == pageSize) {
+                    selected.add(candidate);
+                    if (selected.size() == pageSize) {
                         break;
                     }
                 }
             }
             candidateOffset += candidates.size();
-            if (selectedIds.size() == pageSize || candidates.size() < batchSize) {
+            if (selected.size() == pageSize || candidates.size() < batchSize) {
                 break;
             }
             batchSize = Math.min(1024, batchSize * 2);
         }
 
-        List<Product> result = new ArrayList<>();
-        if (!selectedIds.isEmpty()) {
-            Map<Long, Product> products = jpaRepository.findAllById(selectedIds).stream()
-                .collect(Collectors.toMap(Product::getId, Function.identity()));
-            for (Long id : selectedIds) {
-                result.add(products.get(id));
-            }
-        }
+        List<RankedProduct> result = new ArrayList<>(loadRankedProducts(selected));
         if (result.size() < pageSize) {
             result.addAll(jpaRepository.findUnlikedCustomerProducts(
                 null, remainingSkip, pageSize - result.size()
-            ));
+            ).stream().map(product -> new RankedProduct(product, 0)).toList());
         }
         return result;
+    }
+
+    private List<RankedProduct> loadRankedProducts(List<ProductJpaRepository.RankedCandidate> candidates) {
+        if (candidates.isEmpty()) return List.of();
+        List<Long> ids = candidates.stream().map(ProductJpaRepository.RankedCandidate::getEligibleProductId).toList();
+        Map<Long, Product> products = jpaRepository.findAllById(ids).stream()
+            .collect(Collectors.toMap(Product::getId, Function.identity()));
+        return candidates.stream().map(candidate -> new RankedProduct(
+            products.get(candidate.getEligibleProductId()), candidate.getLikeCount()
+        )).toList();
     }
 
     @Override

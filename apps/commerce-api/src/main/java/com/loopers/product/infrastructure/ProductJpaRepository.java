@@ -66,10 +66,11 @@ interface ProductJpaRepository extends JpaRepository<Product, Long> {
     interface RankedCandidate {
         Long getProductId();
         Long getEligibleProductId();
+        Long getLikeCount();
     }
 
     @Query(value = """
-        select ranked.product_id as productId, p.id as eligibleProductId
+        select ranked.product_id as productId, p.id as eligibleProductId, ranked.like_count as likeCount
         from (
             select product_id, count(*) as like_count
             from product_like
@@ -87,7 +88,7 @@ interface ProductJpaRepository extends JpaRepository<Product, Long> {
     );
 
     @Query(value = """
-        select p.* from (
+        select page.id as productId, page.id as eligibleProductId, page.like_count as likeCount from (
             select candidate.id, l.like_count
             from (
                 select product_id, count(*) as like_count
@@ -98,10 +99,10 @@ interface ProductJpaRepository extends JpaRepository<Product, Long> {
               and (:brandId is null or candidate.brand_id = :brandId)
             order by l.like_count desc, candidate.id asc
             limit :limit offset :offset
-        ) page join product p on p.id = page.id
+        ) page
         order by page.like_count desc, page.id asc
         """, nativeQuery = true)
-    List<Product> findLikedCustomerProducts(
+    List<RankedCandidate> findLikedCustomerProducts(
         @Param("brandId") Long brandId,
         @Param("offset") long offset,
         @Param("limit") int limit

@@ -1,6 +1,7 @@
 package com.loopers.like.domain;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 public interface LikeRepository {
@@ -16,4 +17,6 @@ public interface LikeRepository {
     long countAllByUserId(Long userId);
 
     long countByProductId(Long productId);
+
+    Map<Long, Long> countByProductIds(List<Long> productIds);
 }

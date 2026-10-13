@@ -17,6 +17,7 @@ import org.apache.catalina.valves.ValveBase;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.aop.framework.ProxyFactory;
+import org.springframework.aop.support.AopUtils;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.boot.web.embedded.tomcat.TomcatServletWebServerFactory;
@@ -33,6 +34,23 @@ public class ExperimentConfiguration {
         return new BeanPostProcessor() {
             @Override
             public Object postProcessAfterInitialization(Object bean, String name) {
+                Class<?> targetClass = AopUtils.getTargetClass(bean);
+                String className = targetClass.getSimpleName();
+                boolean timedComponent = targetClass.getPackageName().startsWith("com.loopers.")
+                    && (className.endsWith("RepositoryAdapter") || className.equals("ProductUseCase")
+                        || className.equals("ProductV1Controller"));
+                if (timedComponent) {
+                    ProxyFactory component = new ProxyFactory(bean);
+                    component.setProxyTargetClass(true);
+                    component.addAdvice((MethodInterceptor) invocation -> {
+                        ExperimentTrace trace = ExperimentTrace.current();
+                        if (trace == null) return invocation.proceed();
+                        try (var ignored = trace.scope(className + "." + invocation.getMethod().getName())) {
+                            return invocation.proceed();
+                        }
+                    });
+                    return component.getProxy();
+                }
                 if (!(bean instanceof HikariDataSource)) return bean;
                 ProxyFactory factory = new ProxyFactory(bean);
                 factory.setProxyTargetClass(true);
@@ -40,7 +58,7 @@ public class ExperimentConfiguration {
                     if (!invocation.getMethod().getName().equals("getConnection")) return invocation.proceed();
                     ExperimentTrace trace = ExperimentTrace.current();
                     long start = System.nanoTime();
-                    try {
+                    try (var ignored = trace == null ? null : trace.scope("jdbc.acquire")) {
                         Connection connection = (Connection) invocation.proceed();
                         return trace == null ? connection : ExperimentTrace.wrap(connection);
                     } finally {
@@ -79,8 +97,12 @@ public class ExperimentConfiguration {
             request.setAttribute(ATTRIBUTE, trace);
             ExperimentTrace.begin(trace);
             active.incrementAndGet();
-            try {
-                getNext().invoke(request, response);
+            try (var ignored = trace.scope("request.pipeline")) {
+                try {
+                    getNext().invoke(request, response);
+                } finally {
+                    trace.finishResponse();
+                }
             } finally {
                 ExperimentTrace.clear();
                 active.decrementAndGet();
@@ -105,6 +127,7 @@ public class ExperimentConfiguration {
             event.put("serverDurationMs", time / 1_000_000.0);
             event.put("connectionWaitMs", trace.connectionWaitMs);
             event.put("queries", trace.queries);
+            event.put("stages", trace.timings());
             event.put("sqlTruncated", trace.truncated);
             event.put("async", request.isAsync());
             event.put("serverError", response.getCoyoteResponse().getErrorException() == null ? null
