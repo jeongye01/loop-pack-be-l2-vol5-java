@@ -5,12 +5,15 @@ import com.loopers.support.error.CoreException;
 import com.loopers.support.error.ErrorCode;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.Index;
 import jakarta.persistence.UniqueConstraint;
 import org.hibernate.annotations.Check;
 import jakarta.persistence.Table;
 
 @Entity
-@Table(name = "product", uniqueConstraints = @UniqueConstraint(
+@Table(name = "product",
+    indexes = @Index(name = "idx_product_likes_filter", columnList = "deleted_at,id,brand_id"),
+    uniqueConstraints = @UniqueConstraint(
     name = "uk_product_active_name", columnNames = {"brand_id", "active_name_key"}))
 @Check(name = "ck_product_name", constraints = "octet_length(convert(name using utf16)) between 2 and 200"
     + " and ascii(left(name, 1)) > 32 and ascii(right(name, 1)) > 32")

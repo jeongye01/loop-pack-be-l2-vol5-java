@@ -37,6 +37,18 @@ class ProductRepositoryIntegrationTest {
     @Autowired
     private EntityManager entityManager;
 
+    @DisplayName("좋아요순 후보 필터를 위한 커버링 인덱스가 생성된다")
+    @Test
+    void createsLikesFilterIndex() {
+        List<?> columns = entityManager.createNativeQuery("""
+            select COLUMN_NAME from information_schema.STATISTICS
+            where TABLE_SCHEMA = DATABASE() and TABLE_NAME = 'product'
+              and INDEX_NAME = 'idx_product_likes_filter'
+            order by SEQ_IN_INDEX
+            """).getResultList();
+        assertThat(columns).isEqualTo(List.of("deleted_at", "id", "brand_id"));
+    }
+
     @DisplayName("좋아요 집계 조인은 삭제·브랜드 필터, 0개·동점 정렬과 페이지 경계를 유지한다")
     @Test
     void preservesLikesQueryResultsAcrossFiltersAndPages() {

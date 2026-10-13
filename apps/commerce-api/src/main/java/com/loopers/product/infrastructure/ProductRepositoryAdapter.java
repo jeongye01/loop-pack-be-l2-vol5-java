@@ -116,7 +116,9 @@ public class ProductRepositoryAdapter implements ProductRepository {
     }
 
     private List<Product> findCustomerProductsByLikes(Long brandId, Pageable pageable) {
-        List<Product> liked = jpaRepository.findLikedCustomerProducts(brandId, pageable);
+        List<Product> liked = jpaRepository.findLikedCustomerProducts(
+            brandId, pageable.getOffset(), pageable.getPageSize()
+        );
         int remaining = pageable.getPageSize() - liked.size();
         if (remaining == 0) {
             return liked;
