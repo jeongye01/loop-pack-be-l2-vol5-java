@@ -18,6 +18,10 @@ public class CatalogSeed {
     private static final int PRODUCTS = 10_000;
 
     public static void main(String[] args) throws Exception {
+        if (args.length > 2 && args[2].equals("skewed-1m")) {
+            SkewedCatalogSeed.generate(Path.of(args[0]), Long.parseLong(args[1]));
+            return;
+        }
         Path directory = Path.of(args[0]);
         long seed = Long.parseLong(args[1]);
         if (Files.exists(directory)) throw new IllegalStateException("Output already exists: " + directory);
@@ -81,7 +85,7 @@ public class CatalogSeed {
         System.out.println("CSV generated: " + directory + ", likes=" + likeId);
     }
 
-    private static String name(String text, int id, int limit) {
+    static String name(String text, int id, int limit) {
         String suffix = "-" + id;
         String base = text.trim();
         int end = Math.min(base.length(), limit - suffix.length());
@@ -93,13 +97,13 @@ public class CatalogSeed {
         return name;
     }
 
-    private static BufferedWriter csv(Path dir, String name, String header) throws Exception {
+    static BufferedWriter csv(Path dir, String name, String header) throws Exception {
         BufferedWriter out = Files.newBufferedWriter(dir.resolve(name), StandardCharsets.UTF_8);
         out.write(header + "\n");
         return out;
     }
 
-    private static void row(BufferedWriter out, Object... values) throws Exception {
+    static void row(BufferedWriter out, Object... values) throws Exception {
         for (int i = 0; i < values.length; i++) {
             if (i > 0) out.write(',');
             if (values[i] == null) {

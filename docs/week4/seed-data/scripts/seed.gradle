@@ -14,7 +14,8 @@ allprojects {
                 mainClass = 'CatalogSeed'
                 workingDir rootProject.projectDir
                 args(p.findProperty('datasetDir') ?: 'docs/week4/seed-data/uniform-10k-v1',
-                     p.findProperty('seedValue') ?: '42')
+                     p.findProperty('seedValue') ?: '42',
+                     p.findProperty('datasetProfile') ?: 'uniform')
             }
             p.tasks.register('initCatalogSchema', JavaExec) {
                 dependsOn p.tasks.named('catalogSeedClasses')
