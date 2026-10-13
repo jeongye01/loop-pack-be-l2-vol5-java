@@ -1,0 +1,78 @@
+{
+  "start": {
+    "at": "2026-10-13T10:25:23.001265+00:00",
+    "app": {
+      "exitCode": 0,
+      "stdout": "Tue Oct 13 10:25:23 UTC 2026\nLinux ip-172-31-26-165 7.0.0-1006-aws #6-Ubuntu SMP PREEMPT Tue May 26 12:04:34 UTC 2026 x86_64 GNU/Linux\nPRETTY_NAME=\"Ubuntu 26.04 LTS\"\nNAME=\"Ubuntu\"\nVERSION_ID=\"26.04\"\nVERSION=\"26.04 LTS (Resolute Raccoon)\"\nVERSION_CODENAME=resolute\nID=ubuntu\nID_LIKE=debian\nHOME_URL=\"https://www.ubuntu.com/\"\nSUPPORT_URL=\"https://help.ubuntu.com/\"\nBUG_REPORT_URL=\"https://bugs.launchpad.net/ubuntu/\"\nPRIVACY_POLICY_URL=\"https://www.ubuntu.com/legal/terms-and-policies/privacy-policy\"\nUBUNTU_CODENAME=resolute\nLOGO=ubuntu-logo\n2\n               total        used        free      shared  buff/cache   available\nMem:      8153157632  1277427712  3564232704     3174400  3648925696  6875729920\nSwap:              0           0           0\nFilesystem       1B-blocks       Used   Available Use% Mounted on\n/dev/root      19594608640 4538081280 15039750144  24% /\n29.9.0\nweek4-commerce-api-1 commerce-api:week4-seoul-baseline\nsha256:5ea45fe95c010e99a30d67e06aa70d79bb936f62f79ece4cb556dd27972803d9 cpu=0 memory=0\n   size_t InitialHeapSize                          = 127926272                                 {product} {ergonomic}\n   size_t MaxHeapSize                              = 2038431744                                {product} {ergonomic}\n   size_t SoftMaxHeapSize                          = 2038431744                             {manageable} {ergonomic}\nopenjdk version \"21.0.12.1\" 2026-08-18 LTS\nOpenJDK Runtime Environment Temurin-21.0.12.1+1 (build 21.0.12.1+1-LTS)\nOpenJDK 64-Bit Server VM Temurin-21.0.12.1+1 (build 21.0.12.1+1-LTS, mixed mode, sharing)\n212d229e08028b7e8af9ee7f808610ecd8b3bddd14992148927e64d13d3b0ea3  /home/ubuntu/week4/app.jar\n",
+      "stderr": ""
+    },
+    "db": {
+      "exitCode": 0,
+      "stdout": "Tue Oct 13 10:25:23 UTC 2026\nLinux ip-172-31-26-139 7.0.0-1006-aws #6-Ubuntu SMP PREEMPT Tue May 26 12:04:34 UTC 2026 x86_64 GNU/Linux\nPRETTY_NAME=\"Ubuntu 26.04 LTS\"\nNAME=\"Ubuntu\"\nVERSION_ID=\"26.04\"\nVERSION=\"26.04 LTS (Resolute Raccoon)\"\nVERSION_CODENAME=resolute\nID=ubuntu\nID_LIKE=debian\nHOME_URL=\"https://www.ubuntu.com/\"\nSUPPORT_URL=\"https://help.ubuntu.com/\"\nBUG_REPORT_URL=\"https://bugs.launchpad.net/ubuntu/\"\nPRIVACY_POLICY_URL=\"https://www.ubuntu.com/legal/terms-and-policies/privacy-policy\"\nUBUNTU_CODENAME=resolute\nLOGO=ubuntu-logo\n2\n               total        used        free      shared  buff/cache   available\nMem:      8153141248  1324105728  1794494464     3350528  5372141568  6829035520\nSwap:              0           0           0\nFilesystem       1B-blocks       Used   Available Use% Mounted on\n/dev/root      19594608640 6159278080 13418553344  32% /\n29.9.0\nweek4-db-redis-replica-1 redis:7.0\nweek4-db-redis-master-1 redis:7.0\nweek4-db-mysql-1 mysql:8.0.46\n8.0.46\t134217728\t151\tREPEATABLE-READ\n1000\n240000\n1000000\n1000000\n690000\nproduct\tCREATE TABLE `product` (\\n  `brand_id` bigint NOT NULL,\\n  `created_at` datetime(6) NOT NULL,\\n  `deleted_at` datetime(6) DEFAULT NULL,\\n  `id` bigint NOT NULL AUTO_INCREMENT,\\n  `price` bigint NOT NULL,\\n  `updated_at` datetime(6) NOT NULL,\\n  `name` varchar(100) NOT NULL,\\n  `active_name_key` varbinary(400) GENERATED ALWAYS AS ((case when (`deleted_at` is null) then convert(`name` using binary) else NULL end)) VIRTUAL,\\n  PRIMARY KEY (`id`),\\n  UNIQUE KEY `uk_product_active_name` (`brand_id`,`active_name_key`),\\n  CONSTRAINT `ck_product_name` CHECK (((length(convert(`name` using utf16)) between 2 and 200) and (ascii(left(`name`,1)) > 32) and (ascii(right(`name`,1)) > 32))),\\n  CONSTRAINT `ck_product_price` CHECK ((`price` between 1 and 1000000000))\\n) ENGINE=InnoDB AUTO_INCREMENT=1000001 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci\nproduct_like\tCREATE TABLE `product_like` (\\n  `created_at` datetime(6) NOT NULL,\\n  `deleted_at` datetime(6) DEFAULT NULL,\\n  `id` bigint NOT NULL AUTO_INCREMENT,\\n  `product_id` bigint NOT NULL,\\n  `updated_at` datetime(6) NOT NULL,\\n  `user_id` bigint NOT NULL,\\n  PRIMARY KEY (`id`),\\n  UNIQUE KEY `uk_product_like_user_product` (`user_id`,`product_id`)\\n) ENGINE=InnoDB AUTO_INCREMENT=999494 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci\nproduct\t0\tPRIMARY\t1\tid\tA\t985809\tNULL\tNULL\t\tBTREE\t\t\tYES\tNULL\nproduct\t0\tuk_product_active_name\t1\tbrand_id\tA\t4285\tNULL\tNULL\t\tBTREE\t\t\tYES\tNULL\nproduct\t0\tuk_product_active_name\t2\tactive_name_key\tA\t977082\tNULL\tNULL\tYES\tBTREE\t\t\tYES\tNULL\nproduct_like\t0\tPRIMARY\t1\tid\tA\t687578\tNULL\tNULL\t\tBTREE\t\t\tYES\tNULL\nproduct_like\t0\tuk_product_like_user_product\t1\tuser_id\tA\t93870\tNULL\tNULL\t\tBTREE\t\t\tYES\tNULL\nproduct_like\t0\tuk_product_like_user_product\t2\tproduct_id\tA\t687578\tNULL\tNULL\t\tBTREE\t\t\tYES\tNULL\n",
+      "stderr": ""
+    },
+    "local": {
+      "exitCode": 0,
+      "stdout": "Mac14,2\n8\n17179869184\n",
+      "stderr": ""
+    },
+    "os": {
+      "exitCode": 0,
+      "stdout": "ProductName:\t\tmacOS\nProductVersion:\t\t15.6.1\nBuildVersion:\t\t24G90\n",
+      "stderr": ""
+    },
+    "k6": {
+      "exitCode": 0,
+      "stdout": "k6 v2.3.0 (commit/devel, go1.27.1, darwin/arm64)\n",
+      "stderr": ""
+    }
+  },
+  "gitStatus": {
+    "exitCode": 0,
+    "stdout": " D docs/week2/implementation-completion.md\n?? .playwright-mcp/\n?? docs/week4/experiments/02-baseline/report.md\n?? docs/week4/experiments/02-baseline/results/\n",
+    "stderr": ""
+  },
+  "datasetManifestSha256": "f1b8e4777b54e93cecd78743d95044cf9bbedee354c2f6a299733cd26cf4bef8",
+  "scriptsSha256": {
+    "run.py": "29285e01428bf7aaddaeed7bdcffa79aec05fa2ec44519142282de3b3b529145",
+    "products.js": "eb8aae80c24a61bb9f338cb69ab3ba5d7955ca1c916358a8f67d4799206dffd1",
+    "profile_dataset.py": "e0da5eb4ddb586ef9fc905895739afbc5c1440207057ab4738fb8e6d621a867c",
+    "test_report.py": "304f4b6ec8db12fee7a1cf27883a8a50aea0750c5598fb5b66738ffc0cc995c7",
+    "validation.json": "aa438f45c0a502f16b8f3a92b303597d16e2098819a24215021f3f68329e86bf",
+    "report.py": "a236c909c5834fddc8e7ca836fd17b427b8de18c35252d2c1982d98aaf9b2d1e"
+  },
+  "notes": [
+    "OS snapshots select fields; secrets excluded.",
+    "Local k6 over public network. No cache in product path.",
+    "SQL timings cover JDBC execute calls, not result hydration or pool acquisition.",
+    "Nearest-rank percentiles; millisecond client clock resolution."
+  ],
+  "end": {
+    "at": "2026-10-13T10:26:36.609333+00:00",
+    "app": {
+      "exitCode": 0,
+      "stdout": "Tue Oct 13 10:26:36 UTC 2026\nLinux ip-172-31-26-165 7.0.0-1006-aws #6-Ubuntu SMP PREEMPT Tue May 26 12:04:34 UTC 2026 x86_64 GNU/Linux\nPRETTY_NAME=\"Ubuntu 26.04 LTS\"\nNAME=\"Ubuntu\"\nVERSION_ID=\"26.04\"\nVERSION=\"26.04 LTS (Resolute Raccoon)\"\nVERSION_CODENAME=resolute\nID=ubuntu\nID_LIKE=debian\nHOME_URL=\"https://www.ubuntu.com/\"\nSUPPORT_URL=\"https://help.ubuntu.com/\"\nBUG_REPORT_URL=\"https://bugs.launchpad.net/ubuntu/\"\nPRIVACY_POLICY_URL=\"https://www.ubuntu.com/legal/terms-and-policies/privacy-policy\"\nUBUNTU_CODENAME=resolute\nLOGO=ubuntu-logo\n2\n               total        used        free      shared  buff/cache   available\nMem:      8153157632  1265139712  3576094720     3166208  3649343488  6888017920\nSwap:              0           0           0\nFilesystem       1B-blocks       Used   Available Use% Mounted on\n/dev/root      19594608640 4538503168 15039328256  24% /\n29.9.0\nweek4-commerce-api-1 commerce-api:week4-seoul-baseline\nsha256:5ea45fe95c010e99a30d67e06aa70d79bb936f62f79ece4cb556dd27972803d9 cpu=0 memory=0\n   size_t InitialHeapSize                          = 127926272                                 {product} {ergonomic}\n   size_t MaxHeapSize                              = 2038431744                                {product} {ergonomic}\n   size_t SoftMaxHeapSize                          = 2038431744                             {manageable} {ergonomic}\nopenjdk version \"21.0.12.1\" 2026-08-18 LTS\nOpenJDK Runtime Environment Temurin-21.0.12.1+1 (build 21.0.12.1+1-LTS)\nOpenJDK 64-Bit Server VM Temurin-21.0.12.1+1 (build 21.0.12.1+1-LTS, mixed mode, sharing)\n212d229e08028b7e8af9ee7f808610ecd8b3bddd14992148927e64d13d3b0ea3  /home/ubuntu/week4/app.jar\n",
+      "stderr": ""
+    },
+    "db": {
+      "exitCode": 0,
+      "stdout": "Tue Oct 13 10:26:36 UTC 2026\nLinux ip-172-31-26-139 7.0.0-1006-aws #6-Ubuntu SMP PREEMPT Tue May 26 12:04:34 UTC 2026 x86_64 GNU/Linux\nPRETTY_NAME=\"Ubuntu 26.04 LTS\"\nNAME=\"Ubuntu\"\nVERSION_ID=\"26.04\"\nVERSION=\"26.04 LTS (Resolute Raccoon)\"\nVERSION_CODENAME=resolute\nID=ubuntu\nID_LIKE=debian\nHOME_URL=\"https://www.ubuntu.com/\"\nSUPPORT_URL=\"https://help.ubuntu.com/\"\nBUG_REPORT_URL=\"https://bugs.launchpad.net/ubuntu/\"\nPRIVACY_POLICY_URL=\"https://www.ubuntu.com/legal/terms-and-policies/privacy-policy\"\nUBUNTU_CODENAME=resolute\nLOGO=ubuntu-logo\n2\n               total        used        free      shared  buff/cache   available\nMem:      8153141248  1328087040  1790488576     3346432  5372170240  6825054208\nSwap:              0           0           0\nFilesystem       1B-blocks       Used   Available Use% Mounted on\n/dev/root      19594608640 6159306752 13418524672  32% /\n29.9.0\nweek4-db-redis-replica-1 redis:7.0\nweek4-db-redis-master-1 redis:7.0\nweek4-db-mysql-1 mysql:8.0.46\n8.0.46\t134217728\t151\tREPEATABLE-READ\n1000\n240000\n1000000\n1000000\n690000\nproduct\tCREATE TABLE `product` (\\n  `brand_id` bigint NOT NULL,\\n  `created_at` datetime(6) NOT NULL,\\n  `deleted_at` datetime(6) DEFAULT NULL,\\n  `id` bigint NOT NULL AUTO_INCREMENT,\\n  `price` bigint NOT NULL,\\n  `updated_at` datetime(6) NOT NULL,\\n  `name` varchar(100) NOT NULL,\\n  `active_name_key` varbinary(400) GENERATED ALWAYS AS ((case when (`deleted_at` is null) then convert(`name` using binary) else NULL end)) VIRTUAL,\\n  PRIMARY KEY (`id`),\\n  UNIQUE KEY `uk_product_active_name` (`brand_id`,`active_name_key`),\\n  CONSTRAINT `ck_product_name` CHECK (((length(convert(`name` using utf16)) between 2 and 200) and (ascii(left(`name`,1)) > 32) and (ascii(right(`name`,1)) > 32))),\\n  CONSTRAINT `ck_product_price` CHECK ((`price` between 1 and 1000000000))\\n) ENGINE=InnoDB AUTO_INCREMENT=1000001 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci\nproduct_like\tCREATE TABLE `product_like` (\\n  `created_at` datetime(6) NOT NULL,\\n  `deleted_at` datetime(6) DEFAULT NULL,\\n  `id` bigint NOT NULL AUTO_INCREMENT,\\n  `product_id` bigint NOT NULL,\\n  `updated_at` datetime(6) NOT NULL,\\n  `user_id` bigint NOT NULL,\\n  PRIMARY KEY (`id`),\\n  UNIQUE KEY `uk_product_like_user_product` (`user_id`,`product_id`)\\n) ENGINE=InnoDB AUTO_INCREMENT=999494 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci\nproduct\t0\tPRIMARY\t1\tid\tA\t985809\tNULL\tNULL\t\tBTREE\t\t\tYES\tNULL\nproduct\t0\tuk_product_active_name\t1\tbrand_id\tA\t4285\tNULL\tNULL\t\tBTREE\t\t\tYES\tNULL\nproduct\t0\tuk_product_active_name\t2\tactive_name_key\tA\t977082\tNULL\tNULL\tYES\tBTREE\t\t\tYES\tNULL\nproduct_like\t0\tPRIMARY\t1\tid\tA\t687578\tNULL\tNULL\t\tBTREE\t\t\tYES\tNULL\nproduct_like\t0\tuk_product_like_user_product\t1\tuser_id\tA\t93870\tNULL\tNULL\t\tBTREE\t\t\tYES\tNULL\nproduct_like\t0\tuk_product_like_user_product\t2\tproduct_id\tA\t687578\tNULL\tNULL\t\tBTREE\t\t\tYES\tNULL\n",
+      "stderr": ""
+    },
+    "local": {
+      "exitCode": 0,
+      "stdout": "Mac14,2\n8\n17179869184\n",
+      "stderr": ""
+    },
+    "os": {
+      "exitCode": 0,
+      "stdout": "ProductName:\t\tmacOS\nProductVersion:\t\t15.6.1\nBuildVersion:\t\t24G90\n",
+      "stderr": ""
+    },
+    "k6": {
+      "exitCode": 0,
+      "stdout": "k6 v2.3.0 (commit/devel, go1.27.1, darwin/arm64)\n",
+      "stderr": ""
+    }
+  }
+}

@@ -1,0 +1,79 @@
+[
+  {
+    "runId": "20261013T101709-measure-1-edef7f",
+    "rps": 1,
+    "repeat": 1,
+    "runWallSeconds": 92.728516,
+    "dbContainerCpuSumMeanPercent": 197.78142857142856,
+    "dbContainerCpuCapacityMeanPercent": 98.89071428571428,
+    "dbAvailableMemoryMinBytes": 6837932032,
+    "dominantSql": "select count(l1_0.id) from product_like l1_0 where l1_0.product_id=?",
+    "dominantSqlTimeSharePercent": 97.89758439498843
+  },
+  {
+    "runId": "20261013T101926-measure-0p5-a83e4d",
+    "rps": 0.5,
+    "repeat": 1,
+    "runWallSeconds": 74.449223,
+    "dbContainerCpuSumMeanPercent": 70.53461538461538,
+    "dbContainerCpuCapacityMeanPercent": 35.26730769230769,
+    "dbAvailableMemoryMinBytes": 6832959488,
+    "dominantSql": "select count(l1_0.id) from product_like l1_0 where l1_0.product_id=?",
+    "dominantSqlTimeSharePercent": 97.34668614343342
+  },
+  {
+    "runId": "20261013T102124-measure-0p75-51b314",
+    "rps": 0.75,
+    "repeat": 1,
+    "runWallSeconds": 74.44266,
+    "dbContainerCpuSumMeanPercent": 160.9446153846154,
+    "dbContainerCpuCapacityMeanPercent": 80.4723076923077,
+    "dbAvailableMemoryMinBytes": 6807691264,
+    "dominantSql": "select count(l1_0.id) from product_like l1_0 where l1_0.product_id=?",
+    "dominantSqlTimeSharePercent": 97.67845637937816
+  },
+  {
+    "runId": "20261013T102323-measure-0p75-ce676f",
+    "rps": 0.75,
+    "repeat": 2,
+    "runWallSeconds": 74.610343,
+    "dbContainerCpuSumMeanPercent": 160.3830769230769,
+    "dbContainerCpuCapacityMeanPercent": 80.19153846153846,
+    "dbAvailableMemoryMinBytes": 6829371392,
+    "dominantSql": "select count(l1_0.id) from product_like l1_0 where l1_0.product_id=?",
+    "dominantSqlTimeSharePercent": 97.98211661238989
+  },
+  {
+    "runId": "20261013T102523-measure-0p75-d65205",
+    "rps": 0.75,
+    "repeat": 3,
+    "runWallSeconds": 74.329337,
+    "dbContainerCpuSumMeanPercent": 155.9476923076923,
+    "dbContainerCpuCapacityMeanPercent": 77.97384615384615,
+    "dbAvailableMemoryMinBytes": 6825672704,
+    "dominantSql": "select count(l1_0.id) from product_like l1_0 where l1_0.product_id=?",
+    "dominantSqlTimeSharePercent": 97.82683165851667
+  },
+  {
+    "runId": "20261013T102726-measure-1-625efa",
+    "rps": 1,
+    "repeat": 2,
+    "runWallSeconds": 87.918047,
+    "dbContainerCpuSumMeanPercent": 197.2246153846154,
+    "dbContainerCpuCapacityMeanPercent": 98.6123076923077,
+    "dbAvailableMemoryMinBytes": 6828957696,
+    "dominantSql": "select count(l1_0.id) from product_like l1_0 where l1_0.product_id=?",
+    "dominantSqlTimeSharePercent": 97.9588192381813
+  },
+  {
+    "runId": "20261013T102943-measure-1-939d83",
+    "rps": 1,
+    "repeat": 3,
+    "runWallSeconds": 86.941387,
+    "dbContainerCpuSumMeanPercent": 193.2723076923077,
+    "dbContainerCpuCapacityMeanPercent": 96.63615384615385,
+    "dbAvailableMemoryMinBytes": 6826749952,
+    "dominantSql": "select count(l1_0.id) from product_like l1_0 where l1_0.product_id=?",
+    "dominantSqlTimeSharePercent": 97.98292613373131
+  }
+]

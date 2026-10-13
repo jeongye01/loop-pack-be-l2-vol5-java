@@ -1,0 +1,19 @@
+{
+  "lastPassingRps": 0.75,
+  "firstFailingRps": 1,
+  "runs": {
+    "1": [
+      "20261013T101709-measure-1-edef7f",
+      "20261013T102726-measure-1-625efa",
+      "20261013T102943-measure-1-939d83"
+    ],
+    "0.5": [
+      "20261013T101926-measure-0p5-a83e4d"
+    ],
+    "0.75": [
+      "20261013T102124-measure-0p75-51b314",
+      "20261013T102323-measure-0p75-ce676f",
+      "20261013T102523-measure-0p75-d65205"
+    ]
+  }
+}

@@ -1,7 +1,7 @@
 # 조회 성능 실험 계획서: Baseline
 
 - 실험 ID: `02-baseline`
-- 상태: 초기 측정 완료. 경계 반복 검증은 미완료
+- 상태: 실행 완료. 0.75 RPS 정상·1 RPS 실패 경계 각각 3회 확인. [결과](report.md)
 - 작성일: 2026-10-13
 - 실행 버전: `commerce-api:week4-seoul-baseline` · Git SHA/JAR 해시는 Run별 기록
 - 공통 절차·결과 형식: [프로토콜](../protocol.md)

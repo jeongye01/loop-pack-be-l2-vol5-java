@@ -1,0 +1,229 @@
+{
+  "data": {
+    "content": [
+      {
+        "id": 102909,
+        "name": "Intelligent Plastic Car-102909",
+        "price": 12243,
+        "brand": {
+          "id": 7,
+          "name": "Watsica Group-7"
+        },
+        "likeCount": 0,
+        "soldOut": false
+      },
+      {
+        "id": 382669,
+        "name": "Awesome Linen Clock-382669",
+        "price": 23249,
+        "brand": {
+          "id": 7,
+          "name": "Watsica Group-7"
+        },
+        "likeCount": 0,
+        "soldOut": false
+      },
+      {
+        "id": 176400,
+        "name": "Durable Steel Bag-176400",
+        "price": 74974,
+        "brand": {
+          "id": 7,
+          "name": "Watsica Group-7"
+        },
+        "likeCount": 0,
+        "soldOut": false
+      },
+      {
+        "id": 485697,
+        "name": "Gorgeous Rubber Gloves-485697",
+        "price": 100222,
+        "brand": {
+          "id": 7,
+          "name": "Watsica Group-7"
+        },
+        "likeCount": 0,
+        "soldOut": false
+      },
+      {
+        "id": 331964,
+        "name": "Practical Cotton Gloves-331964",
+        "price": 102399,
+        "brand": {
+          "id": 7,
+          "name": "Watsica Group-7"
+        },
+        "likeCount": 0,
+        "soldOut": false
+      },
+      {
+        "id": 447030,
+        "name": "Intelligent Leather Shirt-447030",
+        "price": 121618,
+        "brand": {
+          "id": 7,
+          "name": "Watsica Group-7"
+        },
+        "likeCount": 6,
+        "soldOut": false
+      },
+      {
+        "id": 955791,
+        "name": "Lightweight Silk Bench-955791",
+        "price": 126995,
+        "brand": {
+          "id": 7,
+          "name": "Watsica Group-7"
+        },
+        "likeCount": 0,
+        "soldOut": false
+      },
+      {
+        "id": 590098,
+        "name": "Synergistic Steel Clock-590098",
+        "price": 136725,
+        "brand": {
+          "id": 7,
+          "name": "Watsica Group-7"
+        },
+        "likeCount": 2,
+        "soldOut": false
+      },
+      {
+        "id": 546267,
+        "name": "Small Marble Bag-546267",
+        "price": 158444,
+        "brand": {
+          "id": 7,
+          "name": "Watsica Group-7"
+        },
+        "likeCount": 0,
+        "soldOut": false
+      },
+      {
+        "id": 720178,
+        "name": "Enormous Leather Coat-720178",
+        "price": 205098,
+        "brand": {
+          "id": 7,
+          "name": "Watsica Group-7"
+        },
+        "likeCount": 0,
+        "soldOut": false
+      },
+      {
+        "id": 21089,
+        "name": "Synergistic Silk Keyboard-21089",
+        "price": 205504,
+        "brand": {
+          "id": 7,
+          "name": "Watsica Group-7"
+        },
+        "likeCount": 0,
+        "soldOut": false
+      },
+      {
+        "id": 104148,
+        "name": "Incredible Steel Car-104148",
+        "price": 259599,
+        "brand": {
+          "id": 7,
+          "name": "Watsica Group-7"
+        },
+        "likeCount": 0,
+        "soldOut": false
+      },
+      {
+        "id": 216845,
+        "name": "Incredible Aluminum Chair-216845",
+        "price": 288175,
+        "brand": {
+          "id": 7,
+          "name": "Watsica Group-7"
+        },
+        "likeCount": 0,
+        "soldOut": false
+      },
+      {
+        "id": 762855,
+        "name": "Sleek Bronze Watch-762855",
+        "price": 316671,
+        "brand": {
+          "id": 7,
+          "name": "Watsica Group-7"
+        },
+        "likeCount": 0,
+        "soldOut": false
+      },
+      {
+        "id": 556283,
+        "name": "Small Plastic Table-556283",
+        "price": 331335,
+        "brand": {
+          "id": 7,
+          "name": "Watsica Group-7"
+        },
+        "likeCount": 0,
+        "soldOut": false
+      },
+      {
+        "id": 481926,
+        "name": "Ergonomic Leather Hat-481926",
+        "price": 335955,
+        "brand": {
+          "id": 7,
+          "name": "Watsica Group-7"
+        },
+        "likeCount": 0,
+        "soldOut": false
+      },
+      {
+        "id": 210918,
+        "name": "Intelligent Rubber Chair-210918",
+        "price": 351387,
+        "brand": {
+          "id": 7,
+          "name": "Watsica Group-7"
+        },
+        "likeCount": 0,
+        "soldOut": false
+      },
+      {
+        "id": 266756,
+        "name": "Practical Marble Car-266756",
+        "price": 357292,
+        "brand": {
+          "id": 7,
+          "name": "Watsica Group-7"
+        },
+        "likeCount": 0,
+        "soldOut": false
+      },
+      {
+        "id": 941498,
+        "name": "Fantastic Wooden Gloves-941498",
+        "price": 365133,
+        "brand": {
+          "id": 7,
+          "name": "Watsica Group-7"
+        },
+        "likeCount": 0,
+        "soldOut": false
+      },
+      {
+        "id": 634031,
+        "name": "Synergistic Silk Gloves-634031",
+        "price": 372959,
+        "brand": {
+          "id": 7,
+          "name": "Watsica Group-7"
+        },
+        "likeCount": 0,
+        "soldOut": false
+      }
+    ],
+    "page": 0,
+    "size": 20,
+    "totalElements": 5000
+  }
+}
