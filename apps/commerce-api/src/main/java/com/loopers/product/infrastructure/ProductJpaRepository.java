@@ -70,15 +70,20 @@ interface ProductJpaRepository extends JpaRepository<Product, Long> {
         Pageable pageable
     );
 
-    @Query("""
-        select p from Product p left join Like l on l.productId = p.id
-        where p.deletedAt is null
-          and (:brandId is null or p.brandId = :brandId)
-        group by p.id
-        order by count(l) desc, p.id asc
-        """)
+    @Query(value = """
+        select p.* from product p
+        left join (
+            select product_id, count(*) as like_count
+            from product_like
+            group by product_id
+        ) l on l.product_id = p.id
+        where p.deleted_at is null
+          and (:brandId is null or p.brand_id = :brandId)
+        order by coalesce(l.like_count, 0) desc, p.id asc
+        """, nativeQuery = true)
     List<Product> findCustomerProductsByLikes(
         @Param("brandId") Long brandId,
         Pageable pageable
     );
+
 }

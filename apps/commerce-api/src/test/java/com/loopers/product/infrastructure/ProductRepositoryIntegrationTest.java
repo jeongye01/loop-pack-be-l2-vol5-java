@@ -37,6 +37,36 @@ class ProductRepositoryIntegrationTest {
     @Autowired
     private EntityManager entityManager;
 
+    @DisplayName("좋아요 집계 조인은 삭제·브랜드 필터, 0개·동점 정렬과 페이지 경계를 유지한다")
+    @Test
+    void preservesLikesQueryResultsAcrossFiltersAndPages() {
+        Product zero = productRepository.save(new Product(1L, "Zero", 100L));
+        Product first = productRepository.save(new Product(1L, "First liked", 100L));
+        Product second = productRepository.save(new Product(1L, "Second liked", 100L));
+        Product other = productRepository.save(new Product(2L, "Other brand", 100L));
+        Product deleted = productRepository.save(new Product(1L, "Deleted liked", 100L));
+        for (Product product : List.of(first, second, other, deleted)) {
+            likeRepository.save(new Like(1L, product.getId()));
+        }
+        likeRepository.save(new Like(2L, other.getId()));
+        likeRepository.save(new Like(2L, deleted.getId()));
+        deleted.delete();
+        productRepository.save(deleted);
+        flushAndClear();
+
+        assertThat(productRepository.findCustomerProducts(null, ProductSort.LIKES_DESC, 0, 20))
+            .extracting(Product::getId)
+            .containsExactly(other.getId(), first.getId(), second.getId(), zero.getId());
+        assertThat(productRepository.findCustomerProducts(1L, ProductSort.LIKES_DESC, 0, 1))
+            .extracting(Product::getId).containsExactly(first.getId());
+        assertThat(productRepository.findCustomerProducts(1L, ProductSort.LIKES_DESC, 1, 1))
+            .extracting(Product::getId).containsExactly(second.getId());
+        assertThat(productRepository.findCustomerProducts(1L, ProductSort.LIKES_DESC, 2, 1))
+            .extracting(Product::getId).containsExactly(zero.getId());
+        assertThat(productRepository.findCustomerProducts(1L, ProductSort.LIKES_DESC, 3, 1)).isEmpty();
+
+    }
+
     @DisplayName("[R-ADMIN-12] 삭제된 상품은 고객 조회에서 제외한다.")
     @Nested
     class ExcludeDeletedProduct {
