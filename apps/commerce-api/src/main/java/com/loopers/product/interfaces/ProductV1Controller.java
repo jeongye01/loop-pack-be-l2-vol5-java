@@ -1,7 +1,7 @@
 package com.loopers.product.interfaces;
 
 import com.loopers.interfaces.api.ApiResponse;
-import com.loopers.interfaces.api.ListResponse;
+import com.loopers.interfaces.api.SliceResponse;
 import com.loopers.interfaces.api.PageQuery;
 import com.loopers.interfaces.api.Requester;
 import com.loopers.product.application.ProductUseCase;
@@ -23,7 +23,7 @@ public class ProductV1Controller {
     private final ProductUseCase productUseCase;
 
     @GetMapping
-    public ApiResponse<ListResponse<ProductV1Dto.CustomerProductResponse>> getProducts(
+    public ApiResponse<SliceResponse<ProductV1Dto.CustomerProductResponse>> getProducts(
         Requester requester,
         @RequestParam(required = false) Long brandId,
         @RequestParam(required = false) String sort,
@@ -31,7 +31,7 @@ public class ProductV1Controller {
         @RequestParam(defaultValue = PageQuery.DEFAULT_SIZE) int size
     ) {
         PageQuery query = new PageQuery(page, size);
-        return ApiResponse.success(ListResponse.from(
+        return ApiResponse.success(SliceResponse.from(
             productUseCase.findCustomerProductPage(brandId, toSort(sort), query.page(), query.size()),
             ProductV1Dto.CustomerProductResponse::from
         ));

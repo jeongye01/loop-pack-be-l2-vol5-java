@@ -171,7 +171,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/CustomerProductPageEnvelope'
+                $ref: '#/components/schemas/LikedProductPageEnvelope'
         '400':
           $ref: '#/components/responses/InvalidRequest'
         '401':
@@ -1274,7 +1274,7 @@ components:
           minimum: 1
           description: CONFIRMED일 때만 존재하는 결제액. DRAFT에서는 생략함
 
-    CustomerProductPage:
+    LikedProductPage:
       type: object
       required: [content, page, size, totalElements]
       properties:
@@ -1295,6 +1295,26 @@ components:
           type: integer
           format: int64
           minimum: 0
+    CustomerProductPage:
+      type: object
+      required: [content, page, size, last]
+      properties:
+        content:
+          type: array
+          items:
+            $ref: '#/components/schemas/CustomerProduct'
+        page:
+          type: integer
+          format: int32
+          minimum: 0
+        size:
+          type: integer
+          format: int32
+          minimum: 1
+          maximum: 100
+        last:
+          type: boolean
+          description: 다음 페이지가 없으면 true. 빈 목록도 true.
     AdminBrandPage:
       type: object
       required: [content, page, size, totalElements]
@@ -1476,3 +1496,12 @@ components:
           $ref: '#/components/schemas/SuccessMetadata'
         data:
           $ref: '#/components/schemas/AdminOrderSummaryPage'
+
+    LikedProductPageEnvelope:
+      type: object
+      required: [meta, data]
+      properties:
+        meta:
+          $ref: '#/components/schemas/SuccessMetadata'
+        data:
+          $ref: '#/components/schemas/LikedProductPage'

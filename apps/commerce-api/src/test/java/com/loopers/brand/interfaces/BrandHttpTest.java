@@ -175,7 +175,8 @@ class BrandHttpTest {
 
             mockMvc.perform(get("/api/v1/products").with(customer(buyer)))
                 .andExpect(success(HttpStatus.OK))
-                .andExpect(jsonPath("$.data.totalElements").value(0));
+                .andExpect(jsonPath("$.data.content").isEmpty())
+                .andExpect(jsonPath("$.data.last").value(true));
             mockMvc.perform(get("/api/v1/products/{productId}", product.getId()).with(customer(buyer)))
                 .andExpect(failure(HttpStatus.NOT_FOUND, "PRODUCT_NOT_FOUND"));
             mockMvc.perform(get("/api/v1/users/{userId}/likes", buyer.getId()).with(customer(buyer)))

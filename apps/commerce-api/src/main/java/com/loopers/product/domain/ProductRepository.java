@@ -29,5 +29,5 @@ public interface ProductRepository {
 
     long countAll(Long brandId);
 
-    long countCustomerProducts(Long brandId);
+    List<Product> findCustomerProductWindow(Long brandId, ProductSort sort, long offset, int limit);
 }

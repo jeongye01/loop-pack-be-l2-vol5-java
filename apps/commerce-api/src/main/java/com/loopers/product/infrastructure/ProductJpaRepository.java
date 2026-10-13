@@ -42,13 +42,6 @@ interface ProductJpaRepository extends JpaRepository<Product, Long> {
     long countByBrandId(Long brandId);
 
     @Query("""
-        select count(p) from Product p
-        where p.deletedAt is null
-          and (:brandId is null or p.brandId = :brandId)
-        """)
-    long countCustomerProducts(@Param("brandId") Long brandId);
-
-    @Query("""
         select p from Product p
         where p.deletedAt is null
           and (:brandId is null or p.brandId = :brandId)

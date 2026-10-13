@@ -353,6 +353,8 @@
 | `totalElements` | 조건에 맞는 전체 항목 수 |
 
 
+고객 상품 목록 `GET /api/v1/products`는 위 표의 `totalElements` 대신 boolean `last`를 반환한다. 다음 페이지가 있으면 `false`, 없으면 `true`이며 빈 목록도 `true`다. `page`·`size`·정렬·필터 규칙은 유지한다. 나머지 목록 API는 기존 전체 개수 계약을 유지한다.
+
 ### OpenAPI 스키마
 
 요청·응답 필드의 타입, `required`, 배열 원소, 값 범위와 예시는 [OpenAPI 명세](../../apps/commerce-api/src/main/resources/static/openapi.yaml)의 각 `path`와 `components/schemas`에서 정의한다. 각 실패 응답의 `x-error-codes`는 그 엔드포인트와 HTTP 상태에서 허용하는 오류 코드다. HTTP 테스트는 실제 요청·응답 형식과 오류 코드가 이 명세를 따르는지 검사한다. 로컬 실행 후 `/swagger-ui.html`에서 같은 명세를 확인한다.

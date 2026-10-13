@@ -331,7 +331,7 @@ class LikeHttpTest {
                 .andExpect(jsonPath("$.data.content.length()").value(1))
                 .andExpect(jsonPath("$.data.content[0].id").value(remaining.getId()))
                 .andExpect(jsonPath("$.data.content[0].likeCount").value(1))
-                .andExpect(jsonPath("$.data.totalElements").value(2));
+                .andExpect(jsonPath("$.data.last").value(false));
 
             mockMvc.perform(get(CUSTOMER_PRODUCTS).with(customer(first))
                     .param("brandId", brand.getId().toString())
@@ -340,7 +340,7 @@ class LikeHttpTest {
                 .andExpect(jsonPath("$.data.content.length()").value(1))
                 .andExpect(jsonPath("$.data.content[0].id").value(canceled.getId()))
                 .andExpect(jsonPath("$.data.content[0].likeCount").value(0))
-                .andExpect(jsonPath("$.data.totalElements").value(2));
+                .andExpect(jsonPath("$.data.last").value(true));
         }
     }
 

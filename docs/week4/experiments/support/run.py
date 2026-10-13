@@ -67,7 +67,7 @@ def expected_page(dataset, query):
             'brand':{'id':int(p['brand_id']),'name':brands[int(p['brand_id'])]},
             'likeCount':likes[int(p['id'])],'soldOut':stock[int(p['id'])]==0}
             for p in products[start:start+query['size']]],
-            'page':query['page'],'size':query['size'],'totalElements':len(products)}}
+            'page':query['page'],'size':query['size'],'last':(query['page']+1)*query['size'] >= len(products)}}
 
 
 class Runner:

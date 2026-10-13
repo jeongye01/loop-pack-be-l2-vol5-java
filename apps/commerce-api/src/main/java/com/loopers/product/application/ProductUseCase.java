@@ -12,6 +12,7 @@ import com.loopers.product.domain.StockRepository;
 import com.loopers.support.error.CoreException;
 import com.loopers.support.error.ErrorCode;
 import com.loopers.support.page.PageResult;
+import com.loopers.support.page.SliceResult;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -120,24 +121,28 @@ public class ProductUseCase {
     }
 
     @Transactional(readOnly = true)
-    public PageResult<CustomerProduct> findCustomerProductPage(
+    public SliceResult<CustomerProduct> findCustomerProductPage(
         Long brandId,
         ProductSort sort,
         int page,
         int size
     ) {
-        List<CustomerProduct> content = findCustomerProducts(brandId, sort, page, size).stream()
-            .map(view -> new CustomerProduct(
-                view.product(),
-                view.stock(),
-                findBrand(view.product().getBrandId()),
-                view.likeCount()
+        if (brandId != null && !isActiveBrand(brandId)) {
+            return new SliceResult<>(List.of(), page, size, true);
+        }
+        ProductSort requestedSort = sort == null ? ProductSort.LATEST : sort;
+        List<Product> products = productRepository.findCustomerProductWindow(
+            brandId, requestedSort, (long) page * size, size + 1
+        );
+        List<CustomerProduct> content = products.stream().limit(size)
+            .map(product -> new CustomerProduct(
+                product,
+                stockRepository.findByProductId(product.getId()).orElse(new Stock(product.getId(), 0)),
+                findBrand(product.getBrandId()),
+                likeRepository.countByProductId(product.getId())
             ))
             .toList();
-        long totalElements = brandId != null && !isActiveBrand(brandId)
-            ? 0
-            : productRepository.countCustomerProducts(brandId);
-        return new PageResult<>(content, page, size, totalElements);
+        return new SliceResult<>(content, page, size, products.size() <= size);
     }
 
     @Transactional(readOnly = true)

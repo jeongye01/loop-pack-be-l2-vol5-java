@@ -110,7 +110,12 @@ public class ProductRepositoryAdapter implements ProductRepository {
         int page,
         int size
     ) {
-        Pageable pageable = PageRequest.of(page, size);
+        return findCustomerProductWindow(brandId, sort, (long) page * size, size);
+    }
+
+    @Override
+    public List<Product> findCustomerProductWindow(Long brandId, ProductSort sort, long offset, int limit) {
+        Pageable pageable = new ProductWindow(offset, limit);
         return switch (sort) {
             case LATEST -> jpaRepository.findCustomerProductsByLatest(brandId, pageable);
             case PRICE_ASC -> jpaRepository.findCustomerProductsByPrice(brandId, pageable);
@@ -195,8 +200,18 @@ public class ProductRepositoryAdapter implements ProductRepository {
         return jpaRepository.countByBrandId(brandId);
     }
 
-    @Override
-    public long countCustomerProducts(Long brandId) {
-        return jpaRepository.countCustomerProducts(brandId);
+    /** Fetch limit and offset are independent so lookahead never shifts the next page. */
+    private static class ProductWindow extends PageRequest {
+        private final long offset;
+
+        ProductWindow(long offset, int limit) {
+            super(0, limit, Sort.unsorted());
+            this.offset = offset;
+        }
+
+        @Override
+        public long getOffset() {
+            return offset;
+        }
     }
 }
