@@ -21,6 +21,7 @@ public final class CacheKeys {
     }
     public static String product(Long id) { return VERSION_PREFIX + "products/" + id; }
     public static String brands(int page, int size) { return VERSION_PREFIX + "admin:brands?" + page(page, size).substring(1); }
+    public static String customerBrands(int page, int size) { return VERSION_PREFIX + "brands?" + page(page, size).substring(1); }
     public static String myLikes(Long user, int page, int size) { return VERSION_PREFIX + "users/" + user + "/likes?" + page(page, size).substring(1); }
     public static String userRevision(Long user) { return "likes:" + user; }
     public static String batch(String bucket, List<Long> ids) {

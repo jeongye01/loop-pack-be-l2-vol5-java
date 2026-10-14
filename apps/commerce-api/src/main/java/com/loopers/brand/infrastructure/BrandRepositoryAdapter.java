@@ -79,4 +79,16 @@ public class BrandRepositoryAdapter implements BrandRepository {
     public long countAll() {
         return jpaRepository.count();
     }
+
+    @Override
+    public List<Brand> findActive(int page, int size) {
+        Sort sort = Sort.by(Sort.Order.desc("createdAt"), Sort.Order.asc("id"));
+        return jpaRepository.findByDeletedAtIsNull(PageRequest.of(page, size, sort));
+    }
+
+    @Override
+    public long countActive() {
+        return jpaRepository.countByDeletedAtIsNull();
+    }
+
 }

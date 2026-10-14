@@ -88,6 +88,57 @@ class BrandHttpTest {
         fixture.truncateRemainingTables();
     }
 
+    @Nested
+    @DisplayName("고객 브랜드 목록: 삭제 제외·페이지·사용자 식별·OpenAPI 계약")
+    class CustomerBrandList {
+        @Test
+        @DisplayName("삭제 브랜드를 페이지와 전체 개수에서 제외하고 id·name만 반환한다")
+        void excludesDeletedBeforePaging() throws Exception {
+            User user = fixture.user();
+            Brand first = fixture.brand("first");
+            Brand second = fixture.brand("second");
+            fixture.deletedBrand("deleted newest");
+            MvcResult page0 = mockMvc.perform(get("/api/v1/brands?page=0&size=1").with(customer(user)))
+                .andExpect(success(HttpStatus.OK)).andReturn();
+            assertThat(ids(data(page0).path("content"))).containsExactly(second.getId());
+            assertThat(data(page0).path("totalElements").asLong()).isEqualTo(2);
+            assertThat(com.loopers.support.http.ApiHttp.fieldNames(data(page0).path("content").get(0)))
+                .containsExactlyInAnyOrder("id", "name");
+            mockMvc.perform(get("/api/v1/brands?page=1&size=1").with(customer(user)))
+                .andExpect(success(HttpStatus.OK)).andExpect(jsonPath("$.data.content[0].id").value(first.getId()));
+            mockMvc.perform(get("/api/v1/brands?page=2&size=1").with(customer(user)))
+                .andExpect(success(HttpStatus.OK)).andExpect(jsonPath("$.data.content.length()").value(0))
+                .andExpect(jsonPath("$.data.totalElements").value(2));
+        }
+
+        @Test
+        @DisplayName("활성 브랜드가 없으면 기본 페이지 0·크기 20과 빈 목록을 반환한다")
+        void emptyDefaults() throws Exception {
+            User user = fixture.user();
+            fixture.deletedBrand("deleted");
+            mockMvc.perform(get("/api/v1/brands").with(customer(user))).andExpect(success(HttpStatus.OK))
+                .andExpect(jsonPath("$.data.content.length()").value(0)).andExpect(jsonPath("$.data.page").value(0))
+                .andExpect(jsonPath("$.data.size").value(20)).andExpect(jsonPath("$.data.totalElements").value(0));
+            mockMvc.perform(get("/api/v1/brands?size=100").with(customer(user))).andExpect(success(HttpStatus.OK));
+        }
+
+        @ParameterizedTest
+        @ValueSource(strings = {"page=-1", "size=0", "size=101", "page=wrong", "size=wrong"})
+        @DisplayName("잘못된 페이지·크기·숫자 형식은 400이다")
+        void rejectsInvalidPage(String query) throws Exception {
+            mockMvc.perform(get("/api/v1/brands?" + query).with(customer(fixture.user())))
+                .andExpect(failure(HttpStatus.BAD_REQUEST, "INVALID_REQUEST"));
+        }
+
+        @ParameterizedTest
+        @ValueSource(strings = {"", "wrong", "999999"})
+        @DisplayName("사용자 헤더 누락·잘못된 형식·없는 사용자는 401이다")
+        void requiresCustomer(String header) throws Exception {
+            mockMvc.perform(get("/api/v1/brands").with(customer(header.isEmpty() ? null : header)))
+                .andExpect(failure(HttpStatus.UNAUTHORIZED, "USER_NOT_IDENTIFIED"));
+        }
+    }
+
     @DisplayName("[R-CATALOG-01] 고객은 존재하며 삭제되지 않은 브랜드의 상세를 조회할 수 있다.")
     @Nested
     class CustomerBrandDetail {

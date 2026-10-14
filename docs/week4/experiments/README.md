@@ -63,3 +63,5 @@ experiments/
 ```
 
 예비 측정 원본의 수치·환경·해시는 그대로 보존한다. 당시 실행기는 보관용이며 정식 실험은 `support/`를 사용한다. 정식 실행 전 정상 응답·불일치·HTTP 오류·timeout·수집 실패·회복을 확인하고, 서울 배포에서 요청별 Tomcat·SQL Trace가 수집되는지 검증한다.
+
+- [21. 조회 경로별 캐시 TTL·쓰기 후 갱신 검증](21-cache-path-validation/report.md)

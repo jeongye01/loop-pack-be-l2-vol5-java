@@ -20,4 +20,8 @@ public interface BrandRepository {
     List<Brand> findAll(int page, int size);
 
     long countAll();
+
+    List<Brand> findActive(int page, int size);
+
+    long countActive();
 }

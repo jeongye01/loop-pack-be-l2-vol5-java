@@ -101,6 +101,7 @@ Redis 장애 중 서비스 지속·DB 보호는 정상 상태 SLO와 별도로 �
 | 상품 목록 좋아요순 | 위 동작 / 좋아요 등록·취소 | 위 키, sort=likes_desc | 5분 ±30초 | 상품·브랜드는 revision / 좋아요는 만료 |
 | 상품 상세 | 상품·브랜드 UD | `v3:products/{id}` | 5분 ±30초 | catalog revision |
 | 내 좋아요 목록 | 내 좋아요 등록·취소 / 상품·브랜드 UD | `v3:users/{userId}/likes?page={page}&size={size}` | 5분 ±30초 | catalog + 사용자 revision |
+| 고객 브랜드 목록 | 브랜드 CUD | `v3:brands?page={page}&size={size}` | 5분 ±30초 | catalog revision |
 | 관리자 브랜드 목록 | 브랜드 CUD | `v3:admin:brands?page={page}&size={size}` | 5분 ±30초 | catalog revision |
 | 좋아요 수 일괄 조회 | 좋아요 등록·취소 / 상품·브랜드 D | `v3:products/like-counts?ids={ids}` | 5분 ±30초 | 좋아요는 만료 / 상품·브랜드는 revision |
 | 품절 상태 일괄 조회 | 재고 변경·주문 확정 / 상품·브랜드 D | `v3:products/stocks?ids={ids}` | 5분 ±30초 | catalog + stock revision |
@@ -130,3 +131,19 @@ C 생성, U 수정, D 삭제. 모든 행에 캐시를 적용한다. 키 생성�
 ids는 중복 제거 전 1~100개 양수 ID만 허용한다. 삭제·없는 상품은 제외된다. 기존 프론트와 함께 계약을 전환해야 하며 현재 EC2 배포는 이전 계약이다.
 
 실행 순서는 [캐시 설계 적용 후 실행 계획](experiments/execution-plan.md)을 따른다.
+
+
+## 고객용 브랜드 목록 API
+
+관리자 목록과 분리한 `GET /api/v1/brands`를 브랜드 필터에 사용한다. 기존 고객 API와 같이 `X-USER-ID`로 사용자를 식별한다.
+
+| 항목 | 결정 |
+| --- | --- |
+| 대상·응답 | 삭제되지 않은 브랜드의 `id`, `name` |
+| 정렬·페이지 | 기존 브랜드 목록과 같은 createdAt DESC, id ASC. page=0, size=20 기본, size 1~100. content/page/size/totalElements 반환 |
+| 캐시 키 | `v3:brands?page={page}&size={size}`. 관리자 키 `v3:admin:brands?...`와 분리 |
+| TTL·무효화 | 5분 ±30초, catalog revision. 브랜드 CUD 후 커밋된 변경 반영 |
+| 관리자 API | 기존 삭제 포함 목록·관리자 접근 제한 유지 |
+| 프론트 | 정적 브랜드 JSON 대신 고객 목록 API에서 페이지별로 전체 브랜드를 받아 검색·선택 |
+
+삭제 필터는 DB 페이지 조회와 전체 개수 계산에 모두 적용한다. 페이지를 읽은 뒤 앱에서 삭제 항목을 걸러 페이지가 비거나 개수가 어긋나지 않게 한다.
