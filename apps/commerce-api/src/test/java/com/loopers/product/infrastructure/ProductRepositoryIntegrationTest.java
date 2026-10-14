@@ -49,6 +49,21 @@ class ProductRepositoryIntegrationTest {
         assertThat(columns).isEqualTo(List.of("deleted_at", "id", "brand_id"));
     }
 
+    @DisplayName("최신순 인덱스는 필터 컬럼 뒤에 생성일 내림차순과 ID 오름차순을 둔다")
+    @Test
+    void createsLatestIndexesWithMatchingDirections() {
+        for (String index : List.of("idx_product_latest", "idx_product_brand_latest")) {
+            List<?> columns = entityManager.createNativeQuery("""
+                select concat(COLUMN_NAME, ':', COLLATION) from information_schema.STATISTICS
+                where TABLE_SCHEMA = DATABASE() and TABLE_NAME = 'product' and INDEX_NAME = :indexName
+                order by SEQ_IN_INDEX
+                """).setParameter("indexName", index).getResultList();
+            assertThat(columns).isEqualTo(index.equals("idx_product_latest")
+                ? List.of("deleted_at:A", "created_at:D", "id:A")
+                : List.of("brand_id:A", "deleted_at:A", "created_at:D", "id:A"));
+        }
+    }
+
     @DisplayName("좋아요 집계 조인은 삭제·브랜드 필터, 0개·동점 정렬과 페이지 경계를 유지한다")
     @Test
     void preservesLikesQueryResultsAcrossFiltersAndPages() {

@@ -1,0 +1,11 @@
+CASE None
+-> Limit: 21 row(s)  (cost=61620 rows=21) (actual time=0.569..0.576 rows=21 loops=1)
+    -> Index lookup on p1_0 using idx_product_latest (deleted_at=NULL), with index condition: (p1_0.deleted_at is null)  (cost=61620 rows=497004) (actual time=0.569..0.574 rows=21 loops=1)
+
+CASE 1
+-> Limit: 21 row(s)  (cost=3886 rows=21) (actual time=0.721..0.729 rows=21 loops=1)
+    -> Index lookup on p1_0 using idx_product_brand_latest (brand_id=1, deleted_at=NULL), with index condition: (p1_0.deleted_at is null)  (cost=3886 rows=5000) (actual time=0.721..0.726 rows=21 loops=1)
+
+CASE 601
+-> Limit: 21 row(s)  (cost=511 rows=21) (actual time=0.185..0.192 rows=21 loops=1)
+    -> Index range scan on p1_0 using idx_product_brand_latest over (brand_id = 601 AND deleted_at = NULL), with index condition: ((p1_0.deleted_at is null) and (p1_0.brand_id = 601))  (cost=511 rows=333) (actual time=0.184..0.19 rows=21 loops=1)

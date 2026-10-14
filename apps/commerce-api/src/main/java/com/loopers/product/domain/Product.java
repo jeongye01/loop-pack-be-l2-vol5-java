@@ -12,7 +12,11 @@ import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "product",
-    indexes = @Index(name = "idx_product_likes_filter", columnList = "deleted_at,id,brand_id"),
+    indexes = {
+        @Index(name = "idx_product_likes_filter", columnList = "deleted_at,id,brand_id"),
+        @Index(name = "idx_product_latest", columnList = "deleted_at,created_at DESC,id ASC"),
+        @Index(name = "idx_product_brand_latest", columnList = "brand_id,deleted_at,created_at DESC,id ASC")
+    },
     uniqueConstraints = @UniqueConstraint(
     name = "uk_product_active_name", columnNames = {"brand_id", "active_name_key"}))
 @Check(name = "ck_product_name", constraints = "octet_length(convert(name using utf16)) between 2 and 200"
