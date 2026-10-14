@@ -7,6 +7,7 @@
 - [02. Baseline 재측정](02-baseline/plan.md): 100만 상품 편중 데이터로 같은 실험 반복
 - [03. 좋아요순 Baseline](03-baseline-likes/plan.md): 같은 데이터·장비에서 좋아요순 부하 한계 탐색
 - [05. 최신순 최적화](05-optimize-latest-query/plan.md): 단건 측정·실행계획·읽기 흐름 비교
+- [06. 가격순 현재 상태](06-optimize-price-query/report.md): 단건 측정·실행계획·읽기 흐름
 - [예비 측정 보관본](preliminary/README.md): 기존 로컬·시드니 결과
 
 ## 공통 인프라
