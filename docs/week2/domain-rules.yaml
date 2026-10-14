@@ -18,13 +18,17 @@ requirements:
   R-ACCESS-06:  []
 
   R-CATALOG-01: []
+  R-CATALOG-03: [] # retired response contract; historical policy references remain
   R-CATALOG-02: []
-  R-CATALOG-03: []
   R-CATALOG-04: []
   R-CATALOG-05: []
   R-CATALOG-06: []
   R-CATALOG-07: []
   R-CATALOG-08: []
+  R-CATALOG-09: []
+  R-CATALOG-10: []
+  R-CACHE-01: []
+  R-CACHE-02: []
 
   R-LIKE-01:    [INV-LIKE-23, INV-LIKE-25]
   R-LIKE-02:    [INV-LIKE-24]

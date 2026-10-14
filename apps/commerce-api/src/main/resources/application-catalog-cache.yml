@@ -1,0 +1,8 @@
+catalog:
+  cache:
+    enabled: true
+
+# The fixed-data experiment cache must not bypass revision checks.
+experiment:
+  latest-cache:
+    enabled: false

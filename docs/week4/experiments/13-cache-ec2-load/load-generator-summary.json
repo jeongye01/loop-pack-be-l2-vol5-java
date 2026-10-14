@@ -1,0 +1,23 @@
+[
+  {
+    "runId": "20261014T180240-measure-1700-ee7833",
+    "hostCpuWhole8CoresMean": 38.22956027101113,
+    "hostCpuWhole8CoresMax": 40.38049940546968,
+    "k6RssMiBMax": 1678.25390625,
+    "hostAvailableMiBMin": 29184.0390625
+  },
+  {
+    "runId": "20261014T180358-measure-1700-ec3e52",
+    "hostCpuWhole8CoresMean": 38.027952474455404,
+    "hostCpuWhole8CoresMax": 40.0,
+    "k6RssMiBMax": 1635.12109375,
+    "hostAvailableMiBMin": 29201.91015625
+  },
+  {
+    "runId": "20261014T180517-measure-1700-d32272",
+    "hostCpuWhole8CoresMean": 38.692186772564924,
+    "hostCpuWhole8CoresMax": 41.77788970032737,
+    "k6RssMiBMax": 1692.0546875,
+    "hostAvailableMiBMin": 29136.1875
+  }
+]

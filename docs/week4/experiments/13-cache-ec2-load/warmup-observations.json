@@ -1,0 +1,56 @@
+[
+  {
+    "runId": "20261014T175804-warmup-300-1fbcf2",
+    "rps": 300,
+    "p95Ms": 1159,
+    "appCpuMeanPercent": 72.57469131665516,
+    "jitMsPerSecond": 1364.9743539226258,
+    "dropped": 0,
+    "errorRate": 0
+  },
+  {
+    "runId": "20261014T175849-warmup-700-7a5cf4",
+    "rps": 700,
+    "p95Ms": 17,
+    "appCpuMeanPercent": 53.680728765681636,
+    "jitMsPerSecond": 503.7351921190793,
+    "dropped": 0,
+    "errorRate": 0
+  },
+  {
+    "runId": "20261014T175935-warmup-1000-f774ef",
+    "rps": 1000,
+    "p95Ms": 13,
+    "appCpuMeanPercent": 42.99044165410569,
+    "jitMsPerSecond": 152.5570587371978,
+    "dropped": 0,
+    "errorRate": 0
+  },
+  {
+    "runId": "20261014T180022-warmup-1000-5dc29e",
+    "rps": 1000,
+    "p95Ms": 19,
+    "appCpuMeanPercent": 49.38908142509039,
+    "jitMsPerSecond": 297.545197152095,
+    "dropped": 0,
+    "errorRate": 0
+  },
+  {
+    "runId": "20261014T180108-warmup-1000-6a4323",
+    "rps": 1000,
+    "p95Ms": 8,
+    "appCpuMeanPercent": 44.072888276082345,
+    "jitMsPerSecond": 25.044302938952278,
+    "dropped": 0,
+    "errorRate": 0
+  },
+  {
+    "runId": "20261014T180154-warmup-1000-a33389",
+    "rps": 1000,
+    "p95Ms": 9,
+    "appCpuMeanPercent": 44.20103602293195,
+    "jitMsPerSecond": 22.76985574697178,
+    "dropped": 0,
+    "errorRate": 0
+  }
+]

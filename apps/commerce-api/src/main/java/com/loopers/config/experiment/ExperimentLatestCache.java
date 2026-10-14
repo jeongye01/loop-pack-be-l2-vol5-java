@@ -27,7 +27,7 @@ import java.time.Duration;
 @Profile("experiment")
 @ConditionalOnProperty(name = "experiment.latest-cache.enabled", havingValue = "true")
 public class ExperimentLatestCache {
-    public static final String KEY = "products:list:v1:sort=latest:brand=all:page=0:size=20";
+    public static final String KEY = "products:list:v2:sort=latest:brand=all:page=0:size=20";
     // Bounds the lifetime of trial data, not a production freshness policy.
     static final Duration TTL = Duration.ofMinutes(10);
     private static final TypeReference<ApiResponse<SliceResponse<ProductV1Dto.CustomerProductResponse>>> TYPE =
@@ -38,8 +38,10 @@ public class ExperimentLatestCache {
 
     public ExperimentLatestCache(
         @Qualifier(RedisConfig.REDIS_TEMPLATE_MASTER) RedisTemplate<String, String> redis,
-        ObjectMapper json, MeterRegistry metrics
+        ObjectMapper json, MeterRegistry metrics,
+        @org.springframework.beans.factory.annotation.Value("${catalog.cache.enabled:false}") boolean catalogCache
     ) {
+        if (catalogCache) throw new IllegalStateException("Disable experiment.latest-cache when catalog.cache is enabled");
         this.redis = redis;
         this.json = json;
         this.metrics = metrics;

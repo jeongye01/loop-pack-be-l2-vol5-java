@@ -1,0 +1,2183 @@
+[
+  {
+    "runId": "20261014T173306-measure-1700-8021f9",
+    "timings": {
+      "duration": {
+        "mean": 833.823,
+        "p50": 838.737,
+        "p95": 1193.168,
+        "p99": 1529.752,
+        "max": 4915.633
+      },
+      "blocked": {
+        "mean": 0.283,
+        "p50": 0.002,
+        "p95": 0.012,
+        "p99": 9.086,
+        "max": 510.207
+      },
+      "looking_up": {
+        "mean": 0,
+        "p50": 0,
+        "p95": 0,
+        "p99": 0,
+        "max": 0
+      },
+      "connecting": {
+        "mean": 0.271,
+        "p50": 0,
+        "p95": 0,
+        "p99": 9.045,
+        "max": 32.899
+      },
+      "tls_handshaking": {
+        "mean": 0,
+        "p50": 0,
+        "p95": 0,
+        "p99": 0,
+        "max": 0
+      },
+      "sending": {
+        "mean": 1.429,
+        "p50": 0.005,
+        "p95": 0.247,
+        "p99": 28.809,
+        "max": 3235.775
+      },
+      "waiting": {
+        "mean": 818.95,
+        "p50": 837.005,
+        "p95": 1185.114,
+        "p99": 1422.568,
+        "max": 1998.431
+      },
+      "receiving": {
+        "mean": 13.444,
+        "p50": 0.017,
+        "p95": 3.476,
+        "p99": 148.935,
+        "max": 3812.211
+      },
+      "clockMinusHttp": {
+        "mean": 3.113,
+        "p50": 0.063,
+        "p95": 0.825,
+        "p99": 105.288,
+        "max": 1120.874
+      },
+      "successClient": {
+        "mean": 837.219,
+        "p50": 840,
+        "p95": 1194,
+        "p99": 1604,
+        "max": 4916
+      },
+      "successServer": {
+        "mean": 10.955,
+        "p50": 8.536,
+        "p95": 24.988,
+        "p99": 41.229,
+        "max": 210.733
+      },
+      "successGap": {
+        "mean": 826.263,
+        "p50": 828.993,
+        "p95": 1185.515,
+        "p99": 1592.224,
+        "max": 4906.088
+      },
+      "successWaitingMinusServer": {
+        "mean": 807.994,
+        "p50": 826.275,
+        "p95": 1174.929,
+        "p99": 1413.144,
+        "max": 1991.144
+      }
+    },
+    "bins": [
+      {
+        "startSecond": 0,
+        "outcomes": {
+          "success": 17059
+        },
+        "latency": {
+          "mean": 346.792,
+          "p50": 364,
+          "p95": 602,
+          "p99": 684,
+          "max": 899
+        },
+        "server": {
+          "mean": 13.096,
+          "p50": 10.499,
+          "p95": 29.275,
+          "p99": 45.78,
+          "max": 101.345
+        },
+        "gap": {
+          "mean": 333.696,
+          "p50": 351.855,
+          "p95": 582.212,
+          "p99": 669.129,
+          "max": 879.789
+        }
+      },
+      {
+        "startSecond": 10,
+        "outcomes": {
+          "success": 17029
+        },
+        "latency": {
+          "mean": 764.845,
+          "p50": 778,
+          "p95": 860,
+          "p99": 873,
+          "max": 908
+        },
+        "server": {
+          "mean": 9.829,
+          "p50": 7.917,
+          "p95": 21.933,
+          "p99": 32.166,
+          "max": 67.648
+        },
+        "gap": {
+          "mean": 755.016,
+          "p50": 766.602,
+          "p95": 852.456,
+          "p99": 865.561,
+          "max": 873.44
+        }
+      },
+      {
+        "startSecond": 20,
+        "outcomes": {
+          "success": 17000
+        },
+        "latency": {
+          "mean": 815.488,
+          "p50": 813,
+          "p95": 906,
+          "p99": 938,
+          "max": 1089
+        },
+        "server": {
+          "mean": 11.393,
+          "p50": 8.526,
+          "p95": 26.939,
+          "p99": 44.773,
+          "max": 210.733
+        },
+        "gap": {
+          "mean": 804.095,
+          "p50": 802.149,
+          "p95": 890.264,
+          "p99": 908.423,
+          "max": 957.456
+        }
+      },
+      {
+        "startSecond": 30,
+        "outcomes": {
+          "success": 16884
+        },
+        "latency": {
+          "mean": 1088.789,
+          "p50": 1061,
+          "p95": 1451,
+          "p99": 1645,
+          "max": 1929
+        },
+        "server": {
+          "mean": 10.918,
+          "p50": 8.982,
+          "p95": 23.206,
+          "p99": 36.807,
+          "max": 124.686
+        },
+        "gap": {
+          "mean": 1077.87,
+          "p50": 1048.719,
+          "p95": 1438.976,
+          "p99": 1629.465,
+          "max": 1911.285
+        }
+      },
+      {
+        "startSecond": 40,
+        "outcomes": {
+          "success": 16536
+        },
+        "latency": {
+          "mean": 1193.829,
+          "p50": 1128,
+          "p95": 1459,
+          "p99": 4162,
+          "max": 4916
+        },
+        "server": {
+          "mean": 8.398,
+          "p50": 7.125,
+          "p95": 17.182,
+          "p99": 30.826,
+          "max": 84.135
+        },
+        "gap": {
+          "mean": 1185.431,
+          "p50": 1121.035,
+          "p95": 1451.147,
+          "p99": 4145.999,
+          "max": 4906.088
+        }
+      },
+      {
+        "startSecond": 50,
+        "outcomes": {
+          "success": 12820
+        },
+        "latency": {
+          "mean": 823.464,
+          "p50": 891,
+          "p95": 1166,
+          "p99": 1331,
+          "max": 1794
+        },
+        "server": {
+          "mean": 12.37,
+          "p50": 9.933,
+          "p95": 29.288,
+          "p99": 52.217,
+          "max": 96.528
+        },
+        "gap": {
+          "mean": 811.093,
+          "p50": 879.194,
+          "p95": 1156.301,
+          "p99": 1323.442,
+          "max": 1788.453
+        }
+      }
+    ],
+    "jvm": {
+      "sampleSeconds": 60.099999999999994,
+      "jitDeltaMs": 3963.0,
+      "gcDeltaSeconds": 0.6560000000000001,
+      "cpuDeltaSeconds": 87.06,
+      "uptimeStart": 324.853
+    },
+    "timeline": [
+      {
+        "t": -0.8,
+        "jitMs": 84315.0,
+        "cpuSeconds": 233.56,
+        "gcSeconds": 1.299,
+        "gcMaxMs": 18.0,
+        "uptime": 324.853,
+        "active": 10.0,
+        "local": [
+          {
+            "process": "/opt/homebrew/Cellar/python@3.13/3.13.7/Frameworks/Python.framework/Versions/3.13/Resources/Python.app/Contents/MacOS/Python",
+            "cpu": 0.0,
+            "rssMiB": 2.3
+          },
+          {
+            "process": "/opt/homebrew/Cellar/python@3.13/3.13.7/Frameworks/Python.framework/Versions/3.13/Resources/Python.app/Contents/MacOS/Python",
+            "cpu": 5.4,
+            "rssMiB": 28.7
+          },
+          {
+            "process": "k6",
+            "cpu": 1.9,
+            "rssMiB": 11.9
+          }
+        ]
+      },
+      {
+        "t": 4.2,
+        "jitMs": 84321.0,
+        "cpuSeconds": 241.4,
+        "gcSeconds": 1.392,
+        "gcMaxMs": 18.0,
+        "uptime": 330.056,
+        "active": 19.0,
+        "local": [
+          {
+            "process": "/opt/homebrew/Cellar/python@3.13/3.13.7/Frameworks/Python.framework/Versions/3.13/Resources/Python.app/Contents/MacOS/Python",
+            "cpu": 0.0,
+            "rssMiB": 2.3
+          },
+          {
+            "process": "/opt/homebrew/Cellar/python@3.13/3.13.7/Frameworks/Python.framework/Versions/3.13/Resources/Python.app/Contents/MacOS/Python",
+            "cpu": 0.3,
+            "rssMiB": 17.3
+          },
+          {
+            "process": "k6",
+            "cpu": 332.8,
+            "rssMiB": 1547.1
+          }
+        ],
+        "jitDeltaMs": 6.0
+      },
+      {
+        "t": 9.3,
+        "jitMs": 84651.0,
+        "cpuSeconds": 249.12,
+        "gcSeconds": 1.455,
+        "gcMaxMs": 18.0,
+        "uptime": 335.1,
+        "active": 18.0,
+        "local": [
+          {
+            "process": "/opt/homebrew/Cellar/python@3.13/3.13.7/Frameworks/Python.framework/Versions/3.13/Resources/Python.app/Contents/MacOS/Python",
+            "cpu": 0.0,
+            "rssMiB": 2.3
+          },
+          {
+            "process": "/opt/homebrew/Cellar/python@3.13/3.13.7/Frameworks/Python.framework/Versions/3.13/Resources/Python.app/Contents/MacOS/Python",
+            "cpu": 0.1,
+            "rssMiB": 17.0
+          },
+          {
+            "process": "k6",
+            "cpu": 214.5,
+            "rssMiB": 1454.6
+          }
+        ],
+        "jitDeltaMs": 330.0
+      },
+      {
+        "t": 14.3,
+        "jitMs": 85139.0,
+        "cpuSeconds": 256.25,
+        "gcSeconds": 1.516,
+        "gcMaxMs": 18.0,
+        "uptime": 339.859,
+        "active": 11.0,
+        "local": [
+          {
+            "process": "/opt/homebrew/Cellar/python@3.13/3.13.7/Frameworks/Python.framework/Versions/3.13/Resources/Python.app/Contents/MacOS/Python",
+            "cpu": 0.0,
+            "rssMiB": 2.3
+          },
+          {
+            "process": "/opt/homebrew/Cellar/python@3.13/3.13.7/Frameworks/Python.framework/Versions/3.13/Resources/Python.app/Contents/MacOS/Python",
+            "cpu": 0.2,
+            "rssMiB": 16.8
+          },
+          {
+            "process": "k6",
+            "cpu": 180.0,
+            "rssMiB": 1737.7
+          }
+        ],
+        "jitDeltaMs": 488.0
+      },
+      {
+        "t": 19.3,
+        "jitMs": 85231.0,
+        "cpuSeconds": 264.27,
+        "gcSeconds": 1.567,
+        "gcMaxMs": 18.0,
+        "uptime": 345.195,
+        "active": 11.0,
+        "local": [
+          {
+            "process": "/opt/homebrew/Cellar/python@3.13/3.13.7/Frameworks/Python.framework/Versions/3.13/Resources/Python.app/Contents/MacOS/Python",
+            "cpu": 0.0,
+            "rssMiB": 2.3
+          },
+          {
+            "process": "/opt/homebrew/Cellar/python@3.13/3.13.7/Frameworks/Python.framework/Versions/3.13/Resources/Python.app/Contents/MacOS/Python",
+            "cpu": 0.0,
+            "rssMiB": 17.8
+          },
+          {
+            "process": "k6",
+            "cpu": 288.8,
+            "rssMiB": 1623.2
+          }
+        ],
+        "jitDeltaMs": 92.0
+      },
+      {
+        "t": 24.3,
+        "jitMs": 85329.0,
+        "cpuSeconds": 271.4,
+        "gcSeconds": 1.62,
+        "gcMaxMs": 18.0,
+        "uptime": 349.917,
+        "active": 43.0,
+        "local": [
+          {
+            "process": "/opt/homebrew/Cellar/python@3.13/3.13.7/Frameworks/Python.framework/Versions/3.13/Resources/Python.app/Contents/MacOS/Python",
+            "cpu": 0.0,
+            "rssMiB": 2.3
+          },
+          {
+            "process": "/opt/homebrew/Cellar/python@3.13/3.13.7/Frameworks/Python.framework/Versions/3.13/Resources/Python.app/Contents/MacOS/Python",
+            "cpu": 0.0,
+            "rssMiB": 18.1
+          },
+          {
+            "process": "k6",
+            "cpu": 168.4,
+            "rssMiB": 1564.1
+          }
+        ],
+        "jitDeltaMs": 98.0
+      },
+      {
+        "t": 29.3,
+        "jitMs": 85851.0,
+        "cpuSeconds": 279.41,
+        "gcSeconds": 1.68,
+        "gcMaxMs": 18.0,
+        "uptime": 355.197,
+        "active": 11.0,
+        "local": [
+          {
+            "process": "/opt/homebrew/Cellar/python@3.13/3.13.7/Frameworks/Python.framework/Versions/3.13/Resources/Python.app/Contents/MacOS/Python",
+            "cpu": 0.0,
+            "rssMiB": 2.3
+          },
+          {
+            "process": "/opt/homebrew/Cellar/python@3.13/3.13.7/Frameworks/Python.framework/Versions/3.13/Resources/Python.app/Contents/MacOS/Python",
+            "cpu": 0.0,
+            "rssMiB": 18.0
+          },
+          {
+            "process": "k6",
+            "cpu": 335.3,
+            "rssMiB": 1614.6
+          }
+        ],
+        "jitDeltaMs": 522.0
+      },
+      {
+        "t": 34.3,
+        "jitMs": 86805.0,
+        "cpuSeconds": 286.72,
+        "gcSeconds": 1.74,
+        "gcMaxMs": 26.0,
+        "uptime": 360.044,
+        "active": 19.0,
+        "local": [
+          {
+            "process": "/opt/homebrew/Cellar/python@3.13/3.13.7/Frameworks/Python.framework/Versions/3.13/Resources/Python.app/Contents/MacOS/Python",
+            "cpu": 0.0,
+            "rssMiB": 2.3
+          },
+          {
+            "process": "/opt/homebrew/Cellar/python@3.13/3.13.7/Frameworks/Python.framework/Versions/3.13/Resources/Python.app/Contents/MacOS/Python",
+            "cpu": 0.0,
+            "rssMiB": 17.8
+          },
+          {
+            "process": "k6",
+            "cpu": 244.1,
+            "rssMiB": 1614.2
+          }
+        ],
+        "jitDeltaMs": 954.0
+      },
+      {
+        "t": 39.3,
+        "jitMs": 86857.0,
+        "cpuSeconds": 294.37,
+        "gcSeconds": 1.795,
+        "gcMaxMs": 26.0,
+        "uptime": 365.142,
+        "active": 11.0,
+        "local": [
+          {
+            "process": "/opt/homebrew/Cellar/python@3.13/3.13.7/Frameworks/Python.framework/Versions/3.13/Resources/Python.app/Contents/MacOS/Python",
+            "cpu": 0.0,
+            "rssMiB": 2.3
+          },
+          {
+            "process": "/opt/homebrew/Cellar/python@3.13/3.13.7/Frameworks/Python.framework/Versions/3.13/Resources/Python.app/Contents/MacOS/Python",
+            "cpu": 0.0,
+            "rssMiB": 18.0
+          },
+          {
+            "process": "k6",
+            "cpu": 183.3,
+            "rssMiB": 1634.8
+          }
+        ],
+        "jitDeltaMs": 52.0
+      },
+      {
+        "t": 44.3,
+        "jitMs": 86892.0,
+        "cpuSeconds": 301.53,
+        "gcSeconds": 1.836,
+        "gcMaxMs": 26.0,
+        "uptime": 369.931,
+        "active": 10.0,
+        "local": [
+          {
+            "process": "/opt/homebrew/Cellar/python@3.13/3.13.7/Frameworks/Python.framework/Versions/3.13/Resources/Python.app/Contents/MacOS/Python",
+            "cpu": 0.0,
+            "rssMiB": 2.3
+          },
+          {
+            "process": "/opt/homebrew/Cellar/python@3.13/3.13.7/Frameworks/Python.framework/Versions/3.13/Resources/Python.app/Contents/MacOS/Python",
+            "cpu": 0.0,
+            "rssMiB": 16.8
+          },
+          {
+            "process": "k6",
+            "cpu": 237.3,
+            "rssMiB": 1652.0
+          }
+        ],
+        "jitDeltaMs": 35.0
+      },
+      {
+        "t": 49.4,
+        "jitMs": 86979.0,
+        "cpuSeconds": 308.99,
+        "gcSeconds": 1.89,
+        "gcMaxMs": 26.0,
+        "uptime": 375.136,
+        "active": 0.0,
+        "local": [
+          {
+            "process": "/opt/homebrew/Cellar/python@3.13/3.13.7/Frameworks/Python.framework/Versions/3.13/Resources/Python.app/Contents/MacOS/Python",
+            "cpu": 0.0,
+            "rssMiB": 2.3
+          },
+          {
+            "process": "/opt/homebrew/Cellar/python@3.13/3.13.7/Frameworks/Python.framework/Versions/3.13/Resources/Python.app/Contents/MacOS/Python",
+            "cpu": 2.7,
+            "rssMiB": 17.1
+          },
+          {
+            "process": "k6",
+            "cpu": 105.7,
+            "rssMiB": 1340.1
+          }
+        ],
+        "jitDeltaMs": 87.0
+      },
+      {
+        "t": 54.4,
+        "jitMs": 88172.0,
+        "cpuSeconds": 313.1,
+        "gcSeconds": 1.916,
+        "gcMaxMs": 26.0,
+        "uptime": 380.145,
+        "active": 19.0,
+        "local": [
+          {
+            "process": "/opt/homebrew/Cellar/python@3.13/3.13.7/Frameworks/Python.framework/Versions/3.13/Resources/Python.app/Contents/MacOS/Python",
+            "cpu": 0.1,
+            "rssMiB": 2.3
+          },
+          {
+            "process": "/opt/homebrew/Cellar/python@3.13/3.13.7/Frameworks/Python.framework/Versions/3.13/Resources/Python.app/Contents/MacOS/Python",
+            "cpu": 1.7,
+            "rssMiB": 17.1
+          },
+          {
+            "process": "k6",
+            "cpu": 215.2,
+            "rssMiB": 1552.8
+          }
+        ],
+        "jitDeltaMs": 1193.0
+      },
+      {
+        "t": 59.3,
+        "jitMs": 88278.0,
+        "cpuSeconds": 320.62,
+        "gcSeconds": 1.955,
+        "gcMaxMs": 26.0,
+        "uptime": 385.077,
+        "active": 7.0,
+        "local": [
+          {
+            "process": "/opt/homebrew/Cellar/python@3.13/3.13.7/Frameworks/Python.framework/Versions/3.13/Resources/Python.app/Contents/MacOS/Python",
+            "cpu": 0.0,
+            "rssMiB": 2.3
+          },
+          {
+            "process": "/opt/homebrew/Cellar/python@3.13/3.13.7/Frameworks/Python.framework/Versions/3.13/Resources/Python.app/Contents/MacOS/Python",
+            "cpu": 0.0,
+            "rssMiB": 16.9
+          },
+          {
+            "process": "k6",
+            "cpu": 282.3,
+            "rssMiB": 1685.9
+          }
+        ],
+        "jitDeltaMs": 106.0
+      }
+    ],
+    "stages": {
+      "UserRepositoryAdapter.findById": {
+        "mean": 0.16,
+        "p50": 0.042,
+        "p95": 0.748,
+        "p99": 1.98,
+        "max": 82.298
+      },
+      "request.pipeline": {
+        "mean": 3.789,
+        "p50": 2.533,
+        "p95": 10.891,
+        "p99": 23.397,
+        "max": 201.281
+      },
+      "jdbc.connection.commit": {
+        "mean": 1.056,
+        "p50": 0.725,
+        "p95": 3.05,
+        "p99": 5.146,
+        "max": 50.39
+      },
+      "jdbc.connection.setAutoCommit": {
+        "mean": 1.639,
+        "p50": 1.181,
+        "p95": 4.356,
+        "p99": 7.555,
+        "max": 108.985
+      },
+      "jdbc.execute": {
+        "mean": 1.157,
+        "p50": 0.79,
+        "p95": 3.195,
+        "p99": 5.622,
+        "max": 75.134
+      },
+      "jdbc.connection.isClosed": {
+        "mean": 0.001,
+        "p50": 0.0,
+        "p95": 0.001,
+        "p99": 0.001,
+        "max": 2.458
+      },
+      "response.writeAndMvcCompletion": {
+        "mean": 0.287,
+        "p50": 0.066,
+        "p95": 1.4,
+        "p99": 3.092,
+        "max": 24.771
+      },
+      "jdbc.connection.getAutoCommit": {
+        "mean": 0.001,
+        "p50": 0.0,
+        "p95": 0.001,
+        "p99": 0.001,
+        "max": 9.169
+      },
+      "jdbc.statement.other": {
+        "mean": 0.024,
+        "p50": 0.005,
+        "p95": 0.018,
+        "p99": 0.641,
+        "max": 14.63
+      },
+      "jdbc.acquire": {
+        "mean": 0.026,
+        "p50": 0.002,
+        "p95": 0.005,
+        "p99": 0.174,
+        "max": 43.777
+      },
+      "jdbc.connection.prepareStatement": {
+        "mean": 0.053,
+        "p50": 0.014,
+        "p95": 0.084,
+        "p99": 1.013,
+        "max": 59.311
+      },
+      "jdbc.connection.setReadOnly": {
+        "mean": 2.355,
+        "p50": 1.714,
+        "p95": 6.342,
+        "p99": 11.456,
+        "max": 73.216
+      },
+      "jdbc.result.read": {
+        "mean": 0.035,
+        "p50": 0.008,
+        "p95": 0.026,
+        "p99": 0.754,
+        "max": 73.181
+      },
+      "jdbc.connection.close": {
+        "mean": 0.033,
+        "p50": 0.001,
+        "p95": 0.003,
+        "p99": 0.017,
+        "max": 34.675
+      },
+      "jdbc.connection.clearWarnings": {
+        "mean": 0.001,
+        "p50": 0.0,
+        "p95": 0.0,
+        "p99": 0.001,
+        "max": 1.602
+      }
+    },
+    "errors": {}
+  },
+  {
+    "runId": "20261014T173418-measure-1700-696426",
+    "timings": {
+      "duration": {
+        "mean": 773.531,
+        "p50": 663.873,
+        "p95": 1852.278,
+        "p99": 2515.456,
+        "max": 3880.6
+      },
+      "blocked": {
+        "mean": 5.169,
+        "p50": 0.002,
+        "p95": 0.018,
+        "p99": 73.245,
+        "max": 1542.342
+      },
+      "looking_up": {
+        "mean": 0,
+        "p50": 0,
+        "p95": 0,
+        "p99": 0,
+        "max": 0
+      },
+      "connecting": {
+        "mean": 4.945,
+        "p50": 0,
+        "p95": 0,
+        "p99": 42.674,
+        "max": 1542.286
+      },
+      "tls_handshaking": {
+        "mean": 0,
+        "p50": 0,
+        "p95": 0,
+        "p99": 0,
+        "max": 0
+      },
+      "sending": {
+        "mean": 4.115,
+        "p50": 0.006,
+        "p95": 1.723,
+        "p99": 101.578,
+        "max": 1975.201
+      },
+      "waiting": {
+        "mean": 750.366,
+        "p50": 661.051,
+        "p95": 1726.35,
+        "p99": 2270.961,
+        "max": 3457.82
+      },
+      "receiving": {
+        "mean": 19.049,
+        "p50": 0.023,
+        "p95": 39.969,
+        "p99": 398.648,
+        "max": 2069.554
+      },
+      "clockMinusHttp": {
+        "mean": 83.971,
+        "p50": 0.145,
+        "p95": 750.322,
+        "p99": 1426.323,
+        "max": 2895.682
+      },
+      "successClient": {
+        "mean": 862.67,
+        "p50": 677,
+        "p95": 2302,
+        "p99": 3162,
+        "max": 4555
+      },
+      "successServer": {
+        "mean": 10.175,
+        "p50": 8.144,
+        "p95": 22.891,
+        "p99": 35.933,
+        "max": 146.539
+      },
+      "successGap": {
+        "mean": 852.495,
+        "p50": 668.197,
+        "p95": 2293.666,
+        "p99": 3155.055,
+        "max": 4546.258
+      },
+      "successWaitingMinusServer": {
+        "mean": 740.191,
+        "p50": 650.178,
+        "p95": 1720.807,
+        "p99": 2264.317,
+        "max": 3452.467
+      }
+    },
+    "bins": [
+      {
+        "startSecond": 0,
+        "outcomes": {
+          "success": 9914
+        },
+        "latency": {
+          "mean": 1248.63,
+          "p50": 936,
+          "p95": 3174,
+          "p99": 3745,
+          "max": 3929
+        },
+        "server": {
+          "mean": 10.413,
+          "p50": 8.651,
+          "p95": 22.103,
+          "p99": 35.509,
+          "max": 146.539
+        },
+        "gap": {
+          "mean": 1238.217,
+          "p50": 925.323,
+          "p95": 3164.614,
+          "p99": 3736.686,
+          "max": 3919.652
+        }
+      },
+      {
+        "startSecond": 10,
+        "outcomes": {
+          "success": 13107
+        },
+        "latency": {
+          "mean": 1494.769,
+          "p50": 1413,
+          "p95": 2932,
+          "p99": 3588,
+          "max": 4555
+        },
+        "server": {
+          "mean": 11.097,
+          "p50": 8.413,
+          "p95": 26.804,
+          "p99": 42.891,
+          "max": 96.303
+        },
+        "gap": {
+          "mean": 1483.672,
+          "p50": 1402.276,
+          "p95": 2924.453,
+          "p99": 3581.088,
+          "max": 4546.258
+        }
+      },
+      {
+        "startSecond": 20,
+        "outcomes": {
+          "success": 16603
+        },
+        "latency": {
+          "mean": 580.073,
+          "p50": 444,
+          "p95": 1297,
+          "p99": 2130,
+          "max": 2356
+        },
+        "server": {
+          "mean": 9.924,
+          "p50": 7.939,
+          "p95": 22.552,
+          "p99": 33.719,
+          "max": 67.607
+        },
+        "gap": {
+          "mean": 570.149,
+          "p50": 432.275,
+          "p95": 1285.816,
+          "p99": 2116.842,
+          "max": 2353.026
+        }
+      },
+      {
+        "startSecond": 30,
+        "outcomes": {
+          "success": 17000
+        },
+        "latency": {
+          "mean": 587.292,
+          "p50": 589,
+          "p95": 687,
+          "p99": 718,
+          "max": 836
+        },
+        "server": {
+          "mean": 10.087,
+          "p50": 8.07,
+          "p95": 22.827,
+          "p99": 36.034,
+          "max": 79.239
+        },
+        "gap": {
+          "mean": 577.205,
+          "p50": 579.593,
+          "p95": 675.304,
+          "p99": 705.144,
+          "max": 828.407
+        }
+      },
+      {
+        "startSecond": 40,
+        "outcomes": {
+          "success": 17000
+        },
+        "latency": {
+          "mean": 673.477,
+          "p50": 655,
+          "p95": 811,
+          "p99": 1145,
+          "max": 2513
+        },
+        "server": {
+          "mean": 9.672,
+          "p50": 7.926,
+          "p95": 20.762,
+          "p99": 33.924,
+          "max": 72.483
+        },
+        "gap": {
+          "mean": 663.805,
+          "p50": 647.115,
+          "p95": 796.571,
+          "p99": 1130.174,
+          "max": 2494.9
+        }
+      },
+      {
+        "startSecond": 50,
+        "outcomes": {
+          "success": 16925
+        },
+        "latency": {
+          "mean": 890.934,
+          "p50": 884,
+          "p95": 1024,
+          "p99": 1153,
+          "max": 1327
+        },
+        "server": {
+          "mean": 10.162,
+          "p50": 8.22,
+          "p95": 22.448,
+          "p99": 32.887,
+          "max": 119.048
+        },
+        "gap": {
+          "mean": 880.772,
+          "p50": 872.75,
+          "p95": 1015.863,
+          "p99": 1144.393,
+          "max": 1322.502
+        }
+      }
+    ],
+    "jvm": {
+      "sampleSeconds": 60.0,
+      "jitDeltaMs": 1886.0,
+      "gcDeltaSeconds": 0.48099999999999987,
+      "cpuDeltaSeconds": 79.85999999999996,
+      "uptimeStart": 396.674
+    },
+    "timeline": [
+      {
+        "t": -1.1,
+        "jitMs": 88334.0,
+        "cpuSeconds": 321.23,
+        "gcSeconds": 1.964,
+        "gcMaxMs": 26.0,
+        "uptime": 396.674,
+        "active": 19.0,
+        "local": [
+          {
+            "process": "/opt/homebrew/Cellar/python@3.13/3.13.7/Frameworks/Python.framework/Versions/3.13/Resources/Python.app/Contents/MacOS/Python",
+            "cpu": 0.0,
+            "rssMiB": 2.3
+          },
+          {
+            "process": "/opt/homebrew/Cellar/python@3.13/3.13.7/Frameworks/Python.framework/Versions/3.13/Resources/Python.app/Contents/MacOS/Python",
+            "cpu": 0.0,
+            "rssMiB": 22.7
+          },
+          {
+            "process": "k6",
+            "cpu": 0.0,
+            "rssMiB": 12.6
+          }
+        ]
+      },
+      {
+        "t": 4.0,
+        "jitMs": 88513.0,
+        "cpuSeconds": 326.24,
+        "gcSeconds": 2.016,
+        "gcMaxMs": 26.0,
+        "uptime": 402.074,
+        "active": 0.0,
+        "local": [
+          {
+            "process": "/opt/homebrew/Cellar/python@3.13/3.13.7/Frameworks/Python.framework/Versions/3.13/Resources/Python.app/Contents/MacOS/Python",
+            "cpu": 0.0,
+            "rssMiB": 2.3
+          },
+          {
+            "process": "/opt/homebrew/Cellar/python@3.13/3.13.7/Frameworks/Python.framework/Versions/3.13/Resources/Python.app/Contents/MacOS/Python",
+            "cpu": 0.1,
+            "rssMiB": 17.0
+          },
+          {
+            "process": "k6",
+            "cpu": 214.2,
+            "rssMiB": 1303.2
+          }
+        ],
+        "jitDeltaMs": 179.0
+      },
+      {
+        "t": 8.9,
+        "jitMs": 88541.0,
+        "cpuSeconds": 329.98,
+        "gcSeconds": 2.04,
+        "gcMaxMs": 26.0,
+        "uptime": 406.768,
+        "active": 32.0,
+        "local": [
+          {
+            "process": "/opt/homebrew/Cellar/python@3.13/3.13.7/Frameworks/Python.framework/Versions/3.13/Resources/Python.app/Contents/MacOS/Python",
+            "cpu": 0.0,
+            "rssMiB": 1.5
+          },
+          {
+            "process": "/opt/homebrew/Cellar/python@3.13/3.13.7/Frameworks/Python.framework/Versions/3.13/Resources/Python.app/Contents/MacOS/Python",
+            "cpu": 0.7,
+            "rssMiB": 17.0
+          },
+          {
+            "process": "k6",
+            "cpu": 237.2,
+            "rssMiB": 1516.0
+          }
+        ],
+        "jitDeltaMs": 28.0
+      },
+      {
+        "t": 13.9,
+        "jitMs": 88902.0,
+        "cpuSeconds": 336.66,
+        "gcSeconds": 2.083,
+        "gcMaxMs": 26.0,
+        "uptime": 411.981,
+        "active": 26.0,
+        "local": [
+          {
+            "process": "/opt/homebrew/Cellar/python@3.13/3.13.7/Frameworks/Python.framework/Versions/3.13/Resources/Python.app/Contents/MacOS/Python",
+            "cpu": 0.0,
+            "rssMiB": 2.3
+          },
+          {
+            "process": "/opt/homebrew/Cellar/python@3.13/3.13.7/Frameworks/Python.framework/Versions/3.13/Resources/Python.app/Contents/MacOS/Python",
+            "cpu": 1.2,
+            "rssMiB": 16.9
+          },
+          {
+            "process": "k6",
+            "cpu": 248.0,
+            "rssMiB": 1750.2
+          }
+        ],
+        "jitDeltaMs": 361.0
+      },
+      {
+        "t": 18.9,
+        "jitMs": 89908.0,
+        "cpuSeconds": 341.94,
+        "gcSeconds": 2.105,
+        "gcMaxMs": 26.0,
+        "uptime": 416.962,
+        "active": 15.0,
+        "local": [
+          {
+            "process": "/opt/homebrew/Cellar/python@3.13/3.13.7/Frameworks/Python.framework/Versions/3.13/Resources/Python.app/Contents/MacOS/Python",
+            "cpu": 0.0,
+            "rssMiB": 2.3
+          },
+          {
+            "process": "/opt/homebrew/Cellar/python@3.13/3.13.7/Frameworks/Python.framework/Versions/3.13/Resources/Python.app/Contents/MacOS/Python",
+            "cpu": 0.7,
+            "rssMiB": 17.1
+          },
+          {
+            "process": "k6",
+            "cpu": 168.3,
+            "rssMiB": 1320.3
+          }
+        ],
+        "jitDeltaMs": 1006.0
+      },
+      {
+        "t": 23.9,
+        "jitMs": 89949.0,
+        "cpuSeconds": 349.21,
+        "gcSeconds": 2.154,
+        "gcMaxMs": 26.0,
+        "uptime": 422.229,
+        "active": 19.0,
+        "local": [
+          {
+            "process": "/opt/homebrew/Cellar/python@3.13/3.13.7/Frameworks/Python.framework/Versions/3.13/Resources/Python.app/Contents/MacOS/Python",
+            "cpu": 0.0,
+            "rssMiB": 2.3
+          },
+          {
+            "process": "/opt/homebrew/Cellar/python@3.13/3.13.7/Frameworks/Python.framework/Versions/3.13/Resources/Python.app/Contents/MacOS/Python",
+            "cpu": 0.1,
+            "rssMiB": 16.8
+          },
+          {
+            "process": "k6",
+            "cpu": 159.0,
+            "rssMiB": 1904.9
+          }
+        ],
+        "jitDeltaMs": 41.0
+      },
+      {
+        "t": 28.9,
+        "jitMs": 90059.0,
+        "cpuSeconds": 356.43,
+        "gcSeconds": 2.195,
+        "gcMaxMs": 26.0,
+        "uptime": 427.256,
+        "active": 18.0,
+        "local": [
+          {
+            "process": "/opt/homebrew/Cellar/python@3.13/3.13.7/Frameworks/Python.framework/Versions/3.13/Resources/Python.app/Contents/MacOS/Python",
+            "cpu": 0.0,
+            "rssMiB": 2.3
+          },
+          {
+            "process": "/opt/homebrew/Cellar/python@3.13/3.13.7/Frameworks/Python.framework/Versions/3.13/Resources/Python.app/Contents/MacOS/Python",
+            "cpu": 0.0,
+            "rssMiB": 16.9
+          },
+          {
+            "process": "k6",
+            "cpu": 235.5,
+            "rssMiB": 1685.8
+          }
+        ],
+        "jitDeltaMs": 110.0
+      },
+      {
+        "t": 33.9,
+        "jitMs": 90138.0,
+        "cpuSeconds": 363.27,
+        "gcSeconds": 2.228,
+        "gcMaxMs": 26.0,
+        "uptime": 431.831,
+        "active": 27.0,
+        "local": [
+          {
+            "process": "/opt/homebrew/Cellar/python@3.13/3.13.7/Frameworks/Python.framework/Versions/3.13/Resources/Python.app/Contents/MacOS/Python",
+            "cpu": 0.0,
+            "rssMiB": 2.3
+          },
+          {
+            "process": "/opt/homebrew/Cellar/python@3.13/3.13.7/Frameworks/Python.framework/Versions/3.13/Resources/Python.app/Contents/MacOS/Python",
+            "cpu": 0.0,
+            "rssMiB": 16.8
+          },
+          {
+            "process": "k6",
+            "cpu": 158.7,
+            "rssMiB": 1718.8
+          }
+        ],
+        "jitDeltaMs": 79.0
+      },
+      {
+        "t": 38.9,
+        "jitMs": 90140.0,
+        "cpuSeconds": 370.92,
+        "gcSeconds": 2.281,
+        "gcMaxMs": 26.0,
+        "uptime": 436.952,
+        "active": 10.0,
+        "local": [
+          {
+            "process": "/opt/homebrew/Cellar/python@3.13/3.13.7/Frameworks/Python.framework/Versions/3.13/Resources/Python.app/Contents/MacOS/Python",
+            "cpu": 0.0,
+            "rssMiB": 2.3
+          },
+          {
+            "process": "/opt/homebrew/Cellar/python@3.13/3.13.7/Frameworks/Python.framework/Versions/3.13/Resources/Python.app/Contents/MacOS/Python",
+            "cpu": 0.0,
+            "rssMiB": 18.0
+          },
+          {
+            "process": "k6",
+            "cpu": 311.0,
+            "rssMiB": 1664.9
+          }
+        ],
+        "jitDeltaMs": 2.0
+      },
+      {
+        "t": 43.9,
+        "jitMs": 90174.0,
+        "cpuSeconds": 378.27,
+        "gcSeconds": 2.319,
+        "gcMaxMs": 26.0,
+        "uptime": 441.896,
+        "active": 6.0,
+        "local": [
+          {
+            "process": "/opt/homebrew/Cellar/python@3.13/3.13.7/Frameworks/Python.framework/Versions/3.13/Resources/Python.app/Contents/MacOS/Python",
+            "cpu": 0.0,
+            "rssMiB": 2.3
+          },
+          {
+            "process": "/opt/homebrew/Cellar/python@3.13/3.13.7/Frameworks/Python.framework/Versions/3.13/Resources/Python.app/Contents/MacOS/Python",
+            "cpu": 0.0,
+            "rssMiB": 17.1
+          },
+          {
+            "process": "k6",
+            "cpu": 256.9,
+            "rssMiB": 1778.0
+          }
+        ],
+        "jitDeltaMs": 34.0
+      },
+      {
+        "t": 48.9,
+        "jitMs": 90176.0,
+        "cpuSeconds": 385.72,
+        "gcSeconds": 2.36,
+        "gcMaxMs": 26.0,
+        "uptime": 446.848,
+        "active": 19.0,
+        "local": [
+          {
+            "process": "/opt/homebrew/Cellar/python@3.13/3.13.7/Frameworks/Python.framework/Versions/3.13/Resources/Python.app/Contents/MacOS/Python",
+            "cpu": 0.0,
+            "rssMiB": 2.3
+          },
+          {
+            "process": "/opt/homebrew/Cellar/python@3.13/3.13.7/Frameworks/Python.framework/Versions/3.13/Resources/Python.app/Contents/MacOS/Python",
+            "cpu": 0.0,
+            "rssMiB": 18.1
+          },
+          {
+            "process": "k6",
+            "cpu": 207.8,
+            "rssMiB": 1758.6
+          }
+        ],
+        "jitDeltaMs": 2.0
+      },
+      {
+        "t": 53.9,
+        "jitMs": 90187.0,
+        "cpuSeconds": 393.47,
+        "gcSeconds": 2.4,
+        "gcMaxMs": 26.0,
+        "uptime": 451.972,
+        "active": 15.0,
+        "local": [
+          {
+            "process": "/opt/homebrew/Cellar/python@3.13/3.13.7/Frameworks/Python.framework/Versions/3.13/Resources/Python.app/Contents/MacOS/Python",
+            "cpu": 0.0,
+            "rssMiB": 2.3
+          },
+          {
+            "process": "/opt/homebrew/Cellar/python@3.13/3.13.7/Frameworks/Python.framework/Versions/3.13/Resources/Python.app/Contents/MacOS/Python",
+            "cpu": 0.0,
+            "rssMiB": 18.5
+          },
+          {
+            "process": "k6",
+            "cpu": 279.7,
+            "rssMiB": 1706.2
+          }
+        ],
+        "jitDeltaMs": 11.0
+      },
+      {
+        "t": 58.9,
+        "jitMs": 90220.0,
+        "cpuSeconds": 401.09,
+        "gcSeconds": 2.445,
+        "gcMaxMs": 26.0,
+        "uptime": 456.951,
+        "active": 7.0,
+        "local": [
+          {
+            "process": "/opt/homebrew/Cellar/python@3.13/3.13.7/Frameworks/Python.framework/Versions/3.13/Resources/Python.app/Contents/MacOS/Python",
+            "cpu": 0.0,
+            "rssMiB": 2.3
+          },
+          {
+            "process": "/opt/homebrew/Cellar/python@3.13/3.13.7/Frameworks/Python.framework/Versions/3.13/Resources/Python.app/Contents/MacOS/Python",
+            "cpu": 0.0,
+            "rssMiB": 16.8
+          },
+          {
+            "process": "k6",
+            "cpu": 169.2,
+            "rssMiB": 1794.2
+          }
+        ],
+        "jitDeltaMs": 33.0
+      }
+    ],
+    "stages": {
+      "UserRepositoryAdapter.findById": {
+        "mean": 0.155,
+        "p50": 0.041,
+        "p95": 0.682,
+        "p99": 1.974,
+        "max": 129.342
+      },
+      "request.pipeline": {
+        "mean": 3.24,
+        "p50": 2.337,
+        "p95": 8.847,
+        "p99": 16.804,
+        "max": 131.727
+      },
+      "jdbc.connection.commit": {
+        "mean": 1.04,
+        "p50": 0.711,
+        "p95": 2.991,
+        "p99": 5.427,
+        "max": 130.353
+      },
+      "jdbc.connection.setAutoCommit": {
+        "mean": 1.617,
+        "p50": 1.165,
+        "p95": 4.257,
+        "p99": 7.864,
+        "max": 131.663
+      },
+      "jdbc.execute": {
+        "mean": 1.132,
+        "p50": 0.772,
+        "p95": 3.162,
+        "p99": 5.712,
+        "max": 99.029
+      },
+      "jdbc.connection.isClosed": {
+        "mean": 0.001,
+        "p50": 0.0,
+        "p95": 0.001,
+        "p99": 0.001,
+        "max": 1.746
+      },
+      "response.writeAndMvcCompletion": {
+        "mean": 0.271,
+        "p50": 0.066,
+        "p95": 1.288,
+        "p99": 2.895,
+        "max": 57.295
+      },
+      "jdbc.connection.getAutoCommit": {
+        "mean": 0.001,
+        "p50": 0.0,
+        "p95": 0.001,
+        "p99": 0.001,
+        "max": 2.651
+      },
+      "jdbc.statement.other": {
+        "mean": 0.024,
+        "p50": 0.005,
+        "p95": 0.017,
+        "p99": 0.599,
+        "max": 25.554
+      },
+      "jdbc.acquire": {
+        "mean": 0.02,
+        "p50": 0.002,
+        "p95": 0.003,
+        "p99": 0.201,
+        "max": 30.204
+      },
+      "jdbc.connection.prepareStatement": {
+        "mean": 0.049,
+        "p50": 0.014,
+        "p95": 0.07,
+        "p99": 0.937,
+        "max": 51.238
+      },
+      "jdbc.connection.setReadOnly": {
+        "mean": 2.349,
+        "p50": 1.683,
+        "p95": 6.425,
+        "p99": 11.975,
+        "max": 130.543
+      },
+      "jdbc.result.read": {
+        "mean": 0.032,
+        "p50": 0.008,
+        "p95": 0.026,
+        "p99": 0.666,
+        "max": 44.599
+      },
+      "jdbc.connection.close": {
+        "mean": 0.037,
+        "p50": 0.001,
+        "p95": 0.002,
+        "p99": 0.016,
+        "max": 48.117
+      },
+      "jdbc.connection.clearWarnings": {
+        "mean": 0.001,
+        "p50": 0.0,
+        "p95": 0.0,
+        "p99": 0.001,
+        "max": 5.034
+      }
+    },
+    "errors": {}
+  },
+  {
+    "runId": "20261014T173529-measure-1700-497b24",
+    "timings": {
+      "duration": {
+        "mean": 267.318,
+        "p50": 189.165,
+        "p95": 606.276,
+        "p99": 667.293,
+        "max": 830.126
+      },
+      "blocked": {
+        "mean": 0.271,
+        "p50": 0.002,
+        "p95": 0.007,
+        "p99": 9.045,
+        "max": 37.44
+      },
+      "looking_up": {
+        "mean": 0,
+        "p50": 0,
+        "p95": 0,
+        "p99": 0,
+        "max": 0
+      },
+      "connecting": {
+        "mean": 0.263,
+        "p50": 0,
+        "p95": 0,
+        "p99": 8.986,
+        "max": 34.066
+      },
+      "tls_handshaking": {
+        "mean": 0,
+        "p50": 0,
+        "p95": 0,
+        "p99": 0,
+        "max": 0
+      },
+      "sending": {
+        "mean": 0.272,
+        "p50": 0.005,
+        "p95": 0.099,
+        "p99": 3.525,
+        "max": 483.276
+      },
+      "waiting": {
+        "mean": 266.469,
+        "p50": 187.541,
+        "p95": 604.981,
+        "p99": 665.343,
+        "max": 738.774
+      },
+      "receiving": {
+        "mean": 0.577,
+        "p50": 0.013,
+        "p95": 2.336,
+        "p99": 5.192,
+        "max": 620.444
+      },
+      "clockMinusHttp": {
+        "mean": 0.091,
+        "p50": 0.045,
+        "p95": 0.739,
+        "p99": 0.932,
+        "max": 475.057
+      },
+      "successClient": {
+        "mean": 267.68,
+        "p50": 189,
+        "p95": 606,
+        "p99": 667,
+        "max": 830
+      },
+      "successServer": {
+        "mean": 10.471,
+        "p50": 8.167,
+        "p95": 24.496,
+        "p99": 40.202,
+        "max": 144.766
+      },
+      "successGap": {
+        "mean": 257.209,
+        "p50": 178.939,
+        "p95": 596.568,
+        "p99": 655.404,
+        "max": 814.756
+      },
+      "successWaitingMinusServer": {
+        "mean": 255.998,
+        "p50": 177.045,
+        "p95": 595.5,
+        "p99": 653.835,
+        "max": 714.615
+      }
+    },
+    "bins": [
+      {
+        "startSecond": 0,
+        "outcomes": {
+          "success": 17040
+        },
+        "latency": {
+          "mean": 117.48,
+          "p50": 122,
+          "p95": 211,
+          "p99": 230,
+          "max": 321
+        },
+        "server": {
+          "mean": 9.75,
+          "p50": 7.917,
+          "p95": 21.761,
+          "p99": 31.98,
+          "max": 64.885
+        },
+        "gap": {
+          "mean": 107.729,
+          "p50": 113.305,
+          "p95": 199.538,
+          "p99": 216.629,
+          "max": 309.083
+        }
+      },
+      {
+        "startSecond": 10,
+        "outcomes": {
+          "success": 17000
+        },
+        "latency": {
+          "mean": 40.556,
+          "p50": 26,
+          "p95": 147,
+          "p99": 174,
+          "max": 237
+        },
+        "server": {
+          "mean": 9.498,
+          "p50": 6.727,
+          "p95": 27.782,
+          "p99": 55.64,
+          "max": 129.648
+        },
+        "gap": {
+          "mean": 31.058,
+          "p50": 15.032,
+          "p95": 133.946,
+          "p99": 164.625,
+          "max": 174.366
+        }
+      },
+      {
+        "startSecond": 20,
+        "outcomes": {
+          "success": 17000
+        },
+        "latency": {
+          "mean": 73.132,
+          "p50": 68,
+          "p95": 157,
+          "p99": 198,
+          "max": 317
+        },
+        "server": {
+          "mean": 11.152,
+          "p50": 8.003,
+          "p95": 28.979,
+          "p99": 52.293,
+          "max": 144.766
+        },
+        "gap": {
+          "mean": 61.98,
+          "p50": 54.397,
+          "p95": 149.787,
+          "p99": 190.204,
+          "max": 311.448
+        }
+      },
+      {
+        "startSecond": 30,
+        "outcomes": {
+          "success": 17000
+        },
+        "latency": {
+          "mean": 341.082,
+          "p50": 371,
+          "p95": 463,
+          "p99": 511,
+          "max": 830
+        },
+        "server": {
+          "mean": 10.894,
+          "p50": 8.8,
+          "p95": 23.202,
+          "p99": 33.304,
+          "max": 139.014
+        },
+        "gap": {
+          "mean": 330.188,
+          "p50": 360.074,
+          "p95": 451.738,
+          "p99": 484.826,
+          "max": 814.756
+        }
+      },
+      {
+        "startSecond": 40,
+        "outcomes": {
+          "success": 17000
+        },
+        "latency": {
+          "mean": 523.878,
+          "p50": 520,
+          "p95": 637,
+          "p99": 662,
+          "max": 752
+        },
+        "server": {
+          "mean": 10.285,
+          "p50": 8.319,
+          "p95": 22.839,
+          "p99": 32.816,
+          "max": 64.0
+        },
+        "gap": {
+          "mean": 513.593,
+          "p50": 511.738,
+          "p95": 630.342,
+          "p99": 653.994,
+          "max": 748.016
+        }
+      },
+      {
+        "startSecond": 50,
+        "outcomes": {
+          "success": 16960
+        },
+        "latency": {
+          "mean": 510.879,
+          "p50": 490,
+          "p95": 669,
+          "p99": 701,
+          "max": 739
+        },
+        "server": {
+          "mean": 11.253,
+          "p50": 9.437,
+          "p95": 24.614,
+          "p99": 34.459,
+          "max": 71.899
+        },
+        "gap": {
+          "mean": 499.626,
+          "p50": 479.373,
+          "p95": 656.188,
+          "p99": 685.543,
+          "max": 717.698
+        }
+      }
+    ],
+    "jvm": {
+      "sampleSeconds": 60.099999999999994,
+      "jitDeltaMs": 1033.0,
+      "gcDeltaSeconds": 0.5130000000000003,
+      "cpuDeltaSeconds": 88.16000000000003,
+      "uptimeStart": 468.711
+    },
+    "timeline": [
+      {
+        "t": -0.8,
+        "jitMs": 90292.0,
+        "cpuSeconds": 402.94,
+        "gcSeconds": 2.465,
+        "gcMaxMs": 26.0,
+        "uptime": 468.711,
+        "active": 13.0,
+        "local": [
+          {
+            "process": "/opt/homebrew/Cellar/python@3.13/3.13.7/Frameworks/Python.framework/Versions/3.13/Resources/Python.app/Contents/MacOS/Python",
+            "cpu": 0.0,
+            "rssMiB": 2.3
+          },
+          {
+            "process": "/opt/homebrew/Cellar/python@3.13/3.13.7/Frameworks/Python.framework/Versions/3.13/Resources/Python.app/Contents/MacOS/Python",
+            "cpu": 0.0,
+            "rssMiB": 29.2
+          },
+          {
+            "process": "k6",
+            "cpu": 0.0,
+            "rssMiB": 11.5
+          }
+        ]
+      },
+      {
+        "t": 4.2,
+        "jitMs": 90654.0,
+        "cpuSeconds": 410.35,
+        "gcSeconds": 2.522,
+        "gcMaxMs": 26.0,
+        "uptime": 473.718,
+        "active": 20.0,
+        "local": [
+          {
+            "process": "/opt/homebrew/Cellar/python@3.13/3.13.7/Frameworks/Python.framework/Versions/3.13/Resources/Python.app/Contents/MacOS/Python",
+            "cpu": 0.0,
+            "rssMiB": 2.3
+          },
+          {
+            "process": "/opt/homebrew/Cellar/python@3.13/3.13.7/Frameworks/Python.framework/Versions/3.13/Resources/Python.app/Contents/MacOS/Python",
+            "cpu": 0.0,
+            "rssMiB": 18.4
+          },
+          {
+            "process": "k6",
+            "cpu": 221.8,
+            "rssMiB": 1491.9
+          }
+        ],
+        "jitDeltaMs": 362.0
+      },
+      {
+        "t": 9.2,
+        "jitMs": 90919.0,
+        "cpuSeconds": 417.96,
+        "gcSeconds": 2.576,
+        "gcMaxMs": 26.0,
+        "uptime": 478.839,
+        "active": 50.0,
+        "local": [
+          {
+            "process": "/opt/homebrew/Cellar/python@3.13/3.13.7/Frameworks/Python.framework/Versions/3.13/Resources/Python.app/Contents/MacOS/Python",
+            "cpu": 0.0,
+            "rssMiB": 2.3
+          },
+          {
+            "process": "/opt/homebrew/Cellar/python@3.13/3.13.7/Frameworks/Python.framework/Versions/3.13/Resources/Python.app/Contents/MacOS/Python",
+            "cpu": 0.0,
+            "rssMiB": 17.8
+          },
+          {
+            "process": "k6",
+            "cpu": 267.2,
+            "rssMiB": 1634.8
+          }
+        ],
+        "jitDeltaMs": 265.0
+      },
+      {
+        "t": 14.2,
+        "jitMs": 90956.0,
+        "cpuSeconds": 425.19,
+        "gcSeconds": 2.614,
+        "gcMaxMs": 26.0,
+        "uptime": 484.006,
+        "active": 7.0,
+        "local": [
+          {
+            "process": "/opt/homebrew/Cellar/python@3.13/3.13.7/Frameworks/Python.framework/Versions/3.13/Resources/Python.app/Contents/MacOS/Python",
+            "cpu": 0.0,
+            "rssMiB": 2.3
+          },
+          {
+            "process": "/opt/homebrew/Cellar/python@3.13/3.13.7/Frameworks/Python.framework/Versions/3.13/Resources/Python.app/Contents/MacOS/Python",
+            "cpu": 0.0,
+            "rssMiB": 17.9
+          },
+          {
+            "process": "k6",
+            "cpu": 178.8,
+            "rssMiB": 1595.8
+          }
+        ],
+        "jitDeltaMs": 37.0
+      },
+      {
+        "t": 19.2,
+        "jitMs": 91020.0,
+        "cpuSeconds": 432.34,
+        "gcSeconds": 2.649,
+        "gcMaxMs": 26.0,
+        "uptime": 488.861,
+        "active": 12.0,
+        "local": [
+          {
+            "process": "/opt/homebrew/Cellar/python@3.13/3.13.7/Frameworks/Python.framework/Versions/3.13/Resources/Python.app/Contents/MacOS/Python",
+            "cpu": 0.0,
+            "rssMiB": 2.3
+          },
+          {
+            "process": "/opt/homebrew/Cellar/python@3.13/3.13.7/Frameworks/Python.framework/Versions/3.13/Resources/Python.app/Contents/MacOS/Python",
+            "cpu": 0.0,
+            "rssMiB": 18.1
+          },
+          {
+            "process": "k6",
+            "cpu": 209.7,
+            "rssMiB": 1551.0
+          }
+        ],
+        "jitDeltaMs": 64.0
+      },
+      {
+        "t": 24.2,
+        "jitMs": 91168.0,
+        "cpuSeconds": 439.65,
+        "gcSeconds": 2.683,
+        "gcMaxMs": 26.0,
+        "uptime": 493.758,
+        "active": 16.0,
+        "local": [
+          {
+            "process": "/opt/homebrew/Cellar/python@3.13/3.13.7/Frameworks/Python.framework/Versions/3.13/Resources/Python.app/Contents/MacOS/Python",
+            "cpu": 0.0,
+            "rssMiB": 2.3
+          },
+          {
+            "process": "/opt/homebrew/Cellar/python@3.13/3.13.7/Frameworks/Python.framework/Versions/3.13/Resources/Python.app/Contents/MacOS/Python",
+            "cpu": 0.0,
+            "rssMiB": 17.9
+          },
+          {
+            "process": "k6",
+            "cpu": 147.8,
+            "rssMiB": 1636.2
+          }
+        ],
+        "jitDeltaMs": 148.0
+      },
+      {
+        "t": 29.2,
+        "jitMs": 91204.0,
+        "cpuSeconds": 446.87,
+        "gcSeconds": 2.729,
+        "gcMaxMs": 17.0,
+        "uptime": 498.727,
+        "active": 14.0,
+        "local": [
+          {
+            "process": "/opt/homebrew/Cellar/python@3.13/3.13.7/Frameworks/Python.framework/Versions/3.13/Resources/Python.app/Contents/MacOS/Python",
+            "cpu": 0.0,
+            "rssMiB": 2.3
+          },
+          {
+            "process": "/opt/homebrew/Cellar/python@3.13/3.13.7/Frameworks/Python.framework/Versions/3.13/Resources/Python.app/Contents/MacOS/Python",
+            "cpu": 0.0,
+            "rssMiB": 16.9
+          },
+          {
+            "process": "k6",
+            "cpu": 233.2,
+            "rssMiB": 1582.4
+          }
+        ],
+        "jitDeltaMs": 36.0
+      },
+      {
+        "t": 34.2,
+        "jitMs": 91204.0,
+        "cpuSeconds": 453.65,
+        "gcSeconds": 2.761,
+        "gcMaxMs": 17.0,
+        "uptime": 503.68,
+        "active": 18.0,
+        "local": [
+          {
+            "process": "/opt/homebrew/Cellar/python@3.13/3.13.7/Frameworks/Python.framework/Versions/3.13/Resources/Python.app/Contents/MacOS/Python",
+            "cpu": 0.0,
+            "rssMiB": 2.3
+          },
+          {
+            "process": "/opt/homebrew/Cellar/python@3.13/3.13.7/Frameworks/Python.framework/Versions/3.13/Resources/Python.app/Contents/MacOS/Python",
+            "cpu": 0.0,
+            "rssMiB": 17.2
+          },
+          {
+            "process": "k6",
+            "cpu": 188.8,
+            "rssMiB": 1635.2
+          }
+        ],
+        "jitDeltaMs": 0.0
+      },
+      {
+        "t": 39.3,
+        "jitMs": 91217.0,
+        "cpuSeconds": 461.63,
+        "gcSeconds": 2.809,
+        "gcMaxMs": 17.0,
+        "uptime": 508.922,
+        "active": 24.0,
+        "local": [
+          {
+            "process": "/opt/homebrew/Cellar/python@3.13/3.13.7/Frameworks/Python.framework/Versions/3.13/Resources/Python.app/Contents/MacOS/Python",
+            "cpu": 0.0,
+            "rssMiB": 2.3
+          },
+          {
+            "process": "/opt/homebrew/Cellar/python@3.13/3.13.7/Frameworks/Python.framework/Versions/3.13/Resources/Python.app/Contents/MacOS/Python",
+            "cpu": 0.0,
+            "rssMiB": 17.5
+          },
+          {
+            "process": "k6",
+            "cpu": 126.7,
+            "rssMiB": 1610.8
+          }
+        ],
+        "jitDeltaMs": 13.0
+      },
+      {
+        "t": 44.2,
+        "jitMs": 91219.0,
+        "cpuSeconds": 469.34,
+        "gcSeconds": 2.851,
+        "gcMaxMs": 17.0,
+        "uptime": 514.102,
+        "active": 5.0,
+        "local": [
+          {
+            "process": "/opt/homebrew/Cellar/python@3.13/3.13.7/Frameworks/Python.framework/Versions/3.13/Resources/Python.app/Contents/MacOS/Python",
+            "cpu": 0.0,
+            "rssMiB": 2.3
+          },
+          {
+            "process": "/opt/homebrew/Cellar/python@3.13/3.13.7/Frameworks/Python.framework/Versions/3.13/Resources/Python.app/Contents/MacOS/Python",
+            "cpu": 0.0,
+            "rssMiB": 17.8
+          },
+          {
+            "process": "k6",
+            "cpu": 258.0,
+            "rssMiB": 1609.2
+          }
+        ],
+        "jitDeltaMs": 2.0
+      },
+      {
+        "t": 49.2,
+        "jitMs": 91305.0,
+        "cpuSeconds": 476.38,
+        "gcSeconds": 2.894,
+        "gcMaxMs": 17.0,
+        "uptime": 518.821,
+        "active": 15.0,
+        "local": [
+          {
+            "process": "/opt/homebrew/Cellar/python@3.13/3.13.7/Frameworks/Python.framework/Versions/3.13/Resources/Python.app/Contents/MacOS/Python",
+            "cpu": 0.0,
+            "rssMiB": 2.3
+          },
+          {
+            "process": "/opt/homebrew/Cellar/python@3.13/3.13.7/Frameworks/Python.framework/Versions/3.13/Resources/Python.app/Contents/MacOS/Python",
+            "cpu": 0.0,
+            "rssMiB": 17.6
+          },
+          {
+            "process": "k6",
+            "cpu": 146.1,
+            "rssMiB": 1714.1
+          }
+        ],
+        "jitDeltaMs": 86.0
+      },
+      {
+        "t": 54.3,
+        "jitMs": 91325.0,
+        "cpuSeconds": 483.76,
+        "gcSeconds": 2.94,
+        "gcMaxMs": 17.0,
+        "uptime": 523.703,
+        "active": 7.0,
+        "local": [
+          {
+            "process": "/opt/homebrew/Cellar/python@3.13/3.13.7/Frameworks/Python.framework/Versions/3.13/Resources/Python.app/Contents/MacOS/Python",
+            "cpu": 0.0,
+            "rssMiB": 2.3
+          },
+          {
+            "process": "/opt/homebrew/Cellar/python@3.13/3.13.7/Frameworks/Python.framework/Versions/3.13/Resources/Python.app/Contents/MacOS/Python",
+            "cpu": 0.0,
+            "rssMiB": 17.3
+          },
+          {
+            "process": "k6",
+            "cpu": 316.5,
+            "rssMiB": 1616.1
+          }
+        ],
+        "jitDeltaMs": 20.0
+      },
+      {
+        "t": 59.3,
+        "jitMs": 91325.0,
+        "cpuSeconds": 491.1,
+        "gcSeconds": 2.978,
+        "gcMaxMs": 17.0,
+        "uptime": 528.68,
+        "active": 0.0,
+        "local": [
+          {
+            "process": "/opt/homebrew/Cellar/python@3.13/3.13.7/Frameworks/Python.framework/Versions/3.13/Resources/Python.app/Contents/MacOS/Python",
+            "cpu": 0.0,
+            "rssMiB": 2.3
+          },
+          {
+            "process": "/opt/homebrew/Cellar/python@3.13/3.13.7/Frameworks/Python.framework/Versions/3.13/Resources/Python.app/Contents/MacOS/Python",
+            "cpu": 0.0,
+            "rssMiB": 17.7
+          },
+          {
+            "process": "k6",
+            "cpu": 201.3,
+            "rssMiB": 1624.3
+          }
+        ],
+        "jitDeltaMs": 0.0
+      }
+    ],
+    "stages": {
+      "UserRepositoryAdapter.findById": {
+        "mean": 0.154,
+        "p50": 0.041,
+        "p95": 0.697,
+        "p99": 2.015,
+        "max": 92.94
+      },
+      "request.pipeline": {
+        "mean": 3.554,
+        "p50": 2.386,
+        "p95": 10.386,
+        "p99": 21.352,
+        "max": 126.169
+      },
+      "jdbc.connection.commit": {
+        "mean": 1.049,
+        "p50": 0.697,
+        "p95": 3.094,
+        "p99": 5.356,
+        "max": 33.564
+      },
+      "jdbc.connection.setAutoCommit": {
+        "mean": 1.595,
+        "p50": 1.134,
+        "p95": 4.286,
+        "p99": 7.588,
+        "max": 94.763
+      },
+      "jdbc.execute": {
+        "mean": 1.135,
+        "p50": 0.754,
+        "p95": 3.206,
+        "p99": 5.797,
+        "max": 120.379
+      },
+      "jdbc.connection.isClosed": {
+        "mean": 0.001,
+        "p50": 0.0,
+        "p95": 0.001,
+        "p99": 0.001,
+        "max": 1.4
+      },
+      "response.writeAndMvcCompletion": {
+        "mean": 0.282,
+        "p50": 0.066,
+        "p95": 1.375,
+        "p99": 3.06,
+        "max": 34.577
+      },
+      "jdbc.connection.getAutoCommit": {
+        "mean": 0.001,
+        "p50": 0.0,
+        "p95": 0.001,
+        "p99": 0.001,
+        "max": 19.142
+      },
+      "jdbc.statement.other": {
+        "mean": 0.025,
+        "p50": 0.005,
+        "p95": 0.018,
+        "p99": 0.64,
+        "max": 19.023
+      },
+      "jdbc.acquire": {
+        "mean": 0.027,
+        "p50": 0.002,
+        "p95": 0.003,
+        "p99": 0.059,
+        "max": 44.642
+      },
+      "jdbc.connection.prepareStatement": {
+        "mean": 0.051,
+        "p50": 0.014,
+        "p95": 0.078,
+        "p99": 1.011,
+        "max": 26.662
+      },
+      "jdbc.connection.setReadOnly": {
+        "mean": 2.267,
+        "p50": 1.619,
+        "p95": 6.26,
+        "p99": 11.479,
+        "max": 89.757
+      },
+      "jdbc.result.read": {
+        "mean": 0.031,
+        "p50": 0.007,
+        "p95": 0.025,
+        "p99": 0.71,
+        "max": 28.472
+      },
+      "jdbc.connection.close": {
+        "mean": 0.056,
+        "p50": 0.001,
+        "p95": 0.002,
+        "p99": 0.017,
+        "max": 62.73
+      },
+      "jdbc.connection.clearWarnings": {
+        "mean": 0.001,
+        "p50": 0.0,
+        "p95": 0.0,
+        "p99": 0.0,
+        "max": 4.685
+      }
+    },
+    "errors": {}
+  }
+]

@@ -73,6 +73,88 @@ paths:
         '401':
           $ref: '#/components/responses/UserNotIdentified'
 
+  /api/v1/products/like-counts:
+    get:
+      tags: [Customer Product]
+      operationId: GetProductLikecounts
+      summary: 상품 likeCount 일괄 조회
+      security:
+        - userId: []
+      parameters:
+        - name: ids
+          in: query
+          required: true
+          schema:
+            type: string
+            description: 쉼표로 구분한 양수 상품 ID 1~100개
+      responses:
+        '200':
+          description: ID 오름차순, 없는 상품·삭제 상품은 제외
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [meta, data]
+                properties:
+                  meta:
+                    $ref: '#/components/schemas/SuccessMetadata'
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      required: [productId, likeCount]
+                      properties:
+                        productId:
+                          type: integer
+                          format: int64
+                        likeCount:
+                          type: integer
+        '400':
+          $ref: '#/components/responses/InvalidRequest'
+        '401':
+          $ref: '#/components/responses/UserNotIdentified'
+
+  /api/v1/products/stocks:
+    get:
+      tags: [Customer Product]
+      operationId: GetProductStocks
+      summary: 상품 soldOut 일괄 조회
+      security:
+        - userId: []
+      parameters:
+        - name: ids
+          in: query
+          required: true
+          schema:
+            type: string
+            description: 쉼표로 구분한 양수 상품 ID 1~100개
+      responses:
+        '200':
+          description: ID 오름차순, 없는 상품·삭제 상품은 제외
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [meta, data]
+                properties:
+                  meta:
+                    $ref: '#/components/schemas/SuccessMetadata'
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      required: [productId, soldOut]
+                      properties:
+                        productId:
+                          type: integer
+                          format: int64
+                        soldOut:
+                          type: boolean
+        '400':
+          $ref: '#/components/responses/InvalidRequest'
+        '401':
+          $ref: '#/components/responses/UserNotIdentified'
+
   /api/v1/products/{productId}:
     get:
       tags: [Customer Product]
@@ -1068,7 +1150,7 @@ components:
           type: string
     CustomerProduct:
       type: object
-      required: [id, name, price, brand, likeCount, soldOut]
+      required: [id, name, price, brand]
       properties:
         id:
           type: integer
@@ -1080,12 +1162,6 @@ components:
           format: int64
         brand:
           $ref: '#/components/schemas/ProductBrand'
-        likeCount:
-          type: integer
-          format: int64
-          minimum: 0
-        soldOut:
-          type: boolean
       example:
         id: 10
         name: 운동화
@@ -1093,8 +1169,6 @@ components:
         brand:
           id: 1
           name: Nike
-        likeCount: 3
-        soldOut: false
     AdminProduct:
       type: object
       required: [id, name, price, brand, stock, deleted]

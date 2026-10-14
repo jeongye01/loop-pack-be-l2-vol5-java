@@ -161,7 +161,7 @@ class ProductHttpTest {
         }
     }
 
-    @DisplayName("[R-CATALOG-03] 상품 목록과 상세에는 브랜드 정보와 좋아요 수가 포함된다.")
+    @DisplayName("[R-CATALOG-09] 상품 기본 정보와 좋아요 수·품절 상태는 별도 조회한다.")
     @Nested
     class BrandAndLikeCountInCustomerProduct {
 
@@ -188,10 +188,10 @@ class ProductHttpTest {
             assertAll(
                 () -> assertThat(item.path("brand").path("id").asLong()).isEqualTo(brand.getId()),
                 () -> assertThat(item.path("brand").path("name").asText()).isEqualTo("Nike"),
-                () -> assertThat(item.path("likeCount").asLong(-1)).isEqualTo(2L),
+                () -> assertThat(item.has("likeCount")).isFalse(),
                 () -> assertThat(data(detail).path("brand").path("id").asLong()).isEqualTo(brand.getId()),
                 () -> assertThat(data(detail).path("brand").path("name").asText()).isEqualTo("Nike"),
-                () -> assertThat(data(detail).path("likeCount").asLong(-1)).isEqualTo(2L)
+                () -> assertThat(batch(customer, product, "like-counts").path("likeCount").asLong(-1)).isEqualTo(2L)
             );
         }
 
@@ -203,9 +203,9 @@ class ProductHttpTest {
             Product product = fixture.product(fixture.brand("Nike"), "Air", 3_000L, 5);
 
             // act & assert
-            mockMvc.perform(get(CUSTOMER_PRODUCT, product.getId()).with(customer(customer)))
+            mockMvc.perform(get("/api/v1/products/like-counts").param("ids", product.getId().toString()).with(customer(customer)))
                 .andExpect(success(HttpStatus.OK))
-                .andExpect(jsonPath("$.data.likeCount").value(0));
+                .andExpect(jsonPath("$.data[0].likeCount").value(0));
         }
     }
 
@@ -278,10 +278,10 @@ class ProductHttpTest {
             // assert
             JsonNode item = findById(data(list).path("content"), product.getId());
             assertAll(
-                () -> assertThat(item.path("soldOut").isBoolean()).isTrue(),
-                () -> assertThat(item.path("soldOut").asBoolean()).isEqualTo(soldOut),
-                () -> assertThat(data(detail).path("soldOut").isBoolean()).isTrue(),
-                () -> assertThat(data(detail).path("soldOut").asBoolean()).isEqualTo(soldOut)
+                () -> assertThat(item.has("soldOut")).isFalse(),
+                () -> assertThat(batch(customer, product, "stocks").path("soldOut").isBoolean()).isTrue(),
+                () -> assertThat(data(detail).has("soldOut")).isFalse(),
+                () -> assertThat(batch(customer, product, "stocks").path("soldOut").asBoolean()).isEqualTo(soldOut)
             );
         }
 
@@ -454,7 +454,7 @@ class ProductHttpTest {
             // assert
             assertAll(
                 () -> assertThat(fieldNames(data(customerDetail)))
-                    .isEqualTo(Set.of("id", "name", "price", "brand", "likeCount", "soldOut")),
+                    .isEqualTo(Set.of("id", "name", "price", "brand")),
                 () -> assertThat(fieldNames(data(customerDetail).path("brand"))).isEqualTo(Set.of("id", "name")),
                 () -> assertThat(fieldNames(data(adminDetail)))
                     .isEqualTo(Set.of("id", "name", "price", "brand", "stock", "deleted")),
@@ -1082,17 +1082,17 @@ class ProductHttpTest {
             // arrange
             User customer = fixture.user();
             Product product = fixture.product(fixture.brand("Nike"), "Air", 3_000L, 0);
-            mockMvc.perform(get(CUSTOMER_PRODUCT, product.getId()).with(customer(customer)))
-                .andExpect(jsonPath("$.data.soldOut").value(true));
+            mockMvc.perform(get("/api/v1/products/stocks").param("ids", product.getId().toString()).with(customer(customer)))
+                .andExpect(jsonPath("$.data[0].soldOut").value(true));
 
             // act
             mockMvc.perform(changeStock(product.getId(), "{\"quantity\":5}"))
                 .andExpect(success(HttpStatus.OK));
 
             // assert
-            mockMvc.perform(get(CUSTOMER_PRODUCT, product.getId()).with(customer(customer)))
+            mockMvc.perform(get("/api/v1/products/stocks").param("ids", product.getId().toString()).with(customer(customer)))
                 .andExpect(success(HttpStatus.OK))
-                .andExpect(jsonPath("$.data.soldOut").value(false));
+                .andExpect(jsonPath("$.data[0].soldOut").value(false));
         }
 
         @DisplayName("[상태 전이] 관리자가 브랜드 이름을 바꾸면 고객 브랜드 상세와 고객 상품의 brand.name에 새 이름이 보인다.")
@@ -1194,4 +1194,9 @@ class ProductHttpTest {
                 .content("{\"brandId\":" + brand.getId() + ",\"name\":\"DB 중복 이름\",\"price\":100}"))
             .andExpect(failure(HttpStatus.CONFLICT, "DUPLICATE_PRODUCT_NAME"));
     }
+    private JsonNode batch(User requester, Product product, String path) throws Exception {
+        return data(mockMvc.perform(get("/api/v1/products/" + path).param("ids", product.getId().toString())
+            .with(customer(requester))).andExpect(success(HttpStatus.OK)).andReturn()).get(0);
+    }
+
 }

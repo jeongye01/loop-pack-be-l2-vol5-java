@@ -1,0 +1,11 @@
+{
+  "previous": "20261014T173142-warmup-1000-331a55",
+  "current": "20261014T173224-warmup-1000-2d6fc4",
+  "p95RelativeChange": 0.047619047619047616,
+  "cpuPercentagePointChange": 1.3195586583311538,
+  "jitMsPerSecond": [
+    11.232528335469292,
+    11.530119888920291
+  ],
+  "stable": true
+}

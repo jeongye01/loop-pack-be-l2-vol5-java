@@ -67,7 +67,7 @@ class ExperimentHttpTest {
             var event = new ObjectMapper().readTree(line.substring(line.indexOf("EXPERIMENT_JSON ") + 16));
             var stages = event.path("stages");
             for (String key : java.util.List.of("request.pipeline", "ProductV1Controller.getProducts",
-                "ProductUseCase.findCustomerProductPage", "ProductRepositoryAdapter.findCustomerProductsByLikes",
+                "ProductUseCase.findBasicPage", "ProductRepositoryAdapter.findCustomerProductsByLikes",
                 "jdbc.execute", "jdbc.result.read", "response.writeAndMvcCompletion")) {
                 assertThat(stages.has(key)).as(key).isTrue();
                 assertThat(stages.path(key).path("totalMs").asDouble()).isGreaterThanOrEqualTo(0);
@@ -79,11 +79,11 @@ class ExperimentHttpTest {
             }
             assertThat(sum).isCloseTo(stages.path("request.pipeline").path("totalMs").asDouble(),
                 org.assertj.core.data.Offset.offset(0.001));
-            assertThat(event.path("queries").size()).isEqualTo(5);
-            for (String repository : java.util.List.of("StockRepositoryAdapter.findAllByProductIds",
-                "BrandRepositoryAdapter.findAllByIds")) {
+            assertThat(event.path("queries").size()).isEqualTo(4);
+            for (String repository : java.util.List.of("BrandRepositoryAdapter.findAllByIds")) {
                 assertThat(stages.path(repository).path("calls").asInt()).as(repository).isEqualTo(1);
             }
+            assertThat(stages.has("StockRepositoryAdapter.findAllByProductIds")).isFalse();
             assertThat(stages.has("StockRepositoryAdapter.findByProductId")).isFalse();
             assertThat(stages.has("LikeRepositoryAdapter.countByProductId")).isFalse();
             assertThat(stages.has("LikeRepositoryAdapter.countByProductIds")).isFalse();

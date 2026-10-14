@@ -10,6 +10,9 @@ import java.time.Instant;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.ThreadLocalRandom;
+import java.util.function.DoubleSupplier;
+import org.springframework.beans.factory.annotation.Value;
 import org.apache.catalina.AccessLog;
 import org.apache.catalina.connector.Request;
 import org.apache.catalina.connector.Response;
@@ -71,9 +74,10 @@ public class ExperimentConfiguration {
     }
 
     @Bean
-    WebServerFactoryCustomizer<TomcatServletWebServerFactory> experimentAccessLog(MeterRegistry registry) {
+    WebServerFactoryCustomizer<TomcatServletWebServerFactory> experimentAccessLog(MeterRegistry registry,
+        @Value("${experiment.trace.sample-rate:1.0}") double sampleRate) {
         AtomicInteger active = registry.gauge("experiment.active.requests", new AtomicInteger());
-        return factory -> factory.addContextValves(new TraceValve(active));
+        return factory -> factory.addContextValves(new TraceValve(active, sampleRate, () -> ThreadLocalRandom.current().nextDouble()));
     }
 
     /** Tomcat calls AccessLog.log after response completion, including client disconnects. */
@@ -83,8 +87,18 @@ public class ExperimentConfiguration {
         private static final String ATTRIBUTE = "experiment.trace";
         private final AtomicInteger active;
         private boolean attributesEnabled;
+        private final double sampleRate;
+        private final DoubleSupplier random;
 
-        TraceValve(AtomicInteger active) { super(true); this.active = active; }
+        TraceValve(AtomicInteger active, double sampleRate, DoubleSupplier random) {
+            super(true);
+            if (!Double.isFinite(sampleRate) || sampleRate < 0 || sampleRate > 1) {
+                throw new IllegalArgumentException("experiment.trace.sample-rate must be between 0 and 1");
+            }
+            this.active = active;
+            this.sampleRate = sampleRate;
+            this.random = random;
+        }
 
         @Override
         public void invoke(Request request, Response response) throws IOException, ServletException {
@@ -93,10 +107,18 @@ public class ExperimentConfiguration {
                 getNext().invoke(request, response);
                 return;
             }
+            active.incrementAndGet();
+            if (random.getAsDouble() >= sampleRate) {
+                try {
+                    getNext().invoke(request, response);
+                } finally {
+                    active.decrementAndGet();
+                }
+                return;
+            }
             ExperimentTrace trace = new ExperimentTrace();
             request.setAttribute(ATTRIBUTE, trace);
             ExperimentTrace.begin(trace);
-            active.incrementAndGet();
             try (var ignored = trace.scope("request.pipeline")) {
                 try {
                     getNext().invoke(request, response);
@@ -117,6 +139,7 @@ public class ExperimentConfiguration {
         public void log(Request request, Response response, long time) {
             if (!(request.getAttribute(ATTRIBUTE) instanceof ExperimentTrace trace)) return;
             Map<String, Object> event = new LinkedHashMap<>();
+            event.put("sampleRate", sampleRate);
             event.put("runId", request.getHeader("X-Run-ID"));
             event.put("requestId", request.getHeader("X-Request-ID"));
             event.put("finishedAt", Instant.now().toString());

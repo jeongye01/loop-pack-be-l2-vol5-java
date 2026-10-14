@@ -35,6 +35,14 @@ public class ProductRepositoryAdapter implements ProductRepository {
     }
 
     @Override
+    public List<Product> findActiveByIds(List<Long> ids) {
+        if (ids.isEmpty()) return List.of();
+        return entityManager.createQuery("select p from Product p, Brand b where p.brandId = b.id "
+            + "and p.deletedAt is null and b.deletedAt is null and p.id in :ids order by p.id", Product.class)
+            .setParameter("ids", ids).getResultList();
+    }
+
+    @Override
     public Product save(Product product) {
         try {
             Product saved;

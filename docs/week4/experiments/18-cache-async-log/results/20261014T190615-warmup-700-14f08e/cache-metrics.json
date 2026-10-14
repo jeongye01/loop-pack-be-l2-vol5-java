@@ -1,0 +1,12 @@
+{
+  "before": {
+    "hit": 9005.0
+  },
+  "after": {
+    "hit": 30009.0
+  },
+  "delta": {
+    "hit": 21004.0
+  },
+  "scope": "Includes preflight and recovery API checks"
+}

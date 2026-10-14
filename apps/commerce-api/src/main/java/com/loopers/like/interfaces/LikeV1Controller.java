@@ -1,6 +1,10 @@
 package com.loopers.like.interfaces;
 
 import com.loopers.interfaces.api.ApiResponse;
+import com.loopers.support.cache.CacheKeys;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.loopers.support.error.CoreException;
+import com.loopers.support.error.ErrorCode;
 import com.loopers.interfaces.api.ListResponse;
 import com.loopers.interfaces.api.PageQuery;
 import com.loopers.interfaces.api.Requester;
@@ -23,6 +27,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class LikeV1Controller {
 
     private final LikeUseCase likeUseCase;
+    private final com.loopers.support.cache.ResponseCache cache;
 
     /**
      * 처음 등록하면 201, 이미 좋아요한 상품이면 새로 만들지 않고 200이다.
@@ -51,9 +56,10 @@ public class LikeV1Controller {
         @RequestParam(defaultValue = PageQuery.DEFAULT_SIZE) int size
     ) {
         PageQuery query = new PageQuery(page, size);
-        return ApiResponse.success(ListResponse.from(
-            likeUseCase.findMinePage(requester.userId(), userId, query.page(), query.size()),
-            ProductV1Dto.CustomerProductResponse::from
-        ));
+        if (!requester.userId().equals(userId)) throw new CoreException(ErrorCode.USER_NOT_FOUND);
+        return cache.read(CacheKeys.MY_LIKES, CacheKeys.myLikes(userId, page, size), new TypeReference<>() { },
+            () -> ApiResponse.success(ListResponse.from(
+                likeUseCase.findMineBasicPage(requester.userId(), userId, query.page(), query.size()), ProductV1Dto.CustomerProductResponse::from)),
+            CacheKeys.CATALOG_REVISION, CacheKeys.userRevision(userId));
     }
 }

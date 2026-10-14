@@ -1,5 +1,14 @@
 # Week4 조회 성능 실험
 
+| SLO 항목 | 목표 |
+| --- | --- |
+| 대상 | 최신순 상품 목록 · 브랜드 필터 없음 · 첫 페이지 20개 |
+| 부하 조건 | 1,700 RPS · 60초 · VU 3,000 · 3회 |
+| 응답 시간 | 클라이언트 기준 p99 ≤ 200ms |
+| 성공률 | 시작 요청의 100% 정상 응답 · 오류/timeout 0건 |
+| 요청 누락 | 미시작·미완료 0건 |
+
+- [이번 주 변경사항](../이번%20주%20변경사항.md): 인덱스·SQL·캐시·로깅·API 분리 요약
 - [공통 프로토콜](protocol.md): 실행·측정·중단·회복·결과 기록 방식
 - [커밋별 일반 EXPLAIN](historical-explain.md): 과거 쿼리·인덱스 구성의 별도 로컬 재현 출력
 - [실험 계획서 템플릿](experiment-plan-template.md)
@@ -11,6 +20,15 @@
 - [06. 가격순 현재 상태](06-optimize-price-query/report.md): 단건 측정·실행계획·읽기 흐름
 - [07. 좋아요순 부하 테스트](07-load-likes/plan.md): 최적화 후 무필터 첫 페이지의 부하 한계·병목 탐색
 - [08. 최신순 부하 한계](08-load-latest/plan.md): 100 RPS 간격으로 정상 처리 한계 탐색
+- [11. 최신순 Redis 캐시](11-cache-latest/report.md): 고정 데이터 조회 성능과 회차별 편차
+- [12. 준비 부하 후 캐시 재측정](12-cache-latest-warmed/report.md): 안정화 확인 후 1,700 RPS 3회
+- [13. 서울 EC2 부하기 비교](13-cache-ec2-load/report.md): 같은 리전 사설 경로에서 캐시 부하 3회
+- [14. 캐시 없는 EC2 부하·촬영](14-no-cache-ec2-video/report.md): 예열 후 1,700 RPS 1회, 촬영 당시 자원 상태
+- [15. 캐시 hit Tomcat 스레드](15-cache-tomcat-threads/report.md): 공통 스레드 지표 추가·1,700 RPS 1회
+- [16. Tomcat 스레드 덤프](16-cache-thread-dump/report.md): 실험 로그 출력 락 대기 확인
+- [17. 상세 로그 OFF 비교](17-cache-trace-off/report.md): 출력 경합 제거 시 평균 23ms·p99 237ms
+- [18. 비동기 실험 로그](18-cache-async-log/report.md): AsyncAppender 구현·로그 전수 보존·1회 비교
+- [19. 상세 기록 1% 샘플링](19-cache-sampled-log/report.md): 1,700 RPS·3,000 VU 3회, p99 51 / 73 / 30ms
 - [예비 측정 보관본](preliminary/README.md): 기존 로컬·시드니 결과
 
 ## 공통 인프라

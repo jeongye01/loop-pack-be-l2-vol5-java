@@ -29,7 +29,6 @@ import static com.loopers.support.http.ApiHttp.content;
 import static com.loopers.support.http.ApiHttp.customer;
 import static com.loopers.support.http.ApiHttp.data;
 import static com.loopers.support.http.ApiHttp.failure;
-import static com.loopers.support.http.ApiHttp.findById;
 import static com.loopers.support.http.ApiHttp.ids;
 import static com.loopers.support.http.ApiHttp.isNullOrAbsent;
 import static com.loopers.support.http.ApiHttp.success;
@@ -184,7 +183,7 @@ class LikeHttpTest {
                 .andReturn();
             assertAll(
                 () -> assertThat(List.of(initial, afterFirst, afterSecond, afterCancel)).containsExactly(0L, 1L, 2L, 1L),
-                () -> assertThat(findById(data(list).path("content"), product.getId()).path("likeCount").asLong(-1))
+                () -> assertThat(likeCount(first, product))
                     .isEqualTo(1L)
             );
         }
@@ -318,7 +317,8 @@ class LikeHttpTest {
                     .param("sort", "likes_desc").param("page", "0").param("size", "1"))
                 .andExpect(success(HttpStatus.OK))
                 .andExpect(jsonPath("$.data.content[0].id").value(canceled.getId()))
-                .andExpect(jsonPath("$.data.content[0].likeCount").value(3));
+                .andExpect(jsonPath("$.data.content[0].likeCount").doesNotExist());
+            assertThat(likeCount(first, canceled)).isEqualTo(3);
 
             for (User owner : List.of(first, second, third)) {
                 mockMvc.perform(cancel(owner, canceled)).andExpect(success(HttpStatus.OK));
@@ -330,7 +330,7 @@ class LikeHttpTest {
                 .andExpect(success(HttpStatus.OK))
                 .andExpect(jsonPath("$.data.content.length()").value(1))
                 .andExpect(jsonPath("$.data.content[0].id").value(remaining.getId()))
-                .andExpect(jsonPath("$.data.content[0].likeCount").value(1))
+                .andExpect(jsonPath("$.data.content[0].likeCount").doesNotExist())
                 .andExpect(jsonPath("$.data.last").value(false));
 
             mockMvc.perform(get(CUSTOMER_PRODUCTS).with(customer(first))
@@ -339,8 +339,10 @@ class LikeHttpTest {
                 .andExpect(success(HttpStatus.OK))
                 .andExpect(jsonPath("$.data.content.length()").value(1))
                 .andExpect(jsonPath("$.data.content[0].id").value(canceled.getId()))
-                .andExpect(jsonPath("$.data.content[0].likeCount").value(0))
+                .andExpect(jsonPath("$.data.content[0].likeCount").doesNotExist())
                 .andExpect(jsonPath("$.data.last").value(true));
+            assertThat(likeCount(first, remaining)).isEqualTo(1);
+            assertThat(likeCount(first, canceled)).isZero();
         }
     }
 
@@ -365,10 +367,10 @@ class LikeHttpTest {
     }
 
     private long likeCount(User requester, Product product) throws Exception {
-        MvcResult result = mockMvc.perform(get(CUSTOMER_PRODUCT, product.getId()).with(customer(requester)))
+        MvcResult result = mockMvc.perform(get("/api/v1/products/like-counts").param("ids", product.getId().toString()).with(customer(requester)))
             .andExpect(success(HttpStatus.OK))
-            .andExpect(jsonPath("$.data.likeCount").exists())
+            .andExpect(jsonPath("$.data[0].likeCount").exists())
             .andReturn();
-        return data(result).path("likeCount").asLong();
+        return data(result).get(0).path("likeCount").asLong();
     }
 }

@@ -25,19 +25,18 @@ public class ProductV1Dto {
         Long id,
         String name,
         long price,
-        BrandResponse brand,
-        long likeCount,
-        boolean soldOut
+        BrandResponse brand
     ) {
+        public static CustomerProductResponse from(ProductUseCase.BasicProduct view) {
+            return new CustomerProductResponse(view.product().getId(), view.product().getName(), view.product().getPrice(), BrandResponse.from(view.brand()));
+        }
         public static CustomerProductResponse from(ProductUseCase.CustomerProduct view) {
             Product product = view.product();
             return new CustomerProductResponse(
                 product.getId(),
                 product.getName(),
                 product.getPrice(),
-                BrandResponse.from(view.brand()),
-                view.likeCount(),
-                view.stock().quantity() == 0
+                BrandResponse.from(view.brand())
             );
         }
     }

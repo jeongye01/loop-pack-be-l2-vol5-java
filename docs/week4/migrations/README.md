@@ -45,3 +45,7 @@ MYSQL_HOST=127.0.0.1 MYSQL_PORT=3306 MYSQL_USER=application MYSQL_PWD=applicatio
 - 카탈로그 테이블의 FK 0개 유지. 기존 주문 테이블의 FK는 변경하지 않음.
 - `:apps:commerce-api:check`: 테스트 367개, 실패·오류·skip 0개, Checkstyle·ArchUnit 통과.
 - DB에서 발생한 브랜드·상품명 중복을 도메인 오류로 변환하고 HTTP 409를 반환하는 생성·수정 경로 확인. 다른 제약 위반을 이름 중복 오류로 변환하지 않는 것도 확인.
+
+## 조회 캐시 revision
+
+`05-add-read-cache-revision.sql`은 조회 캐시용 revision 테이블을 만들고 catalog revision을 갱신한다. 캐시 활성화·재활성화 전에 쓰기를 중지한 상태에서 별도로 적용한다. 기존 데이터·인덱스는 삭제하지 않는다. [캐시 ADR](../ADR.md)의 적용 조건을 따른다.

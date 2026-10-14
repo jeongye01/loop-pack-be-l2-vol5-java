@@ -31,6 +31,21 @@ tasks.test {
         .withPathSensitivity(PathSensitivity.RELATIVE)
 }
 
+// Logback configuration is process-global. The async profile needs its own JVM.
+val testAsyncLogging by tasks.registering(Test::class) {
+    testClassesDirs = sourceSets.test.get().output.classesDirs
+    classpath = sourceSets.test.get().runtimeClasspath
+    useJUnitPlatform()
+    systemProperty("user.timezone", "Asia/Seoul")
+    systemProperty("spring.profiles.active", "test")
+    jvmArgs("-Xshare:off")
+    include("**/ExperimentAsyncHttpTest.class")
+}
+tasks.test {
+    exclude("**/ExperimentAsyncHttpTest.class")
+    dependsOn(testAsyncLogging)
+}
+
 dependencies {
     // add-ons
     implementation(project(":modules:jpa"))

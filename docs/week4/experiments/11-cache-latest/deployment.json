@@ -1,0 +1,12 @@
+{
+  "trialImage": "commerce-api:week4-cache-trial-20261015",
+  "jarSha256": "bac71bca7f4d56727e175e3063466739deea8cef0a38ac7b0bab2ffb86be0176",
+  "restoredImage": "commerce-api:week4-brand-first-20261014",
+  "restoredHealth": "UP",
+  "trialKeyDeleted": true,
+  "cacheEnabledAfterExperiment": false,
+  "sourceSha256": {
+    "apps/commerce-api/src/main/java/com/loopers/config/experiment/ExperimentLatestCache.java": "fbac12f88008de0aa6065aa8ad15ba12f10cccbf4bc066d1a48f7bd82e383f63",
+    "docker/ec2/cache-experiment-compose.yml": "9dd911d58b91bc2c04c2abf18271c3f2a87f703e28aca40e3849bd5d75b1e761"
+  }
+}

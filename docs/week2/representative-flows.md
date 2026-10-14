@@ -81,8 +81,8 @@ sequenceDiagram
     API->>D: 기존 관계 유지
     API-->>C: 200, 좋아요 수 1 (P-LIKE-01)
 
-    C->>API: 상품 상세 조회
-    API-->>C: 200, likeCount=1 (R-LIKE-06)
+    C->>API: 상품 좋아요 수 일괄 조회
+    API-->>C: 200, likeCount (캐시 사용 시 표시 갱신 최대 TTL 대기)
 
     C->>API: 좋아요 취소
     API->>D: 좋아요 관계 취소
@@ -174,3 +174,7 @@ sequenceDiagram
 
     Note over API,O: 중간 실패 시 B와 P1·P2의 이번 변경은 함께 취소된다.
 ```
+
+## 상품 조회 분리
+
+사용자 식별 → 상품 기본 정보 조회 → 프론트가 ID 목록으로 좋아요 수·품절 상태 API를 병렬 조회해 합성. 캐시 조회 전 DB 조회 버전을 확인하고, miss는 DB 조회 후 저장한다. 변경은 동일 DB 트랜잭션의 조회 버전 변경으로 이전 캐시를 무효화한다.

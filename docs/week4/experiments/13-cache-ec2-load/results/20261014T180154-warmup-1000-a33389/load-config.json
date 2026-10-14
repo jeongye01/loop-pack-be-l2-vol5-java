@@ -1,0 +1,57 @@
+{
+  "experimentId": "13-cache-ec2-load",
+  "specId": "ec2-seoul-v1",
+  "baseUrl": "http://54.117.65.124:8080",
+  "appHost": "54.117.65.124",
+  "dbHost": "16.184.11.214",
+  "sshUser": "ubuntu",
+  "appContainer": "week4-commerce-api-1",
+  "dbContainer": "week4-db-mysql-1",
+  "database": "perf_skewed_1m_v1",
+  "dataset": "docs/week4/seed-data/skewed-1m-v1",
+  "input": {
+    "sort": "latest",
+    "page": 0,
+    "size": 20,
+    "userId": 1
+  },
+  "vus": 3000,
+  "timeoutSeconds": 5,
+  "gracefulStopSeconds": 10,
+  "warmupSeconds": 30,
+  "durationSeconds": 30,
+  "sampleIntervalSeconds": 5,
+  "recoverySeconds": 60,
+  "recoveryMaxContainerCpuPercent": 50,
+  "recoveryMinAvailableMemoryBytes": 134217728,
+  "maximumDiscoveryRps": 10000,
+  "cache": {
+    "type": "Redis",
+    "scope": "fixed-data latest first page only",
+    "key": "products:list:v1:sort=latest:brand=all:page=0:size=20",
+    "ttlSeconds": 600,
+    "readFrom": "master",
+    "warmBeforeMeasure": true
+  },
+  "stabilization": {
+    "steps": [
+      300,
+      700
+    ],
+    "rps": 1000,
+    "seconds": 30,
+    "maximumRounds": 8,
+    "maxP95RelativeChange": 0.2,
+    "maxCpuPercentagePointChange": 10,
+    "maxJitMsPerSecond": 100,
+    "consecutiveStableRounds": 2
+  },
+  "loadHost": "3.37.31.251",
+  "loadBaseUrl": "http://172.31.26.165:8080",
+  "runId": "20261014T180154-warmup-1000-a33389",
+  "phase": "warmup",
+  "repeat": 6,
+  "rps": 1000,
+  "url": "http://172.31.26.165:8080/api/v1/products?sort=latest&page=0&size=20",
+  "userId": 1
+}

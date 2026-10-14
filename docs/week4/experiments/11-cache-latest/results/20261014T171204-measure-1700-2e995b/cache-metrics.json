@@ -1,0 +1,18 @@
+{
+  "before": {
+    "fill": 2.0,
+    "hit": 41132.0,
+    "miss": 2.0
+  },
+  "after": {
+    "fill": 2.0,
+    "hit": 125369.0,
+    "miss": 2.0
+  },
+  "delta": {
+    "miss": 0.0,
+    "fill": 0.0,
+    "hit": 84237.0
+  },
+  "scope": "Includes preflight/recovery checks as well as load"
+}

@@ -1,0 +1,172 @@
+{
+  "runId": "20261014T173306-measure-1700-8021f9",
+  "sort": "latest",
+  "sampleCount": 13,
+  "resultSource": "result.json",
+  "hosts": {
+    "app": {
+      "dockerCpuAggregatePercent": {
+        "mean": 145.27461538461537,
+        "max": 158.9,
+        "p95": 158.9
+      },
+      "dockerCpuNormalizedPercent": {
+        "mean": 72.63730769230769,
+        "max": 79.45,
+        "p95": 79.45
+      },
+      "hostCpuBusyPercent": {
+        "mean": 95.04436336013796,
+        "max": 99.712368168744,
+        "p95": 99.712368168744
+      },
+      "hostIowaitPercent": {
+        "mean": 0.0,
+        "max": 0.0,
+        "p95": 0.0
+      },
+      "perCoreBusyPercent": [
+        {
+          "mean": 95.24676243130016,
+          "max": 100.0,
+          "p95": 100.0
+        },
+        {
+          "mean": 94.83556926569219,
+          "max": 99.8080614203455,
+          "p95": 99.8080614203455
+        }
+      ],
+      "containerMemoryMiB": {
+        "mean": 734.3461538461538,
+        "max": 753.6,
+        "p95": 753.6
+      },
+      "hostAvailableMemoryMiB": {
+        "mean": 6319.5661057692305,
+        "max": 6379.48828125,
+        "p95": 6379.48828125
+      },
+      "disk": {
+        "readMiBs": {
+          "mean": 0.0011707267512024208,
+          "max": 0.014048721014429048,
+          "p95": 0.014048721014429048
+        },
+        "writeMiBs": {
+          "mean": 0.1454922782927614,
+          "max": 1.6835322873874345,
+          "p95": 1.6835322873874345
+        },
+        "busyPercent": {
+          "mean": 0.05334335724372136,
+          "max": 0.4403926540903869,
+          "p95": 0.4403926540903869
+        }
+      },
+      "blockIoFirstLast": [
+        "0B / 606kB",
+        "0B / 639kB"
+      ]
+    },
+    "db": {
+      "dockerCpuAggregatePercent": {
+        "mean": 40.79692307692308,
+        "max": 51.93,
+        "p95": 51.93
+      },
+      "dockerCpuNormalizedPercent": {
+        "mean": 20.39846153846154,
+        "max": 25.965,
+        "p95": 25.965
+      },
+      "hostCpuBusyPercent": {
+        "mean": 29.225449177642233,
+        "max": 31.405895691609977,
+        "p95": 31.405895691609977
+      },
+      "hostIowaitPercent": {
+        "mean": 0.017917058422284905,
+        "max": 0.11337868480725624,
+        "p95": 0.11337868480725624
+      },
+      "perCoreBusyPercent": [
+        {
+          "mean": 25.243342348440592,
+          "max": 26.993865030674847,
+          "p95": 26.993865030674847
+        },
+        {
+          "mean": 33.15788538814433,
+          "max": 35.810810810810814,
+          "p95": 35.810810810810814
+        }
+      ],
+      "containerMemoryMiB": {
+        "mean": 956.0538461538462,
+        "max": 956.2,
+        "p95": 956.2
+      },
+      "hostAvailableMemoryMiB": {
+        "mean": 6136.4020432692305,
+        "max": 6141.66796875,
+        "p95": 6141.66796875
+      },
+      "disk": {
+        "readMiBs": {
+          "mean": 0.0,
+          "max": 0.0,
+          "p95": 0.0
+        },
+        "writeMiBs": {
+          "mean": 0.34416444520886663,
+          "max": 2.126896340777437,
+          "p95": 2.126896340777437
+        },
+        "busyPercent": {
+          "mean": 0.058579002760493104,
+          "max": 0.4003569582639881,
+          "p95": 0.4003569582639881
+        }
+      },
+      "blockIoFirstLast": [
+        "193kB / 6.49GB",
+        "193kB / 6.49GB"
+      ]
+    }
+  },
+  "appMetrics": {
+    "hikaricp_connections_active": {
+      "mean": 10.692307692307692,
+      "max": 24.0,
+      "p95": 24.0
+    },
+    "hikaricp_connections_pending": {
+      "mean": 0.0,
+      "max": 0.0,
+      "p95": 0.0
+    },
+    "experiment_active_requests": {
+      "mean": 14.538461538461538,
+      "max": 43.0,
+      "p95": 43.0
+    }
+  },
+  "connectionWaitMs": {
+    "mean": 0.027850436503370046,
+    "max": 43.777663,
+    "p95": 0.005768
+  },
+  "rankSqlMs": null,
+  "jdbcExecuteMs": {
+    "mean": 1.1582045099149267,
+    "max": 75.134687,
+    "p95": 3.19671
+  },
+  "gcPauseSecondsDuringSamples": 0.6560000000000001,
+  "localK6CpuPercent": {
+    "mean": 214.58461538461538,
+    "max": 335.3,
+    "p95": 335.3
+  }
+}

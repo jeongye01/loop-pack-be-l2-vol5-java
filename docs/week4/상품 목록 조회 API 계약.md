@@ -90,8 +90,6 @@ OFFSET 방식으로 앞의 `page × size`개를 건너뛰고 최대 `size`개를
 | `price`      | 상품 가격                            | `89000`   |
 | `brand.id`   | 브랜드 ID                           | `2`       |
 | `brand.name` | 브랜드 이름                           | `"브랜드 B"` |
-| `likeCount`  | 취소되지 않은 좋아요 수                    | `5`       |
-| `soldOut`    | 재고가 0이면 `true`. 재고 수량은 노출하지 않는다. | `false`   |
 
 
 ### 오류
@@ -124,9 +122,7 @@ OFFSET 방식으로 앞의 `page × size`개를 건너뛰고 최대 `size`개를
         "brand": {
           "id": 2,
           "name": "브랜드 B"
-        },
-        "likeCount": 5,
-        "soldOut": false
+        }
       }
     ],
     "page": 0,
@@ -139,3 +135,5 @@ OFFSET 방식으로 앞의 `page × size`개를 건너뛰고 최대 `size`개를
 ### 마지막 페이지 판단
 
 고객 상품 목록은 `totalElements`를 반환하지 않는다. `page * size` 위치에서 `size + 1`개까지 조회하고, 최대 `size`개만 반환한다. 추가 상품이 있으면 `last: false`, 없으면 `last: true`다. 정확히 `size`개만 남은 경우와 빈 목록도 `last: true`다. 필터·삭제 제외·정렬을 적용한 결과를 기준으로 판단한다.
+
+좋아요 수와 품절 여부는 `GET /api/v1/products/like-counts?ids=...`, `GET /api/v1/products/stocks?ids=...`에서 일괄 조회한다. 프론트는 productId로 합성하며 미수신 값을 0·재고 있음으로 가정하지 않는다.

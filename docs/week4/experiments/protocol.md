@@ -82,3 +82,31 @@ EC2에 SSH로 접속해 **Docker 컨테이너 안의 Tomcat·앱 로그**를 가
 | `resources.json`, `server.log` | 자원 시계열·서버 로그 |
 
 미측정 값은 null과 사유를 남기고 기존 Run을 덮어쓰지 않는다. 보고서 수치 표는 JSON에서 생성하며 관찰·가설·한계·결론은 구분해 작성한다.
+
+## Tomcat 공통 지표
+
+실험 Compose에서 `SERVER_TOMCAT_MBEANREGISTRY_ENABLED=true`로 활성화한다. 기존 Prometheus 전체 수집에 포함하고 `resource-summary.json`의 `tomcatThreadsByConnector`에 집계한다.
+
+| 지표 | 의미 |
+| --- | --- |
+| `tomcat_threads_busy_threads` | 표본 시점에 작업 중인 스레드 수 |
+| `tomcat_threads_current_threads` | 현재 생성된 스레드 수 |
+| `tomcat_threads_config_max_threads` | 설정된 최대 스레드 수 |
+
+`name` 라벨로 앱 8080과 관리 8081을 구분한다. 누락은 0으로 해석하지 않는다. 기본 5초 표본의 최대값은 순간 최대값을 보장하지 않는다. busy가 max에 도달하면 스레드 포화 근거지만 큐 대기 시간·길이를 직접 측정한 것은 아니다. `accept-count`는 TCP 연결 backlog 설정으로 작업 큐 실측값이 아니다.
+
+활성화 근거: [Spring Boot Tomcat metrics](https://docs.spring.io/spring-boot/reference/actuator/metrics.html).
+
+## 실험 로그 비동기 출력
+
+`experiment-async` 프로필은 `EXPERIMENT_TRACE`만 별도 AsyncAppender로 보낸다. 기존 JSON·Docker 수집 형식은 유지한다. 큐 8,192건, INFO 폐기 비활성(`discardingThreshold=0`), 큐 포화 시 대기(`neverBlock=false`), 정상 종료 flush 최대 30초다. 강제 종료·출력 장애에서도 영구 보존된다는 의미는 아니다.
+
+공통 수집: `experiment_log_queue_size`(대기 건수), `experiment_log_queue_remaining`(남은 자리), `experiment_log_queue_capacity`(용량). 5초 표본은 순간 최대를 보장하지 않는다. 큐가 0이어도 worker가 가져간 배치가 남을 수 있어 종료 후 추가 수집 구간을 두고 요청 ID 전수 연결·중복/누락 검증을 유지한다. 비동기 실험은 `requireAsyncLogMetrics=true`, `logDrainSeconds=10`을 사용한다.
+
+## 상세 기록 샘플링
+
+`sampled-trace-experiment-compose.yml`을 비동기 로그 Compose와 함께 적용하면 요청 시작 시 1%를 무작위 선택한다. 선택되지 않은 요청은 상세 SQL·단계 계측과 JSON 생성을 건너뛴다. Micrometer의 전체 HTTP 통계와 기존 활성 요청 게이지 수집 범위는 유지한다. 현재 상세 기록 대상은 유효한 `X-Run-ID`·`X-Request-ID`가 있는 상품 목록 요청이다.
+
+`EXPERIMENT_TRACE_SAMPLE_RATE`: `0.01`은 약 1%, `1`은 전수, `0`은 상세 계측 없음. 미설정 기본값은 기존 실험 재현을 위해 `1`이다. 선택된 JSON에 `sampleRate`를 기록한다. 오류·느린 요청의 상세 기록도 같은 확률로 선택되며 전수 보존하지 않는다. 기존 애플리케이션 오류 로거는 변경하지 않는다. Tempo 전송은 아직 적용하지 않았다.
+
+샘플링 결과의 서버 지연·SQL 통계는 선택된 요청에만 해당한다. 기존 실행기의 요청 ID 전수 연결 검증은 그대로 유지하며, 샘플링 실험을 전수 검증 통과로 표시하지 않는다. 샘플링 부하 실험 전에는 별도의 표본 연결 검증이 필요하다. 성능 기준선은 17번 실험의 상세 로그 출력 OFF 1회 측정(평균 23ms, p99 237ms)이며, 샘플링 적용 성능은 별도 측정한다.

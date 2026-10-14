@@ -155,6 +155,48 @@ public class ProductUseCase {
         return new SliceResult<>(content, page, size, products.size() <= size);
     }
 
+    @Transactional(readOnly = true)
+    public SliceResult<BasicProduct> findBasicPage(Long brandId, ProductSort sort, int page, int size) {
+        if (brandId != null && !isActiveBrand(brandId)) return new SliceResult<>(List.of(), page, size, true);
+        ProductSort requested = sort == null ? ProductSort.LATEST : sort;
+        List<Product> products = requested == ProductSort.LIKES_DESC
+            ? productRepository.findCustomerProductsByLikes(brandId, (long) page * size, size + 1).stream().map(RankedProduct::product).toList()
+            : productRepository.findCustomerProductWindow(brandId, requested, (long) page * size, size + 1);
+        return new SliceResult<>(basicProducts(products.stream().limit(size).toList()), page, size, products.size() <= size);
+    }
+
+    @Transactional(readOnly = true)
+    public BasicProduct findBasicProduct(Long id) {
+        List<Product> products = productRepository.findActiveByIds(List.of(id));
+        if (products.isEmpty()) throw new CoreException(ErrorCode.PRODUCT_NOT_FOUND);
+        return basicProducts(products).getFirst();
+    }
+
+    public List<BasicProduct> basicProducts(List<Product> products) {
+        Map<Long, Brand> brands = brandRepository.findAllByIds(products.stream().map(Product::getBrandId).distinct().toList())
+            .stream().collect(Collectors.toMap(Brand::getId, Function.identity()));
+        return products.stream().map(p -> new BasicProduct(p, brands.get(p.getBrandId()))).toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<LikeCount> findLikeCounts(List<Long> ids) {
+        List<Product> products = productRepository.findActiveByIds(ids);
+        Map<Long, Long> counts = likeRepository.countByProductIds(products.stream().map(Product::getId).toList());
+        return products.stream().map(p -> new LikeCount(p.getId(), counts.getOrDefault(p.getId(), 0L))).toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<StockStatus> findStockStatuses(List<Long> ids) {
+        List<Product> products = productRepository.findActiveByIds(ids);
+        Map<Long, Stock> stocks = stockRepository.findAllByProductIds(products.stream().map(Product::getId).toList()).stream()
+            .collect(Collectors.toMap(Stock::getProductId, Function.identity()));
+        return products.stream().map(p -> new StockStatus(p.getId(), !stocks.containsKey(p.getId()) || stocks.get(p.getId()).quantity() == 0)).toList();
+    }
+
+    public record BasicProduct(Product product, Brand brand) { }
+    public record LikeCount(Long productId, long likeCount) { }
+    public record StockStatus(Long productId, boolean soldOut) { }
+
     private Map<Long, Long> rankingCounts(List<RankedProduct> ranked) {
         return ranked.stream().collect(Collectors.toMap(row -> row.product().getId(), RankedProduct::likeCount));
     }

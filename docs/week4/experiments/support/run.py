@@ -17,6 +17,7 @@ import urllib.parse
 import urllib.request
 import uuid
 from report import aggregate, events, write_report
+from tomcat_metrics import parse as parse_tomcat, NAMES as TOMCAT_METRICS
 
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parents[3]
@@ -140,6 +141,9 @@ class Runner:
         for key in ('hikaricp_connections_active','hikaricp_connections_pending','experiment_active_requests'):
             values=metric(key)
             if not values or any(v!=0 for v in values): return False
+        if self.base.get('requireAsyncLogMetrics'):
+            queued = metric('experiment_log_queue_size')
+            if not queued or any(value != 0 for value in queued): return False
         for host, container in [('app',self.base['appContainer']),('db',self.base['dbContainer'])]:
             output=sample[host]['stdout']
             mem=re.search(r'^MemAvailable:\s+(\d+) kB',output,re.M)
@@ -160,7 +164,16 @@ class Runner:
             time.sleep(2)
         return {'ok':False,'samples':samples,'reason':'Recovery deadline exceeded'}
 
-    def run(self, rps, seconds, phase='measure', repeat=1):
+    def launch_load(self, out, stream):
+        env=dict(os.environ,CONFIG_FILE=str(out/'config.json'),EXPECTED_FILE=str(out/'expected.json'),
+                 SUMMARY_FILE=str(out/'summary.json'))
+        return subprocess.Popen(['k6','run','--quiet','--log-format','raw','--console-output',str(out/'client.log'),
+                                 str(HERE/'products.js')],env=env,stdout=stream,stderr=subprocess.STDOUT)
+
+    def collect_load(self, out):
+        return None
+
+    def run(self, rps, seconds, phase='measure', repeat=1, defer_aggregation=False):
         if rps<=0 or seconds<=0 or round(rps*100)!=rps*100:
             raise ValueError('Use positive RPS with at most two decimal places')
         if rps>self.base['maximumDiscoveryRps']: raise ValueError('Discovery RPS safety cap exceeded')
@@ -176,7 +189,7 @@ class Runner:
                      'datasetManifestSha256':sha(self.dataset/'manifest.json'),
                      'scriptsSha256':{p.name:sha(p) for p in HERE.glob('*') if p.is_file()},
                      'notes':['OS snapshots select fields; secrets excluded.',
-                              'Local k6 over public network. No cache in product path.',
+                              ('Remote k6 over private network. ' if self.base.get('loadHost') else 'Local k6 over public network. ') + 'Cache: '+str(self.base.get('cache', 'disabled')),
                               'SQL timings cover JDBC execute calls, not result hydration or pool acquisition.',
                               'Nearest-rank percentiles; millisecond client clock resolution.']}
         save(out/'environment.json',environment)
@@ -192,11 +205,8 @@ class Runner:
                 '-o','ConnectTimeout=5',self.base['sshUser']+'@'+self.base['appHost'],
                 f'sudo docker logs --follow --since {shlex.quote(since)} '+self.base['appContainer']],
                 stdout=log_stream,stderr=log_stream)
-            env=dict(os.environ,CONFIG_FILE=str(out/'config.json'),EXPECTED_FILE=str(out/'expected.json'),
-                     SUMMARY_FILE=str(out/'summary.json'))
             with (out/'k6.log').open('w') as stream:
-                process=subprocess.Popen(['k6','run','--quiet','--log-format','raw','--console-output',str(out/'client.log'),
-                                          str(HERE/'products.js')],env=env,stdout=stream,stderr=subprocess.STDOUT)
+                process=self.launch_load(out, stream)
                 deadline=time.monotonic()+seconds+config['gracefulStopSeconds']+20
                 while process.poll() is None:
                     if log_process.poll() is not None: raise RuntimeError('Server log stream ended early')
@@ -216,6 +226,10 @@ class Runner:
             if not recovery['ok']:
                 try: recovery=self.recover()
                 except Exception as e: recovery={'ok':False,'reason':str(e)}
+            # Queue=0 alone does not mean the async worker's batch has been written.
+            # Keep the stream open for a bounded drain window; exact request matching still applies.
+            if self.base.get('logDrainSeconds') and log_process is not None and log_process.poll() is None:
+                time.sleep(self.base['logDrainSeconds'])
             save(out/'resources.json',samples)
             logs_collected=log_process is not None and log_process.poll() is None
             if log_process is not None and log_process.poll() is None:
@@ -223,37 +237,67 @@ class Runner:
                 try: log_process.wait(timeout=5)
                 except subprocess.TimeoutExpired: log_process.kill(); log_process.wait(timeout=5)
             if log_stream is not None: log_stream.close()
+            try: self.collect_load(out)
+            except Exception as error: failure = (failure or '') + '; load collection: ' + str(error)
             environment['end']=self.snapshot(); save(out/'environment.json',environment)
             result.update(finishedAt=datetime.now(timezone.utc).isoformat(),recovery=recovery,
                           exitCode=process.returncode if process else None,stopReason=failure,
                           artifacts={'traces':'traces.jsonl','server':'server.log','resources':'resources.json'})
-            try:
-                client=events(out/'client.log','TRACE_JSON ')
-                server=events(out/'server.log','EXPERIMENT_JSON ')
-                summary=json.loads((out/'summary.json').read_text()) if (out/'summary.json').exists() else None
-                traces, report=aggregate(config,client,server,summary)
-                with (out/'traces.jsonl').open('w') as stream:
-                    for trace in traces: stream.write(json.dumps(trace,ensure_ascii=False)+'\n')
-                result.update(report)
-                counts=report['requests']; valid=report['validation']
-                sample_ok=bool(samples) and all(s[h]['exitCode']==0 for s in samples for h in ('app','db','local'))
-                environment_ok=all(environment[t][h]['exitCode']==0 for t in ('start','end') for h in ('app','db'))
-                good=(not failure and result['exitCode']==0 and recovery['ok'] and logs_collected
-                      and sample_ok and environment_ok and valid['measurementComplete']
-                      and valid['summaryPresent'] and valid['summaryCountMatches'] and not valid['serverUnmatchedIds']
-                      and counts['dropped']==0 and counts['incomplete']==0
-                      and counts['completed']>0 and counts['byOutcome'].get('success',0)==counts['completed'])
-                result['status']='passed' if good else 'failed'
-                result['validation'].update(samplesComplete=sample_ok,environmentComplete=environment_ok,
-                                             serverLogsCollected=logs_collected)
-                if not good and not failure: result['stopReason']='See request outcomes, validation and recovery'
-            except Exception as e:
-                result.update(status='failed',stopReason=f'{failure or ""}; aggregation: {e}')
-            save(out/'result.json',result); write_report(self.experiment)
+            result['collection'] = {
+                'samplesComplete': bool(samples) and all(s[h]['exitCode']==0 for s in samples for h in ('app','db','local')),
+                'environmentComplete': all(environment[t][h]['exitCode']==0 for t in ('start','end') for h in ('app','db')),
+                'serverLogsCollected': logs_collected,
+            }
+            if self.base.get('requireAsyncLogMetrics'):
+                result['collection']['asyncLogMetricsComplete'] = bool(samples) and all(
+                    all(re.search(r'^'+name+r'(?:\{[^\n]*\})?\s+[0-9.eE+-]+', sample['app']['stdout'], re.M)
+                        for name in ('experiment_log_queue_size', 'experiment_log_queue_remaining', 'experiment_log_queue_capacity'))
+                    for sample in samples)
+            if self.base.get('requireTomcatMetrics'):
+                result['collection']['tomcatMetricsComplete'] = bool(samples) and all(
+                    any(name.endswith('-8080') and all(key in values for key in TOMCAT_METRICS)
+                        for name, values in parse_tomcat(sample['app']['stdout']).items())
+                    for sample in samples)
+            result['status'] = 'collected' if not failure else 'failed'
+            save(out/'result.json', result)
+            if not defer_aggregation:
+                result = aggregate_run(out)
+                write_report(self.experiment)
         print(json.dumps({'runId':run_id,'status':result['status'],'rps':rps,'phase':phase,
                           'requests':result.get('requests'),'metrics':result.get('metrics'),
                           'recovered':recovery['ok']},ensure_ascii=False),flush=True)
         return result
+
+
+def aggregate_run(out):
+    """Aggregate a completed capture; a deferred capture is never treated as a passed run."""
+    result = json.loads((out/'result.json').read_text())
+    config = result['config']
+    failure = result.get('stopReason')
+    flags = result['collection']
+    try:
+        client = events(out/'client.log', 'TRACE_JSON ')
+        server = events(out/'server.log', 'EXPERIMENT_JSON ')
+        summary = json.loads((out/'summary.json').read_text()) if (out/'summary.json').exists() else None
+        traces, report = aggregate(config, client, server, summary)
+        with (out/'traces.jsonl').open('w') as stream:
+            for trace in traces:
+                stream.write(json.dumps(trace, ensure_ascii=False)+'\n')
+        result.update(report)
+        counts, valid = report['requests'], report['validation']
+        good = (not failure and result['exitCode']==0 and result['recovery']['ok']
+                and all(flags.values()) and valid['measurementComplete']
+                and valid['summaryPresent'] and valid['summaryCountMatches'] and not valid['serverUnmatchedIds']
+                and counts['dropped']==0 and counts['incomplete']==0
+                and counts['completed']>0 and counts['byOutcome'].get('success',0)==counts['completed'])
+        result['status'] = 'passed' if good else 'failed'
+        result['validation'].update(flags)
+        if not good and not failure:
+            result['stopReason'] = 'See request outcomes, validation and recovery'
+    except Exception as error:
+        result.update(status='failed', stopReason=f'{failure or ""}; aggregation: {error}')
+    save(out/'result.json', result)
+    return result
 
 
 def main():

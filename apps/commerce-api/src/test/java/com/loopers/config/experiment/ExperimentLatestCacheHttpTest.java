@@ -82,7 +82,7 @@ class ExperimentLatestCacheHttpTest {
         assertThat(request(otherUserId, "latest", 0, 20, null)).isEqualTo(miss);
         assertThat(request(userId, null, 0, 20, null)).isEqualTo(miss);
         assertThat(miss).contains("Cache product").doesNotContain("Deleted");
-        verify(products, times(1)).findCustomerProductPage(null, ProductSort.LATEST, 0, 20);
+        verify(products, times(1)).findBasicPage(null, ProductSort.LATEST, 0, 20);
     }
 
     @Test void differentFiltersPagesSizesAndSortsBypassTrialKey() throws Exception {
@@ -91,10 +91,10 @@ class ExperimentLatestCacheHttpTest {
         request(userId, "latest", 1, 20, null);
         request(userId, "latest", 0, 1, null);
         request(userId, "price_asc", 0, 20, null);
-        verify(products).findCustomerProductPage(brandId, ProductSort.LATEST, 0, 20);
-        verify(products).findCustomerProductPage(null, ProductSort.LATEST, 1, 20);
-        verify(products).findCustomerProductPage(null, ProductSort.LATEST, 0, 1);
-        verify(products).findCustomerProductPage(null, ProductSort.PRICE_ASC, 0, 20);
+        verify(products).findBasicPage(brandId, ProductSort.LATEST, 0, 20);
+        verify(products).findBasicPage(null, ProductSort.LATEST, 1, 20);
+        verify(products).findBasicPage(null, ProductSort.LATEST, 0, 1);
+        verify(products).findBasicPage(null, ProductSort.PRICE_ASC, 0, 20);
     }
 
     @Test void cachedResponseDoesNotBypassRequesterValidation() throws Exception {
@@ -102,13 +102,13 @@ class ExperimentLatestCacheHttpTest {
         mvc.perform(get("/api/v1/products")).andExpect(status().is4xxClientError());
         mvc.perform(get("/api/v1/products").header("X-USER-ID", "99999999"))
             .andExpect(status().is4xxClientError());
-        verify(products, times(1)).findCustomerProductPage(null, ProductSort.LATEST, 0, 20);
+        verify(products, times(1)).findBasicPage(null, ProductSort.LATEST, 0, 20);
     }
 
     @Test void malformedCacheFallsBackToOriginalQuery() throws Exception {
         redis.opsForValue().set(ExperimentLatestCache.KEY, "invalid-json");
         assertThat(request(userId, "latest", 0, 20, null)).contains("Cache product");
-        verify(products).findCustomerProductPage(null, ProductSort.LATEST, 0, 20);
+        verify(products).findBasicPage(null, ProductSort.LATEST, 0, 20);
     }
 
     private String request(long user, String sort, int page, int size, Long brand) throws Exception {

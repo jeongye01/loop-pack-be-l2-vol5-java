@@ -1,0 +1,172 @@
+{
+  "runId": "20261014T171204-measure-1700-2e995b",
+  "sort": "latest",
+  "sampleCount": 13,
+  "resultSource": "result.json",
+  "hosts": {
+    "app": {
+      "dockerCpuAggregatePercent": {
+        "mean": 155.51307692307694,
+        "max": 174.86,
+        "p95": 174.86
+      },
+      "dockerCpuNormalizedPercent": {
+        "mean": 77.75653846153847,
+        "max": 87.43,
+        "p95": 87.43
+      },
+      "hostCpuBusyPercent": {
+        "mean": 99.12744266849276,
+        "max": 99.90384615384616,
+        "p95": 99.90384615384616
+      },
+      "hostIowaitPercent": {
+        "mean": 0.0,
+        "max": 0.0,
+        "p95": 0.0
+      },
+      "perCoreBusyPercent": [
+        {
+          "mean": 99.00314547876896,
+          "max": 100.0,
+          "p95": 100.0
+        },
+        {
+          "mean": 99.218064989655,
+          "max": 100.0,
+          "p95": 100.0
+        }
+      ],
+      "containerMemoryMiB": {
+        "mean": 797.1307692307693,
+        "max": 800.3,
+        "p95": 800.3
+      },
+      "hostAvailableMemoryMiB": {
+        "mean": 6234.811598557692,
+        "max": 6251.828125,
+        "p95": 6251.828125
+      },
+      "disk": {
+        "readMiBs": {
+          "mean": 0.0,
+          "max": 0.0,
+          "p95": 0.0
+        },
+        "writeMiBs": {
+          "mean": 0.29885858103805535,
+          "max": 2.158785363601763,
+          "p95": 2.158785363601763
+        },
+        "busyPercent": {
+          "mean": 0.16668549626081633,
+          "max": 1.1575892047222456,
+          "p95": 1.1575892047222456
+        }
+      },
+      "blockIoFirstLast": [
+        "0B / 311kB",
+        "0B / 344kB"
+      ]
+    },
+    "db": {
+      "dockerCpuAggregatePercent": {
+        "mean": 35.62769230769231,
+        "max": 47.49,
+        "p95": 47.49
+      },
+      "dockerCpuNormalizedPercent": {
+        "mean": 17.813846153846153,
+        "max": 23.745,
+        "p95": 23.745
+      },
+      "hostCpuBusyPercent": {
+        "mean": 25.58279758007894,
+        "max": 34.23076923076923,
+        "p95": 34.23076923076923
+      },
+      "hostIowaitPercent": {
+        "mean": 0.03349702030894691,
+        "max": 0.3058103975535168,
+        "p95": 0.3058103975535168
+      },
+      "perCoreBusyPercent": [
+        {
+          "mean": 23.08438088844823,
+          "max": 31.782945736434108,
+          "p95": 31.782945736434108
+        },
+        {
+          "mean": 28.045924560040852,
+          "max": 36.34615384615385,
+          "p95": 36.34615384615385
+        }
+      ],
+      "containerMemoryMiB": {
+        "mean": 956.0076923076923,
+        "max": 956.1,
+        "p95": 956.1
+      },
+      "hostAvailableMemoryMiB": {
+        "mean": 6138.951322115385,
+        "max": 6144.89453125,
+        "p95": 6144.89453125
+      },
+      "disk": {
+        "readMiBs": {
+          "mean": 0.0,
+          "max": 0.0,
+          "p95": 0.0
+        },
+        "writeMiBs": {
+          "mean": 0.1834176104712612,
+          "max": 2.1751575169551893,
+          "p95": 2.1751575169551893
+        },
+        "busyPercent": {
+          "mean": 0.09818529356953733,
+          "max": 1.017880162773009,
+          "p95": 1.017880162773009
+        }
+      },
+      "blockIoFirstLast": [
+        "193kB / 6.49GB",
+        "193kB / 6.49GB"
+      ]
+    }
+  },
+  "appMetrics": {
+    "hikaricp_connections_active": {
+      "mean": 12.846153846153847,
+      "max": 22.0,
+      "p95": 22.0
+    },
+    "hikaricp_connections_pending": {
+      "mean": 0.0,
+      "max": 0.0,
+      "p95": 0.0
+    },
+    "experiment_active_requests": {
+      "mean": 18.0,
+      "max": 38.0,
+      "p95": 38.0
+    }
+  },
+  "connectionWaitMs": {
+    "mean": 0.03749537274292159,
+    "max": 32.001984,
+    "p95": 0.008236
+  },
+  "rankSqlMs": null,
+  "jdbcExecuteMs": {
+    "mean": 1.6739849870988417,
+    "max": 139.957683,
+    "p95": 4.95828
+  },
+  "gcPauseSecondsDuringSamples": 0.5320000000000001,
+  "localK6CpuPercent": {
+    "mean": 194.1769230769231,
+    "max": 330.2,
+    "p95": 330.2
+  }
+}

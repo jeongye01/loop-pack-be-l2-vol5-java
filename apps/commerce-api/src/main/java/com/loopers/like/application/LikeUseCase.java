@@ -88,6 +88,16 @@ public class LikeUseCase {
     }
 
     @Transactional(readOnly = true)
+    public PageResult<com.loopers.product.application.ProductUseCase.BasicProduct> findMineBasicPage(Long requesterId, Long userId, int page, int size) {
+        if (!requesterId.equals(userId)) throw new CoreException(ErrorCode.USER_NOT_FOUND);
+        List<Product> products = findMine(userId, page, size);
+        var brands = brandRepository.findAllByIds(products.stream().map(Product::getBrandId).distinct().toList()).stream()
+            .collect(java.util.stream.Collectors.toMap(com.loopers.brand.domain.Brand::getId, java.util.function.Function.identity()));
+        return new PageResult<>(products.stream().map(p -> new com.loopers.product.application.ProductUseCase.BasicProduct(p, brands.get(p.getBrandId()))).toList(),
+            page, size, likeRepository.countAllByUserId(userId));
+    }
+
+    @Transactional(readOnly = true)
     public long count(Long productId) {
         return likeRepository.countByProductId(productId);
     }
