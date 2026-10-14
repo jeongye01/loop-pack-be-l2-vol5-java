@@ -1,6 +1,7 @@
 # Week4 조회 성능 실험
 
 - [공통 프로토콜](protocol.md): 실행·측정·중단·회복·결과 기록 방식
+- [커밋별 일반 EXPLAIN](historical-explain.md): 과거 쿼리·인덱스 구성의 별도 로컬 재현 출력
 - [실험 계획서 템플릿](experiment-plan-template.md)
 - [서울 EC2 장비 사양](environments/ec2-seoul.md) · [시스템 구성도](../system-architecture.md)
 - [01. Baseline](01-baseline/plan.md): 현재 데이터 분포와 부하 한계 탐색
@@ -8,6 +9,8 @@
 - [03. 좋아요순 Baseline](03-baseline-likes/plan.md): 같은 데이터·장비에서 좋아요순 부하 한계 탐색
 - [05. 최신순 최적화](05-optimize-latest-query/plan.md): 단건 측정·실행계획·읽기 흐름 비교
 - [06. 가격순 현재 상태](06-optimize-price-query/report.md): 단건 측정·실행계획·읽기 흐름
+- [07. 좋아요순 부하 테스트](07-load-likes/plan.md): 최적화 후 무필터 첫 페이지의 부하 한계·병목 탐색
+- [08. 최신순 부하 한계](08-load-latest/plan.md): 100 RPS 간격으로 정상 처리 한계 탐색
 - [예비 측정 보관본](preliminary/README.md): 기존 로컬·시드니 결과
 
 ## 공통 인프라

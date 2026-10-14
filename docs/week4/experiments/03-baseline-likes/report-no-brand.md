@@ -91,3 +91,9 @@ X-USER-ID: 1
 ![무필터 좋아요순 조회의 B+tree 읽기 범위와 처리 결과](assets/no-brand-read-flow.svg)
 
 좋아요 인덱스는 `(user_id, product_id)` 순서라 **상품별 좋아요 수 조회도 리프 전체를 읽는다.** 재고는 `product_id` 유일 인덱스로 해당 상품 1행을 찾는다.
+
+## 일반 EXPLAIN
+
+[출력 원본](explain-traditional/e801069-baseline.txt) · [실행 SQL](explain-traditional/e801069-baseline.sql) · [당시 구성 재현 정보](explain-traditional/e801069-baseline.json).
+
+해당 커밋의 쿼리·인덱스를 별도 로컬 MySQL 8.0.46에서 재현해 추가 수집했다. 기존 EC2 측정 당시 출력과는 구분한다. `rows`는 추정치이며 실제 읽은 행 수·loops·시간은 기존 `EXPLAIN ANALYZE`를 참고한다. [재현 범위](../historical-explain.md).

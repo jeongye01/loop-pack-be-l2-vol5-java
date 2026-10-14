@@ -180,11 +180,18 @@ class Runner:
                               'SQL timings cover JDBC execute calls, not result hydration or pool acquisition.',
                               'Nearest-rank percentiles; millisecond client clock resolution.']}
         save(out/'environment.json',environment)
-        process=None; samples=[]; failure=None; recovery={'ok':False,'reason':'Not attempted'}
+        process=None; log_process=None; log_stream=None
+        samples=[]; failure=None; recovery={'ok':False,'reason':'Not attempted'}
         since=datetime.now(timezone.utc).isoformat()
         try:
             before=self.recover(); save(out/'preflight.json',before)
             if not before['ok']: raise RuntimeError('Preflight recovery failed')
+            # Follow during the run: Docker may rotate away early requests before collection.
+            log_stream=(out/'server.log').open('w')
+            log_process=subprocess.Popen(['ssh','-i',self.key,'-o','BatchMode=yes',
+                '-o','ConnectTimeout=5',self.base['sshUser']+'@'+self.base['appHost'],
+                f'sudo docker logs --follow --since {shlex.quote(since)} '+self.base['appContainer']],
+                stdout=log_stream,stderr=log_stream)
             env=dict(os.environ,CONFIG_FILE=str(out/'config.json'),EXPECTED_FILE=str(out/'expected.json'),
                      SUMMARY_FILE=str(out/'summary.json'))
             with (out/'k6.log').open('w') as stream:
@@ -192,6 +199,7 @@ class Runner:
                                           str(HERE/'products.js')],env=env,stdout=stream,stderr=subprocess.STDOUT)
                 deadline=time.monotonic()+seconds+config['gracefulStopSeconds']+20
                 while process.poll() is None:
+                    if log_process.poll() is not None: raise RuntimeError('Server log stream ended early')
                     if time.monotonic()>deadline: raise TimeoutError('k6 bounded runtime exceeded')
                     next_sample=time.monotonic()+config['sampleIntervalSeconds']
                     samples.append(self.sample())
@@ -209,8 +217,12 @@ class Runner:
                 try: recovery=self.recover()
                 except Exception as e: recovery={'ok':False,'reason':str(e)}
             save(out/'resources.json',samples)
-            remote=self.ssh(self.base['appHost'],f'sudo docker logs --since {shlex.quote(since)} '+self.base['appContainer'],timeout=40)
-            (out/'server.log').write_text(remote['stdout']+remote['stderr'])
+            logs_collected=log_process is not None and log_process.poll() is None
+            if log_process is not None and log_process.poll() is None:
+                log_process.terminate()
+                try: log_process.wait(timeout=5)
+                except subprocess.TimeoutExpired: log_process.kill(); log_process.wait(timeout=5)
+            if log_stream is not None: log_stream.close()
             environment['end']=self.snapshot(); save(out/'environment.json',environment)
             result.update(finishedAt=datetime.now(timezone.utc).isoformat(),recovery=recovery,
                           exitCode=process.returncode if process else None,stopReason=failure,
@@ -226,14 +238,14 @@ class Runner:
                 counts=report['requests']; valid=report['validation']
                 sample_ok=bool(samples) and all(s[h]['exitCode']==0 for s in samples for h in ('app','db','local'))
                 environment_ok=all(environment[t][h]['exitCode']==0 for t in ('start','end') for h in ('app','db'))
-                good=(not failure and result['exitCode']==0 and recovery['ok'] and remote['exitCode']==0
+                good=(not failure and result['exitCode']==0 and recovery['ok'] and logs_collected
                       and sample_ok and environment_ok and valid['measurementComplete']
                       and valid['summaryPresent'] and valid['summaryCountMatches'] and not valid['serverUnmatchedIds']
                       and counts['dropped']==0 and counts['incomplete']==0
                       and counts['completed']>0 and counts['byOutcome'].get('success',0)==counts['completed'])
                 result['status']='passed' if good else 'failed'
                 result['validation'].update(samplesComplete=sample_ok,environmentComplete=environment_ok,
-                                             serverLogsCollected=remote['exitCode']==0)
+                                             serverLogsCollected=logs_collected)
                 if not good and not failure: result['stopReason']='See request outcomes, validation and recovery'
             except Exception as e:
                 result.update(status='failed',stopReason=f'{failure or ""}; aggregation: {e}')

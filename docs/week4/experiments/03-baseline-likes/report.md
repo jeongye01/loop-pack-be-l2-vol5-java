@@ -38,3 +38,7 @@
 - 목록을 얻은 후 상품마다 실행하는 좋아요 수 조회 20개가 약 87~89%를 차지했다. 목록에서 집계한 좋아요 수를 응답에 재사용하는 것은 개선 후보이며 이번 실험에서는 코드를 바꾸지 않았다.
 - DB CPU는 [집계 JSON](analysis.json)에 모든 코어 합산(2 vCPU 상한 약 200%)과 서버 전체 용량 대비(상한 100%)를 나누어 저장했다. 이는 컨테이너 사용률이며 서버 전체 프로세스의 사용률이 아니다.
 - 메모리·디스크 I/O·앱 지표 원본은 각 Run의 `resources.json`, 요청별 SQL과 시간은 `traces.jsonl`에 보관했다. SQL 실행 계획은 별도로 수집하지 않았다.
+
+## 일반 EXPLAIN
+
+[baseline 출력](explain-traditional/e801069-baseline.txt) · [SQL](explain-traditional/e801069-baseline.sql). 무필터와 브랜드 7을 포함한 별도 로컬 재현 결과다. [재현 조건](../historical-explain.md).

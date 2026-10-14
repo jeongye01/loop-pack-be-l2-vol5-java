@@ -60,3 +60,9 @@ CASE 601
 ![최신순 최적화 전 읽기 흐름](assets/before-read-flow.svg)
 
 후속: [최신순 인덱스 적용 전후 비교](report-index.md) · [디스크·인덱스 용량](storage.md).
+
+## 일반 EXPLAIN
+
+[출력 원본](explain-traditional/before-40a08b3.txt) · [실행 SQL](explain-traditional/before-40a08b3.sql) · [당시 구성 재현 정보](explain-traditional/before-40a08b3.json).
+
+해당 커밋의 쿼리·인덱스를 별도 로컬 MySQL 8.0.46에서 재현해 추가 수집했다. 기존 EC2 측정 당시 출력과는 구분한다. `rows`는 추정치이며 실제 읽은 행 수·loops·시간은 기존 `EXPLAIN ANALYZE`를 참고한다. [재현 범위](../historical-explain.md).

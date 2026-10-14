@@ -1,0 +1,29 @@
+{
+  "capturedAt": "2026-10-14T14:07:06.579646+00:00",
+  "commit": "3bc0f0ceb2c229b1bad7bba166d39f30d739fd34",
+  "database": "perf_explain_history_v1",
+  "dataset": "skewed-1m-v1",
+  "mode": "price",
+  "fetchLimit": 21,
+  "caseCount": 8,
+  "sourceSha256": {
+    "apps/commerce-api/src/main/java/com/loopers/product/infrastructure/ProductJpaRepository.java": "3184231d0078bf8515e03bfd8bf58bfe9fbcc56884e7ee8194ee15df4e8a8d49",
+    "apps/commerce-api/src/main/java/com/loopers/product/infrastructure/ProductRepositoryAdapter.java": "f285549e7b0afbd2c7908142f8486988a0102146c738f5835a5b09d8432deba8",
+    "apps/commerce-api/src/main/java/com/loopers/product/domain/Product.java": "5da04dbf84323628f153497b1f407859625ea70b97991ef30c75515ce179ee8d",
+    "apps/commerce-api/src/main/java/com/loopers/like/domain/Like.java": "a0d26af3f75f00af60877c8b8e1adccac1fa9f50d714e81b1323df3b416fcb3c"
+  },
+  "datasetManifestSha256": "f1b8e4777b54e93cecd78743d95044cf9bbedee354c2f6a299733cd26cf4bef8",
+  "method": "Local reconstruction, not original EC2 output. Native SQL extracted from commit; JPQL translated to physical columns with equivalent filter/order/projection. Representative auxiliary reads are not a full HTTP request trace.",
+  "indexAdditions": [
+    {
+      "table": "product",
+      "name": "idx_product_price",
+      "columns": "deleted_at,price ASC,id ASC"
+    },
+    {
+      "table": "product",
+      "name": "idx_product_brand_price",
+      "columns": "brand_id,deleted_at,price ASC,id ASC"
+    }
+  ]
+}

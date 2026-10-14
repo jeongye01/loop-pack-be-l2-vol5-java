@@ -1,0 +1,3 @@
+# Large raw artifacts stay local; hashes are tracked in raw-artifacts.json.
+results/**/*.log
+results/**/traces.jsonl

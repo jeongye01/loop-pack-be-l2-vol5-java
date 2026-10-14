@@ -48,3 +48,9 @@ Limit: 21 rows
 
 배포 이미지: `commerce-api:week4-brand-first-20261014`. JAR SHA-256: `8abfbdb4be560a8218529fdd3f7205c3fa456c23f56366c05915a5a982aab174`.
 원본: `build/04-optimize-likes-query/brand-filter/`, `brand-first/`. Run: `brands-1791924251` → `brandfirst-1791940723`. 실행계획: `brand-first/explain.sql`, `explain.txt`.
+
+## 일반 EXPLAIN
+
+[출력 원본](explain-traditional/40a08b3.txt) · [실행 SQL](explain-traditional/40a08b3.sql) · [당시 구성 재현 정보](explain-traditional/40a08b3.json).
+
+해당 커밋의 쿼리·인덱스를 별도 로컬 MySQL 8.0.46에서 재현해 추가 수집했다. 기존 EC2 측정 당시 출력과는 구분한다. `rows`는 추정치이며 실제 읽은 행 수·loops·시간은 기존 `EXPLAIN ANALYZE`를 참고한다. [재현 범위](../historical-explain.md).

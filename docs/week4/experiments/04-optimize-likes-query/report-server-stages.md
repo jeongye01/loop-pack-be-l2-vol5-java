@@ -22,3 +22,9 @@
 이전 미분리 시간 101ms와 이번 결과는 워밍업 횟수·측정 시점·계측 범위가 다르다. 이전 101ms의 원인을 그대로 확정하거나 계측 추가로 성능이 개선됐다고 해석하지 않는다.
 
 3회 모두 SQL 63회, 전체 상품 COUNT 0회, 기존 상품 내용·순서 동일을 확인했다. 단위·HTTP·ArchUnit 7개 테스트와 Checkstyle 통과. 원본·집계는 `build/04-optimize-likes-query/stage-timing/`에 저장했다. Run ID: `stages-1791918986`. JAR SHA-256: `545ed7c93814138bb0e820bb2eaaa85e58138449a17558f636d9024fe67fa86d`.
+
+## 일반 EXPLAIN
+
+[출력 원본](explain-traditional/01420df.txt) · [실행 SQL](explain-traditional/01420df.sql) · [당시 구성 재현 정보](explain-traditional/01420df.json).
+
+해당 커밋의 쿼리·인덱스를 별도 로컬 MySQL 8.0.46에서 재현해 추가 수집했다. 기존 EC2 측정 당시 출력과는 구분한다. `rows`는 추정치이며 실제 읽은 행 수·loops·시간은 기존 `EXPLAIN ANALYZE`를 참고한다. [재현 범위](../historical-explain.md).

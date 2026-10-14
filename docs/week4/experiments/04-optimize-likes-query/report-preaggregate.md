@@ -49,3 +49,9 @@ ORDER BY COALESCE(l.like_count, 0) DESC, p.id ASC;
 ```
 
 좋아요 **69만 행 → 상품별 집계 21만 행**을 임시 결과로 만든다. 상품 100만 행마다 이 결과를 탐색하고 정렬한다. 조인 결과는 약 148만 행에서 100만 행으로 줄었지만, **상품 100만 행 읽기·100만 번 탐색·정렬은 남는다.** 목록 SQL은 이전 2.768초, 이번 2.680초로 비슷했다.
+
+## 일반 EXPLAIN
+
+[출력 원본](explain-traditional/a4a5ec8.txt) · [실행 SQL](explain-traditional/a4a5ec8.sql) · [당시 구성 재현 정보](explain-traditional/a4a5ec8.json).
+
+해당 커밋의 쿼리·인덱스를 별도 로컬 MySQL 8.0.46에서 재현해 추가 수집했다. 기존 EC2 측정 당시 출력과는 구분한다. `rows`는 추정치이며 실제 읽은 행 수·loops·시간은 기존 `EXPLAIN ANALYZE`를 참고한다. [재현 범위](../historical-explain.md).

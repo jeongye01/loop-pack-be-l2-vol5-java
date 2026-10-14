@@ -38,3 +38,7 @@
 ## 조회 흐름 비교
 
 ![N+1 제거 전후 조회 흐름](assets/batch-read-flow.svg)
+
+## 일반 EXPLAIN
+
+[커밋 기준 출력](explain-traditional/d2ab232.txt) · [SQL](explain-traditional/d2ab232.sql). 일괄 조회와 좋아요 수 재사용이 함께 커밋된 최종 상태다. 중간 미커밋 상태를 별도 커밋으로 재현했다고 보지 않는다. [로컬 재현 조건](../historical-explain.md).

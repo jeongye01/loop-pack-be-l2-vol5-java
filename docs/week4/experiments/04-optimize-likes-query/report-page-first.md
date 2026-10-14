@@ -57,3 +57,9 @@
 **가장 큰 비용은 상품 조건 확인·조인(약 77%)이다.** 정렬 자체가 대부분을 차지하는 것은 아니다. 좋아요 읽기와 집계만 합쳐도 이번 계측에서는 약 122ms였다.
 
 표는 부모·자식 누적 시간의 차이로 근사 분해했다. 최종 상품 조회는 평균 반복 시간 × 20으로 계산했다. 출력 반올림·반복 측정 오버헤드 때문에 정확한 독립 구간 합산값은 아니며, `EXPLAIN ANALYZE` 계측 시간과 일반 SQL 실행 시간은 구분한다. 누적 시간과 반복 평균의 의미는 [MySQL 공식 문서](https://dev.mysql.com/doc/refman/8.0/en/explain.html)를 따른다.
+
+## 일반 EXPLAIN
+
+[출력 원본](explain-traditional/ce77577.txt) · [실행 SQL](explain-traditional/ce77577.sql) · [당시 구성 재현 정보](explain-traditional/ce77577.json).
+
+해당 커밋의 쿼리·인덱스를 별도 로컬 MySQL 8.0.46에서 재현해 추가 수집했다. 기존 EC2 측정 당시 출력과는 구분한다. `rows`는 추정치이며 실제 읽은 행 수·loops·시간은 기존 `EXPLAIN ANALYZE`를 참고한다. [재현 범위](../historical-explain.md).

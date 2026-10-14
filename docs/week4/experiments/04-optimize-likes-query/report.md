@@ -51,3 +51,9 @@ SELECT COUNT(id) FROM product_like WHERE product_id = 980807;
 좋아요 인덱스는 상품마다 총 100만 번 탐색한다. 탐색당 평균 0.69행, 합계 69만 행을 반환한다.
 
 ![인덱스 추가 후 상품 목록 조회의 데이터 읽기 흐름](assets/after-index-read-flow.svg)
+
+## 일반 EXPLAIN
+
+[출력 원본](explain-traditional/770c082.txt) · [실행 SQL](explain-traditional/770c082.sql) · [당시 구성 재현 정보](explain-traditional/770c082.json).
+
+해당 커밋의 쿼리·인덱스를 별도 로컬 MySQL 8.0.46에서 재현해 추가 수집했다. 기존 EC2 측정 당시 출력과는 구분한다. `rows`는 추정치이며 실제 읽은 행 수·loops·시간은 기존 `EXPLAIN ANALYZE`를 참고한다. [재현 범위](../historical-explain.md).

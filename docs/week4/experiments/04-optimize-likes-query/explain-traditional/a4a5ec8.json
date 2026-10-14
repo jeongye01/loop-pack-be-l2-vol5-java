@@ -1,0 +1,18 @@
+{
+  "capturedAt": "2026-10-14T14:06:50.059151+00:00",
+  "commit": "a4a5ec83afd2a16d35b23f59047a0137b93c7934",
+  "database": "perf_explain_history_v1",
+  "dataset": "skewed-1m-v1",
+  "mode": "likes",
+  "fetchLimit": 20,
+  "caseCount": 8,
+  "sourceSha256": {
+    "apps/commerce-api/src/main/java/com/loopers/product/infrastructure/ProductJpaRepository.java": "dd36c1e45f7cf22c4a995d5d66901a1aaab05128180c4af5d554a5eb65b7b18e",
+    "apps/commerce-api/src/main/java/com/loopers/product/infrastructure/ProductRepositoryAdapter.java": "0bb9ff9d99afe73dd6f8b9545331e7603265f601456346fa55193542b3fe74f3",
+    "apps/commerce-api/src/main/java/com/loopers/product/domain/Product.java": "8b7d3d5055df847f4a52fc5f8177ba4014c77f653070a5fbfc2fd9b99beac6ce",
+    "apps/commerce-api/src/main/java/com/loopers/like/domain/Like.java": "a0d26af3f75f00af60877c8b8e1adccac1fa9f50d714e81b1323df3b416fcb3c"
+  },
+  "datasetManifestSha256": "f1b8e4777b54e93cecd78743d95044cf9bbedee354c2f6a299733cd26cf4bef8",
+  "method": "Local reconstruction, not original EC2 output. Native SQL extracted from commit; JPQL translated to physical columns with equivalent filter/order/projection. Representative auxiliary reads are not a full HTTP request trace.",
+  "indexAdditions": []
+}

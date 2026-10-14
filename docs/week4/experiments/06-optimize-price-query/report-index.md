@@ -45,3 +45,9 @@ JPA에 두 인덱스를 반영하고 컬럼·정렬 방향 검증을 추가했�
 ## 데이터 읽기 흐름
 
 ![가격순 인덱스 적용 후 읽기 흐름](assets/after-read-flow.svg)
+
+## 일반 EXPLAIN
+
+[출력 원본](explain-traditional/after-3bc0f0c.txt) · [실행 SQL](explain-traditional/after-3bc0f0c.sql) · [당시 구성 재현 정보](explain-traditional/after-3bc0f0c.json).
+
+해당 커밋의 쿼리·인덱스를 별도 로컬 MySQL 8.0.46에서 재현해 추가 수집했다. 기존 EC2 측정 당시 출력과는 구분한다. `rows`는 추정치이며 실제 읽은 행 수·loops·시간은 기존 `EXPLAIN ANALYZE`를 참고한다. [재현 범위](../historical-explain.md).

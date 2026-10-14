@@ -36,3 +36,9 @@
 ## 데이터 읽기 흐름
 
 ![전체 상품 스캔에서 좋아요 있는 상품 우선 조회로 변경한 흐름](assets/positive-first-read-flow.svg)
+
+## 일반 EXPLAIN
+
+[출력 원본](explain-traditional/3575b51.txt) · [실행 SQL](explain-traditional/3575b51.sql) · [당시 구성 재현 정보](explain-traditional/3575b51.json).
+
+해당 커밋의 쿼리·인덱스를 별도 로컬 MySQL 8.0.46에서 재현해 추가 수집했다. 기존 EC2 측정 당시 출력과는 구분한다. `rows`는 추정치이며 실제 읽은 행 수·loops·시간은 기존 `EXPLAIN ANALYZE`를 참고한다. [재현 범위](../historical-explain.md).

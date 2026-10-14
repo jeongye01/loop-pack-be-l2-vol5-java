@@ -18,3 +18,7 @@
 
 요청: `GET /api/v1/products?sort=likes_desc&page=0&size=20`에 `brandId=1` 또는 `brandId=601` 추가. `X-USER-ID: 1`.
 원본: `build/04-optimize-likes-query/brand-filter/`. Run: `brands-1791924251`.
+
+## 일반 EXPLAIN
+
+[커밋 기준 출력](explain-traditional/d2ab232.txt) · [SQL](explain-traditional/d2ab232.sql). 브랜드 우선 집계를 적용하기 전 커밋 구성이다. [로컬 재현 조건](../historical-explain.md).
