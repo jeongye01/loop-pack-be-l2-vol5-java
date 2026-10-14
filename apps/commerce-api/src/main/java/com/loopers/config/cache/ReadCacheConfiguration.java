@@ -1,7 +1,7 @@
 package com.loopers.config.cache;
 
 import com.loopers.support.cache.CacheKeys;
-import java.time.Duration;
+import com.loopers.support.cache.ReadCacheTtl;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.cache.Cache;
@@ -28,12 +28,10 @@ public class ReadCacheConfiguration implements CachingConfigurer {
     public ReadCacheConfiguration(io.micrometer.core.instrument.MeterRegistry metrics) { this.metrics = metrics; }
     @Bean
     CacheManager cacheManager(@Qualifier("redisConnectionMaster") RedisConnectionFactory connection) {
-        var defaults = RedisCacheConfiguration.defaultCacheConfig().disableCachingNullValues()
+        var defaults = RedisCacheConfiguration.defaultCacheConfig().entryTtl(new ReadCacheTtl()).disableCachingNullValues()
             .serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(new StringRedisSerializer()));
         var configurations = new java.util.HashMap<String, RedisCacheConfiguration>();
         CacheKeys.NAMES.forEach(name -> configurations.put(name, defaults));
-        configurations.put(CacheKeys.COUNTS, defaults.entryTtl(Duration.ofMinutes(1)));
-        configurations.put(CacheKeys.RANKINGS, defaults.entryTtl(Duration.ofMinutes(1)));
         return RedisCacheManager.builder(RedisCacheWriter.nonLockingRedisCacheWriter(connection, BatchStrategies.scan(1000)))
             .cacheDefaults(defaults)
             .withInitialCacheConfigurations(configurations).build();

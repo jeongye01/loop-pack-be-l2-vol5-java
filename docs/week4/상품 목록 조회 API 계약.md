@@ -136,4 +136,29 @@ OFFSET 방식으로 앞의 `page × size`개를 건너뛰고 최대 `size`개를
 
 고객 상품 목록은 `totalElements`를 반환하지 않는다. `page * size` 위치에서 `size + 1`개까지 조회하고, 최대 `size`개만 반환한다. 추가 상품이 있으면 `last: false`, 없으면 `last: true`다. 정확히 `size`개만 남은 경우와 빈 목록도 `last: true`다. 필터·삭제 제외·정렬을 적용한 결과를 기준으로 판단한다.
 
-좋아요 수와 품절 여부는 `GET /api/v1/products/like-counts?ids=...`, `GET /api/v1/products/stocks?ids=...`에서 일괄 조회한다. 프론트는 productId로 합성하며 미수신 값을 0·재고 있음으로 가정하지 않는다.
+### 좋아요 수·재고 분리 API
+
+상품 목록·상세·내 좋아요 목록의 상품 정보는 `id`, `name`, `price`, `brand`만 반환한다. 좋아요 수와 품절 여부는 아래 API로 별도 조회한다.
+
+| 요청 | 응답 `data` 예시 |
+| --- | --- |
+| `GET /api/v1/products/like-counts?ids=12,13` | `[{"productId":12,"likeCount":3},{"productId":13,"likeCount":0}]` |
+| `GET /api/v1/products/stocks?ids=12,13` | `[{"productId":12,"soldOut":false},{"productId":13,"soldOut":true}]` |
+
+두 API 모두 위와 같은 `meta`·`data` 응답 형식과 `X-USER-ID` 식별을 사용한다.
+
+| 입력·상황 | 처리 |
+| --- | --- |
+| `ids` | 필수. 쉼표로 구분한 양수 Long ID 1~100개, 중복 제거 전 개수 기준 |
+| 중복·입력 순서 | 중복 제거 후 상품 ID 오름차순 반환 |
+| 없는 상품·삭제 상품·삭제 브랜드 소속 상품 | 결과에서 제외. 모두 제외되면 `200`, `data: []` |
+| ids 누락·빈 값·형식 오류·0/음수·101개 이상 | `400 INVALID_REQUEST` |
+| 사용자 헤더 누락·형식 오류·없는 사용자 | `401 USER_NOT_IDENTIFIED` |
+
+프론트는 목록에서 받은 ID로 두 API를 호출하고 `productId`로 합성한다. 미수신 값을 좋아요 0개·재고 있음으로 가정하지 않는다. 내 좋아요 목록은 본인 확인을 유지하며, 페이지 정보도 기존 `totalElements` 계약을 유지한다.
+
+### 캐시와 표시 갱신
+
+캐시가 켜지면 저장마다 TTL **5분 ±30초**를 적용하며, hit로 만료 시간이 연장되지 않는다. 좋아요 수·좋아요순 순위는 만료까지 이전 값이 보일 수 있다. 상품·브랜드·재고 변경과 내 좋아요 목록 변경은 해당 DB revision으로 구분한다. 삭제·본인 확인은 표시 지연 허용 대상이 아니며 주문 판단은 원본 DB를 사용한다.
+
+TTL은 저장된 캐시의 수명이며, 동시 변경·장애를 포함한 모든 요청의 최신성을 보장하는 전역 시간 상한이 아니다. 상세 계약은 [week2 API 계약](../week2/api-contract.md)을 따른다.

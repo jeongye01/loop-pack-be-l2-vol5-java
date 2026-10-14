@@ -56,7 +56,7 @@
 | --- | --- |
 | 요청 | `GET /api/v1/products` |
 | 입력 | query `brandId`(선택), `sort`(`latest`·`price_asc`·`likes_desc`, 기본 `latest`), `page`, `size` |
-| 성공 | `200`, 고객 상품 목록. 삭제되지 않은 상품만 담는다. |
+| 성공 | `200`, 고객 상품 목록 (`id`, `name`, `price`, `brand`). 삭제되지 않은 상품만 담는다. |
 | 순서 | `latest`는 등록 최신순, `price_asc`는 가격 오름차순, `likes_desc`는 좋아요 수 내림차순. 같으면 상품 식별자 오름차순 |
 | 오류 | `400 INVALID_REQUEST`: 정수가 아닌 `brandId`, 지원하지 않는 `sort`, 잘못된 `page`·`size` |
 | 규칙 | 없거나 삭제된 `brandId`로 거르면 빈 목록을 돌려준다. |
@@ -69,7 +69,7 @@
 | --- | --- |
 | 요청 | `GET /api/v1/products/{productId}` |
 | 입력 | path `productId` |
-| 성공 | `200`, 고객 상품 |
+| 성공 | `200`, 고객 상품 (`id`, `name`, `price`, `brand`) |
 | 오류 | `400 INVALID_REQUEST`: `productId`가 정수가 아님 · `404 PRODUCT_NOT_FOUND`: 없거나 삭제된 상품 |
 
 
@@ -102,7 +102,7 @@
 | --- | --- |
 | 요청 | `GET /api/v1/users/{userId}/likes` |
 | 입력 | path `userId`, query `page`, `size` |
-| 성공 | `200`, 고객 상품 목록. 삭제된 상품은 담지 않는다. |
+| 성공 | `200`, 고객 상품 목록 (`id`, `name`, `price`, `brand`). 삭제된 상품은 담지 않는다. |
 | 순서 | 좋아요한 시점 최신순 |
 | 오류 | `400 INVALID_REQUEST`: `userId`가 정수가 아니거나 `page`·`size`가 잘못됨 · `404 USER_NOT_FOUND`: `userId`가 요청자가 아님 |
 
@@ -401,13 +401,17 @@
 
 ## 4주차 고객 상품 응답 변경
 
-R-CATALOG-09/10, R-CACHE-01/02에 따라 고객 상품 응답은 `id`, `name`, `price`, `brand`만 포함한다. 기존 상품 목록·상세·내 좋아요 목록의 `likeCount`, `soldOut`은 아래 일괄 API로 이동한다. 기존 정렬·페이지·오류·인증 계약은 유지한다.
+4주차에 합의한 API 분리에 따라 고객 상품 응답은 `id`, `name`, `price`, `brand`만 포함한다. 기존 상품 목록·상세·내 좋아요 목록의 `likeCount`, `soldOut`은 아래 일괄 API로 이동한다. 기존 정렬·페이지·오류·인증 계약은 유지한다.
 
 | 요청 | 응답 data | 입력 |
 | --- | --- | --- |
 | `GET /api/v1/products/like-counts?ids=1,2` | `[{"productId":1,"likeCount":3}]` | 필수 ids, 양수 정수 1~100개 |
 | `GET /api/v1/products/stocks?ids=1,2` | `[{"productId":1,"soldOut":false}]` | 동일 |
 
+두 API 모두 공통 `meta`·`data` 응답 형식을 사용하며 `X-USER-ID`가 필요하다. 누락·형식 오류·존재하지 않는 사용자는 `401 USER_NOT_IDENTIFIED`다.
+
 입력 개수는 중복 제거 전 기준. 누락·빈 값·숫자 형식 오류·0/음수·101개 이상은 `400 INVALID_REQUEST`. ID 중복은 제거하고 오름차순으로 반환한다. 없는·삭제된 상품·삭제 브랜드 소속 상품은 제외하고 모두 제외되면 `200` 빈 배열이다. `X-USER-ID` 식별은 캐시 hit에도 수행한다. 내 좋아요 목록은 경로 userId와 요청자 일치 확인 후 캐시 조회한다.
 
-캐시가 켜진 경우 좋아요 숫자·순위는 1분 TTL 동안 이전 값이 보일 수 있다. 상품·브랜드 삭제는 이 지연 대상이 아니다. 정상 DB 커밋 이후 시작한 조회는 변경 버전을 사용한다. Redis 장애 시 DB로 우회하며 DB 버전 조회 실패는 오래된 캐시로 우회하지 않는다. 주문은 기존 DB 트랜잭션으로 처리한다.
+캐시가 켜진 경우 전체 조회 캐시는 저장마다 5분 ±30초 TTL을 적용한다. 좋아요 숫자·순위는 만료까지 이전 값이 보일 수 있다. 이 수명은 저장 시점 기준이며 모든 동시 요청의 데이터 최신성에 대한 전역 상한은 아니다. 상품·브랜드 삭제는 이 지연 대상이 아니다. 정상 DB 커밋 이후 시작한 조회는 변경 버전을 사용한다. Redis 장애 시 DB로 우회하며 DB 버전 조회 실패는 오래된 캐시로 우회하지 않는다. 주문은 기존 DB 트랜잭션으로 처리한다.
+
+프론트 연동 예시는 [4주차 상품 조회 API 계약](../week4/상품%20목록%20조회%20API%20계약.md)을 참고한다. 상품 목록은 `last`를, 내 좋아요 목록은 기존 `totalElements`를 유지한다.

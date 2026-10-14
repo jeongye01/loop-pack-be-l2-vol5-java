@@ -82,7 +82,7 @@ class ReadCacheHttpTest {
         verify(products, times(1)).findBasicPage(null, null, 0, 20);
         verify(products, times(0)).findBasicPage(null, ProductSort.LATEST, 0, 20);
         mvc.perform(get("/api/v1/products")).andExpect(status().isUnauthorized());
-        assertThat(redis.getExpire(key(CacheKeys.PRODUCTS, CacheKeys.products("latest", null, 0, 20), CacheKeys.CATALOG_REVISION))).isEqualTo(-1);
+        assertThat(redis.getExpire(key(CacheKeys.PRODUCTS, CacheKeys.products("latest", null, 0, 20), CacheKeys.CATALOG_REVISION))).isBetween(269L, 330L);
     }
 
     @Test void updateRollbackDeletionAndLateOldFillCannotExposeStaleProduct() throws Exception {
@@ -105,7 +105,7 @@ class ReadCacheHttpTest {
         String url = "/api/v1/products/like-counts?ids="+product.getId();
         mvc.perform(get(url).with(customer(user))).andExpect(jsonPath("$.data[0].likeCount").value(0));
         String key = key(CacheKeys.COUNTS, CacheKeys.batch(CacheKeys.COUNTS, java.util.List.of(product.getId())), CacheKeys.CATALOG_REVISION);
-        assertThat(redis.getExpire(key)).isBetween(1L, 60L);
+        assertThat(redis.getExpire(key)).isBetween(269L, 330L);
         mvc.perform(get("/api/v1/users/{id}/likes", user.getId()).with(customer(user))).andExpect(jsonPath("$.data.content.length()").value(0));
         likes.register(user.getId(), product.getId());
         mvc.perform(get(url).with(customer(user))).andExpect(jsonPath("$.data[0].likeCount").value(0));
@@ -125,7 +125,7 @@ class ReadCacheHttpTest {
         brands.update(brand.getId(), "renamed brand");
         mvc.perform(get(url).with(com.loopers.support.http.ApiHttp.admin())).andExpect(jsonPath("$.data.content[0].name").value("renamed brand"));
         mvc.perform(get(url).with(customer(user))).andExpect(status().isForbidden());
-        assertThat(redis.getExpire(key(CacheKeys.BRANDS, CacheKeys.brands(0, 20), CacheKeys.CATALOG_REVISION))).isEqualTo(-1);
+        assertThat(redis.getExpire(key(CacheKeys.BRANDS, CacheKeys.brands(0, 20), CacheKeys.CATALOG_REVISION))).isBetween(269L, 330L);
     }
 
     @Test void malformedNonExpiringCacheIsRemovedAndRefilled() throws Exception {
@@ -154,7 +154,7 @@ class ReadCacheHttpTest {
         String url = "/api/v1/products?sort=likes_desc";
         mvc.perform(get(url).with(customer(user))).andExpect(status().isOk());
         String key = key(CacheKeys.RANKINGS, CacheKeys.products("likes_desc", null, 0, 20), CacheKeys.CATALOG_REVISION);
-        assertThat(redis.getExpire(key)).isBetween(1L, 60L);
+        assertThat(redis.getExpire(key)).isBetween(269L, 330L);
         products.update(product.getId(), "rank renamed", 500L, null);
         mvc.perform(get(url).with(customer(user))).andExpect(jsonPath("$.data.content[0].name").value("rank renamed"));
         products.delete(product.getId());
@@ -169,6 +169,23 @@ class ReadCacheHttpTest {
             new com.loopers.order.application.OrderUseCase.ItemCommand(product.getId(), 1)));
         orders.confirm(buyer.getId(), order.getId());
         mvc.perform(get(url).with(customer(buyer))).andExpect(jsonPath("$.data[0].soldOut").value(true));
+    }
+
+    @Test void cacheHitDoesNotRenewTheRemainingTtl() throws Exception {
+        String original = detail();
+        String key = key(CacheKeys.PRODUCTS, CacheKeys.product(product.getId()), CacheKeys.CATALOG_REVISION);
+        redis.expire(key, Duration.ofSeconds(120));
+        clearInvocations(products);
+        assertThat(detail()).isEqualTo(original);
+        verify(products, times(0)).findBasicProduct(product.getId());
+        assertThat(redis.getExpire(key)).isBetween(119L, 120L);
+    }
+
+    @Test void everyCacheBucketUsesExpiringJitteredEntries() {
+        for (String bucket : CacheKeys.NAMES) {
+            cacheManager.getCache(bucket).put("ttl-policy-test", "value");
+            assertThat(redis.getExpire(bucket + "::ttl-policy-test")).as(bucket).isBetween(269L, 330L);
+        }
     }
 
     @Test void stockMutationAndBrandDeletionInvalidateBatches() throws Exception {

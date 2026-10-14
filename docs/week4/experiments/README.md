@@ -9,6 +9,7 @@
 | 요청 누락 | 미시작·미완료 0건 |
 
 - [이번 주 변경사항](../이번%20주%20변경사항.md): 인덱스·SQL·캐시·로깅·API 분리 요약
+- [캐시 설계 적용 후 실행 계획](execution-plan.md): 정상 hit·쓰기·스탬피드·DB 보호·장애 복구 순서
 - [공통 프로토콜](protocol.md): 실행·측정·중단·회복·결과 기록 방식
 - [커밋별 일반 EXPLAIN](historical-explain.md): 과거 쿼리·인덱스 구성의 별도 로컬 재현 출력
 - [실험 계획서 템플릿](experiment-plan-template.md)
@@ -29,6 +30,7 @@
 - [17. 상세 로그 OFF 비교](17-cache-trace-off/report.md): 출력 경합 제거 시 평균 23ms·p99 237ms
 - [18. 비동기 실험 로그](18-cache-async-log/report.md): AsyncAppender 구현·로그 전수 보존·1회 비교
 - [19. 상세 기록 1% 샘플링](19-cache-sampled-log/report.md): 1,700 RPS·3,000 VU 3회, p99 51 / 73 / 30ms
+- [20. 인기 키 만료 스탬피드](20-cache-stampede/plan.md): 단일 키 만료 직후 동시 요청·DB 중복 조회·풀 대기 검증 계획
 - [예비 측정 보관본](preliminary/README.md): 기존 로컬·시드니 결과
 
 ## 공통 인프라
