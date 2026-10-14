@@ -89,15 +89,13 @@ interface ProductJpaRepository extends JpaRepository<Product, Long> {
 
     @Query(value = """
         select page.id as productId, page.id as eligibleProductId, page.like_count as likeCount from (
-            select candidate.id, l.like_count
-            from (
-                select product_id, count(*) as like_count
-                from product_like
-                group by product_id
-            ) l join product candidate force index (idx_product_likes_filter) on candidate.id = l.product_id
-            where candidate.deleted_at is null
-              and (:brandId is null or candidate.brand_id = :brandId)
-            order by l.like_count desc, candidate.id asc
+            select candidate.id, count(*) as like_count
+            from product candidate force index (uk_product_active_name)
+            straight_join product_like l force index (idx_product_like_product_id)
+              on l.product_id = candidate.id
+            where candidate.brand_id = :brandId and candidate.deleted_at is null
+            group by candidate.id
+            order by like_count desc, candidate.id asc
             limit :limit offset :offset
         ) page
         order by page.like_count desc, page.id asc
@@ -109,11 +107,9 @@ interface ProductJpaRepository extends JpaRepository<Product, Long> {
     );
 
     @Query(value = """
-        select count(*) from (
-            select product_id from product_like group by product_id
-        ) l join product p on p.id = l.product_id
-        where p.deleted_at is null
-          and (:brandId is null or p.brand_id = :brandId)
+        select count(*) from product p force index (uk_product_active_name)
+        where p.brand_id = :brandId and p.deleted_at is null
+          and exists (select 1 from product_like l where l.product_id = p.id)
         """, nativeQuery = true)
     long countLikedCustomerProducts(@Param("brandId") Long brandId);
 
