@@ -11,38 +11,25 @@ public class CatalogReadTransaction {
     private final TransactionTemplate transaction;
     private final CacheReadPolicy policy;
     private final ResponseCache cache;
-    private final RedisCacheLock lock;
-    public CatalogReadTransaction(PlatformTransactionManager manager, CacheReadPolicy policy, ResponseCache cache, RedisCacheLock lock) {
+    private final CacheSingleFlight flights;
+    public CatalogReadTransaction(PlatformTransactionManager manager, CacheReadPolicy policy, ResponseCache cache, CacheSingleFlight flights) {
         this.transaction = new TransactionTemplate(manager);
         this.transaction.setReadOnly(true);
         this.policy = policy;
         this.cache = cache;
-        this.lock = lock;
+        this.flights = flights;
     }
     public <T> T read(Supplier<T> operation) {
         if (policy.bypassRevision()) return operation.get();
-        long started = System.nanoTime();
         while (true) {
             try { return cache.hitOnly(operation); }
             catch (ResponseCache.CacheMiss miss) {
-                if (miss.key == null) return original(operation);
-                if (System.nanoTime() - started >= lock.waitNanos) {
-                    lock.record("timeout_fallback");
-                    return original(operation);
-                }
-                var attempt = lock.acquire(miss.key);
-                if (attempt.failed()) return original(operation);
-                if (attempt.acquired()) {
-                    // The transaction rereads revision and cache before loading original data.
-                    try { return original(operation); }
-                    finally { lock.release(attempt); }
-                }
-                long remaining = lock.waitNanos - (System.nanoTime() - started);
-                if (remaining > 0) lock.pause(remaining);
+                if (miss.key == null) return transaction.execute(status -> operation.get());
+                // Acquire before opening a DB transaction. Only the owner starts a snapshot.
+                var result = flights.execute(miss.key, () -> transaction.execute(status -> operation.get()));
+                if (result.owner()) return result.value();
+                // Never share the owner's composed response: refresh revisions and all cache reads.
             }
         }
-    }
-    private <T> T original(Supplier<T> operation) {
-        return transaction.execute(status -> operation.get());
     }
 }

@@ -20,21 +20,19 @@ public class ResponseCache {
         }
     }
 
-    private <T> T loadOriginal(Supplier<T> loader, CacheKey key) {
+    private <T> T loadOriginal(Supplier<T> loader, CacheSingleFlight.Key key) {
         requireOriginalRead(key);
         return loader.get();
     }
 
-    private void requireOriginalRead(CacheKey key) {
+    private void requireOriginalRead(CacheSingleFlight.Key key) {
         if (Boolean.TRUE.equals(hitOnly.get())) throw new CacheMiss(key);
     }
 
-    record CacheKey(String cacheName, String revisionKey) { }
-
     /** Internal control flow: restart with a fresh revision and DB snapshot. */
     static final class CacheMiss extends RuntimeException {
-        final CacheKey key;
-        CacheMiss(CacheKey key) { super(null, null, false, false); this.key = key; }
+        final CacheSingleFlight.Key key;
+        private CacheMiss(CacheSingleFlight.Key key) { super(null, null, false, false); this.key = key; }
     }
 
     private final CachedJson cached;
@@ -62,16 +60,16 @@ public class ResponseCache {
 
     private <T> T resolve(Entry<T> entry, String key, String value) {
         if (value == null) {
-            T loaded = loadOriginal(entry.loader(), new CacheKey(entry.cacheName(), key));
+            T loaded = loadOriginal(entry.loader(), new CacheSingleFlight.Key(entry.cacheName(), key));
             try { cached.store(entry.cacheName(), key, json.writeValueAsString(loaded)); }
             catch (com.fasterxml.jackson.core.JsonProcessingException e) { throw new IllegalStateException(e); }
             return loaded;
         }
         try { return json.readValue(value, entry.type()); }
         catch (com.fasterxml.jackson.core.JsonProcessingException e) {
-            requireOriginalRead(new CacheKey(entry.cacheName(), key));
+            requireOriginalRead(new CacheSingleFlight.Key(entry.cacheName(), key));
             cached.evict(entry.cacheName(), key);
-            return loadOriginal(entry.loader(), new CacheKey(entry.cacheName(), key));
+            return loadOriginal(entry.loader(), new CacheSingleFlight.Key(entry.cacheName(), key));
         }
     }
     public <T> T read(CacheVersions.Snapshot snapshot, String cacheName, String apiKey, TypeReference<T> type,
@@ -79,14 +77,14 @@ public class ResponseCache {
         if (!snapshot.enabled()) return loadOriginal(loader, null);
         String key = snapshot.key(apiKey, namespaces);
         String value = cached.load(cacheName, key, () -> {
-            try { return json.writeValueAsString(loadOriginal(loader, new CacheKey(cacheName, key))); }
+            try { return json.writeValueAsString(loadOriginal(loader, new CacheSingleFlight.Key(cacheName, key))); }
             catch (com.fasterxml.jackson.core.JsonProcessingException e) { throw new IllegalStateException(e); }
         });
         try { return json.readValue(value, type); }
         catch (com.fasterxml.jackson.core.JsonProcessingException e) {
-            requireOriginalRead(new CacheKey(cacheName, key));
+            requireOriginalRead(new CacheSingleFlight.Key(cacheName, key));
             cached.evict(cacheName, key);
-            return loadOriginal(loader, new CacheKey(cacheName, key));
+            return loadOriginal(loader, new CacheSingleFlight.Key(cacheName, key));
         }
     }
 }
