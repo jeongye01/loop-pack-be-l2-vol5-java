@@ -1,0 +1,69 @@
+{
+  "before": {
+    "ttlMs": {
+      "products::v3:products?sort=latest&brand=all&page=0&size=20:rev=experiment-c45fc4dd-b130-4e16-a3ab-474d608bb7bc": 1454,
+      "like-counts::v3:products/like-counts?ids=1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20:rev=experiment-c45fc4dd-b130-4e16-a3ab-474d608bb7bc": 88570,
+      "stocks::v3:products/stocks?ids=1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20:rev=experiment-c45fc4dd-b130-4e16-a3ab-474d608bb7bc:rev=experiment-c45fc4dd-b130-4e16-a3ab-474d608bb7bc": 101310
+    },
+    "redisStats": {
+      "total_commands_processed": 8450684,
+      "expired_keys": 3876,
+      "evicted_keys": 0,
+      "keyspace_hits": 10270566,
+      "keyspace_misses": 423617
+    },
+    "commandCalls": {
+      "client|setname": 38,
+      "mget": 2762573,
+      "role": 38,
+      "scan": 3508,
+      "ttl": 18,
+      "info": 250,
+      "replconf": 239048,
+      "ping": 47552,
+      "expire": 35,
+      "del": 2016,
+      "hello": 114,
+      "get": 5157898,
+      "psync": 1,
+      "evalsha": 2011,
+      "exists": 2,
+      "set": 224282,
+      "eval": 183,
+      "pttl": 11119
+    }
+  },
+  "after": {
+    "ttlMs": {
+      "like-counts::v3:products/like-counts?ids=1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20:rev=experiment-c45fc4dd-b130-4e16-a3ab-474d608bb7bc": 1965,
+      "stocks::v3:products/stocks?ids=1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20:rev=experiment-c45fc4dd-b130-4e16-a3ab-474d608bb7bc:rev=experiment-c45fc4dd-b130-4e16-a3ab-474d608bb7bc": 14721
+    },
+    "redisStats": {
+      "total_commands_processed": 8656344,
+      "expired_keys": 3909,
+      "evicted_keys": 0,
+      "keyspace_hits": 10576545,
+      "keyspace_misses": 425158
+    },
+    "commandCalls": {
+      "client|setname": 38,
+      "mget": 2864576,
+      "role": 38,
+      "scan": 3511,
+      "ttl": 18,
+      "info": 252,
+      "replconf": 239134,
+      "ping": 47569,
+      "expire": 35,
+      "del": 2016,
+      "hello": 114,
+      "get": 5261410,
+      "psync": 1,
+      "evalsha": 2011,
+      "exists": 2,
+      "set": 224314,
+      "eval": 185,
+      "pttl": 11121
+    }
+  }
+}

@@ -1,0 +1,3985 @@
+{
+  "runId": "20261015T165809-measure-1700-d8c534",
+  "groups": {
+    "read": {
+      "count": 986,
+      "serverMs": {
+        "count": 986,
+        "mean": 129.4929807363083,
+        "p50": 119.767403,
+        "p99": 323.771097,
+        "max": 494.995472
+      },
+      "connectionWaitMs": {
+        "count": 986,
+        "mean": 11.246252276876268,
+        "p50": 0.010815,
+        "p99": 151.73165,
+        "max": 255.15227
+      },
+      "sqlMs": {
+        "other": {
+          "count": 992,
+          "mean": 3.580523355846774,
+          "p50": 2.204665,
+          "p99": 23.194299,
+          "max": 109.954448
+        }
+      },
+      "stagesTotalMsWhenPresent": {
+        "jdbc.connection.clearWarnings": {
+          "count": 986,
+          "mean": 0.0024164168356997973,
+          "p50": 0.001865,
+          "p99": 0.015293,
+          "max": 0.089439
+        },
+        "jdbc.connection.setReadOnly": {
+          "count": 986,
+          "mean": 5.475192464503043,
+          "p50": 3.42375,
+          "p99": 30.193839,
+          "max": 91.331754
+        },
+        "jdbc.connection.prepareStatement": {
+          "count": 986,
+          "mean": 0.08184070588235294,
+          "p50": 0.028439,
+          "p99": 1.275584,
+          "max": 19.576287
+        },
+        "jdbc.acquire": {
+          "count": 986,
+          "mean": 11.245582805273834,
+          "p50": 0.010195,
+          "p99": 151.730936,
+          "max": 255.151552
+        },
+        "jdbc.execute": {
+          "count": 986,
+          "mean": 3.600903284989858,
+          "p50": 2.253587,
+          "p99": 23.191036,
+          "max": 109.953597
+        },
+        "request.pipeline": {
+          "count": 986,
+          "mean": 129.30730893610547,
+          "p50": 119.631779,
+          "p99": 323.717115,
+          "max": 494.952359
+        },
+        "UserRepositoryAdapter.findById": {
+          "count": 986,
+          "mean": 4.1507499178498986,
+          "p50": 2.563715,
+          "p99": 25.136619,
+          "max": 111.213614
+        },
+        "jdbc.connection.getAutoCommit": {
+          "count": 986,
+          "mean": 0.00719995537525355,
+          "p50": 0.006452,
+          "p99": 0.027135,
+          "max": 0.068366
+        },
+        "jdbc.statement.other": {
+          "count": 986,
+          "mean": 0.0810813215010142,
+          "p50": 0.022054,
+          "p99": 1.5331789999999998,
+          "max": 13.741182999999998
+        },
+        "jdbc.connection.close": {
+          "count": 986,
+          "mean": 1.8068968651115618,
+          "p50": 0.010102,
+          "p99": 27.408519,
+          "max": 68.517189
+        },
+        "jdbc.connection.commit": {
+          "count": 986,
+          "mean": 3.418775229208925,
+          "p50": 2.037465,
+          "p99": 23.551953,
+          "max": 106.835176
+        },
+        "jdbc.result.read": {
+          "count": 986,
+          "mean": 0.11399266531440162,
+          "p50": 0.018749000000000002,
+          "p99": 1.977045,
+          "max": 42.046127000000006
+        },
+        "jdbc.connection.isClosed": {
+          "count": 986,
+          "mean": 0.011108409736308316,
+          "p50": 0.005034,
+          "p99": 0.027027,
+          "max": 5.279317
+        },
+        "ProductV1Controller.getProducts": {
+          "count": 986,
+          "mean": 98.53689111359026,
+          "p50": 91.904565,
+          "p99": 250.82513,
+          "max": 450.119437
+        },
+        "response.writeAndMvcCompletion": {
+          "count": 986,
+          "mean": 0.1634847606490872,
+          "p50": 0.06366,
+          "p99": 0.648226,
+          "max": 73.899642
+        },
+        "jdbc.connection.setAutoCommit": {
+          "count": 986,
+          "mean": 3.4409119239350914,
+          "p50": 2.144745,
+          "p99": 22.680519999999998,
+          "max": 81.273981
+        },
+        "StockRepositoryAdapter.findAllByProductIds": {
+          "count": 3,
+          "mean": 3.1117030000000003,
+          "p50": 3.246518,
+          "p99": 4.525979,
+          "max": 4.525979
+        },
+        "ProductUseCase.findStockStatuses": {
+          "count": 3,
+          "mean": 7.516522666666666,
+          "p50": 6.956407,
+          "p99": 11.37975,
+          "max": 11.37975
+        },
+        "ProductRepositoryAdapter.findActiveByIds": {
+          "count": 3,
+          "mean": 3.600999,
+          "p50": 2.385923,
+          "p99": 6.336106,
+          "max": 6.336106
+        }
+      }
+    },
+    "write": {
+      "count": 1200,
+      "serverMs": {
+        "count": 1200,
+        "mean": 161.3010419175,
+        "p50": 115.686444,
+        "p99": 1531.632605,
+        "max": 2045.387372
+      },
+      "connectionWaitMs": {
+        "count": 1200,
+        "mean": 11.095551189166667,
+        "p50": 0.020888,
+        "p99": 161.582148,
+        "max": 299.222873
+      },
+      "sqlMs": {
+        "other": {
+          "count": 9000,
+          "mean": 5.019040961777778,
+          "p50": 2.001633,
+          "p99": 42.347119,
+          "max": 215.496026
+        }
+      },
+      "stagesTotalMsWhenPresent": {
+        "response.writeAndMvcCompletion": {
+          "count": 1200,
+          "mean": 5.177875148333333,
+          "p50": 0.117434,
+          "p99": 286.803123,
+          "max": 510.204785
+        },
+        "OrderRepositoryAdapter.save": {
+          "count": 1200,
+          "mean": 12.385366121666667,
+          "p50": 2.513422,
+          "p99": 96.107358,
+          "max": 1145.993069
+        },
+        "jdbc.connection.setReadOnly": {
+          "count": 1200,
+          "mean": 6.387364444166667,
+          "p50": 3.381456,
+          "p99": 36.060700000000004,
+          "max": 85.065479
+        },
+        "ProductRepositoryAdapter.findForOrder": {
+          "count": 1200,
+          "mean": 7.709726695833333,
+          "p50": 3.581365,
+          "p99": 56.714963,
+          "max": 134.258148
+        },
+        "jdbc.result.read": {
+          "count": 1200,
+          "mean": 0.7467821958333334,
+          "p50": 0.174429,
+          "p99": 14.732872000000004,
+          "max": 59.09519200000002
+        },
+        "jdbc.statement.other": {
+          "count": 1200,
+          "mean": 1.5712748383333333,
+          "p50": 0.27410700000000005,
+          "p99": 30.743629000000002,
+          "max": 65.322333
+        },
+        "jdbc.connection.clearWarnings": {
+          "count": 1200,
+          "mean": 0.010815657499999999,
+          "p50": 0.0038269999999999997,
+          "p99": 0.022151999999999998,
+          "max": 6.242946
+        },
+        "jdbc.connection.setAutoCommit": {
+          "count": 1200,
+          "mean": 7.848210909166666,
+          "p50": 5.119876,
+          "p99": 42.383796000000004,
+          "max": 183.52286900000001
+        },
+        "jdbc.connection.getAutoCommit": {
+          "count": 1200,
+          "mean": 0.065131845,
+          "p50": 0.010298,
+          "p99": 0.045194,
+          "max": 49.850837
+        },
+        "jdbc.connection.isClosed": {
+          "count": 1200,
+          "mean": 0.0128945525,
+          "p50": 0.009677,
+          "p99": 0.044962,
+          "max": 1.213836
+        },
+        "UserRepositoryAdapter.findById": {
+          "count": 1200,
+          "mean": 7.71693041,
+          "p50": 4.813763,
+          "p99": 46.095977,
+          "max": 206.34591999999998
+        },
+        "request.pipeline": {
+          "count": 1200,
+          "mean": 161.008489395,
+          "p50": 115.612379,
+          "p99": 1531.526051,
+          "max": 2042.403771
+        },
+        "jdbc.connection.close": {
+          "count": 1200,
+          "mean": 2.8769239241666664,
+          "p50": 0.019122,
+          "p99": 45.929828,
+          "max": 72.00410099999999
+        },
+        "jdbc.acquire": {
+          "count": 1200,
+          "mean": 11.086723976666667,
+          "p50": 0.018985000000000002,
+          "p99": 161.580235,
+          "max": 299.22164
+        },
+        "jdbc.connection.prepareStatement": {
+          "count": 1200,
+          "mean": 2.6561542741666666,
+          "p50": 0.322988,
+          "p99": 44.72700700000001,
+          "max": 92.86904600000001
+        },
+        "jdbc.connection.commit": {
+          "count": 1200,
+          "mean": 13.2295241525,
+          "p50": 10.989569,
+          "p99": 43.753545,
+          "max": 205.208397
+        },
+        "jdbc.execute": {
+          "count": 1200,
+          "mean": 37.633173049166665,
+          "p50": 27.604522000000003,
+          "p99": 147.578282,
+          "max": 242.028043
+        },
+        "PointRepositoryAdapter.findForOrderByUserId": {
+          "count": 600,
+          "mean": 13.406390978333333,
+          "p50": 5.213821,
+          "p99": 134.684587,
+          "max": 217.37159
+        },
+        "PointRepositoryAdapter.save": {
+          "count": 600,
+          "mean": 3.2285838166666667,
+          "p50": 0.194696,
+          "p99": 73.124641,
+          "max": 93.383004
+        },
+        "OrderRepositoryAdapter.findForConfirmById": {
+          "count": 600,
+          "mean": 37.602594018333335,
+          "p50": 13.791293,
+          "p99": 929.064726,
+          "max": 1023.383005
+        },
+        "StockRepositoryAdapter.save": {
+          "count": 600,
+          "mean": 3.286885338333333,
+          "p50": 0.171933,
+          "p99": 133.892726,
+          "max": 189.440449
+        },
+        "StockRepositoryAdapter.findForOrderByProductId": {
+          "count": 600,
+          "mean": 14.33529,
+          "p50": 5.987207,
+          "p99": 110.256629,
+          "max": 192.017147
+        }
+      }
+    }
+  },
+  "readRevisionCountHistogram": {
+    "0": 986
+  },
+  "readRecheckedWithoutOrigin": 0,
+  "matchedPurchaseCount": 600,
+  "purchaseClientCount": 600,
+  "matchedPurchase": {
+    "clientMs": {
+      "count": 600,
+      "mean": 2741.125,
+      "p50": 2477,
+      "p99": 4905,
+      "max": 5055
+    },
+    "serverSumMs": {
+      "count": 600,
+      "mean": 322.602083835,
+      "p50": 247.55958399999997,
+      "p99": 2720.0260829999997,
+      "max": 3682.590268
+    },
+    "outsideServerMs": {
+      "count": 600,
+      "mean": 2418.522916165,
+      "p50": 2148.074537,
+      "p99": 4563.9296,
+      "max": 4613.360824
+    }
+  },
+  "purchasePairs": [
+    {
+      "index": 4,
+      "clientMs": 3272,
+      "serverSumMs": 3132.3680560000003,
+      "outsideServerMs": 139.63194399999975
+    },
+    {
+      "index": 18,
+      "clientMs": 1873,
+      "serverSumMs": 1247.814273,
+      "outsideServerMs": 625.185727
+    },
+    {
+      "index": 8,
+      "clientMs": 2877,
+      "serverSumMs": 1857.237064,
+      "outsideServerMs": 1019.7629360000001
+    },
+    {
+      "index": 9,
+      "clientMs": 2777,
+      "serverSumMs": 1743.775758,
+      "outsideServerMs": 1033.224242
+    },
+    {
+      "index": 15,
+      "clientMs": 2178,
+      "serverSumMs": 1666.808928,
+      "outsideServerMs": 511.1910720000001
+    },
+    {
+      "index": 10,
+      "clientMs": 2679,
+      "serverSumMs": 1599.762828,
+      "outsideServerMs": 1079.237172
+    },
+    {
+      "index": 17,
+      "clientMs": 1980,
+      "serverSumMs": 1395.809897,
+      "outsideServerMs": 584.1901029999999
+    },
+    {
+      "index": 14,
+      "clientMs": 2283,
+      "serverSumMs": 1191.581009,
+      "outsideServerMs": 1091.418991
+    },
+    {
+      "index": 5,
+      "clientMs": 3184,
+      "serverSumMs": 2981.802874,
+      "outsideServerMs": 202.19712600000003
+    },
+    {
+      "index": 1,
+      "clientMs": 3584,
+      "serverSumMs": 2731.8062600000003,
+      "outsideServerMs": 852.1937399999997
+    },
+    {
+      "index": 11,
+      "clientMs": 2585,
+      "serverSumMs": 2161.036105,
+      "outsideServerMs": 423.96389499999987
+    },
+    {
+      "index": 3,
+      "clientMs": 3386,
+      "serverSumMs": 2527.275299,
+      "outsideServerMs": 858.7247010000001
+    },
+    {
+      "index": 6,
+      "clientMs": 3087,
+      "serverSumMs": 2841.850935,
+      "outsideServerMs": 245.14906500000006
+    },
+    {
+      "index": 0,
+      "clientMs": 3686,
+      "serverSumMs": 3682.590268,
+      "outsideServerMs": 3.4097320000000764
+    },
+    {
+      "index": 2,
+      "clientMs": 3488,
+      "serverSumMs": 2707.916069,
+      "outsideServerMs": 780.0839310000001
+    },
+    {
+      "index": 7,
+      "clientMs": 2989,
+      "serverSumMs": 2720.0260829999997,
+      "outsideServerMs": 268.97391700000026
+    },
+    {
+      "index": 13,
+      "clientMs": 2389,
+      "serverSumMs": 1980.386963,
+      "outsideServerMs": 408.6130370000001
+    },
+    {
+      "index": 22,
+      "clientMs": 1792,
+      "serverSumMs": 963.453474,
+      "outsideServerMs": 828.546526
+    },
+    {
+      "index": 16,
+      "clientMs": 2456,
+      "serverSumMs": 667.448809,
+      "outsideServerMs": 1788.551191
+    },
+    {
+      "index": 25,
+      "clientMs": 1625,
+      "serverSumMs": 517.9221279999999,
+      "outsideServerMs": 1107.077872
+    },
+    {
+      "index": 24,
+      "clientMs": 1758,
+      "serverSumMs": 658.039818,
+      "outsideServerMs": 1099.960182
+    },
+    {
+      "index": 20,
+      "clientMs": 2490,
+      "serverSumMs": 556.7609,
+      "outsideServerMs": 1933.2391
+    },
+    {
+      "index": 27,
+      "clientMs": 1794,
+      "serverSumMs": 518.677422,
+      "outsideServerMs": 1275.322578
+    },
+    {
+      "index": 21,
+      "clientMs": 2395,
+      "serverSumMs": 352.329305,
+      "outsideServerMs": 2042.670695
+    },
+    {
+      "index": 19,
+      "clientMs": 2642,
+      "serverSumMs": 693.913681,
+      "outsideServerMs": 1948.086319
+    },
+    {
+      "index": 12,
+      "clientMs": 4116,
+      "serverSumMs": 824.733117,
+      "outsideServerMs": 3291.2668830000002
+    },
+    {
+      "index": 34,
+      "clientMs": 1920,
+      "serverSumMs": 482.83567600000003,
+      "outsideServerMs": 1437.1643239999999
+    },
+    {
+      "index": 35,
+      "clientMs": 1855,
+      "serverSumMs": 465.61503300000004,
+      "outsideServerMs": 1389.384967
+    },
+    {
+      "index": 23,
+      "clientMs": 3155,
+      "serverSumMs": 605.429045,
+      "outsideServerMs": 2549.570955
+    },
+    {
+      "index": 38,
+      "clientMs": 1809,
+      "serverSumMs": 331.801939,
+      "outsideServerMs": 1477.198061
+    },
+    {
+      "index": 26,
+      "clientMs": 3015,
+      "serverSumMs": 271.272982,
+      "outsideServerMs": 2743.727018
+    },
+    {
+      "index": 41,
+      "clientMs": 1919,
+      "serverSumMs": 359.48276100000004,
+      "outsideServerMs": 1559.517239
+    },
+    {
+      "index": 28,
+      "clientMs": 3220,
+      "serverSumMs": 466.558848,
+      "outsideServerMs": 2753.441152
+    },
+    {
+      "index": 29,
+      "clientMs": 3131,
+      "serverSumMs": 272.473341,
+      "outsideServerMs": 2858.526659
+    },
+    {
+      "index": 30,
+      "clientMs": 3369,
+      "serverSumMs": 448.62791200000004,
+      "outsideServerMs": 2920.372088
+    },
+    {
+      "index": 31,
+      "clientMs": 3288,
+      "serverSumMs": 320.28851699999996,
+      "outsideServerMs": 2967.711483
+    },
+    {
+      "index": 45,
+      "clientMs": 1934,
+      "serverSumMs": 327.96538699999996,
+      "outsideServerMs": 1606.034613
+    },
+    {
+      "index": 32,
+      "clientMs": 3381,
+      "serverSumMs": 345.990377,
+      "outsideServerMs": 3035.009623
+    },
+    {
+      "index": 33,
+      "clientMs": 3704,
+      "serverSumMs": 521.31618,
+      "outsideServerMs": 3182.68382
+    },
+    {
+      "index": 36,
+      "clientMs": 3569,
+      "serverSumMs": 371.660792,
+      "outsideServerMs": 3197.339208
+    },
+    {
+      "index": 50,
+      "clientMs": 2173,
+      "serverSumMs": 414.901615,
+      "outsideServerMs": 1758.098385
+    },
+    {
+      "index": 37,
+      "clientMs": 3575,
+      "serverSumMs": 295.152267,
+      "outsideServerMs": 3279.847733
+    },
+    {
+      "index": 53,
+      "clientMs": 2365,
+      "serverSumMs": 423.869501,
+      "outsideServerMs": 1941.1304989999999
+    },
+    {
+      "index": 39,
+      "clientMs": 3787,
+      "serverSumMs": 278.17654,
+      "outsideServerMs": 3508.82346
+    },
+    {
+      "index": 55,
+      "clientMs": 2261,
+      "serverSumMs": 201.640448,
+      "outsideServerMs": 2059.359552
+    },
+    {
+      "index": 40,
+      "clientMs": 4331,
+      "serverSumMs": 583.304204,
+      "outsideServerMs": 3747.695796
+    },
+    {
+      "index": 56,
+      "clientMs": 2762,
+      "serverSumMs": 604.5117869999999,
+      "outsideServerMs": 2157.488213
+    },
+    {
+      "index": 42,
+      "clientMs": 4164,
+      "serverSumMs": 233.681313,
+      "outsideServerMs": 3930.318687
+    },
+    {
+      "index": 59,
+      "clientMs": 2648,
+      "serverSumMs": 284.991266,
+      "outsideServerMs": 2363.008734
+    },
+    {
+      "index": 44,
+      "clientMs": 4150,
+      "serverSumMs": 156.91557,
+      "outsideServerMs": 3993.08443
+    },
+    {
+      "index": 60,
+      "clientMs": 2572,
+      "serverSumMs": 136.466659,
+      "outsideServerMs": 2435.533341
+    },
+    {
+      "index": 43,
+      "clientMs": 4275,
+      "serverSumMs": 262.461638,
+      "outsideServerMs": 4012.5383620000002
+    },
+    {
+      "index": 46,
+      "clientMs": 4374,
+      "serverSumMs": 292.745155,
+      "outsideServerMs": 4081.254845
+    },
+    {
+      "index": 61,
+      "clientMs": 2893,
+      "serverSumMs": 395.440704,
+      "outsideServerMs": 2497.559296
+    },
+    {
+      "index": 47,
+      "clientMs": 4463,
+      "serverSumMs": 350.253761,
+      "outsideServerMs": 4112.746239
+    },
+    {
+      "index": 48,
+      "clientMs": 4593,
+      "serverSumMs": 366.518784,
+      "outsideServerMs": 4226.481216
+    },
+    {
+      "index": 49,
+      "clientMs": 4518,
+      "serverSumMs": 279.834309,
+      "outsideServerMs": 4238.165691
+    },
+    {
+      "index": 68,
+      "clientMs": 2704,
+      "serverSumMs": 218.622087,
+      "outsideServerMs": 2485.377913
+    },
+    {
+      "index": 67,
+      "clientMs": 2809,
+      "serverSumMs": 279.904697,
+      "outsideServerMs": 2529.095303
+    },
+    {
+      "index": 51,
+      "clientMs": 4621,
+      "serverSumMs": 340.994185,
+      "outsideServerMs": 4280.005815
+    },
+    {
+      "index": 69,
+      "clientMs": 2866,
+      "serverSumMs": 319.38746000000003,
+      "outsideServerMs": 2546.61254
+    },
+    {
+      "index": 52,
+      "clientMs": 4571,
+      "serverSumMs": 212.864869,
+      "outsideServerMs": 4358.135131
+    },
+    {
+      "index": 54,
+      "clientMs": 4740,
+      "serverSumMs": 371.018516,
+      "outsideServerMs": 4368.981484
+    },
+    {
+      "index": 76,
+      "clientMs": 2668,
+      "serverSumMs": 301.333191,
+      "outsideServerMs": 2366.666809
+    },
+    {
+      "index": 78,
+      "clientMs": 2479,
+      "serverSumMs": 249.061918,
+      "outsideServerMs": 2229.938082
+    },
+    {
+      "index": 57,
+      "clientMs": 4801,
+      "serverSumMs": 346.552572,
+      "outsideServerMs": 4454.447428
+    },
+    {
+      "index": 82,
+      "clientMs": 2332,
+      "serverSumMs": 170.569082,
+      "outsideServerMs": 2161.430918
+    },
+    {
+      "index": 58,
+      "clientMs": 4747,
+      "serverSumMs": 286.930699,
+      "outsideServerMs": 4460.0693009999995
+    },
+    {
+      "index": 84,
+      "clientMs": 2339,
+      "serverSumMs": 237.336591,
+      "outsideServerMs": 2101.663409
+    },
+    {
+      "index": 62,
+      "clientMs": 4937,
+      "serverSumMs": 356.19976499999996,
+      "outsideServerMs": 4580.800235
+    },
+    {
+      "index": 63,
+      "clientMs": 4870,
+      "serverSumMs": 256.639176,
+      "outsideServerMs": 4613.360824
+    },
+    {
+      "index": 64,
+      "clientMs": 4905,
+      "serverSumMs": 297.058673,
+      "outsideServerMs": 4607.9413270000005
+    },
+    {
+      "index": 87,
+      "clientMs": 2607,
+      "serverSumMs": 471.465708,
+      "outsideServerMs": 2135.534292
+    },
+    {
+      "index": 65,
+      "clientMs": 4812,
+      "serverSumMs": 248.0704,
+      "outsideServerMs": 4563.9296
+    },
+    {
+      "index": 92,
+      "clientMs": 2446,
+      "serverSumMs": 382.530288,
+      "outsideServerMs": 2063.469712
+    },
+    {
+      "index": 66,
+      "clientMs": 5055,
+      "serverSumMs": 471.244758,
+      "outsideServerMs": 4583.755242
+    },
+    {
+      "index": 93,
+      "clientMs": 2620,
+      "serverSumMs": 516.250703,
+      "outsideServerMs": 2103.749297
+    },
+    {
+      "index": 70,
+      "clientMs": 4966,
+      "serverSumMs": 375.497048,
+      "outsideServerMs": 4590.502952
+    },
+    {
+      "index": 72,
+      "clientMs": 4777,
+      "serverSumMs": 242.16697,
+      "outsideServerMs": 4534.83303
+    },
+    {
+      "index": 71,
+      "clientMs": 4879,
+      "serverSumMs": 331.795704,
+      "outsideServerMs": 4547.204296
+    },
+    {
+      "index": 73,
+      "clientMs": 4803,
+      "serverSumMs": 341.922333,
+      "outsideServerMs": 4461.077667
+    },
+    {
+      "index": 97,
+      "clientMs": 2423,
+      "serverSumMs": 358.453918,
+      "outsideServerMs": 2064.546082
+    },
+    {
+      "index": 75,
+      "clientMs": 4649,
+      "serverSumMs": 189.129164,
+      "outsideServerMs": 4459.870836
+    },
+    {
+      "index": 74,
+      "clientMs": 4770,
+      "serverSumMs": 271.551329,
+      "outsideServerMs": 4498.448671
+    },
+    {
+      "index": 99,
+      "clientMs": 2294,
+      "serverSumMs": 196.261525,
+      "outsideServerMs": 2097.738475
+    },
+    {
+      "index": 100,
+      "clientMs": 2351,
+      "serverSumMs": 255.524679,
+      "outsideServerMs": 2095.475321
+    },
+    {
+      "index": 77,
+      "clientMs": 4693,
+      "serverSumMs": 229.53067199999998,
+      "outsideServerMs": 4463.469328
+    },
+    {
+      "index": 79,
+      "clientMs": 5047,
+      "serverSumMs": 557.934569,
+      "outsideServerMs": 4489.065431
+    },
+    {
+      "index": 80,
+      "clientMs": 4972,
+      "serverSumMs": 563.508288,
+      "outsideServerMs": 4408.491712
+    },
+    {
+      "index": 81,
+      "clientMs": 4889,
+      "serverSumMs": 408.45225800000003,
+      "outsideServerMs": 4480.547742
+    },
+    {
+      "index": 83,
+      "clientMs": 4714,
+      "serverSumMs": 242.228488,
+      "outsideServerMs": 4471.771512
+    },
+    {
+      "index": 103,
+      "clientMs": 2715,
+      "serverSumMs": 480.769952,
+      "outsideServerMs": 2234.230048
+    },
+    {
+      "index": 85,
+      "clientMs": 4867,
+      "serverSumMs": 384.20131200000003,
+      "outsideServerMs": 4482.798688
+    },
+    {
+      "index": 86,
+      "clientMs": 4778,
+      "serverSumMs": 327.092325,
+      "outsideServerMs": 4450.907675
+    },
+    {
+      "index": 107,
+      "clientMs": 2680,
+      "serverSumMs": 287.744651,
+      "outsideServerMs": 2392.255349
+    },
+    {
+      "index": 109,
+      "clientMs": 2618,
+      "serverSumMs": 352.229343,
+      "outsideServerMs": 2265.770657
+    },
+    {
+      "index": 90,
+      "clientMs": 4547,
+      "serverSumMs": 174.785526,
+      "outsideServerMs": 4372.214474
+    },
+    {
+      "index": 88,
+      "clientMs": 4870,
+      "serverSumMs": 405.294273,
+      "outsideServerMs": 4464.7057270000005
+    },
+    {
+      "index": 89,
+      "clientMs": 4774,
+      "serverSumMs": 365.335827,
+      "outsideServerMs": 4408.664173
+    },
+    {
+      "index": 91,
+      "clientMs": 4750,
+      "serverSumMs": 355.92213,
+      "outsideServerMs": 4394.07787
+    },
+    {
+      "index": 94,
+      "clientMs": 4686,
+      "serverSumMs": 376.46569999999997,
+      "outsideServerMs": 4309.5343
+    },
+    {
+      "index": 95,
+      "clientMs": 4648,
+      "serverSumMs": 318.207476,
+      "outsideServerMs": 4329.792524
+    },
+    {
+      "index": 116,
+      "clientMs": 2576,
+      "serverSumMs": 259.717464,
+      "outsideServerMs": 2316.282536
+    },
+    {
+      "index": 118,
+      "clientMs": 2599,
+      "serverSumMs": 321.952515,
+      "outsideServerMs": 2277.047485
+    },
+    {
+      "index": 96,
+      "clientMs": 4807,
+      "serverSumMs": 420.755676,
+      "outsideServerMs": 4386.244324
+    },
+    {
+      "index": 98,
+      "clientMs": 4612,
+      "serverSumMs": 284.23385099999996,
+      "outsideServerMs": 4327.766149
+    },
+    {
+      "index": 121,
+      "clientMs": 2589,
+      "serverSumMs": 364.701955,
+      "outsideServerMs": 2224.298045
+    },
+    {
+      "index": 122,
+      "clientMs": 2515,
+      "serverSumMs": 353.07782899999995,
+      "outsideServerMs": 2161.922171
+    },
+    {
+      "index": 101,
+      "clientMs": 4618,
+      "serverSumMs": 330.400496,
+      "outsideServerMs": 4287.599504
+    },
+    {
+      "index": 102,
+      "clientMs": 4522,
+      "serverSumMs": 204.05954400000002,
+      "outsideServerMs": 4317.940456
+    },
+    {
+      "index": 126,
+      "clientMs": 2326,
+      "serverSumMs": 305.789248,
+      "outsideServerMs": 2020.210752
+    },
+    {
+      "index": 105,
+      "clientMs": 4582,
+      "serverSumMs": 316.233285,
+      "outsideServerMs": 4265.766715
+    },
+    {
+      "index": 106,
+      "clientMs": 4622,
+      "serverSumMs": 428.628581,
+      "outsideServerMs": 4193.371419
+    },
+    {
+      "index": 129,
+      "clientMs": 2326,
+      "serverSumMs": 364.58657000000005,
+      "outsideServerMs": 1961.41343
+    },
+    {
+      "index": 104,
+      "clientMs": 4828,
+      "serverSumMs": 623.431636,
+      "outsideServerMs": 4204.568364
+    },
+    {
+      "index": 110,
+      "clientMs": 4524,
+      "serverSumMs": 284.562886,
+      "outsideServerMs": 4239.437114
+    },
+    {
+      "index": 108,
+      "clientMs": 4733,
+      "serverSumMs": 449.388933,
+      "outsideServerMs": 4283.611067
+    },
+    {
+      "index": 134,
+      "clientMs": 2140,
+      "serverSumMs": 212.858296,
+      "outsideServerMs": 1927.1417040000001
+    },
+    {
+      "index": 111,
+      "clientMs": 4453,
+      "serverSumMs": 196.31564600000002,
+      "outsideServerMs": 4256.684354
+    },
+    {
+      "index": 112,
+      "clientMs": 4458,
+      "serverSumMs": 270.438848,
+      "outsideServerMs": 4187.561152
+    },
+    {
+      "index": 113,
+      "clientMs": 4505,
+      "serverSumMs": 274.716954,
+      "outsideServerMs": 4230.2830460000005
+    },
+    {
+      "index": 114,
+      "clientMs": 4410,
+      "serverSumMs": 230.966864,
+      "outsideServerMs": 4179.033136
+    },
+    {
+      "index": 137,
+      "clientMs": 2114,
+      "serverSumMs": 185.591351,
+      "outsideServerMs": 1928.408649
+    },
+    {
+      "index": 138,
+      "clientMs": 2224,
+      "serverSumMs": 268.336398,
+      "outsideServerMs": 1955.663602
+    },
+    {
+      "index": 115,
+      "clientMs": 4541,
+      "serverSumMs": 296.420875,
+      "outsideServerMs": 4244.579125
+    },
+    {
+      "index": 140,
+      "clientMs": 2256,
+      "serverSumMs": 310.56017299999996,
+      "outsideServerMs": 1945.4398270000002
+    },
+    {
+      "index": 139,
+      "clientMs": 2369,
+      "serverSumMs": 406.51676100000003,
+      "outsideServerMs": 1962.483239
+    },
+    {
+      "index": 117,
+      "clientMs": 4726,
+      "serverSumMs": 454.66080700000003,
+      "outsideServerMs": 4271.339193
+    },
+    {
+      "index": 142,
+      "clientMs": 2244,
+      "serverSumMs": 279.484658,
+      "outsideServerMs": 1964.515342
+    },
+    {
+      "index": 120,
+      "clientMs": 4443,
+      "serverSumMs": 184.797013,
+      "outsideServerMs": 4258.202987
+    },
+    {
+      "index": 119,
+      "clientMs": 4557,
+      "serverSumMs": 240.34166199999999,
+      "outsideServerMs": 4316.658338
+    },
+    {
+      "index": 143,
+      "clientMs": 2169,
+      "serverSumMs": 150.715548,
+      "outsideServerMs": 2018.2844519999999
+    },
+    {
+      "index": 125,
+      "clientMs": 4326,
+      "serverSumMs": 223.33768600000002,
+      "outsideServerMs": 4102.662314
+    },
+    {
+      "index": 123,
+      "clientMs": 4546,
+      "serverSumMs": 304.587549,
+      "outsideServerMs": 4241.412451
+    },
+    {
+      "index": 124,
+      "clientMs": 4452,
+      "serverSumMs": 289.342302,
+      "outsideServerMs": 4162.657698
+    },
+    {
+      "index": 127,
+      "clientMs": 4313,
+      "serverSumMs": 294.646608,
+      "outsideServerMs": 4018.353392
+    },
+    {
+      "index": 147,
+      "clientMs": 2319,
+      "serverSumMs": 250.00149299999998,
+      "outsideServerMs": 2068.9985070000002
+    },
+    {
+      "index": 149,
+      "clientMs": 2351,
+      "serverSumMs": 304.177913,
+      "outsideServerMs": 2046.822087
+    },
+    {
+      "index": 130,
+      "clientMs": 4427,
+      "serverSumMs": 453.110432,
+      "outsideServerMs": 3973.889568
+    },
+    {
+      "index": 128,
+      "clientMs": 4631,
+      "serverSumMs": 495.28578100000004,
+      "outsideServerMs": 4135.7142189999995
+    },
+    {
+      "index": 131,
+      "clientMs": 4347,
+      "serverSumMs": 255.517184,
+      "outsideServerMs": 4091.482816
+    },
+    {
+      "index": 132,
+      "clientMs": 4279,
+      "serverSumMs": 202.072058,
+      "outsideServerMs": 4076.927942
+    },
+    {
+      "index": 133,
+      "clientMs": 4324,
+      "serverSumMs": 245.776142,
+      "outsideServerMs": 4078.223858
+    },
+    {
+      "index": 135,
+      "clientMs": 4700,
+      "serverSumMs": 558.845058,
+      "outsideServerMs": 4141.154942
+    },
+    {
+      "index": 136,
+      "clientMs": 4599,
+      "serverSumMs": 469.229059,
+      "outsideServerMs": 4129.770941
+    },
+    {
+      "index": 155,
+      "clientMs": 2700,
+      "serverSumMs": 494.807327,
+      "outsideServerMs": 2205.192673
+    },
+    {
+      "index": 156,
+      "clientMs": 2606,
+      "serverSumMs": 475.08939,
+      "outsideServerMs": 2130.91061
+    },
+    {
+      "index": 158,
+      "clientMs": 2554,
+      "serverSumMs": 405.84376499999996,
+      "outsideServerMs": 2148.156235
+    },
+    {
+      "index": 160,
+      "clientMs": 2416,
+      "serverSumMs": 245.783994,
+      "outsideServerMs": 2170.216006
+    },
+    {
+      "index": 141,
+      "clientMs": 4320,
+      "serverSumMs": 148.09186799999998,
+      "outsideServerMs": 4171.9081320000005
+    },
+    {
+      "index": 159,
+      "clientMs": 2543,
+      "serverSumMs": 363.06886399999996,
+      "outsideServerMs": 2179.931136
+    },
+    {
+      "index": 163,
+      "clientMs": 2380,
+      "serverSumMs": 157.566053,
+      "outsideServerMs": 2222.433947
+    },
+    {
+      "index": 165,
+      "clientMs": 2353,
+      "serverSumMs": 227.247795,
+      "outsideServerMs": 2125.752205
+    },
+    {
+      "index": 144,
+      "clientMs": 4460,
+      "serverSumMs": 213.53961700000002,
+      "outsideServerMs": 4246.460383
+    },
+    {
+      "index": 145,
+      "clientMs": 4519,
+      "serverSumMs": 302.444534,
+      "outsideServerMs": 4216.555466
+    },
+    {
+      "index": 166,
+      "clientMs": 2419,
+      "serverSumMs": 264.916058,
+      "outsideServerMs": 2154.083942
+    },
+    {
+      "index": 146,
+      "clientMs": 4438,
+      "serverSumMs": 194.14339999999999,
+      "outsideServerMs": 4243.8566
+    },
+    {
+      "index": 148,
+      "clientMs": 4516,
+      "serverSumMs": 302.046109,
+      "outsideServerMs": 4213.953891
+    },
+    {
+      "index": 171,
+      "clientMs": 2323,
+      "serverSumMs": 204.89894600000002,
+      "outsideServerMs": 2118.1010539999997
+    },
+    {
+      "index": 151,
+      "clientMs": 4395,
+      "serverSumMs": 198.324083,
+      "outsideServerMs": 4196.675917
+    },
+    {
+      "index": 150,
+      "clientMs": 4501,
+      "serverSumMs": 307.27558899999997,
+      "outsideServerMs": 4193.724411
+    },
+    {
+      "index": 172,
+      "clientMs": 2425,
+      "serverSumMs": 259.817158,
+      "outsideServerMs": 2165.182842
+    },
+    {
+      "index": 173,
+      "clientMs": 2327,
+      "serverSumMs": 227.13959899999998,
+      "outsideServerMs": 2099.860401
+    },
+    {
+      "index": 174,
+      "clientMs": 2264,
+      "serverSumMs": 120.861547,
+      "outsideServerMs": 2143.138453
+    },
+    {
+      "index": 152,
+      "clientMs": 4466,
+      "serverSumMs": 157.838923,
+      "outsideServerMs": 4308.161077
+    },
+    {
+      "index": 175,
+      "clientMs": 2285,
+      "serverSumMs": 211.965826,
+      "outsideServerMs": 2073.034174
+    },
+    {
+      "index": 153,
+      "clientMs": 4491,
+      "serverSumMs": 293.91034,
+      "outsideServerMs": 4197.08966
+    },
+    {
+      "index": 176,
+      "clientMs": 2350,
+      "serverSumMs": 219.640034,
+      "outsideServerMs": 2130.359966
+    },
+    {
+      "index": 154,
+      "clientMs": 4554,
+      "serverSumMs": 318.508006,
+      "outsideServerMs": 4235.491994
+    },
+    {
+      "index": 178,
+      "clientMs": 2394,
+      "serverSumMs": 290.631446,
+      "outsideServerMs": 2103.368554
+    },
+    {
+      "index": 157,
+      "clientMs": 4513,
+      "serverSumMs": 356.000187,
+      "outsideServerMs": 4156.999813
+    },
+    {
+      "index": 161,
+      "clientMs": 4504,
+      "serverSumMs": 430.166089,
+      "outsideServerMs": 4073.833911
+    },
+    {
+      "index": 162,
+      "clientMs": 4408,
+      "serverSumMs": 374.503129,
+      "outsideServerMs": 4033.496871
+    },
+    {
+      "index": 183,
+      "clientMs": 2325,
+      "serverSumMs": 297.906136,
+      "outsideServerMs": 2027.093864
+    },
+    {
+      "index": 164,
+      "clientMs": 4488,
+      "serverSumMs": 310.853104,
+      "outsideServerMs": 4177.146896
+    },
+    {
+      "index": 167,
+      "clientMs": 4241,
+      "serverSumMs": 166.688775,
+      "outsideServerMs": 4074.311225
+    },
+    {
+      "index": 188,
+      "clientMs": 2261,
+      "serverSumMs": 343.76115200000004,
+      "outsideServerMs": 1917.238848
+    },
+    {
+      "index": 190,
+      "clientMs": 2076,
+      "serverSumMs": 206.78077000000002,
+      "outsideServerMs": 1869.21923
+    },
+    {
+      "index": 168,
+      "clientMs": 4287,
+      "serverSumMs": 180.68737399999998,
+      "outsideServerMs": 4106.312626
+    },
+    {
+      "index": 169,
+      "clientMs": 4318,
+      "serverSumMs": 239.201233,
+      "outsideServerMs": 4078.798767
+    },
+    {
+      "index": 191,
+      "clientMs": 2127,
+      "serverSumMs": 201.55539299999998,
+      "outsideServerMs": 1925.444607
+    },
+    {
+      "index": 170,
+      "clientMs": 4436,
+      "serverSumMs": 311.746346,
+      "outsideServerMs": 4124.253654
+    },
+    {
+      "index": 192,
+      "clientMs": 2257,
+      "serverSumMs": 269.837251,
+      "outsideServerMs": 1987.162749
+    },
+    {
+      "index": 196,
+      "clientMs": 2456,
+      "serverSumMs": 492.930931,
+      "outsideServerMs": 1963.0690690000001
+    },
+    {
+      "index": 177,
+      "clientMs": 4357,
+      "serverSumMs": 315.36289800000003,
+      "outsideServerMs": 4041.637102
+    },
+    {
+      "index": 198,
+      "clientMs": 2258,
+      "serverSumMs": 251.66745400000002,
+      "outsideServerMs": 2006.332546
+    },
+    {
+      "index": 199,
+      "clientMs": 2206,
+      "serverSumMs": 237.176795,
+      "outsideServerMs": 1968.823205
+    },
+    {
+      "index": 179,
+      "clientMs": 4375,
+      "serverSumMs": 379.85541,
+      "outsideServerMs": 3995.14459
+    },
+    {
+      "index": 197,
+      "clientMs": 2578,
+      "serverSumMs": 630.616162,
+      "outsideServerMs": 1947.383838
+    },
+    {
+      "index": 180,
+      "clientMs": 4282,
+      "serverSumMs": 184.130717,
+      "outsideServerMs": 4097.869283
+    },
+    {
+      "index": 181,
+      "clientMs": 4392,
+      "serverSumMs": 253.713343,
+      "outsideServerMs": 4138.286657
+    },
+    {
+      "index": 182,
+      "clientMs": 4292,
+      "serverSumMs": 176.717017,
+      "outsideServerMs": 4115.282983
+    },
+    {
+      "index": 203,
+      "clientMs": 2246,
+      "serverSumMs": 174.39624199999997,
+      "outsideServerMs": 2071.603758
+    },
+    {
+      "index": 204,
+      "clientMs": 2285,
+      "serverSumMs": 174.84408,
+      "outsideServerMs": 2110.15592
+    },
+    {
+      "index": 205,
+      "clientMs": 2483,
+      "serverSumMs": 250.69743599999998,
+      "outsideServerMs": 2232.302564
+    },
+    {
+      "index": 184,
+      "clientMs": 4584,
+      "serverSumMs": 435.091251,
+      "outsideServerMs": 4148.908749
+    },
+    {
+      "index": 185,
+      "clientMs": 4490,
+      "serverSumMs": 414.791523,
+      "outsideServerMs": 4075.208477
+    },
+    {
+      "index": 206,
+      "clientMs": 2389,
+      "serverSumMs": 115.57849,
+      "outsideServerMs": 2273.42151
+    },
+    {
+      "index": 186,
+      "clientMs": 4392,
+      "serverSumMs": 247.34814,
+      "outsideServerMs": 4144.65186
+    },
+    {
+      "index": 207,
+      "clientMs": 2531,
+      "serverSumMs": 264.938206,
+      "outsideServerMs": 2266.061794
+    },
+    {
+      "index": 187,
+      "clientMs": 4660,
+      "serverSumMs": 404.62723600000004,
+      "outsideServerMs": 4255.372764
+    },
+    {
+      "index": 189,
+      "clientMs": 4483,
+      "serverSumMs": 246.736748,
+      "outsideServerMs": 4236.263252
+    },
+    {
+      "index": 210,
+      "clientMs": 2402,
+      "serverSumMs": 111.345383,
+      "outsideServerMs": 2290.654617
+    },
+    {
+      "index": 211,
+      "clientMs": 2456,
+      "serverSumMs": 220.140106,
+      "outsideServerMs": 2235.859894
+    },
+    {
+      "index": 212,
+      "clientMs": 2560,
+      "serverSumMs": 320.585419,
+      "outsideServerMs": 2239.414581
+    },
+    {
+      "index": 193,
+      "clientMs": 4478,
+      "serverSumMs": 255.087367,
+      "outsideServerMs": 4222.912633
+    },
+    {
+      "index": 194,
+      "clientMs": 4394,
+      "serverSumMs": 216.385329,
+      "outsideServerMs": 4177.614671
+    },
+    {
+      "index": 216,
+      "clientMs": 2349,
+      "serverSumMs": 214.026296,
+      "outsideServerMs": 2134.973704
+    },
+    {
+      "index": 195,
+      "clientMs": 4451,
+      "serverSumMs": 328.105576,
+      "outsideServerMs": 4122.894424
+    },
+    {
+      "index": 215,
+      "clientMs": 2453,
+      "serverSumMs": 293.015304,
+      "outsideServerMs": 2159.984696
+    },
+    {
+      "index": 217,
+      "clientMs": 2468,
+      "serverSumMs": 295.48008699999997,
+      "outsideServerMs": 2172.519913
+    },
+    {
+      "index": 219,
+      "clientMs": 2302,
+      "serverSumMs": 193.69739099999998,
+      "outsideServerMs": 2108.302609
+    },
+    {
+      "index": 200,
+      "clientMs": 4263,
+      "serverSumMs": 189.423004,
+      "outsideServerMs": 4073.576996
+    },
+    {
+      "index": 221,
+      "clientMs": 2267,
+      "serverSumMs": 198.328025,
+      "outsideServerMs": 2068.671975
+    },
+    {
+      "index": 202,
+      "clientMs": 4332,
+      "serverSumMs": 217.289838,
+      "outsideServerMs": 4114.710162
+    },
+    {
+      "index": 201,
+      "clientMs": 4437,
+      "serverSumMs": 339.405184,
+      "outsideServerMs": 4097.594816
+    },
+    {
+      "index": 223,
+      "clientMs": 2258,
+      "serverSumMs": 200.092616,
+      "outsideServerMs": 2057.907384
+    },
+    {
+      "index": 224,
+      "clientMs": 2249,
+      "serverSumMs": 182.05183399999999,
+      "outsideServerMs": 2066.948166
+    },
+    {
+      "index": 227,
+      "clientMs": 2200,
+      "serverSumMs": 249.826095,
+      "outsideServerMs": 1950.173905
+    },
+    {
+      "index": 228,
+      "clientMs": 2119,
+      "serverSumMs": 178.974601,
+      "outsideServerMs": 1940.025399
+    },
+    {
+      "index": 229,
+      "clientMs": 2154,
+      "serverSumMs": 262.781117,
+      "outsideServerMs": 1891.218883
+    },
+    {
+      "index": 208,
+      "clientMs": 4454,
+      "serverSumMs": 308.824428,
+      "outsideServerMs": 4145.175572
+    },
+    {
+      "index": 209,
+      "clientMs": 4369,
+      "serverSumMs": 250.443753,
+      "outsideServerMs": 4118.556247
+    },
+    {
+      "index": 233,
+      "clientMs": 2097,
+      "serverSumMs": 246.65418,
+      "outsideServerMs": 1850.34582
+    },
+    {
+      "index": 213,
+      "clientMs": 4422,
+      "serverSumMs": 357.941875,
+      "outsideServerMs": 4064.058125
+    },
+    {
+      "index": 214,
+      "clientMs": 4327,
+      "serverSumMs": 279.573617,
+      "outsideServerMs": 4047.426383
+    },
+    {
+      "index": 238,
+      "clientMs": 2160,
+      "serverSumMs": 264.402196,
+      "outsideServerMs": 1895.597804
+    },
+    {
+      "index": 218,
+      "clientMs": 4290,
+      "serverSumMs": 288.74386300000003,
+      "outsideServerMs": 4001.256137
+    },
+    {
+      "index": 239,
+      "clientMs": 2197,
+      "serverSumMs": 302.10483899999997,
+      "outsideServerMs": 1894.895161
+    },
+    {
+      "index": 220,
+      "clientMs": 4258,
+      "serverSumMs": 271.658248,
+      "outsideServerMs": 3986.341752
+    },
+    {
+      "index": 242,
+      "clientMs": 2197,
+      "serverSumMs": 330.71025199999997,
+      "outsideServerMs": 1866.2897480000001
+    },
+    {
+      "index": 222,
+      "clientMs": 4210,
+      "serverSumMs": 212.76712400000002,
+      "outsideServerMs": 3997.232876
+    },
+    {
+      "index": 225,
+      "clientMs": 4187,
+      "serverSumMs": 230.571403,
+      "outsideServerMs": 3956.428597
+    },
+    {
+      "index": 226,
+      "clientMs": 4091,
+      "serverSumMs": 208.281609,
+      "outsideServerMs": 3882.718391
+    },
+    {
+      "index": 246,
+      "clientMs": 2116,
+      "serverSumMs": 214.557027,
+      "outsideServerMs": 1901.442973
+    },
+    {
+      "index": 247,
+      "clientMs": 2052,
+      "serverSumMs": 148.904848,
+      "outsideServerMs": 1903.095152
+    },
+    {
+      "index": 248,
+      "clientMs": 2040,
+      "serverSumMs": 170.738326,
+      "outsideServerMs": 1869.261674
+    },
+    {
+      "index": 249,
+      "clientMs": 2005,
+      "serverSumMs": 104.894601,
+      "outsideServerMs": 1900.105399
+    },
+    {
+      "index": 230,
+      "clientMs": 3979,
+      "serverSumMs": 234.77301599999998,
+      "outsideServerMs": 3744.226984
+    },
+    {
+      "index": 231,
+      "clientMs": 3893,
+      "serverSumMs": 212.428288,
+      "outsideServerMs": 3680.571712
+    },
+    {
+      "index": 250,
+      "clientMs": 2162,
+      "serverSumMs": 208.203195,
+      "outsideServerMs": 1953.796805
+    },
+    {
+      "index": 232,
+      "clientMs": 3958,
+      "serverSumMs": 216.253418,
+      "outsideServerMs": 3741.7465819999998
+    },
+    {
+      "index": 234,
+      "clientMs": 3958,
+      "serverSumMs": 196.64673,
+      "outsideServerMs": 3761.35327
+    },
+    {
+      "index": 235,
+      "clientMs": 3861,
+      "serverSumMs": 125.968079,
+      "outsideServerMs": 3735.031921
+    },
+    {
+      "index": 253,
+      "clientMs": 2061,
+      "serverSumMs": 118.654748,
+      "outsideServerMs": 1942.345252
+    },
+    {
+      "index": 254,
+      "clientMs": 2086,
+      "serverSumMs": 197.443686,
+      "outsideServerMs": 1888.556314
+    },
+    {
+      "index": 236,
+      "clientMs": 4477,
+      "serverSumMs": 659.669304,
+      "outsideServerMs": 3817.330696
+    },
+    {
+      "index": 237,
+      "clientMs": 4388,
+      "serverSumMs": 568.55334,
+      "outsideServerMs": 3819.44666
+    },
+    {
+      "index": 240,
+      "clientMs": 4094,
+      "serverSumMs": 181.472955,
+      "outsideServerMs": 3912.527045
+    },
+    {
+      "index": 241,
+      "clientMs": 3997,
+      "serverSumMs": 158.90290299999998,
+      "outsideServerMs": 3838.097097
+    },
+    {
+      "index": 260,
+      "clientMs": 2121,
+      "serverSumMs": 111.6521,
+      "outsideServerMs": 2009.3479
+    },
+    {
+      "index": 262,
+      "clientMs": 2275,
+      "serverSumMs": 258.994577,
+      "outsideServerMs": 2016.005423
+    },
+    {
+      "index": 243,
+      "clientMs": 4231,
+      "serverSumMs": 299.372725,
+      "outsideServerMs": 3931.627275
+    },
+    {
+      "index": 244,
+      "clientMs": 4137,
+      "serverSumMs": 202.714927,
+      "outsideServerMs": 3934.285073
+    },
+    {
+      "index": 245,
+      "clientMs": 4038,
+      "serverSumMs": 133.236533,
+      "outsideServerMs": 3904.7634669999998
+    },
+    {
+      "index": 266,
+      "clientMs": 2255,
+      "serverSumMs": 224.927409,
+      "outsideServerMs": 2030.072591
+    },
+    {
+      "index": 268,
+      "clientMs": 2074,
+      "serverSumMs": 106.967375,
+      "outsideServerMs": 1967.032625
+    },
+    {
+      "index": 251,
+      "clientMs": 4084,
+      "serverSumMs": 214.600257,
+      "outsideServerMs": 3869.399743
+    },
+    {
+      "index": 270,
+      "clientMs": 2195,
+      "serverSumMs": 240.690886,
+      "outsideServerMs": 1954.309114
+    },
+    {
+      "index": 252,
+      "clientMs": 4023,
+      "serverSumMs": 138.133243,
+      "outsideServerMs": 3884.866757
+    },
+    {
+      "index": 271,
+      "clientMs": 2139,
+      "serverSumMs": 201.290472,
+      "outsideServerMs": 1937.709528
+    },
+    {
+      "index": 272,
+      "clientMs": 2043,
+      "serverSumMs": 87.32935,
+      "outsideServerMs": 1955.67065
+    },
+    {
+      "index": 255,
+      "clientMs": 4151,
+      "serverSumMs": 339.82545300000004,
+      "outsideServerMs": 3811.174547
+    },
+    {
+      "index": 256,
+      "clientMs": 4059,
+      "serverSumMs": 247.850064,
+      "outsideServerMs": 3811.149936
+    },
+    {
+      "index": 274,
+      "clientMs": 2261,
+      "serverSumMs": 351.26856799999996,
+      "outsideServerMs": 1909.731432
+    },
+    {
+      "index": 273,
+      "clientMs": 2363,
+      "serverSumMs": 430.030639,
+      "outsideServerMs": 1932.969361
+    },
+    {
+      "index": 275,
+      "clientMs": 2163,
+      "serverSumMs": 275.194342,
+      "outsideServerMs": 1887.805658
+    },
+    {
+      "index": 277,
+      "clientMs": 2106,
+      "serverSumMs": 234.913761,
+      "outsideServerMs": 1871.086239
+    },
+    {
+      "index": 278,
+      "clientMs": 2027,
+      "serverSumMs": 113.901214,
+      "outsideServerMs": 1913.098786
+    },
+    {
+      "index": 279,
+      "clientMs": 2031,
+      "serverSumMs": 170.574574,
+      "outsideServerMs": 1860.425426
+    },
+    {
+      "index": 257,
+      "clientMs": 4259,
+      "serverSumMs": 466.097555,
+      "outsideServerMs": 3792.902445
+    },
+    {
+      "index": 259,
+      "clientMs": 4061,
+      "serverSumMs": 271.792863,
+      "outsideServerMs": 3789.207137
+    },
+    {
+      "index": 258,
+      "clientMs": 4176,
+      "serverSumMs": 417.88754500000005,
+      "outsideServerMs": 3758.112455
+    },
+    {
+      "index": 281,
+      "clientMs": 2049,
+      "serverSumMs": 201.705445,
+      "outsideServerMs": 1847.294555
+    },
+    {
+      "index": 261,
+      "clientMs": 4112,
+      "serverSumMs": 197.76247899999998,
+      "outsideServerMs": 3914.237521
+    },
+    {
+      "index": 263,
+      "clientMs": 3914,
+      "serverSumMs": 102.791477,
+      "outsideServerMs": 3811.208523
+    },
+    {
+      "index": 264,
+      "clientMs": 4118,
+      "serverSumMs": 234.68342800000002,
+      "outsideServerMs": 3883.316572
+    },
+    {
+      "index": 284,
+      "clientMs": 2141,
+      "serverSumMs": 282.436795,
+      "outsideServerMs": 1858.563205
+    },
+    {
+      "index": 265,
+      "clientMs": 4046,
+      "serverSumMs": 211.35463900000002,
+      "outsideServerMs": 3834.645361
+    },
+    {
+      "index": 286,
+      "clientMs": 2016,
+      "serverSumMs": 201.66277000000002,
+      "outsideServerMs": 1814.33723
+    },
+    {
+      "index": 285,
+      "clientMs": 2120,
+      "serverSumMs": 277.683895,
+      "outsideServerMs": 1842.3161049999999
+    },
+    {
+      "index": 267,
+      "clientMs": 4066,
+      "serverSumMs": 210.614197,
+      "outsideServerMs": 3855.385803
+    },
+    {
+      "index": 288,
+      "clientMs": 1991,
+      "serverSumMs": 160.24265,
+      "outsideServerMs": 1830.75735
+    },
+    {
+      "index": 269,
+      "clientMs": 4142,
+      "serverSumMs": 245.76235499999999,
+      "outsideServerMs": 3896.237645
+    },
+    {
+      "index": 290,
+      "clientMs": 2052,
+      "serverSumMs": 174.83677,
+      "outsideServerMs": 1877.16323
+    },
+    {
+      "index": 291,
+      "clientMs": 2099,
+      "serverSumMs": 218.97308600000002,
+      "outsideServerMs": 1880.026914
+    },
+    {
+      "index": 293,
+      "clientMs": 2131,
+      "serverSumMs": 263.685072,
+      "outsideServerMs": 1867.314928
+    },
+    {
+      "index": 276,
+      "clientMs": 3846,
+      "serverSumMs": 249.90950200000003,
+      "outsideServerMs": 3596.090498
+    },
+    {
+      "index": 298,
+      "clientMs": 2019,
+      "serverSumMs": 139.444919,
+      "outsideServerMs": 1879.555081
+    },
+    {
+      "index": 297,
+      "clientMs": 2133,
+      "serverSumMs": 255.41628400000002,
+      "outsideServerMs": 1877.583716
+    },
+    {
+      "index": 280,
+      "clientMs": 3939,
+      "serverSumMs": 262.510665,
+      "outsideServerMs": 3676.489335
+    },
+    {
+      "index": 283,
+      "clientMs": 3814,
+      "serverSumMs": 202.084317,
+      "outsideServerMs": 3611.915683
+    },
+    {
+      "index": 282,
+      "clientMs": 3916,
+      "serverSumMs": 301.89446399999997,
+      "outsideServerMs": 3614.105536
+    },
+    {
+      "index": 302,
+      "clientMs": 1918,
+      "serverSumMs": 150.553389,
+      "outsideServerMs": 1767.446611
+    },
+    {
+      "index": 301,
+      "clientMs": 2020,
+      "serverSumMs": 222.52491099999997,
+      "outsideServerMs": 1797.475089
+    },
+    {
+      "index": 287,
+      "clientMs": 3708,
+      "serverSumMs": 219.552076,
+      "outsideServerMs": 3488.447924
+    },
+    {
+      "index": 304,
+      "clientMs": 2011,
+      "serverSumMs": 266.916539,
+      "outsideServerMs": 1744.083461
+    },
+    {
+      "index": 307,
+      "clientMs": 1812,
+      "serverSumMs": 188.86972500000002,
+      "outsideServerMs": 1623.130275
+    },
+    {
+      "index": 289,
+      "clientMs": 3689,
+      "serverSumMs": 217.870091,
+      "outsideServerMs": 3471.129909
+    },
+    {
+      "index": 308,
+      "clientMs": 1861,
+      "serverSumMs": 223.28749,
+      "outsideServerMs": 1637.71251
+    },
+    {
+      "index": 309,
+      "clientMs": 1770,
+      "serverSumMs": 159.89126,
+      "outsideServerMs": 1610.1087400000001
+    },
+    {
+      "index": 310,
+      "clientMs": 1972,
+      "serverSumMs": 250.940895,
+      "outsideServerMs": 1721.059105
+    },
+    {
+      "index": 292,
+      "clientMs": 3915,
+      "serverSumMs": 274.278048,
+      "outsideServerMs": 3640.721952
+    },
+    {
+      "index": 311,
+      "clientMs": 2042,
+      "serverSumMs": 285.527282,
+      "outsideServerMs": 1756.472718
+    },
+    {
+      "index": 295,
+      "clientMs": 3738,
+      "serverSumMs": 229.916272,
+      "outsideServerMs": 3508.083728
+    },
+    {
+      "index": 294,
+      "clientMs": 3837,
+      "serverSumMs": 234.105892,
+      "outsideServerMs": 3602.894108
+    },
+    {
+      "index": 313,
+      "clientMs": 1974,
+      "serverSumMs": 190.019922,
+      "outsideServerMs": 1783.980078
+    },
+    {
+      "index": 296,
+      "clientMs": 3779,
+      "serverSumMs": 188.707877,
+      "outsideServerMs": 3590.292123
+    },
+    {
+      "index": 315,
+      "clientMs": 1882,
+      "serverSumMs": 155.394378,
+      "outsideServerMs": 1726.605622
+    },
+    {
+      "index": 317,
+      "clientMs": 2058,
+      "serverSumMs": 290.070615,
+      "outsideServerMs": 1767.929385
+    },
+    {
+      "index": 300,
+      "clientMs": 3765,
+      "serverSumMs": 237.871376,
+      "outsideServerMs": 3527.128624
+    },
+    {
+      "index": 299,
+      "clientMs": 3865,
+      "serverSumMs": 268.80310299999996,
+      "outsideServerMs": 3596.196897
+    },
+    {
+      "index": 318,
+      "clientMs": 1972,
+      "serverSumMs": 219.634222,
+      "outsideServerMs": 1752.365778
+    },
+    {
+      "index": 319,
+      "clientMs": 1979,
+      "serverSumMs": 222.90579,
+      "outsideServerMs": 1756.09421
+    },
+    {
+      "index": 321,
+      "clientMs": 1910,
+      "serverSumMs": 143.718722,
+      "outsideServerMs": 1766.281278
+    },
+    {
+      "index": 303,
+      "clientMs": 3712,
+      "serverSumMs": 208.41085199999998,
+      "outsideServerMs": 3503.589148
+    },
+    {
+      "index": 305,
+      "clientMs": 3779,
+      "serverSumMs": 252.471402,
+      "outsideServerMs": 3526.528598
+    },
+    {
+      "index": 306,
+      "clientMs": 3824,
+      "serverSumMs": 335.496417,
+      "outsideServerMs": 3488.503583
+    },
+    {
+      "index": 323,
+      "clientMs": 2147,
+      "serverSumMs": 307.839507,
+      "outsideServerMs": 1839.1604929999999
+    },
+    {
+      "index": 330,
+      "clientMs": 1919,
+      "serverSumMs": 218.48150199999998,
+      "outsideServerMs": 1700.518498
+    },
+    {
+      "index": 312,
+      "clientMs": 3730,
+      "serverSumMs": 315.369316,
+      "outsideServerMs": 3414.6306839999997
+    },
+    {
+      "index": 331,
+      "clientMs": 1980,
+      "serverSumMs": 306.31710599999997,
+      "outsideServerMs": 1673.682894
+    },
+    {
+      "index": 314,
+      "clientMs": 3707,
+      "serverSumMs": 282.769563,
+      "outsideServerMs": 3424.230437
+    },
+    {
+      "index": 332,
+      "clientMs": 1908,
+      "serverSumMs": 239.02011599999997,
+      "outsideServerMs": 1668.979884
+    },
+    {
+      "index": 316,
+      "clientMs": 3638,
+      "serverSumMs": 256.986246,
+      "outsideServerMs": 3381.013754
+    },
+    {
+      "index": 334,
+      "clientMs": 1860,
+      "serverSumMs": 198.59767,
+      "outsideServerMs": 1661.40233
+    },
+    {
+      "index": 335,
+      "clientMs": 1771,
+      "serverSumMs": 113.218222,
+      "outsideServerMs": 1657.781778
+    },
+    {
+      "index": 320,
+      "clientMs": 3659,
+      "serverSumMs": 337.901555,
+      "outsideServerMs": 3321.098445
+    },
+    {
+      "index": 322,
+      "clientMs": 3489,
+      "serverSumMs": 200.77856,
+      "outsideServerMs": 3288.22144
+    },
+    {
+      "index": 342,
+      "clientMs": 1704,
+      "serverSumMs": 249.896921,
+      "outsideServerMs": 1454.103079
+    },
+    {
+      "index": 324,
+      "clientMs": 3515,
+      "serverSumMs": 259.123766,
+      "outsideServerMs": 3255.876234
+    },
+    {
+      "index": 326,
+      "clientMs": 3327,
+      "serverSumMs": 161.28605,
+      "outsideServerMs": 3165.71395
+    },
+    {
+      "index": 325,
+      "clientMs": 3430,
+      "serverSumMs": 215.922542,
+      "outsideServerMs": 3214.077458
+    },
+    {
+      "index": 328,
+      "clientMs": 3331,
+      "serverSumMs": 196.533736,
+      "outsideServerMs": 3134.466264
+    },
+    {
+      "index": 327,
+      "clientMs": 3434,
+      "serverSumMs": 258.137785,
+      "outsideServerMs": 3175.862215
+    },
+    {
+      "index": 345,
+      "clientMs": 1637,
+      "serverSumMs": 226.499367,
+      "outsideServerMs": 1410.500633
+    },
+    {
+      "index": 329,
+      "clientMs": 3341,
+      "serverSumMs": 225.038579,
+      "outsideServerMs": 3115.961421
+    },
+    {
+      "index": 348,
+      "clientMs": 1782,
+      "serverSumMs": 382.94104899999996,
+      "outsideServerMs": 1399.058951
+    },
+    {
+      "index": 333,
+      "clientMs": 3287,
+      "serverSumMs": 186.589271,
+      "outsideServerMs": 3100.410729
+    },
+    {
+      "index": 349,
+      "clientMs": 1693,
+      "serverSumMs": 299.389759,
+      "outsideServerMs": 1393.6102409999999
+    },
+    {
+      "index": 352,
+      "clientMs": 1699,
+      "serverSumMs": 250.940315,
+      "outsideServerMs": 1448.059685
+    },
+    {
+      "index": 336,
+      "clientMs": 3302,
+      "serverSumMs": 241.932548,
+      "outsideServerMs": 3060.0674520000002
+    },
+    {
+      "index": 339,
+      "clientMs": 3265,
+      "serverSumMs": 293.717424,
+      "outsideServerMs": 2971.282576
+    },
+    {
+      "index": 338,
+      "clientMs": 3371,
+      "serverSumMs": 376.063854,
+      "outsideServerMs": 2994.936146
+    },
+    {
+      "index": 340,
+      "clientMs": 3176,
+      "serverSumMs": 268.047138,
+      "outsideServerMs": 2907.952862
+    },
+    {
+      "index": 337,
+      "clientMs": 3477,
+      "serverSumMs": 425.482376,
+      "outsideServerMs": 3051.517624
+    },
+    {
+      "index": 356,
+      "clientMs": 1742,
+      "serverSumMs": 306.144717,
+      "outsideServerMs": 1435.8552829999999
+    },
+    {
+      "index": 341,
+      "clientMs": 3247,
+      "serverSumMs": 342.880015,
+      "outsideServerMs": 2904.119985
+    },
+    {
+      "index": 343,
+      "clientMs": 3143,
+      "serverSumMs": 268.348622,
+      "outsideServerMs": 2874.651378
+    },
+    {
+      "index": 357,
+      "clientMs": 1759,
+      "serverSumMs": 340.016467,
+      "outsideServerMs": 1418.983533
+    },
+    {
+      "index": 344,
+      "clientMs": 3194,
+      "serverSumMs": 297.700613,
+      "outsideServerMs": 2896.299387
+    },
+    {
+      "index": 359,
+      "clientMs": 1717,
+      "serverSumMs": 238.590302,
+      "outsideServerMs": 1478.409698
+    },
+    {
+      "index": 346,
+      "clientMs": 3038,
+      "serverSumMs": 137.045349,
+      "outsideServerMs": 2900.954651
+    },
+    {
+      "index": 360,
+      "clientMs": 1645,
+      "serverSumMs": 142.557166,
+      "outsideServerMs": 1502.442834
+    },
+    {
+      "index": 347,
+      "clientMs": 3194,
+      "serverSumMs": 249.24535500000002,
+      "outsideServerMs": 2944.754645
+    },
+    {
+      "index": 350,
+      "clientMs": 3157,
+      "serverSumMs": 159.876707,
+      "outsideServerMs": 2997.123293
+    },
+    {
+      "index": 364,
+      "clientMs": 1759,
+      "serverSumMs": 152.021881,
+      "outsideServerMs": 1606.9781189999999
+    },
+    {
+      "index": 363,
+      "clientMs": 1861,
+      "serverSumMs": 288.621942,
+      "outsideServerMs": 1572.378058
+    },
+    {
+      "index": 365,
+      "clientMs": 1769,
+      "serverSumMs": 199.718994,
+      "outsideServerMs": 1569.281006
+    },
+    {
+      "index": 351,
+      "clientMs": 3176,
+      "serverSumMs": 200.373135,
+      "outsideServerMs": 2975.626865
+    },
+    {
+      "index": 366,
+      "clientMs": 1871,
+      "serverSumMs": 314.63243,
+      "outsideServerMs": 1556.36757
+    },
+    {
+      "index": 353,
+      "clientMs": 3186,
+      "serverSumMs": 203.995425,
+      "outsideServerMs": 2982.004575
+    },
+    {
+      "index": 354,
+      "clientMs": 3157,
+      "serverSumMs": 151.501941,
+      "outsideServerMs": 3005.498059
+    },
+    {
+      "index": 369,
+      "clientMs": 1791,
+      "serverSumMs": 234.158028,
+      "outsideServerMs": 1556.841972
+    },
+    {
+      "index": 355,
+      "clientMs": 3217,
+      "serverSumMs": 198.54400199999998,
+      "outsideServerMs": 3018.455998
+    },
+    {
+      "index": 372,
+      "clientMs": 1768,
+      "serverSumMs": 172.187243,
+      "outsideServerMs": 1595.812757
+    },
+    {
+      "index": 358,
+      "clientMs": 3261,
+      "serverSumMs": 226.62764700000002,
+      "outsideServerMs": 3034.3723529999997
+    },
+    {
+      "index": 374,
+      "clientMs": 1804,
+      "serverSumMs": 184.33707099999998,
+      "outsideServerMs": 1619.662929
+    },
+    {
+      "index": 377,
+      "clientMs": 1918,
+      "serverSumMs": 323.88309300000003,
+      "outsideServerMs": 1594.116907
+    },
+    {
+      "index": 376,
+      "clientMs": 2019,
+      "serverSumMs": 376.87411,
+      "outsideServerMs": 1642.12589
+    },
+    {
+      "index": 361,
+      "clientMs": 3519,
+      "serverSumMs": 364.62253899999996,
+      "outsideServerMs": 3154.377461
+    },
+    {
+      "index": 362,
+      "clientMs": 3426,
+      "serverSumMs": 265.924903,
+      "outsideServerMs": 3160.075097
+    },
+    {
+      "index": 381,
+      "clientMs": 1782,
+      "serverSumMs": 218.364284,
+      "outsideServerMs": 1563.635716
+    },
+    {
+      "index": 367,
+      "clientMs": 3228,
+      "serverSumMs": 182.332508,
+      "outsideServerMs": 3045.667492
+    },
+    {
+      "index": 382,
+      "clientMs": 1729,
+      "serverSumMs": 177.543942,
+      "outsideServerMs": 1551.456058
+    },
+    {
+      "index": 368,
+      "clientMs": 3137,
+      "serverSumMs": 104.534113,
+      "outsideServerMs": 3032.465887
+    },
+    {
+      "index": 383,
+      "clientMs": 1743,
+      "serverSumMs": 241.396185,
+      "outsideServerMs": 1501.603815
+    },
+    {
+      "index": 370,
+      "clientMs": 3289,
+      "serverSumMs": 238.420847,
+      "outsideServerMs": 3050.579153
+    },
+    {
+      "index": 386,
+      "clientMs": 1721,
+      "serverSumMs": 244.595149,
+      "outsideServerMs": 1476.404851
+    },
+    {
+      "index": 371,
+      "clientMs": 3228,
+      "serverSumMs": 208.180064,
+      "outsideServerMs": 3019.819936
+    },
+    {
+      "index": 387,
+      "clientMs": 1689,
+      "serverSumMs": 242.076068,
+      "outsideServerMs": 1446.923932
+    },
+    {
+      "index": 373,
+      "clientMs": 3266,
+      "serverSumMs": 207.69630999999998,
+      "outsideServerMs": 3058.30369
+    },
+    {
+      "index": 389,
+      "clientMs": 1677,
+      "serverSumMs": 189.70722,
+      "outsideServerMs": 1487.29278
+    },
+    {
+      "index": 375,
+      "clientMs": 3374,
+      "serverSumMs": 268.166428,
+      "outsideServerMs": 3105.833572
+    },
+    {
+      "index": 392,
+      "clientMs": 1700,
+      "serverSumMs": 235.25987700000002,
+      "outsideServerMs": 1464.740123
+    },
+    {
+      "index": 378,
+      "clientMs": 3413,
+      "serverSumMs": 357.800098,
+      "outsideServerMs": 3055.199902
+    },
+    {
+      "index": 394,
+      "clientMs": 1821,
+      "serverSumMs": 365.379726,
+      "outsideServerMs": 1455.6202739999999
+    },
+    {
+      "index": 380,
+      "clientMs": 3228,
+      "serverSumMs": 247.89855,
+      "outsideServerMs": 2980.10145
+    },
+    {
+      "index": 379,
+      "clientMs": 3331,
+      "serverSumMs": 305.599873,
+      "outsideServerMs": 3025.400127
+    },
+    {
+      "index": 396,
+      "clientMs": 1636,
+      "serverSumMs": 195.61659500000002,
+      "outsideServerMs": 1440.383405
+    },
+    {
+      "index": 397,
+      "clientMs": 1930,
+      "serverSumMs": 496.035926,
+      "outsideServerMs": 1433.964074
+    },
+    {
+      "index": 384,
+      "clientMs": 3238,
+      "serverSumMs": 291.677977,
+      "outsideServerMs": 2946.322023
+    },
+    {
+      "index": 385,
+      "clientMs": 3170,
+      "serverSumMs": 220.27145099999998,
+      "outsideServerMs": 2949.728549
+    },
+    {
+      "index": 400,
+      "clientMs": 1698,
+      "serverSumMs": 256.665661,
+      "outsideServerMs": 1441.334339
+    },
+    {
+      "index": 402,
+      "clientMs": 1683,
+      "serverSumMs": 272.338511,
+      "outsideServerMs": 1410.661489
+    },
+    {
+      "index": 388,
+      "clientMs": 3124,
+      "serverSumMs": 212.900265,
+      "outsideServerMs": 2911.099735
+    },
+    {
+      "index": 405,
+      "clientMs": 1887,
+      "serverSumMs": 407.52090300000003,
+      "outsideServerMs": 1479.479097
+    },
+    {
+      "index": 393,
+      "clientMs": 3088,
+      "serverSumMs": 191.700364,
+      "outsideServerMs": 2896.299636
+    },
+    {
+      "index": 391,
+      "clientMs": 3289,
+      "serverSumMs": 350.450164,
+      "outsideServerMs": 2938.549836
+    },
+    {
+      "index": 406,
+      "clientMs": 1792,
+      "serverSumMs": 319.370953,
+      "outsideServerMs": 1472.629047
+    },
+    {
+      "index": 390,
+      "clientMs": 3398,
+      "serverSumMs": 436.88464899999997,
+      "outsideServerMs": 2961.115351
+    },
+    {
+      "index": 395,
+      "clientMs": 3208,
+      "serverSumMs": 356.521763,
+      "outsideServerMs": 2851.478237
+    },
+    {
+      "index": 409,
+      "clientMs": 1808,
+      "serverSumMs": 381.225569,
+      "outsideServerMs": 1426.774431
+    },
+    {
+      "index": 411,
+      "clientMs": 1624,
+      "serverSumMs": 247.55958399999997,
+      "outsideServerMs": 1376.440416
+    },
+    {
+      "index": 413,
+      "clientMs": 1591,
+      "serverSumMs": 203.206338,
+      "outsideServerMs": 1387.793662
+    },
+    {
+      "index": 398,
+      "clientMs": 3121,
+      "serverSumMs": 211.032885,
+      "outsideServerMs": 2909.967115
+    },
+    {
+      "index": 414,
+      "clientMs": 1555,
+      "serverSumMs": 121.439874,
+      "outsideServerMs": 1433.560126
+    },
+    {
+      "index": 399,
+      "clientMs": 3299,
+      "serverSumMs": 357.552938,
+      "outsideServerMs": 2941.447062
+    },
+    {
+      "index": 401,
+      "clientMs": 3112,
+      "serverSumMs": 198.28575,
+      "outsideServerMs": 2913.71425
+    },
+    {
+      "index": 415,
+      "clientMs": 1717,
+      "serverSumMs": 237.03267999999997,
+      "outsideServerMs": 1479.96732
+    },
+    {
+      "index": 416,
+      "clientMs": 1795,
+      "serverSumMs": 291.763408,
+      "outsideServerMs": 1503.236592
+    },
+    {
+      "index": 417,
+      "clientMs": 1710,
+      "serverSumMs": 175.59700700000002,
+      "outsideServerMs": 1534.402993
+    },
+    {
+      "index": 403,
+      "clientMs": 3111,
+      "serverSumMs": 156.121843,
+      "outsideServerMs": 2954.878157
+    },
+    {
+      "index": 404,
+      "clientMs": 3016,
+      "serverSumMs": 107.26169200000001,
+      "outsideServerMs": 2908.738308
+    },
+    {
+      "index": 421,
+      "clientMs": 1678,
+      "serverSumMs": 203.107106,
+      "outsideServerMs": 1474.892894
+    },
+    {
+      "index": 422,
+      "clientMs": 1590,
+      "serverSumMs": 188.833924,
+      "outsideServerMs": 1401.166076
+    },
+    {
+      "index": 407,
+      "clientMs": 3093,
+      "serverSumMs": 204.892875,
+      "outsideServerMs": 2888.107125
+    },
+    {
+      "index": 408,
+      "clientMs": 3061,
+      "serverSumMs": 198.293268,
+      "outsideServerMs": 2862.706732
+    },
+    {
+      "index": 410,
+      "clientMs": 3091,
+      "serverSumMs": 297.205503,
+      "outsideServerMs": 2793.794497
+    },
+    {
+      "index": 424,
+      "clientMs": 1704,
+      "serverSumMs": 277.394131,
+      "outsideServerMs": 1426.605869
+    },
+    {
+      "index": 412,
+      "clientMs": 3020,
+      "serverSumMs": 257.116734,
+      "outsideServerMs": 2762.883266
+    },
+    {
+      "index": 429,
+      "clientMs": 1605,
+      "serverSumMs": 228.24192799999997,
+      "outsideServerMs": 1376.758072
+    },
+    {
+      "index": 430,
+      "clientMs": 1526,
+      "serverSumMs": 177.66153,
+      "outsideServerMs": 1348.33847
+    },
+    {
+      "index": 432,
+      "clientMs": 1456,
+      "serverSumMs": 166.20014500000002,
+      "outsideServerMs": 1289.799855
+    },
+    {
+      "index": 418,
+      "clientMs": 2955,
+      "serverSumMs": 179.79419399999998,
+      "outsideServerMs": 2775.205806
+    },
+    {
+      "index": 419,
+      "clientMs": 3019,
+      "serverSumMs": 257.20549,
+      "outsideServerMs": 2761.79451
+    },
+    {
+      "index": 420,
+      "clientMs": 3073,
+      "serverSumMs": 305.55129700000003,
+      "outsideServerMs": 2767.448703
+    },
+    {
+      "index": 436,
+      "clientMs": 1698,
+      "serverSumMs": 326.15331,
+      "outsideServerMs": 1371.84669
+    },
+    {
+      "index": 423,
+      "clientMs": 3013,
+      "serverSumMs": 220.780669,
+      "outsideServerMs": 2792.2193310000002
+    },
+    {
+      "index": 426,
+      "clientMs": 3031,
+      "serverSumMs": 229.745036,
+      "outsideServerMs": 2801.254964
+    },
+    {
+      "index": 440,
+      "clientMs": 1639,
+      "serverSumMs": 222.753336,
+      "outsideServerMs": 1416.246664
+    },
+    {
+      "index": 427,
+      "clientMs": 2945,
+      "serverSumMs": 205.483464,
+      "outsideServerMs": 2739.516536
+    },
+    {
+      "index": 441,
+      "clientMs": 1546,
+      "serverSumMs": 161.687591,
+      "outsideServerMs": 1384.3124090000001
+    },
+    {
+      "index": 425,
+      "clientMs": 3149,
+      "serverSumMs": 316.266951,
+      "outsideServerMs": 2832.733049
+    },
+    {
+      "index": 428,
+      "clientMs": 2858,
+      "serverSumMs": 122.105897,
+      "outsideServerMs": 2735.894103
+    },
+    {
+      "index": 431,
+      "clientMs": 2913,
+      "serverSumMs": 279.614861,
+      "outsideServerMs": 2633.385139
+    },
+    {
+      "index": 444,
+      "clientMs": 1630,
+      "serverSumMs": 269.518908,
+      "outsideServerMs": 1360.481092
+    },
+    {
+      "index": 433,
+      "clientMs": 2743,
+      "serverSumMs": 166.19363299999998,
+      "outsideServerMs": 2576.806367
+    },
+    {
+      "index": 445,
+      "clientMs": 1594,
+      "serverSumMs": 247.012476,
+      "outsideServerMs": 1346.9875240000001
+    },
+    {
+      "index": 434,
+      "clientMs": 2762,
+      "serverSumMs": 143.43293699999998,
+      "outsideServerMs": 2618.567063
+    },
+    {
+      "index": 435,
+      "clientMs": 2764,
+      "serverSumMs": 167.15449999999998,
+      "outsideServerMs": 2596.8455
+    },
+    {
+      "index": 448,
+      "clientMs": 1469,
+      "serverSumMs": 126.56929,
+      "outsideServerMs": 1342.43071
+    },
+    {
+      "index": 437,
+      "clientMs": 2894,
+      "serverSumMs": 241.03307800000002,
+      "outsideServerMs": 2652.966922
+    },
+    {
+      "index": 438,
+      "clientMs": 2812,
+      "serverSumMs": 166.313899,
+      "outsideServerMs": 2645.6861010000002
+    },
+    {
+      "index": 439,
+      "clientMs": 2806,
+      "serverSumMs": 201.051665,
+      "outsideServerMs": 2604.948335
+    },
+    {
+      "index": 453,
+      "clientMs": 1416,
+      "serverSumMs": 180.763051,
+      "outsideServerMs": 1235.236949
+    },
+    {
+      "index": 442,
+      "clientMs": 2835,
+      "serverSumMs": 239.51135399999998,
+      "outsideServerMs": 2595.488646
+    },
+    {
+      "index": 457,
+      "clientMs": 1348,
+      "serverSumMs": 132.39856,
+      "outsideServerMs": 1215.60144
+    },
+    {
+      "index": 443,
+      "clientMs": 2848,
+      "serverSumMs": 255.29941000000002,
+      "outsideServerMs": 2592.70059
+    },
+    {
+      "index": 458,
+      "clientMs": 1366,
+      "serverSumMs": 181.384232,
+      "outsideServerMs": 1184.6157680000001
+    },
+    {
+      "index": 446,
+      "clientMs": 2662,
+      "serverSumMs": 178.56489,
+      "outsideServerMs": 2483.43511
+    },
+    {
+      "index": 459,
+      "clientMs": 1379,
+      "serverSumMs": 172.75615100000002,
+      "outsideServerMs": 1206.243849
+    },
+    {
+      "index": 447,
+      "clientMs": 2590,
+      "serverSumMs": 103.43667500000001,
+      "outsideServerMs": 2486.563325
+    },
+    {
+      "index": 462,
+      "clientMs": 1353,
+      "serverSumMs": 182.283924,
+      "outsideServerMs": 1170.716076
+    },
+    {
+      "index": 449,
+      "clientMs": 2660,
+      "serverSumMs": 158.704022,
+      "outsideServerMs": 2501.295978
+    },
+    {
+      "index": 452,
+      "clientMs": 2760,
+      "serverSumMs": 259.326371,
+      "outsideServerMs": 2500.673629
+    },
+    {
+      "index": 451,
+      "clientMs": 2975,
+      "serverSumMs": 511.364327,
+      "outsideServerMs": 2463.6356729999998
+    },
+    {
+      "index": 450,
+      "clientMs": 3076,
+      "serverSumMs": 554.742535,
+      "outsideServerMs": 2521.257465
+    },
+    {
+      "index": 454,
+      "clientMs": 2816,
+      "serverSumMs": 278.638351,
+      "outsideServerMs": 2537.361649
+    },
+    {
+      "index": 455,
+      "clientMs": 2718,
+      "serverSumMs": 193.536912,
+      "outsideServerMs": 2524.463088
+    },
+    {
+      "index": 456,
+      "clientMs": 2622,
+      "serverSumMs": 143.40079500000002,
+      "outsideServerMs": 2478.599205
+    },
+    {
+      "index": 469,
+      "clientMs": 1429,
+      "serverSumMs": 190.79797200000002,
+      "outsideServerMs": 1238.202028
+    },
+    {
+      "index": 461,
+      "clientMs": 2477,
+      "serverSumMs": 131.811483,
+      "outsideServerMs": 2345.188517
+    },
+    {
+      "index": 460,
+      "clientMs": 2622,
+      "serverSumMs": 238.54026499999998,
+      "outsideServerMs": 2383.459735
+    },
+    {
+      "index": 473,
+      "clientMs": 1405,
+      "serverSumMs": 229.839741,
+      "outsideServerMs": 1175.160259
+    },
+    {
+      "index": 463,
+      "clientMs": 2645,
+      "serverSumMs": 306.8054,
+      "outsideServerMs": 2338.1946
+    },
+    {
+      "index": 465,
+      "clientMs": 2766,
+      "serverSumMs": 348.526071,
+      "outsideServerMs": 2417.4739289999998
+    },
+    {
+      "index": 464,
+      "clientMs": 2866,
+      "serverSumMs": 496.395563,
+      "outsideServerMs": 2369.604437
+    },
+    {
+      "index": 467,
+      "clientMs": 2566,
+      "serverSumMs": 111.324656,
+      "outsideServerMs": 2454.675344
+    },
+    {
+      "index": 478,
+      "clientMs": 1471,
+      "serverSumMs": 280.252886,
+      "outsideServerMs": 1190.747114
+    },
+    {
+      "index": 466,
+      "clientMs": 2702,
+      "serverSumMs": 256.861463,
+      "outsideServerMs": 2445.138537
+    },
+    {
+      "index": 479,
+      "clientMs": 1403,
+      "serverSumMs": 237.81561299999998,
+      "outsideServerMs": 1165.184387
+    },
+    {
+      "index": 468,
+      "clientMs": 2691,
+      "serverSumMs": 282.886678,
+      "outsideServerMs": 2408.113322
+    },
+    {
+      "index": 470,
+      "clientMs": 2537,
+      "serverSumMs": 181.614575,
+      "outsideServerMs": 2355.385425
+    },
+    {
+      "index": 471,
+      "clientMs": 2439,
+      "serverSumMs": 113.841163,
+      "outsideServerMs": 2325.158837
+    },
+    {
+      "index": 472,
+      "clientMs": 2547,
+      "serverSumMs": 184.872771,
+      "outsideServerMs": 2362.127229
+    },
+    {
+      "index": 484,
+      "clientMs": 1364,
+      "serverSumMs": 192.832676,
+      "outsideServerMs": 1171.167324
+    },
+    {
+      "index": 486,
+      "clientMs": 1386,
+      "serverSumMs": 246.799153,
+      "outsideServerMs": 1139.200847
+    },
+    {
+      "index": 474,
+      "clientMs": 2605,
+      "serverSumMs": 252.398974,
+      "outsideServerMs": 2352.601026
+    },
+    {
+      "index": 475,
+      "clientMs": 2507,
+      "serverSumMs": 177.99555500000002,
+      "outsideServerMs": 2329.004445
+    },
+    {
+      "index": 487,
+      "clientMs": 1309,
+      "serverSumMs": 136.828409,
+      "outsideServerMs": 1172.171591
+    },
+    {
+      "index": 476,
+      "clientMs": 2416,
+      "serverSumMs": 114.93985699999999,
+      "outsideServerMs": 2301.060143
+    },
+    {
+      "index": 477,
+      "clientMs": 2566,
+      "serverSumMs": 272.059846,
+      "outsideServerMs": 2293.940154
+    },
+    {
+      "index": 491,
+      "clientMs": 1225,
+      "serverSumMs": 100.88542799999999,
+      "outsideServerMs": 1124.114572
+    },
+    {
+      "index": 480,
+      "clientMs": 2421,
+      "serverSumMs": 145.281193,
+      "outsideServerMs": 2275.718807
+    },
+    {
+      "index": 493,
+      "clientMs": 1228,
+      "serverSumMs": 130.80988,
+      "outsideServerMs": 1097.19012
+    },
+    {
+      "index": 492,
+      "clientMs": 1330,
+      "serverSumMs": 163.89486499999998,
+      "outsideServerMs": 1166.105135
+    },
+    {
+      "index": 481,
+      "clientMs": 2461,
+      "serverSumMs": 153.383276,
+      "outsideServerMs": 2307.616724
+    },
+    {
+      "index": 494,
+      "clientMs": 1187,
+      "serverSumMs": 65.416995,
+      "outsideServerMs": 1121.583005
+    },
+    {
+      "index": 482,
+      "clientMs": 2629,
+      "serverSumMs": 291.23476,
+      "outsideServerMs": 2337.76524
+    },
+    {
+      "index": 495,
+      "clientMs": 1336,
+      "serverSumMs": 162.389041,
+      "outsideServerMs": 1173.610959
+    },
+    {
+      "index": 483,
+      "clientMs": 2546,
+      "serverSumMs": 223.303656,
+      "outsideServerMs": 2322.696344
+    },
+    {
+      "index": 485,
+      "clientMs": 2537,
+      "serverSumMs": 192.494154,
+      "outsideServerMs": 2344.505846
+    },
+    {
+      "index": 488,
+      "clientMs": 2477,
+      "serverSumMs": 203.74091800000002,
+      "outsideServerMs": 2273.259082
+    },
+    {
+      "index": 489,
+      "clientMs": 2491,
+      "serverSumMs": 222.56215999999998,
+      "outsideServerMs": 2268.43784
+    },
+    {
+      "index": 490,
+      "clientMs": 2401,
+      "serverSumMs": 195.729806,
+      "outsideServerMs": 2205.270194
+    },
+    {
+      "index": 506,
+      "clientMs": 1217,
+      "serverSumMs": 180.87124200000002,
+      "outsideServerMs": 1036.128758
+    },
+    {
+      "index": 505,
+      "clientMs": 1323,
+      "serverSumMs": 264.97731699999997,
+      "outsideServerMs": 1058.0226830000001
+    },
+    {
+      "index": 496,
+      "clientMs": 2329,
+      "serverSumMs": 201.813119,
+      "outsideServerMs": 2127.186881
+    },
+    {
+      "index": 497,
+      "clientMs": 2351,
+      "serverSumMs": 197.135964,
+      "outsideServerMs": 2153.864036
+    },
+    {
+      "index": 499,
+      "clientMs": 2265,
+      "serverSumMs": 144.851195,
+      "outsideServerMs": 2120.148805
+    },
+    {
+      "index": 510,
+      "clientMs": 1177,
+      "serverSumMs": 204.776089,
+      "outsideServerMs": 972.223911
+    },
+    {
+      "index": 498,
+      "clientMs": 2387,
+      "serverSumMs": 259.096103,
+      "outsideServerMs": 2127.903897
+    },
+    {
+      "index": 500,
+      "clientMs": 2246,
+      "serverSumMs": 165.70221,
+      "outsideServerMs": 2080.29779
+    },
+    {
+      "index": 502,
+      "clientMs": 2237,
+      "serverSumMs": 175.219068,
+      "outsideServerMs": 2061.780932
+    },
+    {
+      "index": 501,
+      "clientMs": 2344,
+      "serverSumMs": 232.42925400000001,
+      "outsideServerMs": 2111.570746
+    },
+    {
+      "index": 512,
+      "clientMs": 1258,
+      "serverSumMs": 324.723664,
+      "outsideServerMs": 933.276336
+    },
+    {
+      "index": 513,
+      "clientMs": 1169,
+      "serverSumMs": 169.085958,
+      "outsideServerMs": 999.914042
+    },
+    {
+      "index": 503,
+      "clientMs": 2342,
+      "serverSumMs": 260.952365,
+      "outsideServerMs": 2081.047635
+    },
+    {
+      "index": 504,
+      "clientMs": 2279,
+      "serverSumMs": 180.633575,
+      "outsideServerMs": 2098.366425
+    },
+    {
+      "index": 507,
+      "clientMs": 2437,
+      "serverSumMs": 389.268519,
+      "outsideServerMs": 2047.731481
+    },
+    {
+      "index": 508,
+      "clientMs": 2348,
+      "serverSumMs": 344.31433499999997,
+      "outsideServerMs": 2003.685665
+    },
+    {
+      "index": 509,
+      "clientMs": 2394,
+      "serverSumMs": 307.74195399999996,
+      "outsideServerMs": 2086.258046
+    },
+    {
+      "index": 511,
+      "clientMs": 2399,
+      "serverSumMs": 261.40909,
+      "outsideServerMs": 2137.59091
+    },
+    {
+      "index": 520,
+      "clientMs": 1528,
+      "serverSumMs": 298.03974500000004,
+      "outsideServerMs": 1229.960255
+    },
+    {
+      "index": 524,
+      "clientMs": 1382,
+      "serverSumMs": 221.592646,
+      "outsideServerMs": 1160.407354
+    },
+    {
+      "index": 514,
+      "clientMs": 2383,
+      "serverSumMs": 251.45162799999997,
+      "outsideServerMs": 2131.548372
+    },
+    {
+      "index": 525,
+      "clientMs": 1297,
+      "serverSumMs": 169.382567,
+      "outsideServerMs": 1127.617433
+    },
+    {
+      "index": 515,
+      "clientMs": 2306,
+      "serverSumMs": 193.834159,
+      "outsideServerMs": 2112.165841
+    },
+    {
+      "index": 528,
+      "clientMs": 1195,
+      "serverSumMs": 134.590566,
+      "outsideServerMs": 1060.409434
+    },
+    {
+      "index": 517,
+      "clientMs": 2299,
+      "serverSumMs": 180.568583,
+      "outsideServerMs": 2118.431417
+    },
+    {
+      "index": 516,
+      "clientMs": 2400,
+      "serverSumMs": 251.92546299999998,
+      "outsideServerMs": 2148.074537
+    },
+    {
+      "index": 518,
+      "clientMs": 2387,
+      "serverSumMs": 348.21973,
+      "outsideServerMs": 2038.78027
+    },
+    {
+      "index": 519,
+      "clientMs": 2336,
+      "serverSumMs": 255.493068,
+      "outsideServerMs": 2080.5069320000002
+    },
+    {
+      "index": 531,
+      "clientMs": 1159,
+      "serverSumMs": 164.828265,
+      "outsideServerMs": 994.171735
+    },
+    {
+      "index": 521,
+      "clientMs": 2490,
+      "serverSumMs": 323.326512,
+      "outsideServerMs": 2166.673488
+    },
+    {
+      "index": 535,
+      "clientMs": 1093,
+      "serverSumMs": 123.631786,
+      "outsideServerMs": 969.368214
+    },
+    {
+      "index": 523,
+      "clientMs": 2295,
+      "serverSumMs": 164.208397,
+      "outsideServerMs": 2130.791603
+    },
+    {
+      "index": 522,
+      "clientMs": 2403,
+      "serverSumMs": 231.002614,
+      "outsideServerMs": 2171.997386
+    },
+    {
+      "index": 537,
+      "clientMs": 1186,
+      "serverSumMs": 232.429858,
+      "outsideServerMs": 953.570142
+    },
+    {
+      "index": 526,
+      "clientMs": 2295,
+      "serverSumMs": 272.199246,
+      "outsideServerMs": 2022.8007539999999
+    },
+    {
+      "index": 527,
+      "clientMs": 2196,
+      "serverSumMs": 209.770323,
+      "outsideServerMs": 1986.229677
+    },
+    {
+      "index": 538,
+      "clientMs": 1114,
+      "serverSumMs": 191.298023,
+      "outsideServerMs": 922.7019769999999
+    },
+    {
+      "index": 529,
+      "clientMs": 2120,
+      "serverSumMs": 236.093975,
+      "outsideServerMs": 1883.906025
+    },
+    {
+      "index": 530,
+      "clientMs": 2054,
+      "serverSumMs": 178.16664600000001,
+      "outsideServerMs": 1875.8333539999999
+    },
+    {
+      "index": 540,
+      "clientMs": 1114,
+      "serverSumMs": 254.682708,
+      "outsideServerMs": 859.317292
+    },
+    {
+      "index": 532,
+      "clientMs": 2001,
+      "serverSumMs": 196.830305,
+      "outsideServerMs": 1804.169695
+    },
+    {
+      "index": 534,
+      "clientMs": 1987,
+      "serverSumMs": 220.40826199999998,
+      "outsideServerMs": 1766.591738
+    },
+    {
+      "index": 533,
+      "clientMs": 2104,
+      "serverSumMs": 287.17464199999995,
+      "outsideServerMs": 1816.825358
+    },
+    {
+      "index": 536,
+      "clientMs": 1808,
+      "serverSumMs": 96.998231,
+      "outsideServerMs": 1711.001769
+    },
+    {
+      "index": 541,
+      "clientMs": 1705,
+      "serverSumMs": 247.142897,
+      "outsideServerMs": 1457.857103
+    },
+    {
+      "index": 539,
+      "clientMs": 1906,
+      "serverSumMs": 345.626089,
+      "outsideServerMs": 1560.3739110000001
+    },
+    {
+      "index": 548,
+      "clientMs": 1008,
+      "serverSumMs": 312.55985599999997,
+      "outsideServerMs": 695.440144
+    },
+    {
+      "index": 542,
+      "clientMs": 1614,
+      "serverSumMs": 171.534943,
+      "outsideServerMs": 1442.465057
+    },
+    {
+      "index": 551,
+      "clientMs": 845,
+      "serverSumMs": 235.939826,
+      "outsideServerMs": 609.060174
+    },
+    {
+      "index": 543,
+      "clientMs": 1646,
+      "serverSumMs": 243.137301,
+      "outsideServerMs": 1402.862699
+    },
+    {
+      "index": 544,
+      "clientMs": 1560,
+      "serverSumMs": 125.932257,
+      "outsideServerMs": 1434.067743
+    },
+    {
+      "index": 552,
+      "clientMs": 770,
+      "serverSumMs": 130.170513,
+      "outsideServerMs": 639.829487
+    },
+    {
+      "index": 553,
+      "clientMs": 833,
+      "serverSumMs": 192.24040300000001,
+      "outsideServerMs": 640.759597
+    },
+    {
+      "index": 545,
+      "clientMs": 1650,
+      "serverSumMs": 231.36129,
+      "outsideServerMs": 1418.63871
+    },
+    {
+      "index": 546,
+      "clientMs": 1571,
+      "serverSumMs": 183.036576,
+      "outsideServerMs": 1387.963424
+    },
+    {
+      "index": 547,
+      "clientMs": 1541,
+      "serverSumMs": 194.995278,
+      "outsideServerMs": 1346.004722
+    },
+    {
+      "index": 549,
+      "clientMs": 1644,
+      "serverSumMs": 323.867918,
+      "outsideServerMs": 1320.132082
+    },
+    {
+      "index": 550,
+      "clientMs": 1678,
+      "serverSumMs": 417.236743,
+      "outsideServerMs": 1260.763257
+    },
+    {
+      "index": 557,
+      "clientMs": 987,
+      "serverSumMs": 349.466498,
+      "outsideServerMs": 637.533502
+    },
+    {
+      "index": 560,
+      "clientMs": 840,
+      "serverSumMs": 240.649676,
+      "outsideServerMs": 599.350324
+    },
+    {
+      "index": 559,
+      "clientMs": 944,
+      "serverSumMs": 347.373971,
+      "outsideServerMs": 596.626029
+    },
+    {
+      "index": 554,
+      "clientMs": 1468,
+      "serverSumMs": 181.104397,
+      "outsideServerMs": 1286.895603
+    },
+    {
+      "index": 555,
+      "clientMs": 1385,
+      "serverSumMs": 144.24274400000002,
+      "outsideServerMs": 1240.7572559999999
+    },
+    {
+      "index": 562,
+      "clientMs": 862,
+      "serverSumMs": 251.580398,
+      "outsideServerMs": 610.4196019999999
+    },
+    {
+      "index": 556,
+      "clientMs": 1472,
+      "serverSumMs": 191.58914600000003,
+      "outsideServerMs": 1280.410854
+    },
+    {
+      "index": 564,
+      "clientMs": 926,
+      "serverSumMs": 222.80871000000002,
+      "outsideServerMs": 703.19129
+    },
+    {
+      "index": 558,
+      "clientMs": 1553,
+      "serverSumMs": 269.452716,
+      "outsideServerMs": 1283.547284
+    },
+    {
+      "index": 565,
+      "clientMs": 854,
+      "serverSumMs": 168.93130200000002,
+      "outsideServerMs": 685.068698
+    },
+    {
+      "index": 566,
+      "clientMs": 833,
+      "serverSumMs": 165.31725,
+      "outsideServerMs": 667.6827499999999
+    },
+    {
+      "index": 567,
+      "clientMs": 750,
+      "serverSumMs": 124.88775000000001,
+      "outsideServerMs": 625.11225
+    },
+    {
+      "index": 561,
+      "clientMs": 1352,
+      "serverSumMs": 108.274924,
+      "outsideServerMs": 1243.725076
+    },
+    {
+      "index": 569,
+      "clientMs": 826,
+      "serverSumMs": 200.44378899999998,
+      "outsideServerMs": 625.5562110000001
+    },
+    {
+      "index": 563,
+      "clientMs": 1473,
+      "serverSumMs": 183.597555,
+      "outsideServerMs": 1289.402445
+    },
+    {
+      "index": 570,
+      "clientMs": 846,
+      "serverSumMs": 240.116066,
+      "outsideServerMs": 605.883934
+    },
+    {
+      "index": 571,
+      "clientMs": 837,
+      "serverSumMs": 232.961418,
+      "outsideServerMs": 604.038582
+    },
+    {
+      "index": 574,
+      "clientMs": 863,
+      "serverSumMs": 232.50232100000002,
+      "outsideServerMs": 630.497679
+    },
+    {
+      "index": 568,
+      "clientMs": 1473,
+      "serverSumMs": 244.835674,
+      "outsideServerMs": 1228.164326
+    },
+    {
+      "index": 575,
+      "clientMs": 775,
+      "serverSumMs": 172.817119,
+      "outsideServerMs": 602.182881
+    },
+    {
+      "index": 577,
+      "clientMs": 947,
+      "serverSumMs": 344.979554,
+      "outsideServerMs": 602.020446
+    },
+    {
+      "index": 572,
+      "clientMs": 1479,
+      "serverSumMs": 306.197601,
+      "outsideServerMs": 1172.802399
+    },
+    {
+      "index": 579,
+      "clientMs": 781,
+      "serverSumMs": 198.65887999999998,
+      "outsideServerMs": 582.34112
+    },
+    {
+      "index": 573,
+      "clientMs": 1412,
+      "serverSumMs": 242.227125,
+      "outsideServerMs": 1169.772875
+    },
+    {
+      "index": 578,
+      "clientMs": 1112,
+      "serverSumMs": 500.81719699999996,
+      "outsideServerMs": 611.182803
+    },
+    {
+      "index": 576,
+      "clientMs": 1315,
+      "serverSumMs": 214.78521600000002,
+      "outsideServerMs": 1100.214784
+    },
+    {
+      "index": 582,
+      "clientMs": 715,
+      "serverSumMs": 152.521453,
+      "outsideServerMs": 562.4785469999999
+    },
+    {
+      "index": 586,
+      "clientMs": 677,
+      "serverSumMs": 177.319849,
+      "outsideServerMs": 499.680151
+    },
+    {
+      "index": 581,
+      "clientMs": 1192,
+      "serverSumMs": 200.160421,
+      "outsideServerMs": 991.839579
+    },
+    {
+      "index": 580,
+      "clientMs": 1305,
+      "serverSumMs": 365.476427,
+      "outsideServerMs": 939.5235729999999
+    },
+    {
+      "index": 588,
+      "clientMs": 618,
+      "serverSumMs": 228.30994499999997,
+      "outsideServerMs": 389.69005500000003
+    },
+    {
+      "index": 583,
+      "clientMs": 1121,
+      "serverSumMs": 241.952871,
+      "outsideServerMs": 879.047129
+    },
+    {
+      "index": 584,
+      "clientMs": 1023,
+      "serverSumMs": 197.59828399999998,
+      "outsideServerMs": 825.4017160000001
+    },
+    {
+      "index": 585,
+      "clientMs": 1436,
+      "serverSumMs": 599.8842649999999,
+      "outsideServerMs": 836.1157350000001
+    },
+    {
+      "index": 592,
+      "clientMs": 743,
+      "serverSumMs": 374.157307,
+      "outsideServerMs": 368.842693
+    },
+    {
+      "index": 589,
+      "clientMs": 1044,
+      "serverSumMs": 337.758699,
+      "outsideServerMs": 706.241301
+    },
+    {
+      "index": 587,
+      "clientMs": 1247,
+      "serverSumMs": 460.85303,
+      "outsideServerMs": 786.14697
+    },
+    {
+      "index": 594,
+      "clientMs": 566,
+      "serverSumMs": 201.73780699999998,
+      "outsideServerMs": 364.262193
+    },
+    {
+      "index": 590,
+      "clientMs": 972,
+      "serverSumMs": 268.16749400000003,
+      "outsideServerMs": 703.832506
+    },
+    {
+      "index": 591,
+      "clientMs": 1226,
+      "serverSumMs": 480.18182,
+      "outsideServerMs": 745.81818
+    },
+    {
+      "index": 593,
+      "clientMs": 1034,
+      "serverSumMs": 360.887855,
+      "outsideServerMs": 673.112145
+    },
+    {
+      "index": 595,
+      "clientMs": 842,
+      "serverSumMs": 184.512765,
+      "outsideServerMs": 657.487235
+    },
+    {
+      "index": 596,
+      "clientMs": 750,
+      "serverSumMs": 133.98879599999998,
+      "outsideServerMs": 616.011204
+    },
+    {
+      "index": 598,
+      "clientMs": 552,
+      "serverSumMs": 142.89824099999998,
+      "outsideServerMs": 409.101759
+    },
+    {
+      "index": 597,
+      "clientMs": 653,
+      "serverSumMs": 193.622175,
+      "outsideServerMs": 459.37782500000003
+    },
+    {
+      "index": 599,
+      "clientMs": 453,
+      "serverSumMs": 109.771402,
+      "outsideServerMs": 343.22859800000003
+    }
+  ],
+  "notes": [
+    "Percentiles use sorted sample index floor(n*p), not k6 interpolation.",
+    "Outside-server residual includes queue/network/client processing; not a direct Tomcat queue timer.",
+    "Read traces are sampled. Stage totals overlap and must not be summed.",
+    "Repeated revision queries without origin are consistent with follower reprobes; not direct follower instrumentation."
+  ]
+}

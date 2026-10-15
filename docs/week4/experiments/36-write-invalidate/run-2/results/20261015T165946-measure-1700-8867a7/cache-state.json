@@ -1,0 +1,71 @@
+{
+  "before": {
+    "ttlMs": {
+      "products::v4:products?sort=latest&brand=all&page=0&size=20": 4438,
+      "like-counts::v4:products/like-counts?ids=1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20": 104898,
+      "stocks::v4:products/stocks?ids=1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20": 299625
+    },
+    "redisStats": {
+      "total_commands_processed": 9881329,
+      "expired_keys": 4042,
+      "evicted_keys": 0,
+      "keyspace_hits": 12349651,
+      "keyspace_misses": 477808
+    },
+    "commandCalls": {
+      "client|setname": 40,
+      "mget": 3470480,
+      "role": 40,
+      "scan": 4168,
+      "ttl": 18,
+      "info": 290,
+      "replconf": 242052,
+      "ping": 48151,
+      "expire": 35,
+      "unlink": 386,
+      "del": 2016,
+      "hello": 120,
+      "get": 5875308,
+      "psync": 1,
+      "evalsha": 2011,
+      "exists": 2,
+      "set": 224809,
+      "eval": 232,
+      "pttl": 11171
+    }
+  },
+  "after": {
+    "ttlMs": {
+      "like-counts::v4:products/like-counts?ids=1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20": 18186,
+      "stocks::v4:products/stocks?ids=1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20": 273102
+    },
+    "redisStats": {
+      "total_commands_processed": 10115058,
+      "expired_keys": 4057,
+      "evicted_keys": 0,
+      "keyspace_hits": 12682683,
+      "keyspace_misses": 492420
+    },
+    "commandCalls": {
+      "client|setname": 40,
+      "mget": 3586292,
+      "role": 40,
+      "scan": 4772,
+      "ttl": 18,
+      "info": 292,
+      "replconf": 242138,
+      "ping": 48168,
+      "expire": 35,
+      "unlink": 974,
+      "del": 2016,
+      "hello": 120,
+      "get": 5991326,
+      "psync": 1,
+      "evalsha": 2011,
+      "exists": 2,
+      "set": 225407,
+      "eval": 234,
+      "pttl": 11173
+    }
+  }
+}

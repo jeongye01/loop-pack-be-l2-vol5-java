@@ -1,0 +1,2 @@
+commerce-api:write-invalidate-0fa881ec5d5e 2026-10-15T16:55:25.45643457Z healthy
+0fa881ec5d5eb6caf07276f2aaa4fd40440a06238b2fa8a4719d00ad99d1c94b  /app/app.jar

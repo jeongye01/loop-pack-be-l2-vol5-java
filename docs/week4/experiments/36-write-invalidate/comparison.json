@@ -1,0 +1,652 @@
+[
+  {
+    "run": "run-1",
+    "slo": {
+      "runId": "20261015T165809-measure-1700-d8c534",
+      "p99LimitMs": 100,
+      "phase": "measure",
+      "rps": 1700,
+      "seconds": 60,
+      "planned": 102000,
+      "started": 92783,
+      "completed": 92783,
+      "dropped": 9218,
+      "successRate": 1,
+      "failed": 0,
+      "timeouts": 0,
+      "transportErrors": 0,
+      "httpErrors": 0,
+      "mismatches": 0,
+      "httpRequests": 93983,
+      "httpRps": 1556.854046274485,
+      "httpFailureRate": 0,
+      "latencyMs": {
+        "p(50)": 1625,
+        "p(95)": 2425,
+        "p(99)": 2623,
+        "avg": 1622.8216914736536,
+        "min": 19,
+        "max": 2965
+      },
+      "successLatencyMs": {
+        "p(50)": 1625,
+        "p(95)": 2425,
+        "p(99)": 2623,
+        "avg": 1622.8216914736536,
+        "min": 19,
+        "max": 2965
+      },
+      "recovered": true,
+      "collection": {
+        "samplesComplete": true,
+        "environmentComplete": true,
+        "serverLogsCollected": true,
+        "asyncLogMetricsComplete": true,
+        "tomcatMetricsComplete": true
+      },
+      "exitCode": 0,
+      "purchase": {
+        "planned": 600,
+        "started": 600,
+        "completed": 600,
+        "successRate": 1,
+        "failed": 0,
+        "timeouts": 0,
+        "httpErrors": 0,
+        "invalidResponses": 0,
+        "latencyMs": {
+          "avg": 2741.125,
+          "min": 453,
+          "max": 5055,
+          "p(50)": 2472.5,
+          "p(95)": 4649.549999999999,
+          "p(99)": 4889.16
+        },
+        "createLatencyMs": {
+          "p(95)": 2383.1499999999996,
+          "p(99)": 2563.3499999999995,
+          "avg": 1662.59,
+          "min": 363,
+          "max": 2709,
+          "p(50)": 1685.5
+        },
+        "confirmLatencyMs": {
+          "avg": 1078.475,
+          "min": 31,
+          "max": 2808,
+          "p(50)": 1122.5,
+          "p(95)": 2456.25,
+          "p(99)": 2701
+        }
+      },
+      "complete": false,
+      "sloPassed": false,
+      "readPassed": false,
+      "purchasePassed": false
+    },
+    "observations": {
+      "runId": "20261015T165809-measure-1700-d8c534",
+      "resources": {
+        "hikaricp_connections_active": {
+          "mean": 14.384615384615385,
+          "max": 40.0,
+          "p99": 40.0
+        },
+        "hikaricp_connections_pending": {
+          "mean": 7.769230769230769,
+          "max": 60.0,
+          "p99": 60.0
+        },
+        "hikaricp_connections_max": {
+          "mean": 40.0,
+          "max": 40.0,
+          "p99": 40.0
+        },
+        "tomcat_threads_busy_threads": {
+          "mean": 184.6153846153846,
+          "max": 200.0,
+          "p99": 200.0
+        }
+      },
+      "dockerCpuPercent": {
+        "app": {
+          "week4-commerce-api-1": {
+            "mean": 181.7876923076923,
+            "max": 198.88,
+            "p99": 198.88
+          }
+        },
+        "db": {
+          "week4-db-redis-replica-1": {
+            "mean": 0.26153846153846155,
+            "max": 0.33,
+            "p99": 0.33
+          },
+          "week4-db-redis-master-1": {
+            "mean": 3.6515384615384616,
+            "max": 4.61,
+            "p99": 4.61
+          },
+          "week4-db-mysql-1": {
+            "mean": 49.13923076923077,
+            "max": 68.21,
+            "p99": 68.21
+          }
+        }
+      },
+      "loadK6CpuPercent": {
+        "mean": 186.53846153846155,
+        "max": 732.0,
+        "p99": 732.0
+      },
+      "writeTraceCount": 1200,
+      "writeServerDurationMs": {
+        "mean": 161.3010419175,
+        "max": 2045.387372,
+        "p99": 1531.632605
+      },
+      "writeConnectionWaitMs": {
+        "mean": 11.095551189166667,
+        "max": 299.222873,
+        "p99": 161.582148
+      },
+      "sampledReadTraceCount": 986,
+      "serverDurationMs": {
+        "mean": 129.4929807363083,
+        "max": 494.995472,
+        "p99": 323.771097
+      },
+      "connectionWaitMs": {
+        "mean": 11.246252276876268,
+        "max": 255.15227,
+        "p99": 151.73165
+      },
+      "sqlCountHistogram": {
+        "1": 983,
+        "3": 3
+      },
+      "revisionRechecks": 0,
+      "stockOriginTraceCount": 3,
+      "originalListTraceCount": 0,
+      "cacheCounterDelta": {
+        "catalog_cache_errors_total{application=\"commerce-api\",operation=\"get\"}": 629.0,
+        "catalog_cache_errors_total{application=\"commerce-api\",operation=\"put\"}": 0.0,
+        "catalog_cache_invalidation_total{application=\"commerce-api\",outcome=\"failure\"}": 6.0,
+        "catalog_cache_invalidation_total{application=\"commerce-api\",outcome=\"success\"}": 594.0,
+        "catalog_cache_invalidation_keys_total{application=\"commerce-api\"}": 266.0
+      },
+      "notes": [
+        "Read/write server traces are separated by path; read sampling and write instrumentation depend on deployed image.",
+        "Resource snapshots every 5s; maxima do not represent continuous occupancy.",
+        "Cache deltas include preflight/recovery checks and other traffic; misses can include repeated probes."
+      ]
+    },
+    "stampede": {
+      "runId": "20261015T165809-measure-1700-d8c534",
+      "phase": "measure",
+      "original": {
+        "active": 0.0,
+        "loads_total": 19.0,
+        "maximum": 3.0,
+        "overlapping_total": 7.0
+      },
+      "stockOriginal": {
+        "active": 0.0,
+        "loads_total": 290.0,
+        "maximum": 3.0,
+        "overlapping_total": 23.0
+      },
+      "windowsAbove200Ms": 60,
+      "p99LimitMs": 100,
+      "windowsAboveSlo": 60,
+      "worstWindowP99Ms": 2795,
+      "redisStatsDelta": {
+        "total_commands_processed": 285357,
+        "expired_keys": 15,
+        "evicted_keys": 0,
+        "keyspace_hits": 374924,
+        "keyspace_misses": 49969
+      },
+      "notes": [
+        "Original counters include only this X-Run-ID, not validation/recovery.",
+        "Original concurrency includes DB pool waiting; it is not simultaneous SQL count.",
+        "Redis deltas include validation/recovery and unrelated expirations.",
+        "Windows group requests by start time; no exact expiry-event boundary is claimed."
+      ]
+    },
+    "audit": true
+  },
+  {
+    "run": "run-2",
+    "slo": {
+      "runId": "20261015T165946-measure-1700-8867a7",
+      "p99LimitMs": 100,
+      "phase": "measure",
+      "rps": 1700,
+      "seconds": 60,
+      "planned": 102000,
+      "started": 102002,
+      "completed": 102002,
+      "dropped": 0,
+      "successRate": 1,
+      "failed": 0,
+      "timeouts": 0,
+      "transportErrors": 0,
+      "httpErrors": 0,
+      "mismatches": 0,
+      "httpRequests": 103204,
+      "httpRps": 1719.347232581698,
+      "httpFailureRate": 0,
+      "latencyMs": {
+        "p(50)": 6,
+        "p(95)": 90,
+        "p(99)": 228.99000000000524,
+        "avg": 20.172878963157586,
+        "min": 1,
+        "max": 421
+      },
+      "successLatencyMs": {
+        "avg": 20.172878963157586,
+        "min": 1,
+        "max": 421,
+        "p(50)": 6,
+        "p(95)": 90,
+        "p(99)": 228.99000000000524
+      },
+      "recovered": true,
+      "collection": {
+        "samplesComplete": true,
+        "environmentComplete": true,
+        "serverLogsCollected": true,
+        "asyncLogMetricsComplete": true,
+        "tomcatMetricsComplete": true
+      },
+      "exitCode": 0,
+      "purchase": {
+        "planned": 600,
+        "started": 601,
+        "completed": 601,
+        "successRate": 1,
+        "failed": 0,
+        "timeouts": 0,
+        "httpErrors": 0,
+        "invalidResponses": 0,
+        "latencyMs": {
+          "avg": 82.05158069883528,
+          "min": 24,
+          "max": 518,
+          "p(50)": 56,
+          "p(95)": 214,
+          "p(99)": 425
+        },
+        "createLatencyMs": {
+          "avg": 31.48585690515807,
+          "min": 9,
+          "max": 277,
+          "p(50)": 19,
+          "p(95)": 80,
+          "p(99)": 191
+        },
+        "confirmLatencyMs": {
+          "p(99)": 249,
+          "avg": 50.52079866888519,
+          "min": 12,
+          "max": 463,
+          "p(50)": 32,
+          "p(95)": 132
+        }
+      },
+      "complete": true,
+      "sloPassed": false,
+      "readPassed": false,
+      "purchasePassed": false
+    },
+    "observations": {
+      "runId": "20261015T165946-measure-1700-8867a7",
+      "resources": {
+        "hikaricp_connections_active": {
+          "mean": 9.153846153846153,
+          "max": 18.0,
+          "p99": 18.0
+        },
+        "hikaricp_connections_pending": {
+          "mean": 0.0,
+          "max": 0.0,
+          "p99": 0.0
+        },
+        "hikaricp_connections_max": {
+          "mean": 40.0,
+          "max": 40.0,
+          "p99": 40.0
+        },
+        "tomcat_threads_busy_threads": {
+          "mean": 38.92307692307692,
+          "max": 183.0,
+          "p99": 183.0
+        }
+      },
+      "dockerCpuPercent": {
+        "app": {
+          "week4-commerce-api-1": {
+            "mean": 161.85846153846154,
+            "max": 196.44,
+            "p99": 196.44
+          }
+        },
+        "db": {
+          "week4-db-redis-replica-1": {
+            "mean": 0.30615384615384617,
+            "max": 0.38,
+            "p99": 0.38
+          },
+          "week4-db-redis-master-1": {
+            "mean": 5.924615384615384,
+            "max": 7.63,
+            "p99": 7.63
+          },
+          "week4-db-mysql-1": {
+            "mean": 56.505384615384614,
+            "max": 63.88,
+            "p99": 63.88
+          }
+        }
+      },
+      "loadK6CpuPercent": {
+        "mean": 197.0,
+        "max": 743.0,
+        "p99": 743.0
+      },
+      "writeTraceCount": 1202,
+      "writeServerDurationMs": {
+        "mean": 36.688469063227956,
+        "max": 450.233264,
+        "p99": 181.029276
+      },
+      "writeConnectionWaitMs": {
+        "mean": 0.3037983560732113,
+        "max": 52.933221999999994,
+        "p99": 8.312560000000001
+      },
+      "sampledReadTraceCount": 1007,
+      "serverDurationMs": {
+        "mean": 16.70653820854022,
+        "max": 305.529782,
+        "p99": 129.464614
+      },
+      "connectionWaitMs": {
+        "mean": 0.26038831479642505,
+        "max": 39.311395,
+        "p99": 6.833884
+      },
+      "sqlCountHistogram": {
+        "1": 1002,
+        "3": 5
+      },
+      "revisionRechecks": 0,
+      "stockOriginTraceCount": 5,
+      "originalListTraceCount": 0,
+      "cacheCounterDelta": {
+        "catalog_cache_errors_total{application=\"commerce-api\",operation=\"get\"}": 0.0,
+        "catalog_cache_errors_total{application=\"commerce-api\",operation=\"put\"}": 0.0,
+        "catalog_cache_invalidation_total{application=\"commerce-api\",outcome=\"failure\"}": 0.0,
+        "catalog_cache_invalidation_total{application=\"commerce-api\",outcome=\"success\"}": 601.0,
+        "catalog_cache_invalidation_keys_total{application=\"commerce-api\"}": 581.0
+      },
+      "notes": [
+        "Read/write server traces are separated by path; read sampling and write instrumentation depend on deployed image.",
+        "Resource snapshots every 5s; maxima do not represent continuous occupancy.",
+        "Cache deltas include preflight/recovery checks and other traffic; misses can include repeated probes."
+      ]
+    },
+    "stampede": {
+      "runId": "20261015T165946-measure-1700-8867a7",
+      "phase": "measure",
+      "original": {
+        "active": 0.0,
+        "loads_total": 13.0,
+        "maximum": 2.0,
+        "overlapping_total": 1.0
+      },
+      "stockOriginal": {
+        "active": 0.0,
+        "loads_total": 582.0,
+        "maximum": 2.0,
+        "overlapping_total": 2.0
+      },
+      "windowsAbove200Ms": 2,
+      "p99LimitMs": 100,
+      "windowsAboveSlo": 12,
+      "worstWindowP99Ms": 388.02,
+      "redisStatsDelta": {
+        "total_commands_processed": 233729,
+        "expired_keys": 15,
+        "evicted_keys": 0,
+        "keyspace_hits": 333032,
+        "keyspace_misses": 14612
+      },
+      "notes": [
+        "Original counters include only this X-Run-ID, not validation/recovery.",
+        "Original concurrency includes DB pool waiting; it is not simultaneous SQL count.",
+        "Redis deltas include validation/recovery and unrelated expirations.",
+        "Windows group requests by start time; no exact expiry-event boundary is claimed."
+      ]
+    },
+    "audit": true
+  },
+  {
+    "run": "run-3",
+    "slo": {
+      "runId": "20261015T170123-measure-1700-84d87f",
+      "p99LimitMs": 100,
+      "phase": "measure",
+      "rps": 1700,
+      "seconds": 60,
+      "planned": 102000,
+      "started": 102001,
+      "completed": 102001,
+      "dropped": 0,
+      "successRate": 1,
+      "failed": 0,
+      "timeouts": 0,
+      "transportErrors": 0,
+      "httpErrors": 0,
+      "mismatches": 0,
+      "httpRequests": 103201,
+      "httpRps": 1719.7821698963676,
+      "httpFailureRate": 0,
+      "latencyMs": {
+        "p(50)": 3,
+        "p(95)": 36,
+        "p(99)": 76,
+        "avg": 9.510671464005254,
+        "min": 1,
+        "max": 235
+      },
+      "successLatencyMs": {
+        "avg": 9.510671464005254,
+        "min": 1,
+        "max": 235,
+        "p(50)": 3,
+        "p(95)": 36,
+        "p(99)": 76
+      },
+      "recovered": true,
+      "collection": {
+        "samplesComplete": true,
+        "environmentComplete": true,
+        "serverLogsCollected": true,
+        "asyncLogMetricsComplete": true,
+        "tomcatMetricsComplete": true
+      },
+      "exitCode": 0,
+      "purchase": {
+        "planned": 600,
+        "started": 600,
+        "completed": 600,
+        "successRate": 1,
+        "failed": 0,
+        "timeouts": 0,
+        "httpErrors": 0,
+        "invalidResponses": 0,
+        "latencyMs": {
+          "avg": 55.21333333333333,
+          "min": 21,
+          "max": 306,
+          "p(50)": 33,
+          "p(95)": 144.04999999999995,
+          "p(99)": 230.01999999999998
+        },
+        "createLatencyMs": {
+          "min": 7,
+          "max": 137,
+          "p(50)": 13,
+          "p(95)": 59,
+          "p(99)": 94.02999999999997,
+          "avg": 21.645
+        },
+        "confirmLatencyMs": {
+          "avg": 33.531666666666666,
+          "min": 13,
+          "max": 248,
+          "p(50)": 20,
+          "p(95)": 94.09999999999991,
+          "p(99)": 146.01
+        }
+      },
+      "complete": true,
+      "sloPassed": false,
+      "readPassed": true,
+      "purchasePassed": false
+    },
+    "observations": {
+      "runId": "20261015T170123-measure-1700-84d87f",
+      "resources": {
+        "hikaricp_connections_active": {
+          "mean": 8.307692307692308,
+          "max": 13.0,
+          "p99": 13.0
+        },
+        "hikaricp_connections_pending": {
+          "mean": 0.0,
+          "max": 0.0,
+          "p99": 0.0
+        },
+        "hikaricp_connections_max": {
+          "mean": 40.0,
+          "max": 40.0,
+          "p99": 40.0
+        },
+        "tomcat_threads_busy_threads": {
+          "mean": 20.384615384615383,
+          "max": 75.0,
+          "p99": 75.0
+        }
+      },
+      "dockerCpuPercent": {
+        "app": {
+          "week4-commerce-api-1": {
+            "mean": 149.8653846153846,
+            "max": 184.45,
+            "p99": 184.45
+          }
+        },
+        "db": {
+          "week4-db-redis-replica-1": {
+            "mean": 2.3207692307692307,
+            "max": 3.89,
+            "p99": 3.89
+          },
+          "week4-db-redis-master-1": {
+            "mean": 8.187692307692307,
+            "max": 11.23,
+            "p99": 11.23
+          },
+          "week4-db-mysql-1": {
+            "mean": 57.339999999999996,
+            "max": 66.65,
+            "p99": 66.65
+          }
+        }
+      },
+      "loadK6CpuPercent": {
+        "mean": 196.46153846153845,
+        "max": 743.0,
+        "p99": 743.0
+      },
+      "writeTraceCount": 1200,
+      "writeServerDurationMs": {
+        "mean": 25.93171110833333,
+        "max": 222.000755,
+        "p99": 126.89133
+      },
+      "writeConnectionWaitMs": {
+        "mean": 0.05598438583333333,
+        "max": 21.142683,
+        "p99": 0.40004999999999996
+      },
+      "sampledReadTraceCount": 1022,
+      "serverDurationMs": {
+        "mean": 8.189087829745597,
+        "max": 124.009507,
+        "p99": 61.28303
+      },
+      "connectionWaitMs": {
+        "mean": 0.1050041506849315,
+        "max": 31.227693,
+        "p99": 0.568276
+      },
+      "sqlCountHistogram": {
+        "1": 1015,
+        "3": 7
+      },
+      "revisionRechecks": 0,
+      "stockOriginTraceCount": 7,
+      "originalListTraceCount": 0,
+      "cacheCounterDelta": {
+        "catalog_cache_errors_total{application=\"commerce-api\",operation=\"get\"}": 0.0,
+        "catalog_cache_errors_total{application=\"commerce-api\",operation=\"put\"}": 0.0,
+        "catalog_cache_invalidation_total{application=\"commerce-api\",outcome=\"failure\"}": 0.0,
+        "catalog_cache_invalidation_total{application=\"commerce-api\",outcome=\"success\"}": 600.0,
+        "catalog_cache_invalidation_keys_total{application=\"commerce-api\"}": 593.0
+      },
+      "notes": [
+        "Read/write server traces are separated by path; read sampling and write instrumentation depend on deployed image.",
+        "Resource snapshots every 5s; maxima do not represent continuous occupancy.",
+        "Cache deltas include preflight/recovery checks and other traffic; misses can include repeated probes."
+      ]
+    },
+    "stampede": {
+      "runId": "20261015T170123-measure-1700-84d87f",
+      "phase": "measure",
+      "original": {
+        "active": 0.0,
+        "loads_total": 12.0,
+        "maximum": 1.0
+      },
+      "stockOriginal": {
+        "active": 0.0,
+        "loads_total": 594.0,
+        "maximum": 2.0,
+        "overlapping_total": 1.0
+      },
+      "windowsAbove200Ms": 0,
+      "p99LimitMs": 100,
+      "windowsAboveSlo": 6,
+      "worstWindowP99Ms": 187,
+      "redisStatsDelta": {
+        "total_commands_processed": 222759,
+        "expired_keys": 16,
+        "evicted_keys": 0,
+        "keyspace_hits": 322107,
+        "keyspace_misses": 9099
+      },
+      "notes": [
+        "Original counters include only this X-Run-ID, not validation/recovery.",
+        "Original concurrency includes DB pool waiting; it is not simultaneous SQL count.",
+        "Redis deltas include validation/recovery and unrelated expirations.",
+        "Windows group requests by start time; no exact expiry-event boundary is claimed."
+      ]
+    },
+    "audit": true
+  }
+]

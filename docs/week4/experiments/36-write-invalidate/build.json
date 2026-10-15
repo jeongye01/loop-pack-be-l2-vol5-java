@@ -1,0 +1,6 @@
+{
+  "image": "commerce-api:write-invalidate-0fa881ec5d5e",
+  "jarSha256": "0fa881ec5d5eb6caf07276f2aaa4fd40440a06238b2fa8a4719d00ad99d1c94b",
+  "baseGit": "b47b39091a539d935d7a1cd6b1fd7628c7d4b7bc",
+  "workingTreeBuild": true
+}

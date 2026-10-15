@@ -12,6 +12,8 @@ def cache_state(runner):
     patterns = ['products::v3:products?sort=latest&brand=all&page=0&size=20:rev=*',
                 'like-counts::v3:products/like-counts?ids='+ids+':rev=*',
                 'stocks::v3:products/stocks?ids='+ids+':rev=*']
+    if runner.base.get('cache', {}).get('writeInvalidate', False):
+        patterns = [p.replace('v3:', 'v4:').removesuffix(':rev=*') for p in patterns]
     state = {'ttlMs': {}}
     for pattern in patterns:
         found = runner.ssh(runner.base['dbHost'], 'sudo docker exec week4-db-redis-master-1 redis-cli --scan --pattern '+shlex.quote(pattern))
@@ -43,6 +45,8 @@ def main():
     p = argparse.ArgumentParser(); p.add_argument('--config', type=Path, required=True); p.add_argument('--ssh-key', required=True); phases = p.add_mutually_exclusive_group(); phases.add_argument('--measure-only', action='store_true'); phases.add_argument('--warmup-only', action='store_true'); p.add_argument('--continue-after-warmup-failure', action='store_true')
     a = p.parse_args(); r = RemoteRunner(a.config, a.ssh_key)
     p99_limit_ms = r.base.get('slo', {}).get('p99Ms', 100)
+    purchase_limit_ms = r.base.get('slo', {}).get('purchaseP99Ms', p99_limit_ms)
+    like_limit_ms = r.base.get('slo', {}).get('likeP99Ms', p99_limit_ms)
     history = r.experiment/'slo-runs.json'
     runs = json.loads(history.read_text()) if history.exists() else []
     schedule = [(1700,60,'measure')] if a.measure_only else [(rate,r.base.get('warmupSeconds',20),'warmup') for rate in r.base.get('warmupSteps',[300,700])] + [(1700,60,'measure')]
@@ -82,10 +86,26 @@ def main():
         summary['readPassed'] = summary['sloPassed']
         if 'purchase' in summary:
             purchase = summary['purchase']
+            summary['purchase']['p99LimitMs'] = purchase_limit_ms
             summary['purchasePassed'] = (purchase['started'] >= purchase['planned']
                 and purchase['started'] == purchase['completed'] and purchase['successRate'] == 1
-                and purchase['invalidResponses'] == 0 and purchase['latencyMs'].get('p(99)', float('inf')) <= p99_limit_ms)
+                and purchase['invalidResponses'] == 0 and purchase['latencyMs'].get('p(99)', float('inf')) <= purchase_limit_ms)
             summary['sloPassed'] = summary['sloPassed'] and summary['purchasePassed']
+        if phase == 'measure' and r.base.get('likes', {}).get('pairRps', 0):
+            summary['likes'] = {}
+            for step in ('register', 'cancel'):
+                prefix = 'like_' + step
+                item = {'planned': r.base['likes']['pairRps'] * seconds,
+                    'started': value(prefix + '_started'), 'completed': value(prefix + '_completed'),
+                    'successRate': value(prefix + '_success', 'rate'),
+                    'failed': value(prefix + '_success', 'fails'),
+                    'latencyMs': m.get(prefix + '_latency_ms', {}).get('values', {})}
+                item['passed'] = (item['started'] >= item['planned'] and item['started'] == item['completed']
+                    and item['successRate'] == 1 and (like_limit_ms is None or item['latencyMs'].get('p(99)', float('inf')) <= like_limit_ms))
+                item['p99LimitMs'] = like_limit_ms
+                summary['likes'][step] = item
+            summary['likesPassed'] = all(v['passed'] for v in summary['likes'].values())
+            summary['sloPassed'] = summary['sloPassed'] and summary['likesPassed']
         save(out/'slo-result.json',summary); runs.append(summary); save(r.experiment/'slo-runs.json',runs)
         print(json.dumps(summary),flush=True)
         if phase=='warmup' and a.continue_after_warmup_failure and result['status']=='collected' and summary['recovered'] and all(summary['collection'].values()) and summary['exitCode']==0:

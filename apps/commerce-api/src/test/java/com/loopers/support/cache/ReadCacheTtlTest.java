@@ -48,4 +48,9 @@ class ReadCacheTtlTest {
         org.assertj.core.api.Assertions.assertThatThrownBy(() -> new ReadCacheTtl(-1, true)).isInstanceOf(IllegalArgumentException.class);
         assertThat(new ReadCacheTtl(0, false).getTimeToLive(CacheKeys.products("latest", null, 0, 20) + ":rev=v", "x").toSeconds()).isBetween(270L, 330L);
     }
+    @org.junit.jupiter.api.Test
+    void writeInvalidateLatestKeyUsesExperimentTtl() {
+        assertThat(new ReadCacheTtl(5, true).getTimeToLive(
+            WriteInvalidation.key(CacheKeys.products("latest", null, 0, 20)), "x").toSeconds()).isEqualTo(5);
+    }
 }

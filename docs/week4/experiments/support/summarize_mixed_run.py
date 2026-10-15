@@ -19,6 +19,7 @@ for line in (folder/'server.log').read_text().splitlines():
             if trace['runId']==result['runId']: traces.append(trace)
         except ValueError: pass
 write_traces=[t for t in traces if t['path'].startswith('/api/v1/orders')]
+like_traces=[t for t in traces if t['path'].endswith('/likes') and t['path'].startswith('/api/v1/products/')]
 traces=[t for t in traces if t['path']=='/api/v1/products']
 metrics={}
 for name in ['hikaricp_connections_active','hikaricp_connections_pending','hikaricp_connections_max','tomcat_threads_busy_threads']:
@@ -38,6 +39,9 @@ def cache_counters(text):
 old=cache_counters(pre); new=cache_counters(post)
 evidence={'runId':result['runId'],'resources':metrics,'dockerCpuPercent':cpu,
     'loadK6CpuPercent':dist([float(line.split()[1]) for s in samples for line in s['local']['stdout'].splitlines() if len(line.split())>=5 and line.split()[4].split('/')[-1]=='k6']),
+    'likeTraceCount':len(like_traces),
+    'likeServerDurationMs':dist([t['serverDurationMs'] for t in like_traces]),
+    'likeConnectionWaitMs':dist([t['connectionWaitMs'] for t in like_traces]),
     'writeTraceCount':len(write_traces),
     'writeServerDurationMs':dist([t['serverDurationMs'] for t in write_traces]),
     'writeConnectionWaitMs':dist([t['connectionWaitMs'] for t in write_traces]),

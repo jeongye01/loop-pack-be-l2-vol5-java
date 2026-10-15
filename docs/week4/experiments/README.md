@@ -77,3 +77,15 @@ experiments/
 - [32. 로컬 Single Flight 혼합 부하 3회](32-single-flight-mixed/report.md): 원본 중복 감소, 읽기·구매 p99 100ms는 미달
 
 - [33. Redis 분산 락 혼합 부하](33-redis-lock-mixed/report.md): SET NX 재채움 제어·최초 예열 후 3회 비교
+
+- [34. Single Flight + revision OFF](34-single-flight-no-revision/report.md): 전역 revision 읽기·쓰기 우회 진단
+
+- [35. Single Flight + TTL 5초](35-single-flight-ttl5/report.md): revision OFF 유지·2초와 비교
+
+- [36. TTL + Write Invalidate](36-write-invalidate/report.md): 혼합 부하 3회 및 무효화 실패·늦은 채움 정합성 재현
+
+- [37. 읽기·구매·좋아요 혼합 부하](37-write-invalidate-likes/report.md): 좋아요 등록·취소 합계 10 RPS 추가
+
+- [38. 구매 RPS 한계 탐색](38-purchase-capacity/report.md): 읽기 100ms·구매 300ms 목표, 구매만 증량
+
+- [39. 구매 15건/초 확인](39-purchase-15rps/report.md): 읽기·좋아요 고정, 60초 × 2회

@@ -1,0 +1,30 @@
+{
+  "targetedTests": [
+    {
+      "name": "com.loopers.config.cache.WriteInvalidateExperimentTest",
+      "tests": "8",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0"
+    },
+    {
+      "name": "com.loopers.support.cache.ReadCacheTtlTest",
+      "tests": "5",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0"
+    }
+  ],
+  "checkstyle": "passed",
+  "build": "passed",
+  "fullRegression": "not run",
+  "archUnit": [
+    {
+      "name": "com.loopers.architecture.ArchitectureTest",
+      "tests": "1",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0"
+    }
+  ]
+}

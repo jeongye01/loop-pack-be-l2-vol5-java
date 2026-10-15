@@ -1,0 +1,94 @@
+{
+  "runId": "20261015T160932-measure-1700-f6e5bc",
+  "resources": {
+    "hikaricp_connections_active": {
+      "mean": 9.538461538461538,
+      "max": 22.0,
+      "p99": 22.0
+    },
+    "hikaricp_connections_pending": {
+      "mean": 0.0,
+      "max": 0.0,
+      "p99": 0.0
+    },
+    "hikaricp_connections_max": {
+      "mean": 40.0,
+      "max": 40.0,
+      "p99": 40.0
+    },
+    "tomcat_threads_busy_threads": {
+      "mean": 31.076923076923077,
+      "max": 148.0,
+      "p99": 148.0
+    }
+  },
+  "dockerCpuPercent": {
+    "app": {
+      "week4-commerce-api-1": {
+        "mean": 164.8846153846154,
+        "max": 197.17,
+        "p99": 197.17
+      }
+    },
+    "db": {
+      "week4-db-redis-replica-1": {
+        "mean": 0.17076923076923078,
+        "max": 0.2,
+        "p99": 0.2
+      },
+      "week4-db-redis-master-1": {
+        "mean": 5.373846153846154,
+        "max": 7.44,
+        "p99": 7.44
+      },
+      "week4-db-mysql-1": {
+        "mean": 54.95153846153846,
+        "max": 65.4,
+        "p99": 65.4
+      }
+    }
+  },
+  "loadK6CpuPercent": {
+    "mean": 196.0,
+    "max": 736.0,
+    "p99": 736.0
+  },
+  "writeTraceCount": 1202,
+  "writeServerDurationMs": {
+    "mean": 45.524182606489184,
+    "max": 346.359049,
+    "p99": 185.617279
+  },
+  "writeConnectionWaitMs": {
+    "mean": 0.6043345532445923,
+    "max": 85.708416,
+    "p99": 19.749777
+  },
+  "sampledReadTraceCount": 1055,
+  "serverDurationMs": {
+    "mean": 17.008070548815166,
+    "max": 187.082534,
+    "p99": 126.357734
+  },
+  "connectionWaitMs": {
+    "mean": 0.5708727213270143,
+    "max": 84.905292,
+    "p99": 23.729214
+  },
+  "sqlCountHistogram": {
+    "1": 1054,
+    "3": 1
+  },
+  "revisionRechecks": 0,
+  "stockOriginTraceCount": 0,
+  "originalListTraceCount": 1,
+  "cacheCounterDelta": {
+    "catalog_cache_errors_total{application=\"commerce-api\",operation=\"get\"}": 0.0,
+    "catalog_cache_errors_total{application=\"commerce-api\",operation=\"put\"}": 0.0
+  },
+  "notes": [
+    "Read/write server traces are separated by path; read sampling and write instrumentation depend on deployed image.",
+    "Resource snapshots every 5s; maxima do not represent continuous occupancy.",
+    "Cache deltas include preflight/recovery checks and other traffic; misses can include repeated probes."
+  ]
+}

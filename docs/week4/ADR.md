@@ -1,5 +1,14 @@
 # Redis 캐시 전략 ADR
 
+## 2026-10-16 변경: TTL + Write Invalidate 기본 실험
+
+현재 catalog-cache 프로필은 **Write Invalidate**를 사용한다. DB 커밋 후 관련 Redis 키를 삭제하며, hit/miss/write에서 DB revision을 읽거나 갱신하지 않는다. v4 키에는 revision 접미사를 붙이지 않는다. Single Flight와 기존 TTL 정책을 유지한다(부하 실험의 최신순 첫 페이지만 5초).
+
+무효화 범위는 기존 그룹과 같고 롤백에서는 삭제하지 않는다. 삭제 실패·늦은 재채움 보호는 기본 구현의 한계로 재현하며, 정합성이 확보됐다고 미리 선언하지 않는다. [36번 계획서](experiments/36-write-invalidate/plan.md)에 부하와 실패 시나리오를 함께 정리했다.
+
+아래 revision 관련 설명은 이전 설계·실험 기록이다. 비교용 구현은 남기지만 현재 프로필의 실행 경로와 구분한다.
+
+
 ## 설계 결정과 검토 항목
 
 RDB가 원본이고 Redis는 Cache Aside로 사용한다. 무효화는 기존 DB revision 방식을 유지한다. 데이터 변경과 그룹 revision을 같은 DB 트랜잭션으로 갱신하고, 커밋 후 조회는 새 버전의 캐시 키를 사용한다.

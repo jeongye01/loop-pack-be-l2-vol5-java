@@ -6,7 +6,7 @@ import org.springframework.core.env.Environment;
 import org.springframework.core.env.Profiles;
 import org.springframework.stereotype.Component;
 
-/** Fixed-data experiment only: never enable while exercising mutation/invalidation contracts. */
+/** Diagnostic experiment only: disables revision reads/writes and immediate cache invalidation. */
 @Component
 public class CacheReadPolicy {
     private final boolean bypassRevision;

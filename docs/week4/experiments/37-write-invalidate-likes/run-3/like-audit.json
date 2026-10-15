@@ -1,0 +1,9 @@
+{
+  "events": 602,
+  "pairs": 301,
+  "plannedPairs": 300,
+  "remainingRelations": [],
+  "allPairsSuccessful": true,
+  "passed": true,
+  "note": "Fresh users had no prior relations; each 201 registration must be followed by successful cancellation. Does not validate displayed count freshness."
+}

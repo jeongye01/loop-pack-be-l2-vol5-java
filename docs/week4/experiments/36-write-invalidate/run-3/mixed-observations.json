@@ -1,0 +1,97 @@
+{
+  "runId": "20261015T170123-measure-1700-84d87f",
+  "resources": {
+    "hikaricp_connections_active": {
+      "mean": 8.307692307692308,
+      "max": 13.0,
+      "p99": 13.0
+    },
+    "hikaricp_connections_pending": {
+      "mean": 0.0,
+      "max": 0.0,
+      "p99": 0.0
+    },
+    "hikaricp_connections_max": {
+      "mean": 40.0,
+      "max": 40.0,
+      "p99": 40.0
+    },
+    "tomcat_threads_busy_threads": {
+      "mean": 20.384615384615383,
+      "max": 75.0,
+      "p99": 75.0
+    }
+  },
+  "dockerCpuPercent": {
+    "app": {
+      "week4-commerce-api-1": {
+        "mean": 149.8653846153846,
+        "max": 184.45,
+        "p99": 184.45
+      }
+    },
+    "db": {
+      "week4-db-redis-replica-1": {
+        "mean": 2.3207692307692307,
+        "max": 3.89,
+        "p99": 3.89
+      },
+      "week4-db-redis-master-1": {
+        "mean": 8.187692307692307,
+        "max": 11.23,
+        "p99": 11.23
+      },
+      "week4-db-mysql-1": {
+        "mean": 57.339999999999996,
+        "max": 66.65,
+        "p99": 66.65
+      }
+    }
+  },
+  "loadK6CpuPercent": {
+    "mean": 196.46153846153845,
+    "max": 743.0,
+    "p99": 743.0
+  },
+  "writeTraceCount": 1200,
+  "writeServerDurationMs": {
+    "mean": 25.93171110833333,
+    "max": 222.000755,
+    "p99": 126.89133
+  },
+  "writeConnectionWaitMs": {
+    "mean": 0.05598438583333333,
+    "max": 21.142683,
+    "p99": 0.40004999999999996
+  },
+  "sampledReadTraceCount": 1022,
+  "serverDurationMs": {
+    "mean": 8.189087829745597,
+    "max": 124.009507,
+    "p99": 61.28303
+  },
+  "connectionWaitMs": {
+    "mean": 0.1050041506849315,
+    "max": 31.227693,
+    "p99": 0.568276
+  },
+  "sqlCountHistogram": {
+    "1": 1015,
+    "3": 7
+  },
+  "revisionRechecks": 0,
+  "stockOriginTraceCount": 7,
+  "originalListTraceCount": 0,
+  "cacheCounterDelta": {
+    "catalog_cache_errors_total{application=\"commerce-api\",operation=\"get\"}": 0.0,
+    "catalog_cache_errors_total{application=\"commerce-api\",operation=\"put\"}": 0.0,
+    "catalog_cache_invalidation_total{application=\"commerce-api\",outcome=\"failure\"}": 0.0,
+    "catalog_cache_invalidation_total{application=\"commerce-api\",outcome=\"success\"}": 600.0,
+    "catalog_cache_invalidation_keys_total{application=\"commerce-api\"}": 593.0
+  },
+  "notes": [
+    "Read/write server traces are separated by path; read sampling and write instrumentation depend on deployed image.",
+    "Resource snapshots every 5s; maxima do not represent continuous occupancy.",
+    "Cache deltas include preflight/recovery checks and other traffic; misses can include repeated probes."
+  ]
+}

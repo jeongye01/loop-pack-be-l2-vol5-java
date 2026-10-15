@@ -1,0 +1,164 @@
+diff --git a/docs/week4/experiments/support/products.js b/docs/week4/experiments/support/products.js
+index 014ec50..ab54fcc 100644
+--- a/docs/week4/experiments/support/products.js
++++ b/docs/week4/experiments/support/products.js
+@@ -23,6 +23,10 @@ const purchaseHttpErrors = new Counter('purchase_http_errors');
+ const purchaseTimeouts = new Counter('purchase_timeouts');
+ const purchaseInvalid = new Counter('purchase_invalid_response');
+ const purchaseEnabled = config.phase === 'measure' && config.purchase?.rps > 0;
++const likeMetrics = Object.fromEntries(['register', 'cancel'].map(step => [step, {
++  started: new Counter(`like_${step}_started`), completed: new Counter(`like_${step}_completed`),
++  success: new Rate(`like_${step}_success`), latency: new Trend(`like_${step}_latency_ms`, true),
++}]));
+ // Optional short-window metrics for expiry experiments; normal workloads remain unchanged.
+ const windowSeconds = config.latencyWindowSeconds || 0;
+ const windows = windowSeconds > 0 ? Array.from({length: Math.ceil(config.durationSeconds / windowSeconds)}, (_, i) => ({
+@@ -52,6 +56,13 @@ if (purchaseEnabled) {
+     gracefulStop: `${config.gracefulStopSeconds}s`,
+   };
+ }
++if (config.phase === 'measure' && config.likes?.pairRps > 0) {
++  options.scenarios.likes = {
++    executor: 'constant-arrival-rate', exec: 'likePair', rate: config.likes.pairRps, timeUnit: '1s',
++    duration: `${config.durationSeconds}s`, preAllocatedVUs: config.likes.vus, maxVUs: config.likes.vus,
++    gracefulStop: `${config.gracefulStopSeconds}s`,
++  };
++}
+ function emit(event) { if (config.emitTraces !== false) console.log('TRACE_JSON ' + JSON.stringify(event)); }
+ export default function () {
+   const requestId = `${config.runId}-${exec.scenario.iterationInTest}`;
+@@ -154,3 +165,27 @@ export function purchase() {
+       expectedAmount:product.price,orderId,outcome,httpStatus:status,error:code,latencyMs:elapsed}));
+   }
+ }
++
++// Each pair uses a fresh user/product relation; no retries after ambiguous writes.
++export function likePair() {
++  const index = exec.scenario.iterationInTest;
++  const user = config.purchase.buyers[index];
++  if (!user) exec.test.abort('Dedicated like user pool exhausted');
++  const productId = config.purchase.products[index % config.purchase.products.length].id;
++  const url = `${config.url.split('/api/')[0]}/api/v1/products/${productId}/likes`;
++  for (const step of ['register', 'cancel']) {
++    const m = likeMetrics[step]; m.started.add(1);
++    const start = Date.now();
++    const params = {headers: {'X-USER-ID': String(user), 'X-Run-ID': config.runId,
++      'X-Request-ID': `${config.runId}-like-${index}-${step}`},
++      timeout: `${config.timeoutSeconds}s`, tags: {name:`like.${step}`}};
++    const response = step === 'register' ? http.post(url, null, params) : http.del(url, null, params);
++    let ok = false;
++    try { ok = response.status === (step === 'register' ? 201 : 200)
++      && response.json().meta?.result === 'SUCCESS'; } catch (_) { /* recorded below */ }
++    const elapsed = Date.now() - start;
++    m.completed.add(1); m.success.add(ok); m.latency.add(elapsed);
++    console.log('LIKE_JSON ' + JSON.stringify({runId:config.runId,index,user,productId,step,
++      outcome:ok ? 'success' : 'failure',httpStatus:response.status,errorCode:response.error_code || null,latencyMs:elapsed}));
++  }
++}
+diff --git a/docs/week4/experiments/support/run_combined_slo.py b/docs/week4/experiments/support/run_combined_slo.py
+index 3b43f49..837da45 100644
+--- a/docs/week4/experiments/support/run_combined_slo.py
++++ b/docs/week4/experiments/support/run_combined_slo.py
+@@ -12,6 +12,8 @@ def cache_state(runner):
+     patterns = ['products::v3:products?sort=latest&brand=all&page=0&size=20:rev=*',
+                 'like-counts::v3:products/like-counts?ids='+ids+':rev=*',
+                 'stocks::v3:products/stocks?ids='+ids+':rev=*']
++    if runner.base.get('cache', {}).get('writeInvalidate', False):
++        patterns = [p.replace('v3:', 'v4:').removesuffix(':rev=*') for p in patterns]
+     state = {'ttlMs': {}}
+     for pattern in patterns:
+         found = runner.ssh(runner.base['dbHost'], 'sudo docker exec week4-db-redis-master-1 redis-cli --scan --pattern '+shlex.quote(pattern))
+@@ -86,6 +88,20 @@ def main():
+                 and purchase['started'] == purchase['completed'] and purchase['successRate'] == 1
+                 and purchase['invalidResponses'] == 0 and purchase['latencyMs'].get('p(99)', float('inf')) <= p99_limit_ms)
+             summary['sloPassed'] = summary['sloPassed'] and summary['purchasePassed']
++        if phase == 'measure' and r.base.get('likes', {}).get('pairRps', 0):
++            summary['likes'] = {}
++            for step in ('register', 'cancel'):
++                prefix = 'like_' + step
++                item = {'planned': r.base['likes']['pairRps'] * seconds,
++                    'started': value(prefix + '_started'), 'completed': value(prefix + '_completed'),
++                    'successRate': value(prefix + '_success', 'rate'),
++                    'failed': value(prefix + '_success', 'fails'),
++                    'latencyMs': m.get(prefix + '_latency_ms', {}).get('values', {})}
++                item['passed'] = (item['started'] >= item['planned'] and item['started'] == item['completed']
++                    and item['successRate'] == 1 and item['latencyMs'].get('p(99)', float('inf')) <= p99_limit_ms)
++                summary['likes'][step] = item
++            summary['likesPassed'] = all(v['passed'] for v in summary['likes'].values())
++            summary['sloPassed'] = summary['sloPassed'] and summary['likesPassed']
+         save(out/'slo-result.json',summary); runs.append(summary); save(r.experiment/'slo-runs.json',runs)
+         print(json.dumps(summary),flush=True)
+         if phase=='warmup' and a.continue_after_warmup_failure and result['status']=='collected' and summary['recovered'] and all(summary['collection'].values()) and summary['exitCode']==0:
+diff --git a/docs/week4/experiments/support/run_mixed_repeats.py b/docs/week4/experiments/support/run_mixed_repeats.py
+index f8edd50..f18bf2e 100644
+--- a/docs/week4/experiments/support/run_mixed_repeats.py
++++ b/docs/week4/experiments/support/run_mixed_repeats.py
+@@ -34,7 +34,7 @@ for root in sorted(a.experiment.glob('run-*')):
+         print(f'{root.name}: SKIP WARMUP; retain preflight/recovery checks',flush=True)
+     previous_server = server
+     call('mixed_purchase_fixture.py',common+['snapshot','--output',str(root/'before.json')])
+-    print(f'{root.name}: START MIXED 1700 reads/s + 10 purchases/s for 60s',flush=True)
++    print(f"{root.name}: START MIXED 1700 reads/s + 10 purchases/s + {config.get('likes', {}).get('pairRps', 0) * 2} like writes/s for 60s",flush=True)
+     code=call('run_combined_slo.py',common+['--measure-only'],'measure.log')
+     runs=json.loads((root/'slo-runs.json').read_text());run=runs[-1]
+     if run['phase']!='measure' or not run['recovered'] or not all(run['collection'].values()) or run['exitCode']!=0:
+@@ -42,6 +42,8 @@ for root in sorted(a.experiment.glob('run-*')):
+     call('mixed_purchase_fixture.py',common+['snapshot','--output',str(root/'after.json')])
+     call('audit_mixed_purchase.py',[str(root)],'audit.log')
+     if not json.loads((root/'purchase-audit.json').read_text())['passed']: raise RuntimeError('Purchase audit failed')
++    if config.get('likes', {}).get('pairRps', 0):
++        call('audit_mixed_likes.py',common,'like-audit.log')
+     call('summarize_mixed_run.py',[str(root)],'observations.log')
+     call('summarize_stampede.py',[str(root)],'stampede.log')
+     print(json.dumps({'run':root.name,'runId':run['runId'],'readP99':run['latencyMs']['p(99)'],
+diff --git a/docs/week4/experiments/support/summarize_mixed_run.py b/docs/week4/experiments/support/summarize_mixed_run.py
+index ba73c1e..e4d2e00 100644
+--- a/docs/week4/experiments/support/summarize_mixed_run.py
++++ b/docs/week4/experiments/support/summarize_mixed_run.py
+@@ -19,6 +19,7 @@ for line in (folder/'server.log').read_text().splitlines():
+             if trace['runId']==result['runId']: traces.append(trace)
+         except ValueError: pass
+ write_traces=[t for t in traces if t['path'].startswith('/api/v1/orders')]
++like_traces=[t for t in traces if t['path'].endswith('/likes') and t['path'].startswith('/api/v1/products/')]
+ traces=[t for t in traces if t['path']=='/api/v1/products']
+ metrics={}
+ for name in ['hikaricp_connections_active','hikaricp_connections_pending','hikaricp_connections_max','tomcat_threads_busy_threads']:
+@@ -38,6 +39,9 @@ def cache_counters(text):
+ old=cache_counters(pre); new=cache_counters(post)
+ evidence={'runId':result['runId'],'resources':metrics,'dockerCpuPercent':cpu,
+     'loadK6CpuPercent':dist([float(line.split()[1]) for s in samples for line in s['local']['stdout'].splitlines() if len(line.split())>=5 and line.split()[4].split('/')[-1]=='k6']),
++    'likeTraceCount':len(like_traces),
++    'likeServerDurationMs':dist([t['serverDurationMs'] for t in like_traces]),
++    'likeConnectionWaitMs':dist([t['connectionWaitMs'] for t in like_traces]),
+     'writeTraceCount':len(write_traces),
+     'writeServerDurationMs':dist([t['serverDurationMs'] for t in write_traces]),
+     'writeConnectionWaitMs':dist([t['connectionWaitMs'] for t in write_traces]),
+diff --git a/docs/week4/experiments/support/audit_mixed_likes.py b/docs/week4/experiments/support/audit_mixed_likes.py
+new file mode 100644
+index 0000000..6fba38c
+--- /dev/null
++++ b/docs/week4/experiments/support/audit_mixed_likes.py
+@@ -0,0 +1,23 @@
++"""Compare every like write response with dedicated users' final DB relations."""
++import argparse
++import json
++from pathlib import Path
++from mixed_purchase_fixture import sql
++
++p=argparse.ArgumentParser();p.add_argument('--config',type=Path,required=True);p.add_argument('--ssh-key',required=True)
++a=p.parse_args();root=a.config.parent;c=json.loads(a.config.read_text())
++folder=next((root/'results').glob('*-measure-*'));events=[]
++for line in (folder/'client.log').read_text().splitlines():
++    if 'LIKE_JSON ' in line: events.append(json.loads(line.split('LIKE_JSON ',1)[1]))
++users=c['purchase']['buyers'];remaining=sql(c,a.ssh_key,f'SELECT user_id,product_id FROM product_like WHERE user_id BETWEEN {min(users)} AND {max(users)} ORDER BY user_id,product_id;')
++pairs={}
++for e in events: pairs.setdefault(e['index'],[]).append(e)
++valid=all(len(v)==2 and [x['step'] for x in v]==['register','cancel']
++    and all(x['outcome']=='success' for x in v) and v[0]['user']==v[1]['user']
++    and v[0]['productId']==v[1]['productId'] for v in pairs.values())
++expected=c['likes']['pairRps']*c['durationSeconds']
++result={'events':len(events),'pairs':len(pairs),'plannedPairs':expected,'remainingRelations':remaining,
++    'allPairsSuccessful':valid,'passed':len(pairs)>=expected and valid and not remaining,
++    'note':'Fresh users had no prior relations; each 201 registration must be followed by successful cancellation. Does not validate displayed count freshness.'}
++(root/'like-audit.json').write_text(json.dumps(result,indent=2)+'\n');print(json.dumps(result))
++if not result['passed']: raise SystemExit(1)

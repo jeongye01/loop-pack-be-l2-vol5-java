@@ -1,0 +1,989 @@
+{
+  "runId": "20261015T161109-measure-1700-a7d5d7",
+  "phase": "measure",
+  "original": {
+    "active": 0.0,
+    "loads_total": 30.0,
+    "maximum": 1.0
+  },
+  "stockOriginal": {},
+  "oneSecondWindows": [
+    {
+      "startSecond": 0,
+      "latencyMs": {
+        "avg": 23.120659211300765,
+        "min": 2,
+        "max": 120,
+        "p(50)": 12,
+        "p(95)": 77,
+        "p(99)": 94
+      },
+      "success": {
+        "rate": 1,
+        "passes": 1699,
+        "fails": 0
+      }
+    },
+    {
+      "startSecond": 1,
+      "latencyMs": {
+        "avg": 7.145968216597999,
+        "min": 1,
+        "max": 43,
+        "p(50)": 4,
+        "p(95)": 27,
+        "p(99)": 35.01999999999998
+      },
+      "success": {
+        "fails": 0,
+        "rate": 1,
+        "passes": 1699
+      }
+    },
+    {
+      "startSecond": 2,
+      "latencyMs": {
+        "p(95)": 61,
+        "p(99)": 77.00999999999999,
+        "avg": 20.549411764705884,
+        "min": 1,
+        "max": 113,
+        "p(50)": 13
+      },
+      "success": {
+        "rate": 1,
+        "passes": 1700,
+        "fails": 0
+      }
+    },
+    {
+      "startSecond": 3,
+      "latencyMs": {
+        "avg": 13.903586125808348,
+        "min": 1,
+        "max": 86,
+        "p(50)": 10,
+        "p(95)": 38,
+        "p(99)": 56
+      },
+      "success": {
+        "rate": 1,
+        "passes": 1701,
+        "fails": 0
+      }
+    },
+    {
+      "startSecond": 4,
+      "latencyMs": {
+        "max": 26,
+        "p(50)": 3,
+        "p(95)": 15,
+        "p(99)": 21,
+        "avg": 5.038846380223661,
+        "min": 1
+      },
+      "success": {
+        "rate": 1,
+        "passes": 1699,
+        "fails": 0
+      }
+    },
+    {
+      "startSecond": 5,
+      "latencyMs": {
+        "p(95)": 7,
+        "p(99)": 11,
+        "avg": 3.0488235294117647,
+        "min": 1,
+        "max": 14,
+        "p(50)": 3
+      },
+      "success": {
+        "fails": 0,
+        "rate": 1,
+        "passes": 1700
+      }
+    },
+    {
+      "startSecond": 6,
+      "latencyMs": {
+        "max": 25,
+        "p(50)": 3,
+        "p(95)": 8,
+        "p(99)": 15,
+        "avg": 3.538235294117647,
+        "min": 1
+      },
+      "success": {
+        "rate": 1,
+        "passes": 1700,
+        "fails": 0
+      }
+    },
+    {
+      "startSecond": 7,
+      "latencyMs": {
+        "p(95)": 78,
+        "p(99)": 100.00999999999999,
+        "avg": 28.157647058823528,
+        "min": 2,
+        "max": 126,
+        "p(50)": 20
+      },
+      "success": {
+        "passes": 1700,
+        "fails": 0,
+        "rate": 1
+      }
+    },
+    {
+      "startSecond": 8,
+      "latencyMs": {
+        "avg": 7.247501469723692,
+        "min": 1,
+        "max": 54,
+        "p(50)": 4,
+        "p(95)": 24,
+        "p(99)": 37
+      },
+      "success": {
+        "rate": 1,
+        "passes": 1701,
+        "fails": 0
+      }
+    },
+    {
+      "startSecond": 9,
+      "latencyMs": {
+        "max": 24,
+        "p(50)": 2,
+        "p(95)": 9,
+        "p(99)": 16.019999999999982,
+        "avg": 3.364331959976457,
+        "min": 1
+      },
+      "success": {
+        "rate": 1,
+        "passes": 1699,
+        "fails": 0
+      }
+    },
+    {
+      "startSecond": 10,
+      "latencyMs": {
+        "avg": 4.420340975896531,
+        "min": 1,
+        "max": 30,
+        "p(50)": 3,
+        "p(95)": 14,
+        "p(99)": 21
+      },
+      "success": {
+        "rate": 1,
+        "passes": 1701,
+        "fails": 0
+      }
+    },
+    {
+      "startSecond": 11,
+      "latencyMs": {
+        "avg": 5.845882352941176,
+        "min": 1,
+        "max": 34,
+        "p(50)": 4,
+        "p(95)": 15,
+        "p(99)": 24.00999999999999
+      },
+      "success": {
+        "rate": 1,
+        "passes": 1700,
+        "fails": 0
+      }
+    },
+    {
+      "startSecond": 12,
+      "latencyMs": {
+        "max": 70,
+        "p(50)": 4,
+        "p(95)": 41,
+        "p(99)": 56.01999999999998,
+        "avg": 10.751030017657445,
+        "min": 1
+      },
+      "success": {
+        "rate": 1,
+        "passes": 1699,
+        "fails": 0
+      }
+    },
+    {
+      "startSecond": 13,
+      "latencyMs": {
+        "p(99)": 18,
+        "avg": 3.4552941176470586,
+        "min": 1,
+        "max": 23,
+        "p(50)": 2,
+        "p(95)": 10
+      },
+      "success": {
+        "rate": 1,
+        "passes": 1700,
+        "fails": 0
+      }
+    },
+    {
+      "startSecond": 14,
+      "latencyMs": {
+        "p(95)": 16,
+        "p(99)": 24,
+        "avg": 5.157554379776602,
+        "min": 1,
+        "max": 32,
+        "p(50)": 3
+      },
+      "success": {
+        "rate": 1,
+        "passes": 1701,
+        "fails": 0
+      }
+    },
+    {
+      "startSecond": 15,
+      "latencyMs": {
+        "max": 44,
+        "p(50)": 3,
+        "p(95)": 15,
+        "p(99)": 27,
+        "avg": 4.95,
+        "min": 1
+      },
+      "success": {
+        "rate": 1,
+        "passes": 1700,
+        "fails": 0
+      }
+    },
+    {
+      "startSecond": 16,
+      "latencyMs": {
+        "max": 39,
+        "p(50)": 5,
+        "p(95)": 19,
+        "p(99)": 29,
+        "avg": 7.249558563861095,
+        "min": 1
+      },
+      "success": {
+        "rate": 1,
+        "passes": 1699,
+        "fails": 0
+      }
+    },
+    {
+      "startSecond": 17,
+      "latencyMs": {
+        "min": 1,
+        "max": 89,
+        "p(50)": 16,
+        "p(95)": 47,
+        "p(99)": 61.00999999999999,
+        "avg": 18.14764705882353
+      },
+      "success": {
+        "rate": 1,
+        "passes": 1700,
+        "fails": 0
+      }
+    },
+    {
+      "startSecond": 18,
+      "latencyMs": {
+        "avg": 8.357436801881246,
+        "min": 1,
+        "max": 58,
+        "p(50)": 5,
+        "p(95)": 26,
+        "p(99)": 32
+      },
+      "success": {
+        "rate": 1,
+        "passes": 1701,
+        "fails": 0
+      }
+    },
+    {
+      "startSecond": 19,
+      "latencyMs": {
+        "max": 61,
+        "p(50)": 3,
+        "p(95)": 31,
+        "p(99)": 44,
+        "avg": 7.987639788110653,
+        "min": 1
+      },
+      "success": {
+        "passes": 1699,
+        "fails": 0,
+        "rate": 1
+      }
+    },
+    {
+      "startSecond": 20,
+      "latencyMs": {
+        "max": 35,
+        "p(50)": 6,
+        "p(95)": 22,
+        "p(99)": 27,
+        "avg": 8.181069958847736,
+        "min": 1
+      },
+      "success": {
+        "rate": 1,
+        "passes": 1701,
+        "fails": 0
+      }
+    },
+    {
+      "startSecond": 21,
+      "latencyMs": {
+        "avg": 3.0094173042966452,
+        "min": 1,
+        "max": 20,
+        "p(50)": 2,
+        "p(95)": 6,
+        "p(99)": 13
+      },
+      "success": {
+        "rate": 1,
+        "passes": 1699,
+        "fails": 0
+      }
+    },
+    {
+      "startSecond": 22,
+      "latencyMs": {
+        "avg": 28.231628453850675,
+        "min": 1,
+        "max": 164,
+        "p(50)": 9,
+        "p(95)": 95,
+        "p(99)": 123
+      },
+      "success": {
+        "rate": 1,
+        "passes": 1701,
+        "fails": 0
+      }
+    },
+    {
+      "startSecond": 23,
+      "latencyMs": {
+        "avg": 13.568823529411764,
+        "min": 2,
+        "max": 87,
+        "p(50)": 10,
+        "p(95)": 35,
+        "p(99)": 57.00999999999999
+      },
+      "success": {
+        "passes": 1700,
+        "fails": 0,
+        "rate": 1
+      }
+    },
+    {
+      "startSecond": 24,
+      "latencyMs": {
+        "avg": 2.62,
+        "min": 1,
+        "max": 15,
+        "p(50)": 2,
+        "p(95)": 4,
+        "p(99)": 7
+      },
+      "success": {
+        "rate": 1,
+        "passes": 1700,
+        "fails": 0
+      }
+    },
+    {
+      "startSecond": 25,
+      "latencyMs": {
+        "avg": 8.090588235294117,
+        "min": 1,
+        "max": 37,
+        "p(50)": 5,
+        "p(95)": 23,
+        "p(99)": 29
+      },
+      "success": {
+        "rate": 1,
+        "passes": 1700,
+        "fails": 0
+      }
+    },
+    {
+      "startSecond": 26,
+      "latencyMs": {
+        "max": 42,
+        "p(50)": 7,
+        "p(95)": 24,
+        "p(99)": 30,
+        "avg": 8.882352941176471,
+        "min": 1
+      },
+      "success": {
+        "passes": 1700,
+        "fails": 0,
+        "rate": 1
+      }
+    },
+    {
+      "startSecond": 27,
+      "latencyMs": {
+        "p(99)": 70,
+        "avg": 12.80764705882353,
+        "min": 1,
+        "max": 116,
+        "p(50)": 3,
+        "p(95)": 54
+      },
+      "success": {
+        "rate": 1,
+        "passes": 1700,
+        "fails": 0
+      }
+    },
+    {
+      "startSecond": 28,
+      "latencyMs": {
+        "p(50)": 3,
+        "p(95)": 43,
+        "p(99)": 59.00999999999999,
+        "avg": 9.049411764705882,
+        "min": 1,
+        "max": 86
+      },
+      "success": {
+        "rate": 1,
+        "passes": 1700,
+        "fails": 0
+      }
+    },
+    {
+      "startSecond": 29,
+      "latencyMs": {
+        "max": 31,
+        "p(50)": 3,
+        "p(95)": 12.049999999999955,
+        "p(99)": 21.00999999999999,
+        "avg": 3.791176470588235,
+        "min": 1
+      },
+      "success": {
+        "rate": 1,
+        "passes": 1700,
+        "fails": 0
+      }
+    },
+    {
+      "startSecond": 30,
+      "latencyMs": {
+        "avg": 6.596233078281342,
+        "min": 1,
+        "max": 38,
+        "p(50)": 4,
+        "p(95)": 17,
+        "p(99)": 26
+      },
+      "success": {
+        "rate": 1,
+        "passes": 1699,
+        "fails": 0
+      }
+    },
+    {
+      "startSecond": 31,
+      "latencyMs": {
+        "min": 1,
+        "max": 21,
+        "p(50)": 2,
+        "p(95)": 5,
+        "p(99)": 15,
+        "avg": 2.8671369782480896
+      },
+      "success": {
+        "rate": 1,
+        "passes": 1701,
+        "fails": 0
+      }
+    },
+    {
+      "startSecond": 32,
+      "latencyMs": {
+        "p(50)": 3,
+        "p(95)": 31,
+        "p(99)": 55.02999999999997,
+        "avg": 8.218235294117648,
+        "min": 1,
+        "max": 78
+      },
+      "success": {
+        "rate": 1,
+        "passes": 1700,
+        "fails": 0
+      }
+    },
+    {
+      "startSecond": 33,
+      "latencyMs": {
+        "p(95)": 13,
+        "p(99)": 22,
+        "avg": 4.012948793407887,
+        "min": 1,
+        "max": 34,
+        "p(50)": 3
+      },
+      "success": {
+        "rate": 1,
+        "passes": 1699,
+        "fails": 0
+      }
+    },
+    {
+      "startSecond": 34,
+      "latencyMs": {
+        "avg": 7.615882352941177,
+        "min": 1,
+        "max": 44,
+        "p(50)": 5,
+        "p(95)": 23.049999999999955,
+        "p(99)": 34
+      },
+      "success": {
+        "rate": 1,
+        "passes": 1700,
+        "fails": 0
+      }
+    },
+    {
+      "startSecond": 35,
+      "latencyMs": {
+        "p(95)": 4,
+        "p(99)": 11,
+        "avg": 2.811176470588235,
+        "min": 1,
+        "max": 15,
+        "p(50)": 2
+      },
+      "success": {
+        "rate": 1,
+        "passes": 1700,
+        "fails": 0
+      }
+    },
+    {
+      "startSecond": 36,
+      "latencyMs": {
+        "max": 18,
+        "p(50)": 2,
+        "p(95)": 5,
+        "p(99)": 9,
+        "avg": 2.801881246325691,
+        "min": 1
+      },
+      "success": {
+        "rate": 1,
+        "passes": 1701,
+        "fails": 0
+      }
+    },
+    {
+      "startSecond": 37,
+      "latencyMs": {
+        "avg": 17.91176470588235,
+        "min": 1,
+        "max": 122,
+        "p(50)": 4,
+        "p(95)": 61,
+        "p(99)": 97.05999999999995
+      },
+      "success": {
+        "rate": 1,
+        "passes": 1700,
+        "fails": 0
+      }
+    },
+    {
+      "startSecond": 38,
+      "latencyMs": {
+        "p(99)": 54.01999999999998,
+        "avg": 9.927015891701,
+        "min": 1,
+        "max": 68,
+        "p(50)": 7,
+        "p(95)": 26.09999999999991
+      },
+      "success": {
+        "fails": 0,
+        "rate": 1,
+        "passes": 1699
+      }
+    },
+    {
+      "startSecond": 39,
+      "latencyMs": {
+        "avg": 3.442941176470588,
+        "min": 1,
+        "max": 22,
+        "p(50)": 2,
+        "p(95)": 10,
+        "p(99)": 16
+      },
+      "success": {
+        "passes": 1700,
+        "fails": 0,
+        "rate": 1
+      }
+    },
+    {
+      "startSecond": 40,
+      "latencyMs": {
+        "max": 21,
+        "p(50)": 3,
+        "p(95)": 9,
+        "p(99)": 15,
+        "avg": 3.7777777777777777,
+        "min": 1
+      },
+      "success": {
+        "rate": 1,
+        "passes": 1701,
+        "fails": 0
+      }
+    },
+    {
+      "startSecond": 41,
+      "latencyMs": {
+        "max": 14,
+        "p(50)": 2,
+        "p(95)": 6,
+        "p(99)": 10,
+        "avg": 2.9323529411764704,
+        "min": 1
+      },
+      "success": {
+        "passes": 1700,
+        "fails": 0,
+        "rate": 1
+      }
+    },
+    {
+      "startSecond": 42,
+      "latencyMs": {
+        "min": 1,
+        "max": 65,
+        "p(50)": 13,
+        "p(95)": 41,
+        "p(99)": 54.00999999999999,
+        "avg": 16.63
+      },
+      "success": {
+        "rate": 1,
+        "passes": 1700,
+        "fails": 0
+      }
+    },
+    {
+      "startSecond": 43,
+      "latencyMs": {
+        "avg": 3.93698468786808,
+        "min": 1,
+        "max": 25,
+        "p(50)": 3,
+        "p(95)": 9,
+        "p(99)": 12
+      },
+      "success": {
+        "rate": 1,
+        "passes": 1698,
+        "fails": 0
+      }
+    },
+    {
+      "startSecond": 44,
+      "latencyMs": {
+        "p(95)": 5,
+        "p(99)": 12,
+        "avg": 2.7871840094062317,
+        "min": 1,
+        "max": 19,
+        "p(50)": 2
+      },
+      "success": {
+        "passes": 1701,
+        "fails": 0,
+        "rate": 1
+      }
+    },
+    {
+      "startSecond": 45,
+      "latencyMs": {
+        "avg": 3.1829411764705884,
+        "min": 1,
+        "max": 15,
+        "p(50)": 3,
+        "p(95)": 7,
+        "p(99)": 11
+      },
+      "success": {
+        "rate": 1,
+        "passes": 1700,
+        "fails": 0
+      }
+    },
+    {
+      "startSecond": 46,
+      "latencyMs": {
+        "avg": 3.1728395061728394,
+        "min": 1,
+        "max": 18,
+        "p(50)": 3,
+        "p(95)": 7,
+        "p(99)": 12
+      },
+      "success": {
+        "rate": 1,
+        "passes": 1701,
+        "fails": 0
+      }
+    },
+    {
+      "startSecond": 47,
+      "latencyMs": {
+        "p(95)": 24,
+        "p(99)": 31,
+        "avg": 7.048823529411765,
+        "min": 1,
+        "max": 42,
+        "p(50)": 3
+      },
+      "success": {
+        "passes": 1700,
+        "fails": 0,
+        "rate": 1
+      }
+    },
+    {
+      "startSecond": 48,
+      "latencyMs": {
+        "p(95)": 8,
+        "p(99)": 15,
+        "avg": 3.0824014125956447,
+        "min": 1,
+        "max": 20,
+        "p(50)": 2
+      },
+      "success": {
+        "rate": 1,
+        "passes": 1699,
+        "fails": 0
+      }
+    },
+    {
+      "startSecond": 49,
+      "latencyMs": {
+        "avg": 3.300588235294118,
+        "min": 1,
+        "max": 19,
+        "p(50)": 2,
+        "p(95)": 10,
+        "p(99)": 15
+      },
+      "success": {
+        "rate": 1,
+        "passes": 1700,
+        "fails": 0
+      }
+    },
+    {
+      "startSecond": 50,
+      "latencyMs": {
+        "avg": 2.6458823529411766,
+        "min": 1,
+        "max": 11,
+        "p(50)": 2,
+        "p(95)": 5,
+        "p(99)": 8
+      },
+      "success": {
+        "rate": 1,
+        "passes": 1700,
+        "fails": 0
+      }
+    },
+    {
+      "startSecond": 51,
+      "latencyMs": {
+        "avg": 2.9994121105232217,
+        "min": 1,
+        "max": 16,
+        "p(50)": 2,
+        "p(95)": 7,
+        "p(99)": 12
+      },
+      "success": {
+        "passes": 1701,
+        "fails": 0,
+        "rate": 1
+      }
+    },
+    {
+      "startSecond": 52,
+      "latencyMs": {
+        "p(50)": 3,
+        "p(95)": 33,
+        "p(99)": 49.00999999999999,
+        "avg": 9.257058823529412,
+        "min": 1,
+        "max": 66
+      },
+      "success": {
+        "fails": 0,
+        "rate": 1,
+        "passes": 1700
+      }
+    },
+    {
+      "startSecond": 53,
+      "latencyMs": {
+        "min": 1,
+        "max": 36,
+        "p(50)": 2,
+        "p(95)": 14,
+        "p(99)": 26,
+        "avg": 3.827058823529412
+      },
+      "success": {
+        "passes": 1700,
+        "fails": 0,
+        "rate": 1
+      }
+    },
+    {
+      "startSecond": 54,
+      "latencyMs": {
+        "avg": 3.104178928781636,
+        "min": 1,
+        "max": 18,
+        "p(50)": 3,
+        "p(95)": 6,
+        "p(99)": 10
+      },
+      "success": {
+        "rate": 1,
+        "passes": 1699,
+        "fails": 0
+      }
+    },
+    {
+      "startSecond": 55,
+      "latencyMs": {
+        "p(95)": 4,
+        "p(99)": 7,
+        "avg": 2.5761316872427984,
+        "min": 1,
+        "max": 14,
+        "p(50)": 2
+      },
+      "success": {
+        "fails": 0,
+        "rate": 1,
+        "passes": 1701
+      }
+    },
+    {
+      "startSecond": 56,
+      "latencyMs": {
+        "p(50)": 2,
+        "p(95)": 4,
+        "p(99)": 9,
+        "avg": 2.6615656268393173,
+        "min": 1,
+        "max": 13
+      },
+      "success": {
+        "rate": 1,
+        "passes": 1699,
+        "fails": 0
+      }
+    },
+    {
+      "startSecond": 57,
+      "latencyMs": {
+        "p(50)": 4,
+        "p(95)": 57,
+        "p(99)": 110,
+        "avg": 14.80599647266314,
+        "min": 1,
+        "max": 149
+      },
+      "success": {
+        "rate": 1,
+        "passes": 1701,
+        "fails": 0
+      }
+    },
+    {
+      "startSecond": 58,
+      "latencyMs": {
+        "avg": 3.526470588235294,
+        "min": 1,
+        "max": 29,
+        "p(50)": 2,
+        "p(95)": 10,
+        "p(99)": 18
+      },
+      "success": {
+        "rate": 1,
+        "passes": 1700,
+        "fails": 0
+      }
+    },
+    {
+      "startSecond": 59,
+      "latencyMs": {
+        "avg": 5.5927015891701,
+        "min": 1,
+        "max": 24,
+        "p(50)": 5,
+        "p(95)": 13,
+        "p(99)": 17
+      },
+      "success": {
+        "rate": 1,
+        "passes": 1699,
+        "fails": 0
+      }
+    }
+  ],
+  "windowsAbove200Ms": 0,
+  "p99LimitMs": 100,
+  "windowsAboveSlo": 3,
+  "worstWindowP99Ms": 123,
+  "redisStatsDelta": {
+    "total_commands_processed": 204484,
+    "expired_keys": 34,
+    "evicted_keys": 0,
+    "keyspace_hits": 305978,
+    "keyspace_misses": 366
+  },
+  "notes": [
+    "Original counters include only this X-Run-ID, not validation/recovery.",
+    "Original concurrency includes DB pool waiting; it is not simultaneous SQL count.",
+    "Redis deltas include validation/recovery and unrelated expirations.",
+    "Windows group requests by start time; no exact expiry-event boundary is claimed."
+  ]
+}

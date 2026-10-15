@@ -1,0 +1,7 @@
+{
+  "fixtureCapacityTest": "1 passed",
+  "mixedRepeatProcessTests": "4 passed",
+  "pythonCompile": "passed",
+  "applicationChanged": false,
+  "applicationChecks": "not rerun; unchanged deployed build"
+}

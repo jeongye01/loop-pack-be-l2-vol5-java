@@ -1,0 +1,32 @@
+[
+  {
+    "run": "run-1",
+    "readP99LimitMs": 100,
+    "purchaseP99LimitMs": 300,
+    "readLatencyPassed": false,
+    "purchaseLatencyPassed": false,
+    "dropped": 0,
+    "readSuccess": 1,
+    "purchaseSuccess": 1
+  },
+  {
+    "run": "run-2",
+    "readP99LimitMs": 100,
+    "purchaseP99LimitMs": 300,
+    "readLatencyPassed": false,
+    "purchaseLatencyPassed": false,
+    "dropped": 0,
+    "readSuccess": 1,
+    "purchaseSuccess": 1
+  },
+  {
+    "run": "run-3",
+    "readP99LimitMs": 100,
+    "purchaseP99LimitMs": 300,
+    "readLatencyPassed": false,
+    "purchaseLatencyPassed": true,
+    "dropped": 0,
+    "readSuccess": 1,
+    "purchaseSuccess": 1
+  }
+]

@@ -1,0 +1,83 @@
+{
+  "runId": "20261015T165809-measure-1700-d8c534",
+  "p99LimitMs": 100,
+  "phase": "measure",
+  "rps": 1700,
+  "seconds": 60,
+  "planned": 102000,
+  "started": 92783,
+  "completed": 92783,
+  "dropped": 9218,
+  "successRate": 1,
+  "failed": 0,
+  "timeouts": 0,
+  "transportErrors": 0,
+  "httpErrors": 0,
+  "mismatches": 0,
+  "httpRequests": 93983,
+  "httpRps": 1556.854046274485,
+  "httpFailureRate": 0,
+  "latencyMs": {
+    "p(50)": 1625,
+    "p(95)": 2425,
+    "p(99)": 2623,
+    "avg": 1622.8216914736536,
+    "min": 19,
+    "max": 2965
+  },
+  "successLatencyMs": {
+    "p(50)": 1625,
+    "p(95)": 2425,
+    "p(99)": 2623,
+    "avg": 1622.8216914736536,
+    "min": 19,
+    "max": 2965
+  },
+  "recovered": true,
+  "collection": {
+    "samplesComplete": true,
+    "environmentComplete": true,
+    "serverLogsCollected": true,
+    "asyncLogMetricsComplete": true,
+    "tomcatMetricsComplete": true
+  },
+  "exitCode": 0,
+  "purchase": {
+    "planned": 600,
+    "started": 600,
+    "completed": 600,
+    "successRate": 1,
+    "failed": 0,
+    "timeouts": 0,
+    "httpErrors": 0,
+    "invalidResponses": 0,
+    "latencyMs": {
+      "avg": 2741.125,
+      "min": 453,
+      "max": 5055,
+      "p(50)": 2472.5,
+      "p(95)": 4649.549999999999,
+      "p(99)": 4889.16
+    },
+    "createLatencyMs": {
+      "p(95)": 2383.1499999999996,
+      "p(99)": 2563.3499999999995,
+      "avg": 1662.59,
+      "min": 363,
+      "max": 2709,
+      "p(50)": 1685.5
+    },
+    "confirmLatencyMs": {
+      "avg": 1078.475,
+      "min": 31,
+      "max": 2808,
+      "p(50)": 1122.5,
+      "p(95)": 2456.25,
+      "p(99)": 2701
+    }
+  },
+  "complete": false,
+  "sloPassed": false,
+  "readPassed": false,
+  "purchasePassed": false
+}

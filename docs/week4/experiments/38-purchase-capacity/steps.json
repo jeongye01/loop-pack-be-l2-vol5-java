@@ -1,0 +1,18 @@
+[
+  {
+    "run": "run-020-1",
+    "purchaseRps": 20,
+    "readP99": 232,
+    "purchaseP99": 377,
+    "dropped": 0,
+    "passed": false
+  },
+  {
+    "run": "run-020-2",
+    "purchaseRps": 20,
+    "readP99": 149,
+    "purchaseP99": 250,
+    "dropped": 0,
+    "passed": false
+  }
+]

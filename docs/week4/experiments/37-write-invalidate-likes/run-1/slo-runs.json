@@ -1,0 +1,216 @@
+[
+  {
+    "runId": "20261015T170836-warmup-300-75e9d5",
+    "p99LimitMs": 100,
+    "phase": "warmup",
+    "rps": 300,
+    "seconds": 30,
+    "planned": 9000,
+    "started": 9001,
+    "completed": 9001,
+    "dropped": 0,
+    "successRate": 1,
+    "failed": 0,
+    "timeouts": 0,
+    "transportErrors": 0,
+    "httpErrors": 0,
+    "mismatches": 0,
+    "httpRequests": 9001,
+    "httpRps": 299.97695712389935,
+    "httpFailureRate": 0,
+    "latencyMs": {
+      "avg": 2.205088323519609,
+      "min": 1,
+      "max": 27,
+      "p(50)": 2,
+      "p(95)": 3,
+      "p(99)": 5
+    },
+    "successLatencyMs": {
+      "p(99)": 5,
+      "avg": 2.205088323519609,
+      "min": 1,
+      "max": 27,
+      "p(50)": 2,
+      "p(95)": 3
+    },
+    "recovered": true,
+    "collection": {
+      "samplesComplete": true,
+      "environmentComplete": true,
+      "serverLogsCollected": true,
+      "asyncLogMetricsComplete": true,
+      "tomcatMetricsComplete": true
+    },
+    "exitCode": 0,
+    "complete": true,
+    "sloPassed": true,
+    "readPassed": true
+  },
+  {
+    "runId": "20261015T170935-warmup-700-d250e8",
+    "p99LimitMs": 100,
+    "phase": "warmup",
+    "rps": 700,
+    "seconds": 30,
+    "planned": 21000,
+    "started": 21001,
+    "completed": 21001,
+    "dropped": 0,
+    "successRate": 1,
+    "failed": 0,
+    "timeouts": 0,
+    "transportErrors": 0,
+    "httpErrors": 0,
+    "mismatches": 0,
+    "httpRequests": 21001,
+    "httpRps": 699.8978068251045,
+    "httpFailureRate": 0,
+    "latencyMs": {
+      "avg": 2.0537117280129515,
+      "min": 1,
+      "max": 30,
+      "p(50)": 2,
+      "p(95)": 3,
+      "p(99)": 8
+    },
+    "successLatencyMs": {
+      "p(50)": 2,
+      "p(95)": 3,
+      "p(99)": 8,
+      "avg": 2.0537117280129515,
+      "min": 1,
+      "max": 30
+    },
+    "recovered": true,
+    "collection": {
+      "samplesComplete": true,
+      "environmentComplete": true,
+      "serverLogsCollected": true,
+      "asyncLogMetricsComplete": true,
+      "tomcatMetricsComplete": true
+    },
+    "exitCode": 0,
+    "complete": true,
+    "sloPassed": true,
+    "readPassed": true
+  },
+  {
+    "runId": "20261015T171040-measure-1700-bed179",
+    "p99LimitMs": 100,
+    "phase": "measure",
+    "rps": 1700,
+    "seconds": 60,
+    "planned": 102000,
+    "started": 102001,
+    "completed": 102001,
+    "dropped": 0,
+    "successRate": 1,
+    "failed": 0,
+    "timeouts": 0,
+    "transportErrors": 0,
+    "httpErrors": 0,
+    "mismatches": 0,
+    "httpRequests": 103803,
+    "httpRps": 1729.3622191564164,
+    "httpFailureRate": 0,
+    "latencyMs": {
+      "min": 1,
+      "max": 416,
+      "p(50)": 4,
+      "p(95)": 90,
+      "p(99)": 214,
+      "avg": 17.619611572435563
+    },
+    "successLatencyMs": {
+      "p(95)": 90,
+      "p(99)": 214,
+      "avg": 17.619611572435563,
+      "min": 1,
+      "max": 416,
+      "p(50)": 4
+    },
+    "recovered": true,
+    "collection": {
+      "samplesComplete": true,
+      "environmentComplete": true,
+      "serverLogsCollected": true,
+      "asyncLogMetricsComplete": true,
+      "tomcatMetricsComplete": true
+    },
+    "exitCode": 0,
+    "purchase": {
+      "planned": 600,
+      "started": 601,
+      "completed": 601,
+      "successRate": 1,
+      "failed": 0,
+      "timeouts": 0,
+      "httpErrors": 0,
+      "invalidResponses": 0,
+      "latencyMs": {
+        "avg": 66.94176372712147,
+        "min": 24,
+        "max": 574,
+        "p(50)": 36,
+        "p(95)": 200,
+        "p(99)": 338
+      },
+      "createLatencyMs": {
+        "p(99)": 170,
+        "avg": 27.572379367720465,
+        "min": 10,
+        "max": 305,
+        "p(50)": 14,
+        "p(95)": 85
+      },
+      "confirmLatencyMs": {
+        "p(50)": 21,
+        "p(95)": 117,
+        "p(99)": 212,
+        "avg": 39.32279534109817,
+        "min": 13,
+        "max": 382
+      }
+    },
+    "complete": true,
+    "sloPassed": false,
+    "readPassed": false,
+    "purchasePassed": false,
+    "likes": {
+      "register": {
+        "planned": 300,
+        "started": 300,
+        "completed": 300,
+        "successRate": 1,
+        "failed": 0,
+        "latencyMs": {
+          "avg": 30.55666666666667,
+          "min": 11,
+          "max": 242,
+          "p(50)": 17,
+          "p(95)": 83.05000000000001,
+          "p(99)": 189.13999999999987
+        },
+        "passed": false
+      },
+      "cancel": {
+        "planned": 300,
+        "started": 300,
+        "completed": 300,
+        "successRate": 1,
+        "failed": 0,
+        "latencyMs": {
+          "avg": 27.813333333333333,
+          "min": 10,
+          "max": 265,
+          "p(50)": 17,
+          "p(95)": 85.50000000000011,
+          "p(99)": 163.01
+        },
+        "passed": false
+      }
+    },
+    "likesPassed": false
+  }
+]

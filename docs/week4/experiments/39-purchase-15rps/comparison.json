@@ -1,0 +1,622 @@
+[
+  {
+    "run": "run-015-1",
+    "slo": {
+      "runId": "20261015T172149-measure-1700-8901cf",
+      "p99LimitMs": 100,
+      "phase": "measure",
+      "rps": 1700,
+      "seconds": 60,
+      "planned": 102000,
+      "started": 102001,
+      "completed": 102001,
+      "dropped": 0,
+      "successRate": 1,
+      "failed": 0,
+      "timeouts": 0,
+      "transportErrors": 0,
+      "httpErrors": 0,
+      "mismatches": 0,
+      "httpRequests": 104403,
+      "httpRps": 1739.2919491420128,
+      "httpFailureRate": 0,
+      "latencyMs": {
+        "avg": 20.2327428162469,
+        "min": 1,
+        "max": 377,
+        "p(50)": 3,
+        "p(95)": 127,
+        "p(99)": 205
+      },
+      "successLatencyMs": {
+        "avg": 20.2327428162469,
+        "min": 1,
+        "max": 377,
+        "p(50)": 3,
+        "p(95)": 127,
+        "p(99)": 205
+      },
+      "recovered": true,
+      "collection": {
+        "samplesComplete": true,
+        "environmentComplete": true,
+        "serverLogsCollected": true,
+        "asyncLogMetricsComplete": true,
+        "tomcatMetricsComplete": true
+      },
+      "exitCode": 0,
+      "purchase": {
+        "planned": 900,
+        "started": 901,
+        "completed": 901,
+        "successRate": 1,
+        "failed": 0,
+        "timeouts": 0,
+        "httpErrors": 0,
+        "invalidResponses": 0,
+        "latencyMs": {
+          "p(95)": 214,
+          "p(99)": 315,
+          "avg": 60.275249722530525,
+          "min": 20,
+          "max": 380,
+          "p(50)": 30
+        },
+        "createLatencyMs": {
+          "max": 205,
+          "p(50)": 13,
+          "p(95)": 83,
+          "p(99)": 146,
+          "avg": 24.570477247502776,
+          "min": 7
+        },
+        "confirmLatencyMs": {
+          "p(99)": 212,
+          "avg": 35.65149833518313,
+          "min": 11,
+          "max": 281,
+          "p(50)": 18,
+          "p(95)": 135
+        },
+        "p99LimitMs": 300
+      },
+      "complete": true,
+      "sloPassed": false,
+      "readPassed": false,
+      "purchasePassed": false,
+      "likes": {
+        "register": {
+          "planned": 300,
+          "started": 300,
+          "completed": 300,
+          "successRate": 1,
+          "failed": 0,
+          "latencyMs": {
+            "avg": 28.8,
+            "min": 10,
+            "max": 228,
+            "p(50)": 15.5,
+            "p(95)": 104.15000000000003,
+            "p(99)": 170.08999999999992
+          },
+          "passed": true,
+          "p99LimitMs": null
+        },
+        "cancel": {
+          "planned": 300,
+          "started": 300,
+          "completed": 300,
+          "successRate": 1,
+          "failed": 0,
+          "latencyMs": {
+            "avg": 25.73,
+            "min": 10,
+            "max": 205,
+            "p(50)": 15,
+            "p(95)": 99.10000000000002,
+            "p(99)": 143.2099999999998
+          },
+          "passed": true,
+          "p99LimitMs": null
+        }
+      },
+      "likesPassed": true
+    },
+    "observations": {
+      "runId": "20261015T172149-measure-1700-8901cf",
+      "resources": {
+        "hikaricp_connections_active": {
+          "mean": 9.0,
+          "max": 37.0,
+          "p99": 37.0
+        },
+        "hikaricp_connections_pending": {
+          "mean": 0.07692307692307693,
+          "max": 1.0,
+          "p99": 1.0
+        },
+        "hikaricp_connections_max": {
+          "mean": 40.0,
+          "max": 40.0,
+          "p99": 40.0
+        },
+        "tomcat_threads_busy_threads": {
+          "mean": 22.46153846153846,
+          "max": 57.0,
+          "p99": 57.0
+        }
+      },
+      "dockerCpuPercent": {
+        "app": {
+          "week4-commerce-api-1": {
+            "mean": 153.48538461538462,
+            "max": 193.84,
+            "p99": 193.84
+          }
+        },
+        "db": {
+          "week4-db-redis-replica-1": {
+            "mean": 0.38153846153846155,
+            "max": 0.45,
+            "p99": 0.45
+          },
+          "week4-db-redis-master-1": {
+            "mean": 6.6607692307692306,
+            "max": 8.5,
+            "p99": 8.5
+          },
+          "week4-db-mysql-1": {
+            "mean": 60.29692307692308,
+            "max": 72.2,
+            "p99": 72.2
+          }
+        }
+      },
+      "loadK6CpuPercent": {
+        "mean": 202.15384615384616,
+        "max": 732.0,
+        "p99": 732.0
+      },
+      "likeTraceCount": 0,
+      "likeServerDurationMs": null,
+      "likeConnectionWaitMs": null,
+      "writeTraceCount": 1802,
+      "writeServerDurationMs": {
+        "mean": 26.212051430077693,
+        "max": 253.227253,
+        "p99": 153.059091
+      },
+      "writeConnectionWaitMs": {
+        "mean": 0.4909069051054384,
+        "max": 90.457934,
+        "p99": 13.300857
+      },
+      "sampledReadTraceCount": 1090,
+      "serverDurationMs": {
+        "mean": 17.084640451376146,
+        "max": 246.217338,
+        "p99": 173.895852
+      },
+      "connectionWaitMs": {
+        "mean": 0.46002373119266055,
+        "max": 55.072165,
+        "p99": 15.457498
+      },
+      "sqlCountHistogram": {
+        "1": 1079,
+        "3": 11
+      },
+      "revisionRechecks": 0,
+      "stockOriginTraceCount": 11,
+      "originalListTraceCount": 0,
+      "cacheCounterDelta": {
+        "catalog_cache_errors_total{application=\"commerce-api\",operation=\"get\"}": 16.0,
+        "catalog_cache_errors_total{application=\"commerce-api\",operation=\"put\"}": 0.0,
+        "catalog_cache_invalidation_total{application=\"commerce-api\",outcome=\"failure\"}": 1.0,
+        "catalog_cache_invalidation_total{application=\"commerce-api\",outcome=\"success\"}": 1500.0,
+        "catalog_cache_invalidation_keys_total{application=\"commerce-api\"}": 842.0
+      },
+      "notes": [
+        "Read/write server traces are separated by path; read sampling and write instrumentation depend on deployed image.",
+        "Resource snapshots every 5s; maxima do not represent continuous occupancy.",
+        "Cache deltas include preflight/recovery checks and other traffic; misses can include repeated probes."
+      ]
+    },
+    "stampede": {
+      "runId": "20261015T172149-measure-1700-8901cf",
+      "phase": "measure",
+      "original": {
+        "active": 0.0,
+        "loads_total": 12.0,
+        "maximum": 1.0
+      },
+      "stockOriginal": {
+        "active": 0.0,
+        "loads_total": 843.0,
+        "maximum": 3.0,
+        "overlapping_total": 2.0
+      },
+      "windowsAbove200Ms": 8,
+      "p99LimitMs": 100,
+      "windowsAboveSlo": 14,
+      "worstWindowP99Ms": 319.01,
+      "redisStatsDelta": {
+        "total_commands_processed": 238350,
+        "expired_keys": 16,
+        "evicted_keys": 0,
+        "keyspace_hits": 336078,
+        "keyspace_misses": 16400
+      },
+      "notes": [
+        "Original counters include only this X-Run-ID, not validation/recovery.",
+        "Original concurrency includes DB pool waiting; it is not simultaneous SQL count.",
+        "Redis deltas include validation/recovery and unrelated expirations.",
+        "Windows group requests by start time; no exact expiry-event boundary is claimed."
+      ]
+    },
+    "purchaseAudit": {
+      "runId": "20261015T172149-measure-1700-8901cf",
+      "passed": true,
+      "checks": {
+        "eventCountMatchesCompleted": true,
+        "oneOrderPerPurchase": true,
+        "successResponsesMatchConfirmedOrders": true,
+        "stockDecrementsMatchConfirmedQuantities": true,
+        "pointDebitsMatchConfirmedAmounts": true
+      },
+      "createdOrders": 901,
+      "confirmedOrders": 901,
+      "clientSuccessfulPurchases": 901,
+      "confirmedDespiteClientFailure": [],
+      "stockDecrements": {
+        "1": 46,
+        "2": 45,
+        "3": 45,
+        "4": 45,
+        "5": 45,
+        "6": 45,
+        "7": 45,
+        "8": 45,
+        "9": 45,
+        "10": 45,
+        "11": 45,
+        "12": 45,
+        "13": 45,
+        "14": 45,
+        "15": 45,
+        "16": 45,
+        "17": 45,
+        "18": 45,
+        "19": 45,
+        "20": 45
+      },
+      "totalPointDebit": 59576329116,
+      "rowLockStatusDelta": {
+        "Innodb_row_lock_current_waits": 0,
+        "Innodb_row_lock_time": 0,
+        "Innodb_row_lock_time_avg": 0,
+        "Innodb_row_lock_time_max": 0,
+        "Innodb_row_lock_waits": 0
+      }
+    },
+    "likeAudit": {
+      "events": 600,
+      "pairs": 300,
+      "plannedPairs": 300,
+      "remainingRelations": [],
+      "allPairsSuccessful": true,
+      "passed": true,
+      "note": "Fresh users had no prior relations; each 201 registration must be followed by successful cancellation. Does not validate displayed count freshness."
+    }
+  },
+  {
+    "run": "run-015-2",
+    "slo": {
+      "runId": "20261015T172327-measure-1700-bdab43",
+      "p99LimitMs": 100,
+      "phase": "measure",
+      "rps": 1700,
+      "seconds": 60,
+      "planned": 102000,
+      "started": 102001,
+      "completed": 102001,
+      "dropped": 0,
+      "successRate": 1,
+      "failed": 0,
+      "timeouts": 0,
+      "transportErrors": 0,
+      "httpErrors": 0,
+      "mismatches": 0,
+      "httpRequests": 104401,
+      "httpRps": 1739.8673081635663,
+      "httpFailureRate": 0,
+      "latencyMs": {
+        "avg": 11.025489946176998,
+        "min": 1,
+        "max": 272,
+        "p(50)": 3,
+        "p(95)": 43,
+        "p(99)": 131
+      },
+      "successLatencyMs": {
+        "avg": 11.025489946176998,
+        "min": 1,
+        "max": 272,
+        "p(50)": 3,
+        "p(95)": 43,
+        "p(99)": 131
+      },
+      "recovered": true,
+      "collection": {
+        "samplesComplete": true,
+        "environmentComplete": true,
+        "serverLogsCollected": true,
+        "asyncLogMetricsComplete": true,
+        "tomcatMetricsComplete": true
+      },
+      "exitCode": 0,
+      "purchase": {
+        "planned": 900,
+        "started": 900,
+        "completed": 900,
+        "successRate": 1,
+        "failed": 0,
+        "timeouts": 0,
+        "httpErrors": 0,
+        "invalidResponses": 0,
+        "latencyMs": {
+          "avg": 49.035555555555554,
+          "min": 20,
+          "max": 340,
+          "p(50)": 31,
+          "p(95)": 132.19999999999982,
+          "p(99)": 223.01999999999998
+        },
+        "createLatencyMs": {
+          "avg": 20.394444444444446,
+          "min": 8,
+          "max": 159,
+          "p(50)": 13,
+          "p(95)": 58.049999999999955,
+          "p(99)": 101.01999999999998
+        },
+        "confirmLatencyMs": {
+          "avg": 28.602222222222224,
+          "min": 12,
+          "max": 241,
+          "p(50)": 18,
+          "p(95)": 79.04999999999995,
+          "p(99)": 150.05999999999995
+        },
+        "p99LimitMs": 300
+      },
+      "complete": true,
+      "sloPassed": false,
+      "readPassed": false,
+      "purchasePassed": true,
+      "likes": {
+        "register": {
+          "planned": 300,
+          "started": 300,
+          "completed": 300,
+          "successRate": 1,
+          "failed": 0,
+          "latencyMs": {
+            "avg": 23.003333333333334,
+            "min": 8,
+            "max": 124,
+            "p(50)": 15,
+            "p(95)": 58.25000000000006,
+            "p(99)": 107.07999999999993
+          },
+          "passed": true,
+          "p99LimitMs": null
+        },
+        "cancel": {
+          "planned": 300,
+          "started": 300,
+          "completed": 300,
+          "successRate": 1,
+          "failed": 0,
+          "latencyMs": {
+            "avg": 19.926666666666666,
+            "min": 7,
+            "max": 167,
+            "p(50)": 14,
+            "p(95)": 46.05000000000001,
+            "p(99)": 122.03999999999996
+          },
+          "passed": true,
+          "p99LimitMs": null
+        }
+      },
+      "likesPassed": true
+    },
+    "observations": {
+      "runId": "20261015T172327-measure-1700-bdab43",
+      "resources": {
+        "hikaricp_connections_active": {
+          "mean": 5.615384615384615,
+          "max": 9.0,
+          "p99": 9.0
+        },
+        "hikaricp_connections_pending": {
+          "mean": 0.0,
+          "max": 0.0,
+          "p99": 0.0
+        },
+        "hikaricp_connections_max": {
+          "mean": 40.0,
+          "max": 40.0,
+          "p99": 40.0
+        },
+        "tomcat_threads_busy_threads": {
+          "mean": 17.692307692307693,
+          "max": 57.0,
+          "p99": 57.0
+        }
+      },
+      "dockerCpuPercent": {
+        "app": {
+          "week4-commerce-api-1": {
+            "mean": 146.34076923076924,
+            "max": 179.05,
+            "p99": 179.05
+          }
+        },
+        "db": {
+          "week4-db-redis-replica-1": {
+            "mean": 1.6423076923076922,
+            "max": 4.07,
+            "p99": 4.07
+          },
+          "week4-db-redis-master-1": {
+            "mean": 9.367692307692307,
+            "max": 11.82,
+            "p99": 11.82
+          },
+          "week4-db-mysql-1": {
+            "mean": 60.84923076923077,
+            "max": 71.22,
+            "p99": 71.22
+          }
+        }
+      },
+      "loadK6CpuPercent": {
+        "mean": 205.30769230769232,
+        "max": 729.0,
+        "p99": 729.0
+      },
+      "likeTraceCount": 0,
+      "likeServerDurationMs": null,
+      "likeConnectionWaitMs": null,
+      "writeTraceCount": 1800,
+      "writeServerDurationMs": {
+        "mean": 22.73945908888889,
+        "max": 217.782257,
+        "p99": 106.461882
+      },
+      "writeConnectionWaitMs": {
+        "mean": 0.1762317,
+        "max": 62.250786,
+        "p99": 0.908575
+      },
+      "sampledReadTraceCount": 980,
+      "serverDurationMs": {
+        "mean": 9.33974608367347,
+        "max": 201.785503,
+        "p99": 106.244539
+      },
+      "connectionWaitMs": {
+        "mean": 0.12998350204081632,
+        "max": 37.741841,
+        "p99": 0.780791
+      },
+      "sqlCountHistogram": {
+        "1": 966,
+        "3": 14
+      },
+      "revisionRechecks": 0,
+      "stockOriginTraceCount": 13,
+      "originalListTraceCount": 1,
+      "cacheCounterDelta": {
+        "catalog_cache_errors_total{application=\"commerce-api\",operation=\"get\"}": 0.0,
+        "catalog_cache_errors_total{application=\"commerce-api\",operation=\"put\"}": 0.0,
+        "catalog_cache_invalidation_total{application=\"commerce-api\",outcome=\"failure\"}": 0.0,
+        "catalog_cache_invalidation_total{application=\"commerce-api\",outcome=\"success\"}": 1500.0,
+        "catalog_cache_invalidation_keys_total{application=\"commerce-api\"}": 873.0
+      },
+      "notes": [
+        "Read/write server traces are separated by path; read sampling and write instrumentation depend on deployed image.",
+        "Resource snapshots every 5s; maxima do not represent continuous occupancy.",
+        "Cache deltas include preflight/recovery checks and other traffic; misses can include repeated probes."
+      ]
+    },
+    "stampede": {
+      "runId": "20261015T172327-measure-1700-bdab43",
+      "phase": "measure",
+      "original": {
+        "active": 0.0,
+        "loads_total": 12.0,
+        "maximum": 1.0
+      },
+      "stockOriginal": {
+        "active": 0.0,
+        "loads_total": 874.0,
+        "maximum": 2.0,
+        "overlapping_total": 1.0
+      },
+      "windowsAbove200Ms": 2,
+      "p99LimitMs": 100,
+      "windowsAboveSlo": 5,
+      "worstWindowP99Ms": 224.01999999999998,
+      "redisStatsDelta": {
+        "total_commands_processed": 230021,
+        "expired_keys": 15,
+        "evicted_keys": 0,
+        "keyspace_hits": 327541,
+        "keyspace_misses": 12314
+      },
+      "notes": [
+        "Original counters include only this X-Run-ID, not validation/recovery.",
+        "Original concurrency includes DB pool waiting; it is not simultaneous SQL count.",
+        "Redis deltas include validation/recovery and unrelated expirations.",
+        "Windows group requests by start time; no exact expiry-event boundary is claimed."
+      ]
+    },
+    "purchaseAudit": {
+      "runId": "20261015T172327-measure-1700-bdab43",
+      "passed": true,
+      "checks": {
+        "eventCountMatchesCompleted": true,
+        "oneOrderPerPurchase": true,
+        "successResponsesMatchConfirmedOrders": true,
+        "stockDecrementsMatchConfirmedQuantities": true,
+        "pointDebitsMatchConfirmedAmounts": true
+      },
+      "createdOrders": 900,
+      "confirmedOrders": 900,
+      "clientSuccessfulPurchases": 900,
+      "confirmedDespiteClientFailure": [],
+      "stockDecrements": {
+        "1": 45,
+        "2": 45,
+        "3": 45,
+        "4": 45,
+        "5": 45,
+        "6": 45,
+        "7": 45,
+        "8": 45,
+        "9": 45,
+        "10": 45,
+        "11": 45,
+        "12": 45,
+        "13": 45,
+        "14": 45,
+        "15": 45,
+        "16": 45,
+        "17": 45,
+        "18": 45,
+        "19": 45,
+        "20": 45
+      },
+      "totalPointDebit": 59519825955,
+      "rowLockStatusDelta": {
+        "Innodb_row_lock_current_waits": 0,
+        "Innodb_row_lock_time": 0,
+        "Innodb_row_lock_time_avg": 0,
+        "Innodb_row_lock_time_max": 0,
+        "Innodb_row_lock_waits": 0
+      }
+    },
+    "likeAudit": {
+      "events": 600,
+      "pairs": 300,
+      "plannedPairs": 300,
+      "remainingRelations": [],
+      "allPairsSuccessful": true,
+      "passed": true,
+      "note": "Fresh users had no prior relations; each 201 registration must be followed by successful cancellation. Does not validate displayed count freshness."
+    }
+  }
+]

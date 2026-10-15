@@ -20,7 +20,6 @@ public class CatalogReadTransaction {
         this.flights = flights;
     }
     public <T> T read(Supplier<T> operation) {
-        if (policy.bypassRevision()) return operation.get();
         while (true) {
             try { return cache.hitOnly(operation); }
             catch (ResponseCache.CacheMiss miss) {

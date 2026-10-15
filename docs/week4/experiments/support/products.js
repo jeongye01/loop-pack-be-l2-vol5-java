@@ -23,6 +23,10 @@ const purchaseHttpErrors = new Counter('purchase_http_errors');
 const purchaseTimeouts = new Counter('purchase_timeouts');
 const purchaseInvalid = new Counter('purchase_invalid_response');
 const purchaseEnabled = config.phase === 'measure' && config.purchase?.rps > 0;
+const likeMetrics = Object.fromEntries(['register', 'cancel'].map(step => [step, {
+  started: new Counter(`like_${step}_started`), completed: new Counter(`like_${step}_completed`),
+  success: new Rate(`like_${step}_success`), latency: new Trend(`like_${step}_latency_ms`, true),
+}]));
 // Optional short-window metrics for expiry experiments; normal workloads remain unchanged.
 const windowSeconds = config.latencyWindowSeconds || 0;
 const windows = windowSeconds > 0 ? Array.from({length: Math.ceil(config.durationSeconds / windowSeconds)}, (_, i) => ({
@@ -49,6 +53,13 @@ if (purchaseEnabled) {
   options.scenarios.purchases = {
     executor: 'constant-arrival-rate', exec: 'purchase', rate: config.purchase.rps, timeUnit: '1s',
     duration: `${config.durationSeconds}s`, preAllocatedVUs: config.purchase.vus, maxVUs: config.purchase.vus,
+    gracefulStop: `${config.gracefulStopSeconds}s`,
+  };
+}
+if (config.phase === 'measure' && config.likes?.pairRps > 0) {
+  options.scenarios.likes = {
+    executor: 'constant-arrival-rate', exec: 'likePair', rate: config.likes.pairRps, timeUnit: '1s',
+    duration: `${config.durationSeconds}s`, preAllocatedVUs: config.likes.vus, maxVUs: config.likes.vus,
     gracefulStop: `${config.gracefulStopSeconds}s`,
   };
 }
@@ -152,5 +163,29 @@ export function purchase() {
     purchaseLatency.add(elapsed, {outcome});
     console.log('PURCHASE_JSON ' + JSON.stringify({runId:config.runId,index,buyer,productId:product.id,
       expectedAmount:product.price,orderId,outcome,httpStatus:status,error:code,latencyMs:elapsed}));
+  }
+}
+
+// Each pair uses a fresh user/product relation; no retries after ambiguous writes.
+export function likePair() {
+  const index = exec.scenario.iterationInTest;
+  const user = config.purchase.buyers[index];
+  if (!user) exec.test.abort('Dedicated like user pool exhausted');
+  const productId = config.purchase.products[index % config.purchase.products.length].id;
+  const url = `${config.url.split('/api/')[0]}/api/v1/products/${productId}/likes`;
+  for (const step of ['register', 'cancel']) {
+    const m = likeMetrics[step]; m.started.add(1);
+    const start = Date.now();
+    const params = {headers: {'X-USER-ID': String(user), 'X-Run-ID': config.runId,
+      'X-Request-ID': `${config.runId}-like-${index}-${step}`},
+      timeout: `${config.timeoutSeconds}s`, tags: {name:`like.${step}`}};
+    const response = step === 'register' ? http.post(url, null, params) : http.del(url, null, params);
+    let ok = false;
+    try { ok = response.status === (step === 'register' ? 201 : 200)
+      && response.json().meta?.result === 'SUCCESS'; } catch (_) { /* recorded below */ }
+    const elapsed = Date.now() - start;
+    m.completed.add(1); m.success.add(ok); m.latency.add(elapsed);
+    console.log('LIKE_JSON ' + JSON.stringify({runId:config.runId,index,user,productId,step,
+      outcome:ok ? 'success' : 'failure',httpStatus:response.status,errorCode:response.error_code || null,latencyMs:elapsed}));
   }
 }

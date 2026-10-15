@@ -1,6 +1,7 @@
 catalog:
   cache:
     enabled: true
+    write-invalidate: true
 
 # The fixed-data experiment cache must not bypass revision checks.
 experiment:

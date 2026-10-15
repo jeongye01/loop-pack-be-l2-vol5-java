@@ -1,0 +1,49 @@
+[ {
+  "scenario" : "invalidation-failure-update",
+  "consistencyCriterionPassed" : false,
+  "observed" : "DB write committed; new HTTP read returned old product with 200"
+}, {
+  "scenario" : "invalidation-failure-update-expiry-recovery",
+  "consistencyCriterionPassed" : true,
+  "observed" : "fresh/404 after accelerated remaining TTL expiry"
+}, {
+  "scenario" : "invalidation-failure-delete",
+  "consistencyCriterionPassed" : false,
+  "observed" : "DB write committed; new HTTP read returned old product with 200"
+}, {
+  "scenario" : "invalidation-failure-delete-expiry-recovery",
+  "consistencyCriterionPassed" : true,
+  "observed" : "fresh/404 after accelerated remaining TTL expiry"
+}, {
+  "scenario" : "late-fill-update",
+  "consistencyCriterionPassed" : false,
+  "observed" : "successful deletion followed by old snapshot repopulation; new HTTP read returned old product"
+}, {
+  "scenario" : "late-fill-update-expiry-recovery",
+  "consistencyCriterionPassed" : true,
+  "observed" : "fresh/404 after accelerated remaining TTL expiry"
+}, {
+  "scenario" : "late-fill-delete",
+  "consistencyCriterionPassed" : false,
+  "observed" : "successful deletion followed by old snapshot repopulation; new HTTP read returned old product"
+}, {
+  "scenario" : "late-fill-delete-expiry-recovery",
+  "consistencyCriterionPassed" : true,
+  "observed" : "fresh/404 after accelerated remaining TTL expiry"
+}, {
+  "scenario" : "ttl",
+  "consistencyCriterionPassed" : true,
+  "observed" : "base TTL 270..330s; hit nonrenewal; accelerated remaining TTL 100ms -> refill"
+}, {
+  "scenario" : "normal-delete",
+  "consistencyCriterionPassed" : true,
+  "observed" : "404 after completed invalidation"
+}, {
+  "scenario" : "rollback",
+  "consistencyCriterionPassed" : true,
+  "observed" : "no deletion; unchanged DB/cache response"
+}, {
+  "scenario" : "normal-update-hit",
+  "consistencyCriterionPassed" : true,
+  "observed" : "new value; no revision SQL on facade hit; unauthenticated HTTP rejected"
+} ]

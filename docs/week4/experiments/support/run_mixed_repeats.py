@@ -34,7 +34,7 @@ for root in sorted(a.experiment.glob('run-*')):
         print(f'{root.name}: SKIP WARMUP; retain preflight/recovery checks',flush=True)
     previous_server = server
     call('mixed_purchase_fixture.py',common+['snapshot','--output',str(root/'before.json')])
-    print(f'{root.name}: START MIXED 1700 reads/s + 10 purchases/s for 60s',flush=True)
+    print(f"{root.name}: START MIXED 1700 reads/s + 10 purchases/s + {config.get('likes', {}).get('pairRps', 0) * 2} like writes/s for 60s",flush=True)
     code=call('run_combined_slo.py',common+['--measure-only'],'measure.log')
     runs=json.loads((root/'slo-runs.json').read_text());run=runs[-1]
     if run['phase']!='measure' or not run['recovered'] or not all(run['collection'].values()) or run['exitCode']!=0:
@@ -42,6 +42,8 @@ for root in sorted(a.experiment.glob('run-*')):
     call('mixed_purchase_fixture.py',common+['snapshot','--output',str(root/'after.json')])
     call('audit_mixed_purchase.py',[str(root)],'audit.log')
     if not json.loads((root/'purchase-audit.json').read_text())['passed']: raise RuntimeError('Purchase audit failed')
+    if config.get('likes', {}).get('pairRps', 0):
+        call('audit_mixed_likes.py',common,'like-audit.log')
     call('summarize_mixed_run.py',[str(root)],'observations.log')
     call('summarize_stampede.py',[str(root)],'stampede.log')
     print(json.dumps({'run':root.name,'runId':run['runId'],'readP99':run['latencyMs']['p(99)'],
