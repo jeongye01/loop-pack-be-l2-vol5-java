@@ -1,0 +1,66 @@
+{
+  "before": {
+    "ttlMs": {
+      "products::v3:products?sort=latest&brand=all&page=0&size=20:rev=82cb342f-e77d-4d17-96b5-17cf82677d24": 288954,
+      "like-counts::v3:products/like-counts?ids=1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20:rev=82cb342f-e77d-4d17-96b5-17cf82677d24": 298519,
+      "stocks::v3:products/stocks?ids=1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20:rev=82cb342f-e77d-4d17-96b5-17cf82677d24:rev=102a8c80-26aa-4136-9ccf-4b61e1bb479a": 318000
+    },
+    "redisStats": {
+      "total_commands_processed": 2574982,
+      "expired_keys": 118,
+      "evicted_keys": 0,
+      "keyspace_hits": 2338989,
+      "keyspace_misses": 129
+    },
+    "commandCalls": {
+      "client|setname": 30,
+      "mget": 1,
+      "role": 30,
+      "scan": 50,
+      "ttl": 18,
+      "info": 22,
+      "replconf": 192931,
+      "ping": 38377,
+      "expire": 35,
+      "del": 5,
+      "hello": 90,
+      "get": 2339063,
+      "psync": 1,
+      "exists": 2,
+      "set": 4295,
+      "pttl": 33
+    }
+  },
+  "after": {
+    "ttlMs": {
+      "products::v3:products?sort=latest&brand=all&page=0&size=20:rev=82cb342f-e77d-4d17-96b5-17cf82677d24": 249570,
+      "like-counts::v3:products/like-counts?ids=1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20:rev=82cb342f-e77d-4d17-96b5-17cf82677d24": 243532,
+      "stocks::v3:products/stocks?ids=1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20:rev=82cb342f-e77d-4d17-96b5-17cf82677d24:rev=102a8c80-26aa-4136-9ccf-4b61e1bb479a": 281098
+    },
+    "redisStats": {
+      "total_commands_processed": 2587164,
+      "expired_keys": 118,
+      "evicted_keys": 0,
+      "keyspace_hits": 2356986,
+      "keyspace_misses": 129
+    },
+    "commandCalls": {
+      "client|setname": 30,
+      "mget": 5997,
+      "role": 30,
+      "scan": 53,
+      "ttl": 18,
+      "info": 24,
+      "replconf": 192983,
+      "ping": 38387,
+      "expire": 35,
+      "del": 5,
+      "hello": 90,
+      "get": 2345065,
+      "psync": 1,
+      "exists": 2,
+      "set": 4410,
+      "pttl": 36
+    }
+  }
+}

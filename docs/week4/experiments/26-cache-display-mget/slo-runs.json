@@ -1,0 +1,94 @@
+[
+  {
+    "runId": "20261015T031831-warmup-300-5df139",
+    "phase": "warmup",
+    "rps": 300,
+    "seconds": 20,
+    "planned": 6000,
+    "started": 6001,
+    "completed": 6001,
+    "dropped": 0,
+    "successRate": 0.9998333611064822,
+    "failed": 1,
+    "timeouts": 0,
+    "transportErrors": 0,
+    "httpErrors": 1,
+    "mismatches": 0,
+    "httpRequests": 6001,
+    "httpRps": 299.9067072444483,
+    "httpFailureRate": 0.00016663889351774705,
+    "latencyMs": {
+      "avg": 1429.331778036994,
+      "min": 5,
+      "max": 4844,
+      "p(50)": 1620,
+      "p(95)": 2898,
+      "p(99)": 3510
+    },
+    "successLatencyMs": {
+      "avg": 1429.0293333333334,
+      "min": 5,
+      "max": 4844,
+      "p(50)": 1619.5,
+      "p(95)": 2897.05,
+      "p(99)": 3510.01
+    },
+    "recovered": true,
+    "collection": {
+      "samplesComplete": true,
+      "environmentComplete": true,
+      "serverLogsCollected": true,
+      "asyncLogMetricsComplete": true,
+      "tomcatMetricsComplete": true
+    },
+    "exitCode": 0,
+    "complete": true,
+    "sloPassed": false
+  },
+  {
+    "runId": "20261015T031925-measure-1700-c69072",
+    "phase": "measure",
+    "rps": 1700,
+    "seconds": 60,
+    "planned": 102000,
+    "started": 55891,
+    "completed": 55891,
+    "dropped": 46109,
+    "successRate": 0.9996242686657959,
+    "failed": 21,
+    "timeouts": 21,
+    "transportErrors": 0,
+    "httpErrors": 0,
+    "mismatches": 0,
+    "httpRequests": 55891,
+    "httpRps": 890.4805368726253,
+    "httpFailureRate": 0.0003757313342040758,
+    "latencyMs": {
+      "avg": 3222.5292086382424,
+      "min": 17,
+      "max": 5002,
+      "p(50)": 3355,
+      "p(95)": 4017,
+      "p(99)": 4352.0999999999985
+    },
+    "successLatencyMs": {
+      "avg": 3221.8609629497046,
+      "min": 17,
+      "max": 4999,
+      "p(50)": 3355,
+      "p(95)": 4016,
+      "p(99)": 4341.309999999998
+    },
+    "recovered": true,
+    "collection": {
+      "samplesComplete": true,
+      "environmentComplete": true,
+      "serverLogsCollected": true,
+      "asyncLogMetricsComplete": true,
+      "tomcatMetricsComplete": true
+    },
+    "exitCode": 0,
+    "complete": false,
+    "sloPassed": false
+  }
+]
