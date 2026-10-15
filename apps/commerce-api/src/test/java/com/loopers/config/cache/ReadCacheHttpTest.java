@@ -51,7 +51,7 @@ class ReadCacheHttpTest {
     @Autowired MockMvc mvc;
     @Autowired EntityManager em;
     @Autowired PlatformTransactionManager tm;
-    @Autowired CacheVersions versions;
+    @MockitoSpyBean CacheVersions versions;
     @Autowired LikeUseCase likes;
     @MockitoSpyBean ProductUseCase products;
     @MockitoSpyBean org.springframework.cache.CacheManager cacheManager;
@@ -87,6 +87,65 @@ class ReadCacheHttpTest {
         verify(products, times(0)).findBasicPage(null, ProductSort.LATEST, 0, 20);
         mvc.perform(get("/api/v1/products")).andExpect(status().isUnauthorized());
         assertThat(redis.getExpire(key(CacheKeys.PRODUCTS, CacheKeys.products("latest", null, 0, 20), CacheKeys.CATALOG_REVISION))).isBetween(269L, 330L);
+    }
+
+    /** 같은 fixture·HTTP 입력에서 캐시 비활성 → miss → hit을 비교한다. 읽기 사이에는 쓰지 않는다. */
+    @org.junit.jupiter.params.ParameterizedTest(name = "{0}, brand filter={1}")
+    @org.junit.jupiter.params.provider.CsvSource({
+        "latest,false", "latest,true", "price_asc,false", "price_asc,true", "likes_desc,false", "likes_desc,true"
+    })
+    @DisplayName("[R-CATALOG-02/04/05] DB-only·miss·hit의 정렬·페이지·응답은 같고 hit은 원본 조회를 생략한다")
+    void databaseOnlyMissAndHitReturnSamePages(String sort, boolean filtered) throws Exception {
+        var second = fixture.product(brand, "second", 100L, 0);
+        var third = fixture.product(brand, "third", 200L, 1);
+        var other = fixture.product(fixture.brand("other"), "other-product", 50L, 1);
+        fixture.deletedProduct(brand, "deleted", 1L);
+        fixture.like(user, second);
+        fixture.like(user, third);
+        fixture.like(user, other);
+        Long brandId = filtered ? brand.getId() : null;
+        ProductSort requested = ProductSort.valueOf(sort.toUpperCase(java.util.Locale.ROOT));
+        var mapper = new com.fasterxml.jackson.databind.ObjectMapper();
+        var collected = new java.util.ArrayList<Long>();
+        for (int page = 0; page < 3; page++) {
+            String url = "/api/v1/products?sort=" + sort + "&page=" + page + "&size=2"
+                + (filtered ? "&brandId=" + brandId : "");
+            String bucket = sort.equals("likes_desc") ? CacheKeys.RANKINGS : CacheKeys.PRODUCTS;
+            String cacheKey = key(bucket, CacheKeys.products(sort, brandId, page, 2), CacheKeys.CATALOG_REVISION);
+            assertThat(redis.hasKey(cacheKey)).isFalse();
+            // Exercise ResponseCache's real disabled branch; only the feature switch is stubbed.
+            org.mockito.Mockito.doReturn(false).when(versions).isEnabled();
+            clearInvocations(products);
+            String databaseOnly;
+            try {
+                databaseOnly = mvc.perform(get(url).with(customer(user))).andExpect(status().isOk())
+                    .andReturn().getResponse().getContentAsString();
+                verify(products, times(1)).findBasicPage(brandId, requested, page, 2);
+                assertThat(redis.hasKey(cacheKey)).as("DB-only must not populate Redis").isFalse();
+            } finally {
+                org.mockito.Mockito.doCallRealMethod().when(versions).isEnabled();
+            }
+            clearInvocations(products);
+            String miss = mvc.perform(get(url).with(customer(user))).andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+            verify(products, times(1)).findBasicPage(brandId, requested, page, 2);
+            assertThat(redis.hasKey(cacheKey)).isTrue();
+            assertThat(redis.getExpire(cacheKey)).isBetween(269L, 330L);
+            clearInvocations(products);
+            String hit = mvc.perform(get(url).with(customer(user))).andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+            verify(products, times(0)).findBasicPage(brandId, requested, page, 2);
+            assertThat(mapper.readTree(miss)).isEqualTo(mapper.readTree(databaseOnly));
+            assertThat(mapper.readTree(hit)).isEqualTo(mapper.readTree(databaseOnly));
+            var data = mapper.readTree(hit).path("data");
+            assertThat(data.path("page").asInt()).isEqualTo(page);
+            assertThat(data.path("size").asInt()).isEqualTo(2);
+            assertThat(data.path("last").asBoolean()).isEqualTo(page >= 1);
+            for (var item : data.path("content")) collected.add(item.path("id").asLong());
+        }
+        var expected = new java.util.ArrayList<>(java.util.List.of(product.getId(), second.getId(), third.getId()));
+        if (!filtered) expected.add(other.getId());
+        assertThat(collected).doesNotHaveDuplicates().containsExactlyInAnyOrderElementsOf(expected);
     }
 
     /**

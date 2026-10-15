@@ -51,3 +51,7 @@ JPA에 두 인덱스를 반영하고 컬럼·정렬 방향 검증을 추가했�
 [출력 원본](explain-traditional/after-3bc0f0c.txt) · [실행 SQL](explain-traditional/after-3bc0f0c.sql) · [당시 구성 재현 정보](explain-traditional/after-3bc0f0c.json).
 
 해당 커밋의 쿼리·인덱스를 별도 로컬 MySQL 8.0.46에서 재현해 추가 수집했다. 기존 EC2 측정 당시 출력과는 구분한다. `rows`는 추정치이며 실제 읽은 행 수·loops·시간은 기존 `EXPLAIN ANALYZE`를 참고한다. [재현 범위](../historical-explain.md).
+
+## 제출 전 원본 재검증
+
+기존 로컬 측정 원본에서 전후 각 조건의 3개 지연 표본과 최소·중앙·최대값을 [검증 기록](audit-samples.json)으로 추출했다. 무필터·브랜드 1·601 모두 반복 응답 및 인덱스 전후 전체 JSON이 일치했다. 신규 측정이 아니며 표본 3개로 p95·p99를 추정하지 않는다.

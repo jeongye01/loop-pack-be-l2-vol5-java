@@ -77,7 +77,16 @@ class RedisRecoveryHttpTest {
     @Autowired org.springframework.jdbc.core.JdbcTemplate jdbc;
 
     @BeforeEach
-    void clearOwnRedis() { redis.getConnectionFactory().getConnection().serverCommands().flushDb(); }
+    void clearOwnRedis() throws Exception {
+        // Fixture maintenance uses the dedicated container, not the application's 100ms budget.
+        // Actual HTTP/cache/reconnect assertions below still use the production client settings.
+        var flushed = REDIS.execInContainer("redis-cli", "FLUSHDB", "SYNC");
+        assertThat(flushed.getExitCode()).as("Fixture Redis flush exit code").isZero();
+        assertThat(flushed.getStdout().trim()).as("Fixture Redis flush result").isEqualTo("OK");
+        var size = REDIS.execInContainer("redis-cli", "DBSIZE");
+        assertThat(size.getExitCode()).as("Fixture Redis size exit code").isZero();
+        assertThat(size.getStdout().trim()).as("Fixture Redis starts empty").isEqualTo("0");
+    }
 
     @AfterEach
     void restoreOwnRedis() throws Exception {

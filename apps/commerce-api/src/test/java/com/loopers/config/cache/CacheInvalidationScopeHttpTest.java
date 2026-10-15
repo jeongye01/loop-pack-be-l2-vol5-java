@@ -66,7 +66,7 @@ class CacheInvalidationScopeHttpTest {
     @Autowired EntityManager em;
     @Autowired PlatformTransactionManager tm;
     @Autowired CacheVersions versions;
-    @Autowired LikeUseCase likes;
+    @MockitoSpyBean LikeUseCase likes;
     @Autowired BrandUseCase brands;
     @Autowired OrderUseCase orders;
     @MockitoSpyBean ProductUseCase products;
@@ -309,6 +309,155 @@ class CacheInvalidationScopeHttpTest {
             executor.shutdownNow();
             assertThat(executor.awaitTermination(10, TimeUnit.SECONDS)).isTrue();
         }
+    }
+
+    /** 본인 목록의 옛 읽기를 멈춘 뒤 취소를 커밋하고, 옛 키가 채워져도 타인 접근과 최신 본인 조회를 보호한다. */
+    @Test
+    @org.junit.jupiter.api.Timeout(60)
+    @DisplayName("[R-LIKE-04/R-ORDER-13/R-POINT-02] 늦은 본인 목록 채움 전후에도 타인 조회·주문 확정을 거절한다")
+    void delayedPrivateListNeverBypassesOwnership() throws Exception {
+        Route mine = routes().get("my-alice");
+        String oldKey = cacheKey(mine);
+        long orderId = createHttpOrder(alice, a.getId());
+        JsonNode beforeOrder = customerData(get("/api/v1/orders/" + orderId), alice);
+        CountDownLatch loaded = new CountDownLatch(1);
+        CountDownLatch resume = new CountDownLatch(1);
+        doAnswer(invocation -> {
+            Object result = invocation.callRealMethod();
+            loaded.countDown();
+            if (!resume.await(10, TimeUnit.SECONDS)) throw new IllegalStateException("private read was not released");
+            return result;
+        }).when(likes).findMineBasicPage(alice.getId(), alice.getId(), 0, 20);
+        var executor = Executors.newSingleThreadExecutor();
+        try {
+            var oldRead = executor.submit(() -> read(mine, 200));
+            assertThat(loaded.await(10, TimeUnit.SECONDS)).isTrue();
+            customerWrite(delete("/api/v1/products/" + a.getId() + "/likes"));
+            assertThat(cacheKey(mine)).isNotEqualTo(oldKey);
+            for (boolean afterFill : List.of(false, true)) {
+                if (afterFill) {
+                    resume.countDown();
+                    assertThat(ids(oldRead.get(10, TimeUnit.SECONDS).path("content"))).containsExactly(a.getId());
+                    assertThat(ids(json.readTree(redis.opsForValue().get(oldKey)).path("data").path("content"))).containsExactly(a.getId());
+                }
+                reject(get(mine.url()), bob, org.springframework.http.HttpStatus.NOT_FOUND, "USER_NOT_FOUND");
+                reject(get("/api/v1/orders/" + orderId), bob, org.springframework.http.HttpStatus.NOT_FOUND, "ORDER_NOT_FOUND");
+                reject(post("/api/v1/orders/" + orderId + "/confirm"), bob, org.springframework.http.HttpStatus.NOT_FOUND, "ORDER_NOT_FOUND");
+                mvc.perform(get(mine.url())).andExpect(com.loopers.support.http.ApiHttp.failure(
+                    org.springframework.http.HttpStatus.UNAUTHORIZED, "USER_NOT_IDENTIFIED"));
+                assertThat(customerData(get("/api/v1/orders/" + orderId), alice)).isEqualTo(beforeOrder);
+                assertBalance(alice, 1000); assertBalance(bob, 0);
+                assertStock(a.getId(), 1);
+                assertThat(customerData(get("/api/v1/orders"), bob).path("content").size()).isZero();
+                assertThat(ids(read(routes().get("my-bob"), 200).path("content"))).containsExactly(b.getId());
+            }
+            assertThat(ids(read(mine, 200).path("content"))).isEmpty();
+        } finally {
+            resume.countDown();
+            executor.shutdownNow();
+            assertThat(executor.awaitTermination(10, TimeUnit.SECONDS)).isTrue();
+        }
+    }
+
+    /** 상품/재고의 옛 DB 결과 → 관리자 commit → 옛 캐시 저장 순서를 고정한 뒤 실제 주문 HTTP를 실행한다. */
+    @ParameterizedTest(name = "늦은 채움과 주문 판단: {0}")
+    @ValueSource(strings = {"price", "stock", "delete"})
+    @org.junit.jupiter.api.Timeout(60)
+    @DisplayName("[R-ORDER-02/05/07/08/09] 늦게 저장된 상품·재고 표시가 주문 가격·삭제·재고·포인트 판단을 바꾸지 않는다")
+    void delayedDisplayFillCannotChangeOrderDecisions(String change) throws Exception {
+        Route route = routes().get(change.equals("stock") ? "stocks" : "detail-A");
+        String oldKey = cacheKey(route);
+        long existingOrder = createHttpOrder(alice, a.getId());
+        JsonNode originalOrder = customerData(get("/api/v1/orders/" + existingOrder), alice);
+        CountDownLatch loaded = new CountDownLatch(1);
+        CountDownLatch resume = new CountDownLatch(1);
+        org.mockito.stubbing.Answer<Object> pauseAfterDatabaseRead = invocation -> {
+            Object result = invocation.callRealMethod();
+            loaded.countDown();
+            if (!resume.await(10, TimeUnit.SECONDS)) throw new IllegalStateException("display read was not released");
+            return result;
+        };
+        if (change.equals("stock")) {
+            doAnswer(pauseAfterDatabaseRead).when(products).findStockStatuses(
+                List.of(a.getId(), a2.getId(), b.getId()).stream().sorted().toList());
+        } else {
+            doAnswer(pauseAfterDatabaseRead).when(products).findBasicProduct(a.getId());
+        }
+        var executor = Executors.newSingleThreadExecutor();
+        try {
+            var oldRead = executor.submit(() -> read(route, 200));
+            assertThat(loaded.await(10, TimeUnit.SECONDS)).isTrue();
+            switch (change) {
+                case "price" -> write(put("/api-admin/v1/products/" + a.getId()).content("{\"name\":\"new-price\",\"price\":400}"));
+                case "stock" -> write(put("/api-admin/v1/products/" + a.getId() + "/stock").content("{\"quantity\":0}"));
+                case "delete" -> write(delete("/api-admin/v1/products/" + a.getId()));
+                default -> throw new IllegalArgumentException(change);
+            }
+            assertThat(cacheKey(route)).isNotEqualTo(oldKey);
+            resume.countDown();
+            JsonNode old = oldRead.get(10, TimeUnit.SECONDS);
+            assertThat(json.readTree(redis.opsForValue().get(oldKey)).path("data")).isEqualTo(old);
+            if (change.equals("stock")) assertThat(batchItem(old, a.getId()).path("soldOut").asBoolean()).isFalse();
+            else assertThat(old.path("price").asLong()).isEqualTo(100);
+
+            if (change.equals("price")) {
+                assertThat(read(route, 200).path("price").asLong()).isEqualTo(400);
+                var poor = fixture.userWithPoint(1);
+                long poorOrder = createHttpOrder(poor, a.getId());
+                JsonNode poorBefore = customerData(get("/api/v1/orders/" + poorOrder), poor);
+                reject(post("/api/v1/orders/" + poorOrder + "/confirm"), poor,
+                    org.springframework.http.HttpStatus.CONFLICT, "INSUFFICIENT_POINT");
+                assertThat(customerData(get("/api/v1/orders/" + poorOrder), poor)).isEqualTo(poorBefore);
+                assertBalance(poor, 1); assertBalance(bob, 0); assertBalance(alice, 1000); assertStock(a.getId(), 1);
+                long currentOrder = createHttpOrder(alice, a.getId());
+                assertThat(customerData(get("/api/v1/orders/" + currentOrder), alice).path("totalAmount").asLong()).isEqualTo(400);
+                write(put("/api-admin/v1/products/" + a.getId()).content("{\"name\":\"later-price\",\"price\":900}"));
+                JsonNode confirmed = customerData(post("/api/v1/orders/" + currentOrder + "/confirm"), alice);
+                assertThat(confirmed.path("status").asText()).isEqualTo("CONFIRMED");
+                assertThat(confirmed.path("items").get(0).path("unitPrice").asLong()).isEqualTo(400);
+                assertThat(confirmed.path("payment").path("amount").asLong()).isEqualTo(400);
+                assertBalance(alice, 600); assertStock(a.getId(), 0);
+            } else {
+                if (change.equals("delete")) {
+                    read(route, 404);
+                    reject(post("/api/v1/orders").content(orderItems(a.getId())), alice,
+                        org.springframework.http.HttpStatus.NOT_FOUND, "PRODUCT_NOT_FOUND");
+                } else {
+                    assertThat(batchItem(read(route, 200), a.getId()).path("soldOut").asBoolean()).isTrue();
+                }
+                reject(post("/api/v1/orders/" + existingOrder + "/confirm"), alice,
+                    org.springframework.http.HttpStatus.CONFLICT, change.equals("delete") ? "PRODUCT_NOT_AVAILABLE" : "INSUFFICIENT_STOCK");
+                assertBalance(alice, 1000); assertBalance(bob, 0);
+                assertStock(a.getId(), change.equals("stock") ? 0 : 1);
+                assertThat(customerData(get("/api/v1/orders"), alice).path("content").size()).isEqualTo(1);
+            }
+            assertThat(customerData(get("/api/v1/orders/" + existingOrder), alice)).isEqualTo(originalOrder);
+        } finally {
+            resume.countDown();
+            executor.shutdownNow();
+            assertThat(executor.awaitTermination(10, TimeUnit.SECONDS)).isTrue();
+        }
+    }
+
+    JsonNode customerData(MockHttpServletRequestBuilder request, User user) throws Exception {
+        return com.loopers.support.http.ApiHttp.data(mvc.perform(request.with(customer(user)).with(csrf())
+            .contentType(MediaType.APPLICATION_JSON)).andExpect(status().is2xxSuccessful()).andReturn());
+    }
+    long createHttpOrder(User user, Long productId) throws Exception {
+        return customerData(post("/api/v1/orders").content(orderItems(productId)), user).path("id").asLong();
+    }
+    String orderItems(Long productId) { return "{\"items\":[{\"productId\":" + productId + ",\"quantity\":1}]}"; }
+    void reject(MockHttpServletRequestBuilder request, User user, org.springframework.http.HttpStatus status, String code) throws Exception {
+        mvc.perform(request.with(customer(user)).with(csrf()).contentType(MediaType.APPLICATION_JSON))
+            .andExpect(com.loopers.support.http.ApiHttp.failure(status, code));
+    }
+    void assertBalance(User user, long expected) throws Exception {
+        assertThat(customerData(get("/api/v1/points"), user).path("balance").asLong()).isEqualTo(expected);
+    }
+    void assertStock(Long productId, int expected) {
+        Integer quantity = new TransactionTemplate(tm).execute(tx -> (Integer) em.createNativeQuery(
+            "select quantity from stock where product_id = :id", Integer.class).setParameter("id", productId).getSingleResult());
+        assertThat(quantity).isEqualTo(expected);
     }
 
     // 아래 도우미는 쓰기 전에 관련·무관한 조회를 모두 캐시하고, 쓰기 후 키·응답·TTL을 비교한다.

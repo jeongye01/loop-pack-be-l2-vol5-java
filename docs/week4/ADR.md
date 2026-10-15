@@ -91,7 +91,7 @@ Redis 장애 중 서비스 지속·DB 보호는 정상 상태 SLO와 별도로 �
 
 ## 현재 구현 기록
 
-아래는 로컬 구현 기준이다. **그룹 DB revision과 전체 TTL 5분 ±30초를 사용한다. EC2에는 아직 배포하지 않았다.**
+**그룹 DB revision과 전체 TTL 5분 ±30초를 사용한다.** EC2에는 `catalog-6cae328`로 API 분리·캐시 확장을 배포했고, 후속 `catalog-b2e84c4`에 Redis 타임아웃 설정을 반영했다. [캐시 배포·쓰기 검증](experiments/21-cache-path-validation/report.md)과 [타임아웃 배포 기록](experiments/22-cache-redis-recovery/report.md)을 구분한다. 아래 기능 테스트의 통과가 새 설계의 혼합 부하 SLO 달성을 의미하지는 않는다.
 
 상품 기본 정보와 좋아요 수·품절 상태를 API별로 분리한다. 프론트가 `productId`로 합친다.
 
@@ -128,7 +128,7 @@ C 생성, U 수정, D 삭제. 모든 행에 캐시를 적용한다. 키 생성�
 
 기본 목록·상세·내 좋아요 응답에는 `id`, `name`, `price`, `brand`만 있다. 받은 ID로 `/api/v1/products/like-counts?ids=...`와 `/api/v1/products/stocks?ids=...`를 각각 호출한다. 두 API도 기존 사용자 확인을 요구한다. 재고 응답 전에는 품절 여부를 미확인 상태로 보여 주고, 실패를 재고 있음으로 취급하지 않는다. 주문 확정은 기존 DB 검증을 유지한다.
 
-ids는 중복 제거 전 1~100개 양수 ID만 허용한다. 삭제·없는 상품은 제외된다. 기존 프론트와 함께 계약을 전환해야 하며 현재 EC2 배포는 이전 계약이다.
+ids는 중복 제거 전 1~100개 양수 ID만 허용한다. 삭제·없는 상품은 제외된다. 프론트의 응답 합성과 함께 EC2 계약을 전환했다. 배포·실호출 범위는 [21번 검증 기록](experiments/21-cache-path-validation/report.md)을 따른다.
 
 실행 순서는 [캐시 설계 적용 후 실행 계획](experiments/execution-plan.md)을 따른다.
 
