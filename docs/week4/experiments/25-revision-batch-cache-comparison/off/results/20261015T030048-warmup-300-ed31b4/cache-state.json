@@ -1,0 +1,22 @@
+{
+  "before": {
+    "ttlMs": {},
+    "redisStats": {
+      "total_commands_processed": 2383887,
+      "expired_keys": 115,
+      "evicted_keys": 0,
+      "keyspace_hits": 2149224,
+      "keyspace_misses": 123
+    }
+  },
+  "after": {
+    "ttlMs": {},
+    "redisStats": {
+      "total_commands_processed": 2383992,
+      "expired_keys": 115,
+      "evicted_keys": 0,
+      "keyspace_hits": 2149224,
+      "keyspace_misses": 123
+    }
+  }
+}

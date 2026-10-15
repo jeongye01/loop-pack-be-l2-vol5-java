@@ -74,9 +74,16 @@ public class ProductReadFacade {
 
     private List<ProductV1Dto.CustomerProductResponse> compose(List<ProductV1Dto.BasicProductResponse> basic, CacheVersions.Snapshot revisions) {
         if (basic.isEmpty()) return List.of();
-        var ids = basic.stream().map(ProductV1Dto.BasicProductResponse::id).toList();
-        var counts = counts(ids, revisions).data().stream().collect(Collectors.toMap(ProductUseCase.LikeCount::productId, Function.identity()));
-        var stocks = stocks(ids, revisions).data().stream().collect(Collectors.toMap(ProductUseCase.StockStatus::productId, Function.identity()));
+        var ids = basic.stream().map(ProductV1Dto.BasicProductResponse::id).distinct().sorted().toList();
+        var values = cache.readPair(revisions,
+            new ResponseCache.Entry<>(CacheKeys.COUNTS, CacheKeys.batch(CacheKeys.COUNTS, ids),
+                new TypeReference<ApiResponse<List<ProductUseCase.LikeCount>>>() { },
+                () -> ApiResponse.success(products.findLikeCounts(ids)), CacheKeys.CATALOG_REVISION),
+            new ResponseCache.Entry<>(CacheKeys.STOCKS, CacheKeys.batch(CacheKeys.STOCKS, ids),
+                new TypeReference<ApiResponse<List<ProductUseCase.StockStatus>>>() { },
+                () -> ApiResponse.success(products.findStockStatuses(ids)), CacheKeys.CATALOG_REVISION, CacheKeys.STOCK_REVISION));
+        var counts = values.first().data().stream().collect(Collectors.toMap(ProductUseCase.LikeCount::productId, Function.identity()));
+        var stocks = values.second().data().stream().collect(Collectors.toMap(ProductUseCase.StockStatus::productId, Function.identity()));
         return basic.stream().map(item -> new ProductV1Dto.CustomerProductResponse(item.id(), item.name(), item.price(), item.brand(),
             counts.get(item.id()).likeCount(), stocks.get(item.id()).soldOut())).toList();
     }

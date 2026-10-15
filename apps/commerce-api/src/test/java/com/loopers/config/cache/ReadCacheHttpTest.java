@@ -100,6 +100,59 @@ class ReadCacheHttpTest {
         org.mockito.Mockito.verifyNoInteractions(products);
     }
 
+    /** 준비: 목록과 두 표시 캐시를 채운다. 실행: hit. 확인: 실제 Redis 명령은 GET 1회와 MGET 1회다. */
+    @Test
+    @DisplayName("통합 목록 hit은 목록 GET 후 좋아요 수와 재고를 MGET 한 번으로 읽는다")
+    void readsDisplayCachesInOneRedisCommand() throws Exception {
+        String first = mvc.perform(get("/api/v1/products").with(customer(user))).andExpect(status().isOk())
+            .andReturn().getResponse().getContentAsString();
+        long gets = redisCommandCalls("get"), multiGets = redisCommandCalls("mget");
+        clearInvocations(products);
+        String hit = mvc.perform(get("/api/v1/products").with(customer(user))).andExpect(status().isOk())
+            .andReturn().getResponse().getContentAsString();
+        assertThat(hit).isEqualTo(first);
+        assertThat(redisCommandCalls("get") - gets).isEqualTo(1);
+        assertThat(redisCommandCalls("mget") - multiGets).isEqualTo(1);
+        org.mockito.Mockito.verifyNoInteractions(products);
+    }
+
+    long redisCommandCalls(String command) {
+        return redis.execute((org.springframework.data.redis.core.RedisCallback<Long>) connection -> {
+            var info = connection.serverCommands().info("commandstats");
+            String stat = info.getProperty("cmdstat_" + command, "calls=0,usec=0");
+            return Long.parseLong(stat.split(",")[0].substring("calls=".length()));
+        });
+    }
+
+    /** 준비: 캐시를 채운 뒤 두 표시 키 중 하나만 제거/손상한다. 실행: 목록 조회. 확인: 해당 원본만 읽고 다른 hit의 TTL은 연장하지 않는다. */
+    @org.junit.jupiter.params.ParameterizedTest
+    @org.junit.jupiter.params.provider.CsvSource({"like-counts,false", "stocks,false", "like-counts,true", "stocks,true"})
+    @DisplayName("MGET의 일부 miss·JSON 손상은 해당 데이터만 원본에서 읽고 나머지 hit을 유지한다")
+    void handlesPartialBatchMiss(String bucket, boolean corrupt) throws Exception {
+        String url = "/api/v1/products";
+        String first = mvc.perform(get(url).with(customer(user))).andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
+        var ids = java.util.List.of(product.getId());
+        String countsKey = key(CacheKeys.COUNTS, CacheKeys.batch(CacheKeys.COUNTS, ids), CacheKeys.CATALOG_REVISION);
+        String stocksKey = key(CacheKeys.STOCKS, CacheKeys.batch(CacheKeys.STOCKS, ids), CacheKeys.CATALOG_REVISION, CacheKeys.STOCK_REVISION);
+        String missing = bucket.equals(CacheKeys.COUNTS) ? countsKey : stocksKey;
+        String kept = bucket.equals(CacheKeys.COUNTS) ? stocksKey : countsKey;
+        redis.expire(kept, Duration.ofSeconds(120));
+        if (corrupt) redis.opsForValue().set(missing, "{broken");
+        else redis.delete(missing);
+        clearInvocations(products);
+        String response = mvc.perform(get(url).with(customer(user))).andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
+        assertThat(response).isEqualTo(first);
+        verify(products, times(bucket.equals(CacheKeys.COUNTS) ? 1 : 0)).findLikeCounts(ids);
+        verify(products, times(bucket.equals(CacheKeys.STOCKS) ? 1 : 0)).findStockStatuses(ids);
+        verify(products, times(0)).findBasicPage(org.mockito.ArgumentMatchers.any(), org.mockito.ArgumentMatchers.any(), org.mockito.ArgumentMatchers.anyInt(), org.mockito.ArgumentMatchers.anyInt());
+        assertThat(redis.getExpire(kept)).isBetween(110L, 120L);
+        if (corrupt) {
+            assertThat(redis.hasKey(missing)).isFalse();
+            mvc.perform(get(url).with(customer(user))).andExpect(status().isOk());
+        }
+        assertThat(redis.getExpire(missing)).isBetween(269L, 330L);
+    }
+
     /** 20개 목록의 miss는 각 일괄 조회 1회, hit은 원본 호출 0회. 재고 변경은 상품 캐시를 재사용한다. */
     @Test
     @DisplayName("통합 목록은 20개를 일괄 합성하고 재고 변경 후에도 기본 정보 캐시를 재사용한다")

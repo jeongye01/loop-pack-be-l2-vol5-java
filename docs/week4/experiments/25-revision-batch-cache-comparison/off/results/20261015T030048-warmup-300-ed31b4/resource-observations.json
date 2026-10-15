@@ -1,0 +1,113 @@
+{
+  "runId": "20261015T030048-warmup-300-ed31b4",
+  "sampleCount": 6,
+  "tomcat": {
+    "http-nio-0.0.0.0-8080": {
+      "tomcat_threads_busy_threads": {
+        "count": 6,
+        "mean": 166.66666666666666,
+        "min": 0.0,
+        "max": 200.0
+      },
+      "tomcat_threads_config_max_threads": {
+        "count": 6,
+        "mean": 200.0,
+        "min": 200.0,
+        "max": 200.0
+      },
+      "tomcat_threads_current_threads": {
+        "count": 6,
+        "mean": 168.33333333333334,
+        "min": 10.0,
+        "max": 200.0
+      }
+    }
+  },
+  "metrics": {
+    "hikaricp_connections_active": {
+      "min": 0.0,
+      "max": 40.0,
+      "mean": 32.5,
+      "p99": 40.0
+    },
+    "hikaricp_connections_pending": {
+      "min": 0.0,
+      "max": 157.0,
+      "mean": 126.0,
+      "p99": 157.0
+    },
+    "experiment_active_requests": {
+      "min": 0.0,
+      "max": 198.0,
+      "mean": 164.0,
+      "p99": 198.0
+    },
+    "experiment_log_queue_size": {
+      "min": 0.0,
+      "max": 0.0,
+      "mean": 0.0,
+      "p99": 0.0
+    }
+  },
+  "dockerCpuPercent": {
+    "app": {
+      "week4-commerce-api-1": {
+        "min": 0.36,
+        "max": 198.57,
+        "mean": 162.99166666666667,
+        "p99": 198.57
+      }
+    },
+    "db": {
+      "week4-db-redis-replica-1": {
+        "min": 0.12,
+        "max": 3.0,
+        "mean": 0.615,
+        "p99": 3.0
+      },
+      "week4-db-redis-master-1": {
+        "min": 0.12,
+        "max": 3.61,
+        "mean": 0.835,
+        "p99": 3.61
+      },
+      "week4-db-mysql-1": {
+        "min": 0.46,
+        "max": 49.79,
+        "mean": 26.986666666666665,
+        "p99": 49.79
+      }
+    }
+  },
+  "note": "Sampled resource maxima; preflight-to-recovery counter deltas include validation and recovery requests.",
+  "cacheCountersBefore": [],
+  "cacheCountersAfter": [],
+  "loadK6CpuPercent": {
+    "min": 65.3,
+    "max": 421.0,
+    "mean": 162.06,
+    "p99": 421.0
+  },
+  "sampledTraces": {
+    "count": 62,
+    "serverDurationMs": {
+      "min": 173.043962,
+      "max": 5045.757854,
+      "mean": 1456.0557203709677,
+      "p99": 5045.757854
+    },
+    "connectionWaitMs": {
+      "min": 0.035408999999999996,
+      "max": 4096.960179,
+      "mean": 1043.8594657741935,
+      "p99": 4096.960179
+    },
+    "sqlCount": {
+      "min": 0,
+      "max": 7,
+      "mean": 6.774193548387097,
+      "p99": 7
+    },
+    "sqlErrors": 0
+  }
+}

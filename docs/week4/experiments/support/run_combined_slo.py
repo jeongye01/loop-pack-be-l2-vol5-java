@@ -24,6 +24,11 @@ def cache_state(runner):
     if info['exitCode']: raise RuntimeError('Redis stats unavailable')
     state['redisStats'] = {k: int(v) for line in info['stdout'].splitlines() if ':' in line
                            for k, v in [line.split(':', 1)] if k in ('keyspace_hits', 'keyspace_misses', 'expired_keys', 'evicted_keys', 'total_commands_processed')}
+    commands = runner.ssh(runner.base['dbHost'], 'sudo docker exec week4-db-redis-master-1 redis-cli INFO commandstats')
+    if commands['exitCode']: raise RuntimeError('Redis command stats unavailable')
+    state['commandCalls'] = {name.removeprefix('cmdstat_'): int(fields.split(',')[0].split('=')[1])
+                             for line in commands['stdout'].splitlines() if line.startswith('cmdstat_')
+                             for name, fields in [line.split(':', 1)]}
     return state
 
 

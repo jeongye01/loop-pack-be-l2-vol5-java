@@ -152,3 +152,7 @@ C 생성, U 수정, D 삭제. 모든 행에 캐시를 적용한다. 키 생성�
 ## 통합 API revision 조회 개선
 
 각 통합 요청의 읽기 트랜잭션에서 필요한 catalog·stock(내 좋아요는 사용자 revision 포함)을 한 SQL로 조회해 불변 snapshot으로 전달한다. 키별 namespace 조합·순서와 없는 revision의 `0` 처리는 유지한다. snapshot은 요청 간 공유하지 않으며 Redis 장애에도 DB revision 조회는 우회하지 않는다. 읽기 트랜잭션 범위는 이번 비교에서 유지한다.
+
+### 통합 응답의 표시 캐시 일괄 읽기
+
+상품 목록 GET에서 ID를 얻은 뒤 좋아요 수·재고 키를 Redis MGET 한 번으로 읽는다. 서로 다른 캐시 키와 revision·TTL 5분 ±30초는 유지하며, 부분 miss는 해당 원본만 조회해 기존 CacheManager 정책으로 저장한다. hit의 TTL은 연장하지 않는다. Redis 장애 fallback과 손상 JSON 제거는 유지한다. DB 읽기 트랜잭션 범위 변경은 별도 비교 대상으로 남긴다.
