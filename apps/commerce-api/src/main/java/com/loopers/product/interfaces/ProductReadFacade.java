@@ -15,18 +15,22 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
+import com.loopers.support.cache.CatalogReadTransaction;
 
 /** 상품 정보와 표시 값을 별도로 캐시하고 한 응답으로 합친다. */
 @Component
 @RequiredArgsConstructor
-@Transactional(readOnly = true)
 public class ProductReadFacade {
     private final ProductUseCase products;
     private final LikeUseCase likes;
     private final ResponseCache cache;
+    private final CatalogReadTransaction transaction;
 
     public ApiResponse<SliceResponse<ProductV1Dto.CustomerProductResponse>> page(Long brandId, ProductSort sort, String normalized, int page, int size) {
+        return transaction.read(() -> pageWithinRead(brandId, sort, normalized, page, size));
+    }
+
+    private ApiResponse<SliceResponse<ProductV1Dto.CustomerProductResponse>> pageWithinRead(Long brandId, ProductSort sort, String normalized, int page, int size) {
         var revisions = cache.snapshot(CacheKeys.CATALOG_REVISION, CacheKeys.STOCK_REVISION);
         ApiResponse<SliceResponse<ProductV1Dto.BasicProductResponse>> basic = cache.read(revisions,
             "likes_desc".equals(normalized) ? CacheKeys.RANKINGS : CacheKeys.PRODUCTS,
@@ -38,6 +42,10 @@ public class ProductReadFacade {
     }
 
     public ApiResponse<ProductV1Dto.CustomerProductResponse> detail(Long id) {
+        return transaction.read(() -> detailWithinRead(id));
+    }
+
+    private ApiResponse<ProductV1Dto.CustomerProductResponse> detailWithinRead(Long id) {
         var revisions = cache.snapshot(CacheKeys.CATALOG_REVISION, CacheKeys.STOCK_REVISION);
         ApiResponse<ProductV1Dto.BasicProductResponse> basic = cache.read(revisions, CacheKeys.PRODUCTS, CacheKeys.product(id), new TypeReference<>() { },
             () -> ApiResponse.success(ProductV1Dto.BasicProductResponse.from(products.findBasicProduct(id))), CacheKeys.CATALOG_REVISION);
@@ -45,6 +53,10 @@ public class ProductReadFacade {
     }
 
     public ApiResponse<ListResponse<ProductV1Dto.CustomerProductResponse>> mine(Long userId, int page, int size) {
+        return transaction.read(() -> mineWithinRead(userId, page, size));
+    }
+
+    private ApiResponse<ListResponse<ProductV1Dto.CustomerProductResponse>> mineWithinRead(Long userId, int page, int size) {
         var revisions = cache.snapshot(CacheKeys.CATALOG_REVISION, CacheKeys.STOCK_REVISION, CacheKeys.userRevision(userId));
         ApiResponse<ListResponse<ProductV1Dto.BasicProductResponse>> basic = cache.read(revisions, CacheKeys.MY_LIKES,
             CacheKeys.myLikes(userId, page, size), new TypeReference<>() { },
@@ -55,7 +67,7 @@ public class ProductReadFacade {
     }
 
     public ApiResponse<List<ProductUseCase.LikeCount>> counts(List<Long> ids) {
-        return counts(ids, cache.snapshot(CacheKeys.CATALOG_REVISION));
+        return transaction.read(() -> counts(ids, cache.snapshot(CacheKeys.CATALOG_REVISION)));
     }
     private ApiResponse<List<ProductUseCase.LikeCount>> counts(List<Long> ids, CacheVersions.Snapshot revisions) {
         List<Long> normalized = ids.stream().distinct().sorted().toList();
@@ -64,7 +76,7 @@ public class ProductReadFacade {
     }
 
     public ApiResponse<List<ProductUseCase.StockStatus>> stocks(List<Long> ids) {
-        return stocks(ids, cache.snapshot(CacheKeys.CATALOG_REVISION, CacheKeys.STOCK_REVISION));
+        return transaction.read(() -> stocks(ids, cache.snapshot(CacheKeys.CATALOG_REVISION, CacheKeys.STOCK_REVISION)));
     }
     private ApiResponse<List<ProductUseCase.StockStatus>> stocks(List<Long> ids, CacheVersions.Snapshot revisions) {
         List<Long> normalized = ids.stream().distinct().sorted().toList();

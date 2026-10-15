@@ -11,16 +11,18 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 public class CacheVersions {
     private final JdbcTemplate jdbc;
     private final boolean enabled;
-    public CacheVersions(JdbcTemplate jdbc, @Value("${catalog.cache.enabled:false}") boolean enabled) {
+    private final CacheReadPolicy policy;
+    public CacheVersions(JdbcTemplate jdbc, @Value("${catalog.cache.enabled:false}") boolean enabled, CacheReadPolicy policy) {
         this.jdbc = jdbc;
         this.enabled = enabled;
+        this.policy = policy;
     }
     public boolean isEnabled() { return enabled; }
     public Snapshot snapshot(String... namespaces) {
         if (!isEnabled()) return new Snapshot(false, java.util.Map.of());
         var revisions = new java.util.LinkedHashMap<String, String>();
-        for (String namespace : namespaces) revisions.put(namespace, "0");
-        if (!revisions.isEmpty()) {
+        for (String namespace : namespaces) revisions.put(namespace, policy.bypassRevision() ? policy.experimentRevision() : "0");
+        if (!policy.bypassRevision() && !revisions.isEmpty()) {
             String placeholders = String.join(",", java.util.Collections.nCopies(revisions.size(), "?"));
             jdbc.query("select namespace, revision from read_cache_revision where namespace in (" + placeholders + ")",
                 (org.springframework.jdbc.core.RowCallbackHandler) row -> revisions.put(row.getString("namespace"), row.getString("revision")),
