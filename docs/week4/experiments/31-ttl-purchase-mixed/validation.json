@@ -1,0 +1,11 @@
+{
+  "pilotReadAndPurchasePassed": true,
+  "mainCaptureComplete": true,
+  "mainRecoveryPassed": true,
+  "purchaseDbAuditPassed": true,
+  "reportLinksValid": true,
+  "batchedTtlCollector205KeysPerPatternPassed": true,
+  "readSloPassed": false,
+  "purchaseSloPassed": false,
+  "mainRuns": 1
+}

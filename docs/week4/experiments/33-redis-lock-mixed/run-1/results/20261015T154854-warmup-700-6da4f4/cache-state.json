@@ -1,0 +1,69 @@
+{
+  "before": {
+    "ttlMs": {
+      "products::v3:products?sort=latest&brand=all&page=0&size=20:rev=82cb342f-e77d-4d17-96b5-17cf82677d24": 1424,
+      "like-counts::v3:products/like-counts?ids=1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20:rev=82cb342f-e77d-4d17-96b5-17cf82677d24": 242105,
+      "stocks::v3:products/stocks?ids=1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20:rev=82cb342f-e77d-4d17-96b5-17cf82677d24:rev=2e2b0e58-9773-4e39-be3b-8c09c618fe91": 274786
+    },
+    "redisStats": {
+      "total_commands_processed": 7063249,
+      "expired_keys": 2459,
+      "evicted_keys": 0,
+      "keyspace_hits": 8684533,
+      "keyspace_misses": 232620
+    },
+    "commandCalls": {
+      "client|setname": 37,
+      "mget": 2180287,
+      "role": 37,
+      "scan": 2436,
+      "ttl": 18,
+      "info": 222,
+      "replconf": 237814,
+      "ping": 47305,
+      "expire": 35,
+      "del": 25,
+      "hello": 111,
+      "get": 4549020,
+      "psync": 1,
+      "evalsha": 20,
+      "exists": 2,
+      "set": 38225,
+      "eval": 116,
+      "pttl": 7539
+    }
+  },
+  "after": {
+    "ttlMs": {
+      "like-counts::v3:products/like-counts?ids=1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20:rev=82cb342f-e77d-4d17-96b5-17cf82677d24": 185388,
+      "stocks::v3:products/stocks?ids=1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20:rev=82cb342f-e77d-4d17-96b5-17cf82677d24:rev=2e2b0e58-9773-4e39-be3b-8c09c618fe91": 218067
+    },
+    "redisStats": {
+      "total_commands_processed": 7105803,
+      "expired_keys": 2477,
+      "evicted_keys": 0,
+      "keyspace_hits": 8747541,
+      "keyspace_misses": 232839
+    },
+    "commandCalls": {
+      "client|setname": 37,
+      "mget": 2201289,
+      "role": 37,
+      "scan": 2439,
+      "ttl": 18,
+      "info": 224,
+      "replconf": 237871,
+      "ping": 47317,
+      "expire": 35,
+      "del": 42,
+      "hello": 111,
+      "get": 4570241,
+      "psync": 1,
+      "evalsha": 37,
+      "exists": 2,
+      "set": 38444,
+      "eval": 118,
+      "pttl": 7541
+    }
+  }
+}

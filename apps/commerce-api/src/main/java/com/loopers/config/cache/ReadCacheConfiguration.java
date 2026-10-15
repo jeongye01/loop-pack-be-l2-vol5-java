@@ -27,8 +27,10 @@ public class ReadCacheConfiguration implements CachingConfigurer {
 
     public ReadCacheConfiguration(io.micrometer.core.instrument.MeterRegistry metrics) { this.metrics = metrics; }
     @Bean
-    CacheManager cacheManager(@Qualifier("redisConnectionMaster") RedisConnectionFactory connection) {
-        var defaults = RedisCacheConfiguration.defaultCacheConfig().entryTtl(new ReadCacheTtl()).disableCachingNullValues()
+    CacheManager cacheManager(@Qualifier("redisConnectionMaster") RedisConnectionFactory connection,
+        @org.springframework.beans.factory.annotation.Value("${experiment.latest-first-ttl-seconds:0}") long latestFirstSeconds,
+        org.springframework.core.env.Environment environment) {
+        var defaults = RedisCacheConfiguration.defaultCacheConfig().entryTtl(new ReadCacheTtl(latestFirstSeconds, environment.matchesProfiles("experiment"))).disableCachingNullValues()
             .serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(new StringRedisSerializer()));
         var configurations = new java.util.HashMap<String, RedisCacheConfiguration>();
         CacheKeys.NAMES.forEach(name -> configurations.put(name, defaults));

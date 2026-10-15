@@ -1,0 +1,181 @@
+[
+  {
+    "runId": "20261015T154742-warmup-300-37d320",
+    "p99LimitMs": 100,
+    "phase": "warmup",
+    "rps": 300,
+    "seconds": 30,
+    "planned": 9000,
+    "started": 9001,
+    "completed": 9001,
+    "dropped": 0,
+    "successRate": 0.5137206977002555,
+    "failed": 4377,
+    "timeouts": 4377,
+    "transportErrors": 0,
+    "httpErrors": 0,
+    "mismatches": 0,
+    "httpRequests": 9001,
+    "httpRps": 296.0746257927796,
+    "httpFailureRate": 0.4862793022997445,
+    "latencyMs": {
+      "max": 5002,
+      "p(50)": 4943,
+      "p(95)": 5001,
+      "p(99)": 5001,
+      "avg": 4139.139428952339,
+      "min": 376
+    },
+    "successLatencyMs": {
+      "avg": 3323.7796280276816,
+      "min": 376,
+      "max": 5000,
+      "p(50)": 3597,
+      "p(95)": 4892.849999999999,
+      "p(99)": 4979.7699999999995
+    },
+    "recovered": true,
+    "collection": {
+      "samplesComplete": true,
+      "environmentComplete": true,
+      "serverLogsCollected": true,
+      "asyncLogMetricsComplete": true,
+      "tomcatMetricsComplete": true
+    },
+    "exitCode": 0,
+    "complete": true,
+    "sloPassed": false,
+    "readPassed": false
+  },
+  {
+    "runId": "20261015T154854-warmup-700-6da4f4",
+    "p99LimitMs": 100,
+    "phase": "warmup",
+    "rps": 700,
+    "seconds": 30,
+    "planned": 21000,
+    "started": 21000,
+    "completed": 21000,
+    "dropped": 0,
+    "successRate": 1,
+    "failed": 0,
+    "timeouts": 0,
+    "transportErrors": 0,
+    "httpErrors": 0,
+    "mismatches": 0,
+    "httpRequests": 21000,
+    "httpRps": 699.8656047146113,
+    "httpFailureRate": 0,
+    "latencyMs": {
+      "min": 1,
+      "max": 150,
+      "p(50)": 7,
+      "p(95)": 29,
+      "p(99)": 64,
+      "avg": 9.612428571428572
+    },
+    "successLatencyMs": {
+      "avg": 9.612428571428572,
+      "min": 1,
+      "max": 150,
+      "p(50)": 7,
+      "p(95)": 29,
+      "p(99)": 64
+    },
+    "recovered": true,
+    "collection": {
+      "samplesComplete": true,
+      "environmentComplete": true,
+      "serverLogsCollected": true,
+      "asyncLogMetricsComplete": true,
+      "tomcatMetricsComplete": true
+    },
+    "exitCode": 0,
+    "complete": true,
+    "sloPassed": true,
+    "readPassed": true
+  },
+  {
+    "runId": "20261015T154959-measure-1700-e66f4a",
+    "p99LimitMs": 100,
+    "phase": "measure",
+    "rps": 1700,
+    "seconds": 60,
+    "planned": 102000,
+    "started": 72382,
+    "completed": 72382,
+    "dropped": 29619,
+    "successRate": 1,
+    "failed": 0,
+    "timeouts": 0,
+    "transportErrors": 0,
+    "httpErrors": 0,
+    "mismatches": 0,
+    "httpRequests": 73582,
+    "httpRps": 1185.0217706762091,
+    "httpFailureRate": 0,
+    "latencyMs": {
+      "p(99)": 3264,
+      "avg": 2406.797587798071,
+      "min": 30,
+      "max": 3651,
+      "p(50)": 2460,
+      "p(95)": 3049
+    },
+    "successLatencyMs": {
+      "min": 30,
+      "max": 3651,
+      "p(50)": 2460,
+      "p(95)": 3049,
+      "p(99)": 3264,
+      "avg": 2406.797587798071
+    },
+    "recovered": true,
+    "collection": {
+      "samplesComplete": true,
+      "environmentComplete": true,
+      "serverLogsCollected": true,
+      "asyncLogMetricsComplete": true,
+      "tomcatMetricsComplete": true
+    },
+    "exitCode": 0,
+    "purchase": {
+      "planned": 600,
+      "started": 600,
+      "completed": 600,
+      "successRate": 1,
+      "failed": 0,
+      "timeouts": 0,
+      "httpErrors": 0,
+      "invalidResponses": 0,
+      "latencyMs": {
+        "min": 1921,
+        "max": 6184,
+        "p(50)": 4354.5,
+        "p(95)": 5807.05,
+        "p(99)": 6057.16,
+        "avg": 3972.3766666666666
+      },
+      "createLatencyMs": {
+        "min": 613,
+        "max": 3303,
+        "p(50)": 2432,
+        "p(95)": 3002.05,
+        "p(99)": 3204.08,
+        "avg": 2423.82
+      },
+      "confirmLatencyMs": {
+        "min": 27,
+        "max": 3312,
+        "p(50)": 2138.5,
+        "p(95)": 3037.1499999999996,
+        "p(99)": 3252.01,
+        "avg": 1548.4816666666666
+      }
+    },
+    "complete": false,
+    "sloPassed": false,
+    "readPassed": false,
+    "purchasePassed": false
+  }
+]

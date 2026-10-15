@@ -1,0 +1,22 @@
+{
+  "runId": "20261015T144649-measure-5-a7452b",
+  "readSuccess": {
+    "rate": 1,
+    "passes": 15,
+    "fails": 0
+  },
+  "purchaseSuccess": {
+    "rate": 1,
+    "passes": 3,
+    "fails": 0
+  },
+  "collection": {
+    "samplesComplete": true,
+    "environmentComplete": true,
+    "serverLogsCollected": true,
+    "asyncLogMetricsComplete": true,
+    "tomcatMetricsComplete": true
+  },
+  "recovered": true,
+  "notMainMeasurement": true
+}

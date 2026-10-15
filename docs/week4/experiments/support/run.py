@@ -95,7 +95,7 @@ class Runner:
         try:
             with urllib.request.urlopen(request, timeout=self.base['timeoutSeconds']) as response:
                 body=json.load(response)
-            return {'ok':body.get('meta',{}).get('result')=='SUCCESS' and body.get('data')==self.expected['data'],
+            return {'ok':body.get('meta',{}).get('result')=='SUCCESS' and (self.base.get('validateSeedResponse', True) is False or body.get('data')==self.expected['data']),
                     'latencyMs':(time.monotonic()-start)*1000}
         except Exception as e: return {'ok':False,'error':str(e)}
 

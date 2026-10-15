@@ -1,0 +1,117 @@
+{
+  "runId": "20261015T040059-measure-1700-ae82c2",
+  "sampleCount": 13,
+  "tomcat": {
+    "http-nio-0.0.0.0-8080": {
+      "tomcat_threads_busy_threads": {
+        "count": 13,
+        "mean": 56.23076923076923,
+        "min": 0.0,
+        "max": 200.0
+      },
+      "tomcat_threads_config_max_threads": {
+        "count": 13,
+        "mean": 200.0,
+        "min": 200.0,
+        "max": 200.0
+      },
+      "tomcat_threads_current_threads": {
+        "count": 13,
+        "mean": 200.0,
+        "min": 200.0,
+        "max": 200.0
+      }
+    }
+  },
+  "metrics": {
+    "hikaricp_connections_active": {
+      "min": 0.0,
+      "max": 40.0,
+      "mean": 22.76923076923077,
+      "p99": 40.0
+    },
+    "hikaricp_connections_pending": {
+      "min": 0.0,
+      "max": 163.0,
+      "mean": 32.84615384615385,
+      "p99": 163.0
+    },
+    "experiment_active_requests": {
+      "min": 0.0,
+      "max": 200.0,
+      "mean": 52.15384615384615,
+      "p99": 200.0
+    },
+    "experiment_log_queue_size": {
+      "min": 0.0,
+      "max": 0.0,
+      "mean": 0.0,
+      "p99": 0.0
+    }
+  },
+  "dockerCpuPercent": {
+    "app": {
+      "week4-commerce-api-1": {
+        "min": 0.3,
+        "max": 198.28,
+        "mean": 171.28076923076924,
+        "p99": 198.28
+      }
+    },
+    "db": {
+      "week4-db-redis-replica-1": {
+        "min": 0.13,
+        "max": 0.17,
+        "mean": 0.15384615384615385,
+        "p99": 0.17
+      },
+      "week4-db-redis-master-1": {
+        "min": 0.2,
+        "max": 8.61,
+        "mean": 5.99,
+        "p99": 8.61
+      },
+      "week4-db-mysql-1": {
+        "min": 0.48,
+        "max": 117.5,
+        "mean": 97.29615384615384,
+        "p99": 117.5
+      }
+    }
+  },
+  "note": "Sampled resource maxima; preflight-to-recovery counter deltas include validation and recovery requests.",
+  "cacheCountersBefore": [
+    "catalog_cache_errors_total{application=\"commerce-api\",operation=\"get\"} 33.0"
+  ],
+  "cacheCountersAfter": [
+    "catalog_cache_errors_total{application=\"commerce-api\",operation=\"get\"} 33.0"
+  ],
+  "loadK6CpuPercent": {
+    "min": 349.0,
+    "max": 592.0,
+    "mean": 386.0,
+    "p99": 592.0
+  },
+  "sampledTraces": {
+    "count": 1018,
+    "serverDurationMs": {
+      "min": 2.139994,
+      "max": 633.883395,
+      "mean": 41.5529449194499,
+      "p99": 366.090295
+    },
+    "connectionWaitMs": {
+      "min": 0.0067929999999999996,
+      "max": 605.9563800000001,
+      "mean": 28.07671000392927,
+      "p99": 339.600065
+    },
+    "sqlCount": {
+      "min": 2,
+      "max": 2,
+      "mean": 2,
+      "p99": 2
+    },
+    "sqlErrors": 0
+  }
+}

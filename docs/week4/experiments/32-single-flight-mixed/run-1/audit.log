@@ -1,0 +1,45 @@
+{
+  "runId": "20261015T151758-measure-1700-92c1bb",
+  "passed": true,
+  "checks": {
+    "eventCountMatchesCompleted": true,
+    "oneOrderPerPurchase": true,
+    "successResponsesMatchConfirmedOrders": true,
+    "stockDecrementsMatchConfirmedQuantities": true,
+    "pointDebitsMatchConfirmedAmounts": true
+  },
+  "createdOrders": 601,
+  "confirmedOrders": 601,
+  "clientSuccessfulPurchases": 601,
+  "confirmedDespiteClientFailure": [],
+  "stockDecrements": {
+    "1": 31,
+    "2": 30,
+    "3": 30,
+    "4": 30,
+    "5": 30,
+    "6": 30,
+    "7": 30,
+    "8": 30,
+    "9": 30,
+    "10": 30,
+    "11": 30,
+    "12": 30,
+    "13": 30,
+    "14": 30,
+    "15": 30,
+    "16": 30,
+    "17": 30,
+    "18": 30,
+    "19": 30,
+    "20": 30
+  },
+  "totalPointDebit": 39736387131,
+  "rowLockStatusDelta": {
+    "Innodb_row_lock_current_waits": 0,
+    "Innodb_row_lock_time": 20237,
+    "Innodb_row_lock_time_avg": 14,
+    "Innodb_row_lock_time_max": 549,
+    "Innodb_row_lock_waits": 307
+  }
+}

@@ -1,0 +1,46 @@
+{
+  "runId": "20261015T040059-measure-1700-ae82c2",
+  "phase": "measure",
+  "rps": 1700,
+  "seconds": 60,
+  "planned": 102000,
+  "started": 102001,
+  "completed": 102001,
+  "dropped": 0,
+  "successRate": 1,
+  "failed": 0,
+  "timeouts": 0,
+  "transportErrors": 0,
+  "httpErrors": 0,
+  "mismatches": 0,
+  "httpRequests": 102001,
+  "httpRps": 1699.809737042029,
+  "httpFailureRate": 0,
+  "latencyMs": {
+    "avg": 50.643738786874636,
+    "min": 2,
+    "max": 1024,
+    "p(50)": 9,
+    "p(95)": 259,
+    "p(99)": 440
+  },
+  "successLatencyMs": {
+    "avg": 50.643738786874636,
+    "min": 2,
+    "max": 1024,
+    "p(50)": 9,
+    "p(95)": 259,
+    "p(99)": 440
+  },
+  "recovered": true,
+  "collection": {
+    "samplesComplete": true,
+    "environmentComplete": true,
+    "serverLogsCollected": true,
+    "asyncLogMetricsComplete": true,
+    "tomcatMetricsComplete": true
+  },
+  "exitCode": 0,
+  "complete": true,
+  "sloPassed": false
+}

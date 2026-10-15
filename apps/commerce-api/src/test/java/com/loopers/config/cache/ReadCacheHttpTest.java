@@ -53,6 +53,7 @@ class ReadCacheHttpTest {
     @Autowired PlatformTransactionManager tm;
     @MockitoSpyBean CacheVersions versions;
     @MockitoSpyBean org.springframework.jdbc.core.JdbcTemplate jdbc;
+    @MockitoSpyBean com.loopers.support.cache.CachedJson cachedJson;
     @Autowired LikeUseCase likes;
     @MockitoSpyBean ProductUseCase products;
     @MockitoSpyBean org.springframework.cache.CacheManager cacheManager;
@@ -114,6 +115,78 @@ class ReadCacheHttpTest {
         assertThat(redisCommandCalls("get") - gets).isEqualTo(1);
         assertThat(redisCommandCalls("mget") - multiGets).isEqualTo(1);
         org.mockito.Mockito.verifyNoInteractions(products);
+    }
+
+    /** 준비: 통합 응답 캐시를 채운다. 실행: 모든 캐시가 hit인 재조회. 확인: Redis 표시 조회 때 DB 트랜잭션·커넥션 자원이 없다. */
+    @org.junit.jupiter.params.ParameterizedTest
+    @org.junit.jupiter.params.provider.ValueSource(strings = {"latest", "price_asc", "likes_desc", "detail", "mine"})
+    @DisplayName("통합 hit은 revision 조회 후 DB 커넥션을 반환하고 Redis에서 응답을 합친다")
+    void hitDoesNotHoldDatabaseTransactionDuringRedisRead(String route) throws Exception {
+        likes.register(user.getId(), product.getId());
+        String url = switch (route) {
+            case "detail" -> "/api/v1/products/" + product.getId();
+            case "mine" -> "/api/v1/users/" + user.getId() + "/likes";
+            default -> "/api/v1/products?sort=" + route;
+        };
+        String before = mvc.perform(get(url).with(customer(user))).andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
+        var observed = new java.util.concurrent.atomic.AtomicInteger();
+        org.mockito.Mockito.doAnswer(invocation -> {
+            assertThat(org.springframework.transaction.support.TransactionSynchronizationManager.isActualTransactionActive()).isFalse();
+            assertThat(org.springframework.transaction.support.TransactionSynchronizationManager.getResourceMap()).isEmpty();
+            observed.incrementAndGet();
+            return invocation.callRealMethod();
+        }).when(cachedJson).loadMany(org.mockito.ArgumentMatchers.anyList(), org.mockito.ArgumentMatchers.anyList());
+        clearInvocations(products);
+        assertThat(mvc.perform(get(url).with(customer(user))).andExpect(status().isOk()).andReturn().getResponse().getContentAsString()).isEqualTo(before);
+        assertThat(observed.get()).isEqualTo(1);
+        org.mockito.Mockito.verifyNoInteractions(products);
+    }
+
+    /** 준비: 전체 miss. 실행: 목록 조회. 확인: 원본 조회 직전부터 트랜잭션이 활성화되어 revision과 같은 스냅샷을 쓴다. */
+    @Test
+    @DisplayName("전체 miss는 revision을 트랜잭션 안에서 다시 읽고 원본을 한 번만 조회한다")
+    void missRestartsRevisionInsideTransaction() throws Exception {
+        var states = new java.util.ArrayList<Boolean>();
+        org.mockito.Mockito.doAnswer(invocation -> {
+            states.add(org.springframework.transaction.support.TransactionSynchronizationManager.isActualTransactionActive());
+            return invocation.callRealMethod();
+        }).when(versions).snapshot(CacheKeys.CATALOG_REVISION, CacheKeys.STOCK_REVISION);
+        org.mockito.Mockito.doAnswer(invocation -> {
+            assertThat(org.springframework.transaction.support.TransactionSynchronizationManager.isActualTransactionActive()).isTrue();
+            return invocation.callRealMethod();
+        }).when(cachedJson).loadMany(org.mockito.ArgumentMatchers.anyList(), org.mockito.ArgumentMatchers.anyList());
+        mvc.perform(get("/api/v1/products").with(customer(user))).andExpect(status().isOk());
+        assertThat(states).containsExactly(false, true);
+        verify(products, times(1)).findBasicPage(org.mockito.ArgumentMatchers.any(), org.mockito.ArgumentMatchers.any(), org.mockito.ArgumentMatchers.anyInt(), org.mockito.ArgumentMatchers.anyInt());
+        verify(products, times(1)).findLikeCounts(java.util.List.of(product.getId()));
+        verify(products, times(1)).findStockStatuses(java.util.List.of(product.getId()));
+    }
+
+    /** 준비: 상품 목록은 hit, 재고만 miss. 실행: 표시 조회 도중 상품 수정 커밋. 확인: 옛 목록을 버리고 새 revision·상품을 함께 반환한다. */
+    @Test
+    @DisplayName("부분 miss 사이 상품이 변경되면 옛 hit을 버리고 새 revision으로 전체 응답을 다시 구성한다")
+    void partialMissDoesNotMixOldProductWithNewRevision() throws Exception {
+        mvc.perform(get("/api/v1/products").with(customer(user))).andExpect(status().isOk());
+        var ids = java.util.List.of(product.getId());
+        redis.delete(key(CacheKeys.STOCKS, CacheKeys.batch(CacheKeys.STOCKS, ids), CacheKeys.CATALOG_REVISION, CacheKeys.STOCK_REVISION));
+        var calls = new java.util.concurrent.atomic.AtomicInteger();
+        org.mockito.Mockito.doAnswer(invocation -> {
+            Object values = invocation.callRealMethod();
+            if (calls.incrementAndGet() == 1) {
+                assertThat(org.springframework.transaction.support.TransactionSynchronizationManager.isActualTransactionActive()).isFalse();
+                mvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put("/api-admin/v1/products/" + product.getId())
+                    .with(com.loopers.support.http.ApiHttp.admin()).with(org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf())
+                    .contentType(org.springframework.http.MediaType.APPLICATION_JSON).content("{\"name\":\"after-probe\",\"price\":200}"))
+                    .andExpect(status().isOk());
+            }
+            return values;
+        }).when(cachedJson).loadMany(org.mockito.ArgumentMatchers.anyList(), org.mockito.ArgumentMatchers.anyList());
+        mvc.perform(get("/api/v1/products").with(customer(user))).andExpect(status().isOk())
+            .andExpect(jsonPath("$.data.content[0].name").value("after-probe"))
+            .andExpect(jsonPath("$.data.content[0].price").value(200));
+        assertThat(calls.get()).isEqualTo(2);
+        mvc.perform(get("/api/v1/products").with(customer(user))).andExpect(status().isOk())
+            .andExpect(jsonPath("$.data.content[0].name").value("after-probe"));
     }
 
     long redisCommandCalls(String command) {

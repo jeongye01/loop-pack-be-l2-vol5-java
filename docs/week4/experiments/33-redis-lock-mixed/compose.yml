@@ -1,0 +1,11 @@
+services:
+  commerce-api:
+    image: commerce-api:redis-lock-cbfb7e35463f
+    environment:
+      CATALOG_CACHE_ENABLED: "true"
+      EXPERIMENT_CATALOG_REVISION_BYPASS_ENABLED: "false"
+      EXPERIMENT_LATEST_CACHE_ENABLED: "false"
+      EXPERIMENT_LATEST_FIRST_TTL_SECONDS: "2"
+      CATALOG_CACHE_LOCK_LEASE_MS: "5000"
+      CATALOG_CACHE_LOCK_WAIT_MS: "1000"
+      CATALOG_CACHE_LOCK_POLL_MS: "20"

@@ -1,0 +1,6 @@
+{
+  "baseCommit": "ba1f57adb62813d86541f5fcd54ee7febf5469c6",
+  "workingTreePatch": "implementation.patch",
+  "jarSha256": "0d807521f68f63d66687b3b458cc7cd9c296294c52e149932038e037badfc0e6",
+  "image": "commerce-api:hit-miss-0d807521f68f"
+}

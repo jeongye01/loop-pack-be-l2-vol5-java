@@ -1,0 +1,66 @@
+{
+  "before": {
+    "ttlMs": {
+      "products::v3:products?sort=latest&brand=all&page=0&size=20:rev=82cb342f-e77d-4d17-96b5-17cf82677d24": 3394,
+      "like-counts::v3:products/like-counts?ids=1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20:rev=82cb342f-e77d-4d17-96b5-17cf82677d24": 24808,
+      "stocks::v3:products/stocks?ids=1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20:rev=82cb342f-e77d-4d17-96b5-17cf82677d24:rev=102a8c80-26aa-4136-9ccf-4b61e1bb479a": 309153
+    },
+    "redisStats": {
+      "total_commands_processed": 4546998,
+      "expired_keys": 140,
+      "evicted_keys": 0,
+      "keyspace_hits": 5210417,
+      "keyspace_misses": 167
+    },
+    "commandCalls": {
+      "client|setname": 34,
+      "mget": 956651,
+      "role": 34,
+      "scan": 206,
+      "ttl": 18,
+      "info": 126,
+      "replconf": 230482,
+      "ping": 45846,
+      "expire": 35,
+      "del": 5,
+      "hello": 102,
+      "get": 3297092,
+      "psync": 1,
+      "exists": 2,
+      "set": 16195,
+      "pttl": 170
+    }
+  },
+  "after": {
+    "ttlMs": {
+      "products::v3:products?sort=latest&brand=all&page=0&size=20:rev=82cb342f-e77d-4d17-96b5-17cf82677d24": 225783,
+      "like-counts::v3:products/like-counts?ids=1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20:rev=82cb342f-e77d-4d17-96b5-17cf82677d24": 258876,
+      "stocks::v3:products/stocks?ids=1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20:rev=82cb342f-e77d-4d17-96b5-17cf82677d24:rev=102a8c80-26aa-4136-9ccf-4b61e1bb479a": 252260
+    },
+    "redisStats": {
+      "total_commands_processed": 4589102,
+      "expired_keys": 142,
+      "evicted_keys": 0,
+      "keyspace_hits": 5273442,
+      "keyspace_misses": 182
+    },
+    "commandCalls": {
+      "client|setname": 34,
+      "mget": 977663,
+      "role": 34,
+      "scan": 209,
+      "ttl": 18,
+      "info": 128,
+      "replconf": 230539,
+      "ping": 45857,
+      "expire": 35,
+      "del": 5,
+      "hello": 102,
+      "get": 3318105,
+      "psync": 1,
+      "exists": 2,
+      "set": 16199,
+      "pttl": 173
+    }
+  }
+}

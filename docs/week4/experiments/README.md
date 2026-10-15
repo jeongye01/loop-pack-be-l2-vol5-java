@@ -4,9 +4,11 @@
 | --- | --- |
 | 대상 | 최신순 상품 목록 · 브랜드 필터 없음 · 첫 페이지 20개 |
 | 부하 조건 | 1,700 RPS · 60초 · VU 3,000 · 3회 |
-| 응답 시간 | 클라이언트 기준 p99 ≤ 200ms |
+| 응답 시간 | 클라이언트 기준 p99 ≤ 100ms |
 | 성공률 | 시작 요청의 100% 정상 응답 · 오류/timeout 0건 |
 | 요청 누락 | 미시작·미완료 0건 |
+
+2026-10-15 목표를 200ms에서 100ms로 강화했다. 과거 실행 설정·원본 결과는 보존하고 새 기준의 재판정은 보고서에 구분해 기록한다. 읽기·쓰기 혼합 실험은 목록 조회와 구매 전체(주문 생성→확정)를 각각 판정한다.
 
 - [이번 주 변경사항](../이번%20주%20변경사항.md): 인덱스·SQL·캐시·로깅·API 분리 요약
 - [캐시 설계 적용 후 실행 계획](execution-plan.md): 정상 hit·쓰기·스탬피드·DB 보호·장애 복구 순서
@@ -65,3 +67,13 @@ experiments/
 예비 측정 원본의 수치·환경·해시는 그대로 보존한다. 당시 실행기는 보관용이며 정식 실험은 `support/`를 사용한다. 정식 실행 전 정상 응답·불일치·HTTP 오류·timeout·수집 실패·회복을 확인하고, 서울 배포에서 요청별 Tomcat·SQL Trace가 수집되는지 검증한다.
 
 - [21. 조회 경로별 캐시 TTL·쓰기 후 갱신 검증](21-cache-path-validation/report.md)
+
+- [29. hit/miss 트랜잭션 분리 후 revision ON SLO](29-cache-hit-miss-transaction/report.md)
+
+- [30. 최신순 TTL 2초 스탬피드 관찰 3회](30-latest-short-ttl-stampede/report.md)
+
+- [31. TTL 2초 + 구매 쓰기 혼합 부하](31-ttl-purchase-mixed/report.md): 읽기·구매 성능 분리, p99 2,524 / 4,691ms·풀/스레드 포화 관측
+
+- [32. 로컬 Single Flight 혼합 부하 3회](32-single-flight-mixed/report.md): 원본 중복 감소, 읽기·구매 p99 100ms는 미달
+
+- [33. Redis 분산 락 혼합 부하](33-redis-lock-mixed/report.md): SET NX 재채움 제어·최초 예열 후 3회 비교

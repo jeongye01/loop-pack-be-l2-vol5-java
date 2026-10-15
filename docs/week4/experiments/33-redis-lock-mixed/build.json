@@ -1,0 +1,6 @@
+{
+  "image": "commerce-api:redis-lock-cbfb7e35463f",
+  "jarSha256": "cbfb7e35463f3a8619aaec4f726f8ef5accc099c7d879c2628509cc2d184ab3a",
+  "baseGit": "ba1f57adb62813d86541f5fcd54ee7febf5469c6",
+  "workingTreeBuild": true
+}

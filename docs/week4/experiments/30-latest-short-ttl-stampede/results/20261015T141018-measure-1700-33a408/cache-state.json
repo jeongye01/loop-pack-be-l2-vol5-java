@@ -1,0 +1,64 @@
+{
+  "before": {
+    "ttlMs": {
+      "products::v3:products?sort=latest&brand=all&page=0&size=20:rev=82cb342f-e77d-4d17-96b5-17cf82677d24": 1413,
+      "like-counts::v3:products/like-counts?ids=1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20:rev=82cb342f-e77d-4d17-96b5-17cf82677d24": 84021,
+      "stocks::v3:products/stocks?ids=1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20:rev=82cb342f-e77d-4d17-96b5-17cf82677d24:rev=102a8c80-26aa-4136-9ccf-4b61e1bb479a": 29550
+    },
+    "redisStats": {
+      "total_commands_processed": 5389844,
+      "expired_keys": 310,
+      "evicted_keys": 0,
+      "keyspace_hits": 6464908,
+      "keyspace_misses": 2448
+    },
+    "commandCalls": {
+      "client|setname": 35,
+      "mget": 1374592,
+      "role": 35,
+      "scan": 270,
+      "ttl": 18,
+      "info": 166,
+      "replconf": 231917,
+      "ping": 46132,
+      "expire": 35,
+      "del": 5,
+      "hello": 105,
+      "get": 3717928,
+      "psync": 1,
+      "exists": 2,
+      "set": 18380,
+      "pttl": 224
+    }
+  },
+  "after": {
+    "ttlMs": {
+      "stocks::v3:products/stocks?ids=1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20:rev=82cb342f-e77d-4d17-96b5-17cf82677d24:rev=102a8c80-26aa-4136-9ccf-4b61e1bb479a": 217015
+    },
+    "redisStats": {
+      "total_commands_processed": 5594919,
+      "expired_keys": 344,
+      "evicted_keys": 0,
+      "keyspace_hits": 6770617,
+      "keyspace_misses": 3392
+    },
+    "commandCalls": {
+      "client|setname": 35,
+      "mget": 1476611,
+      "role": 35,
+      "scan": 273,
+      "ttl": 18,
+      "info": 168,
+      "replconf": 232003,
+      "ping": 46149,
+      "expire": 35,
+      "del": 5,
+      "hello": 105,
+      "get": 3820542,
+      "psync": 1,
+      "exists": 2,
+      "set": 18713,
+      "pttl": 225
+    }
+  }
+}

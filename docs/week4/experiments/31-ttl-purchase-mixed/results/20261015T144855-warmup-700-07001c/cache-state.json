@@ -1,0 +1,71 @@
+{
+  "before": {
+    "ttlMs": {
+      "products::v3:products?sort=latest&brand=all&page=0&size=20:rev=82cb342f-e77d-4d17-96b5-17cf82677d24": 1442,
+      "like-counts::v3:products/like-counts?ids=1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20:rev=82cb342f-e77d-4d17-96b5-17cf82677d24": 147484,
+      "stocks::v3:products/stocks?ids=1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20:rev=82cb342f-e77d-4d17-96b5-17cf82677d24:rev=102a8c80-26aa-4136-9ccf-4b61e1bb479a": 190912,
+      "stocks::v3:products/stocks?ids=1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20:rev=82cb342f-e77d-4d17-96b5-17cf82677d24:rev=155a4d1d-8324-481c-b2fb-44d5d736dc48": 184462,
+      "stocks::v3:products/stocks?ids=1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20:rev=82cb342f-e77d-4d17-96b5-17cf82677d24:rev=6407bde6-9847-41bc-a8fd-5fd3c6fa47d0": 151976,
+      "stocks::v3:products/stocks?ids=1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20:rev=82cb342f-e77d-4d17-96b5-17cf82677d24:rev=1a8e72ae-a8e3-4a48-8a23-b252212a3683": 199680
+    },
+    "redisStats": {
+      "total_commands_processed": 5615744,
+      "expired_keys": 368,
+      "evicted_keys": 0,
+      "keyspace_hits": 6797665,
+      "keyspace_misses": 3473
+    },
+    "commandCalls": {
+      "client|setname": 35,
+      "mget": 1485635,
+      "role": 35,
+      "scan": 282,
+      "ttl": 18,
+      "info": 174,
+      "replconf": 234228,
+      "ping": 46591,
+      "expire": 35,
+      "del": 5,
+      "hello": 105,
+      "get": 3829606,
+      "psync": 1,
+      "exists": 2,
+      "set": 18752,
+      "pttl": 242
+    }
+  },
+  "after": {
+    "ttlMs": {
+      "like-counts::v3:products/like-counts?ids=1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20:rev=82cb342f-e77d-4d17-96b5-17cf82677d24": 89725,
+      "stocks::v3:products/stocks?ids=1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20:rev=82cb342f-e77d-4d17-96b5-17cf82677d24:rev=102a8c80-26aa-4136-9ccf-4b61e1bb479a": 132803,
+      "stocks::v3:products/stocks?ids=1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20:rev=82cb342f-e77d-4d17-96b5-17cf82677d24:rev=155a4d1d-8324-481c-b2fb-44d5d736dc48": 126345,
+      "stocks::v3:products/stocks?ids=1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20:rev=82cb342f-e77d-4d17-96b5-17cf82677d24:rev=6407bde6-9847-41bc-a8fd-5fd3c6fa47d0": 93840,
+      "stocks::v3:products/stocks?ids=1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20:rev=82cb342f-e77d-4d17-96b5-17cf82677d24:rev=1a8e72ae-a8e3-4a48-8a23-b252212a3683": 141533
+    },
+    "redisStats": {
+      "total_commands_processed": 5657941,
+      "expired_keys": 385,
+      "evicted_keys": 0,
+      "keyspace_hits": 6860630,
+      "keyspace_misses": 3585
+    },
+    "commandCalls": {
+      "client|setname": 35,
+      "mget": 1506638,
+      "role": 35,
+      "scan": 285,
+      "ttl": 18,
+      "info": 176,
+      "replconf": 234286,
+      "ping": 46602,
+      "expire": 35,
+      "del": 5,
+      "hello": 105,
+      "get": 3850672,
+      "psync": 1,
+      "exists": 2,
+      "set": 18801,
+      "pttl": 247
+    }
+  }
+}

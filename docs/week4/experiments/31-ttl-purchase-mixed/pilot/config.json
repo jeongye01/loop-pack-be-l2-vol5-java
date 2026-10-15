@@ -1,0 +1,161 @@
+{
+  "experimentId": "31-ttl-purchase-mixed-pilot",
+  "specId": "ec2-seoul-v1",
+  "baseUrl": "http://54.117.65.124:8080",
+  "appHost": "54.117.65.124",
+  "dbHost": "16.184.11.214",
+  "sshUser": "ubuntu",
+  "appContainer": "week4-commerce-api-1",
+  "dbContainer": "week4-db-mysql-1",
+  "database": "perf_skewed_1m_v1",
+  "dataset": "docs/week4/seed-data/skewed-1m-v1",
+  "input": {
+    "sort": "latest",
+    "page": 0,
+    "size": 20,
+    "userId": 1
+  },
+  "vus": 5,
+  "timeoutSeconds": 5,
+  "gracefulStopSeconds": 10,
+  "warmupSeconds": 30,
+  "durationSeconds": 60,
+  "sampleIntervalSeconds": 5,
+  "recoverySeconds": 60,
+  "recoveryMaxContainerCpuPercent": 50,
+  "recoveryMinAvailableMemoryBytes": 134217728,
+  "maximumDiscoveryRps": 10000,
+  "cache": {
+    "type": "Redis",
+    "scope": "catalog products + counts + stocks",
+    "ttlSeconds": 300,
+    "jitterSeconds": 30,
+    "readFrom": "master",
+    "expiryOverride": true,
+    "enabled": true,
+    "revisionLookup": "hit: one SQL; miss: reread inside transaction",
+    "readCommands": "GET products, MGET counts+stocks",
+    "outerReadTransaction": "miss only; hit probe outside transaction",
+    "revisionBypass": false,
+    "latestFirstTtlSeconds": 2,
+    "latestFirstJitterSeconds": 0
+  },
+  "loadHost": "3.37.31.251",
+  "loadBaseUrl": "http://172.31.26.165:8080",
+  "warmupSteps": [
+    300,
+    700
+  ],
+  "requireTomcatMetrics": true,
+  "requireAsyncLogMetrics": true,
+  "logDrainSeconds": 10,
+  "traceSampleRate": 0.01,
+  "emitTraces": false,
+  "slo": {
+    "rps": 1700,
+    "p99Ms": 100,
+    "successRate": 1,
+    "dropped": 0,
+    "incomplete": 0
+  },
+  "latencyWindowSeconds": 1,
+  "validateSeedResponse": false,
+  "purchase": {
+    "rps": 1,
+    "vus": 2,
+    "buyers": [
+      240003,
+      240004,
+      240005,
+      240006,
+      240007,
+      240008,
+      240009,
+      240010,
+      240011,
+      240012
+    ],
+    "products": [
+      {
+        "id": 1,
+        "price": 56503161
+      },
+      {
+        "id": 2,
+        "price": 93846083
+      },
+      {
+        "id": 3,
+        "price": 77563492
+      },
+      {
+        "id": 4,
+        "price": 44571788
+      },
+      {
+        "id": 5,
+        "price": 44770658
+      },
+      {
+        "id": 6,
+        "price": 67286966
+      },
+      {
+        "id": 7,
+        "price": 53375808
+      },
+      {
+        "id": 8,
+        "price": 70668627
+      },
+      {
+        "id": 9,
+        "price": 18707615
+      },
+      {
+        "id": 10,
+        "price": 90794126
+      },
+      {
+        "id": 11,
+        "price": 95475229
+      },
+      {
+        "id": 12,
+        "price": 93631887
+      },
+      {
+        "id": 13,
+        "price": 97860254
+      },
+      {
+        "id": 14,
+        "price": 68820963
+      },
+      {
+        "id": 15,
+        "price": 22870908
+      },
+      {
+        "id": 16,
+        "price": 62515769
+      },
+      {
+        "id": 17,
+        "price": 83618658
+      },
+      {
+        "id": 18,
+        "price": 41212188
+      },
+      {
+        "id": 19,
+        "price": 86609421
+      },
+      {
+        "id": 20,
+        "price": 51959198
+      }
+    ]
+  }
+}

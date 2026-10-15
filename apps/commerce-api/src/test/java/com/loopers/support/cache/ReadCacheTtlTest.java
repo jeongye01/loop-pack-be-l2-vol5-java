@@ -27,4 +27,25 @@ class ReadCacheTtlTest {
             assertThat(ttl.getTimeToLive("key", "value").toSeconds()).isBetween(270L, 330L);
         }
     }
+    @Test
+    @DisplayName("실험 TTL 2초는 최신순 무브랜드 첫 20개 키에만 적용하고 jitter를 넣지 않는다")
+    void shortTtlOnlyAppliesToTheSelectedLatestPage() {
+        var ttl = new ReadCacheTtl(2, true);
+        for (int i = 0; i < 20; i++) {
+            assertThat(ttl.getTimeToLive(CacheKeys.products("latest", null, 0, 20) + ":rev=version", "value")).isEqualTo(Duration.ofSeconds(2));
+        }
+        for (String key : java.util.List.of(CacheKeys.products("price_asc", null, 0, 20), CacheKeys.products("latest", 1L, 0, 20),
+            CacheKeys.products("latest", null, 1, 20), CacheKeys.products("latest", null, 0, 10), CacheKeys.product(1L),
+            CacheKeys.batch(CacheKeys.COUNTS, java.util.List.of(1L)), CacheKeys.batch(CacheKeys.STOCKS, java.util.List.of(1L)))) {
+            assertThat(ttl.getTimeToLive(key + ":rev=version", "value").toSeconds()).isBetween(270L, 330L);
+        }
+    }
+
+    @Test
+    @DisplayName("짧은 TTL은 실험 프로필에서만 허용하고 음수 설정을 거절한다")
+    void rejectsNonExperimentAndNegativeOverrides() {
+        org.assertj.core.api.Assertions.assertThatThrownBy(() -> new ReadCacheTtl(2, false)).isInstanceOf(IllegalArgumentException.class);
+        org.assertj.core.api.Assertions.assertThatThrownBy(() -> new ReadCacheTtl(-1, true)).isInstanceOf(IllegalArgumentException.class);
+        assertThat(new ReadCacheTtl(0, false).getTimeToLive(CacheKeys.products("latest", null, 0, 20) + ":rev=v", "x").toSeconds()).isBetween(270L, 330L);
+    }
 }

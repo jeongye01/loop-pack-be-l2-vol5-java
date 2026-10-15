@@ -1,0 +1,46 @@
+{
+  "runId": "20261015T134123-warmup-300-f7a18a",
+  "phase": "warmup",
+  "rps": 300,
+  "seconds": 30,
+  "planned": 9000,
+  "started": 9001,
+  "completed": 9001,
+  "dropped": 0,
+  "successRate": 1,
+  "failed": 0,
+  "timeouts": 0,
+  "transportErrors": 0,
+  "httpErrors": 0,
+  "mismatches": 0,
+  "httpRequests": 9001,
+  "httpRps": 299.9835912441681,
+  "httpFailureRate": 0,
+  "latencyMs": {
+    "min": 1,
+    "max": 27,
+    "p(50)": 2,
+    "p(95)": 4,
+    "p(99)": 5,
+    "avg": 2.5619375624930565
+  },
+  "successLatencyMs": {
+    "p(95)": 4,
+    "p(99)": 5,
+    "avg": 2.5619375624930565,
+    "min": 1,
+    "max": 27,
+    "p(50)": 2
+  },
+  "recovered": true,
+  "collection": {
+    "samplesComplete": true,
+    "environmentComplete": true,
+    "serverLogsCollected": true,
+    "asyncLogMetricsComplete": true,
+    "tomcatMetricsComplete": true
+  },
+  "exitCode": 0,
+  "complete": true,
+  "sloPassed": true
+}

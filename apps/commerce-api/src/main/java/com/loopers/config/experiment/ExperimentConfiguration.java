@@ -33,7 +33,7 @@ import org.springframework.context.annotation.Profile;
 @Profile("experiment")
 public class ExperimentConfiguration {
     @Bean
-    static BeanPostProcessor experimentDataSource() {
+    static BeanPostProcessor experimentDataSource(org.springframework.beans.factory.ObjectProvider<ExperimentOriginMetrics> origins) {
         return new BeanPostProcessor() {
             @Override
             public Object postProcessAfterInitialization(Object bean, String name) {
@@ -46,10 +46,22 @@ public class ExperimentConfiguration {
                     ProxyFactory component = new ProxyFactory(bean);
                     component.setProxyTargetClass(true);
                     component.addAdvice((MethodInterceptor) invocation -> {
+                        Object[] args = invocation.getArguments();
+                        boolean latestFirst = className.equals("ProductUseCase") && invocation.getMethod().getName().equals("findBasicPage")
+                            && args[0] == null && (args[1] == null || args[1] == com.loopers.product.domain.ProductSort.LATEST)
+                            && Integer.valueOf(0).equals(args[2]) && Integer.valueOf(20).equals(args[3]);
+                        ExperimentOriginMetrics.OriginalRead read = invocation::proceed;
+                        boolean stockRead = className.equals("ProductUseCase") && invocation.getMethod().getName().equals("findStockStatuses");
+                        if ((latestFirst || stockRead) && org.springframework.web.context.request.RequestContextHolder.getRequestAttributes()
+                            instanceof org.springframework.web.context.request.ServletRequestAttributes request) {
+                            read = () -> stockRead
+                                ? origins.getObject().recordStock(request.getRequest().getHeader("X-Run-ID"), invocation::proceed)
+                                : origins.getObject().record(request.getRequest().getHeader("X-Run-ID"), invocation::proceed);
+                        }
                         ExperimentTrace trace = ExperimentTrace.current();
-                        if (trace == null) return invocation.proceed();
+                        if (trace == null) return read.get();
                         try (var ignored = trace.scope(className + "." + invocation.getMethod().getName())) {
-                            return invocation.proceed();
+                            return read.get();
                         }
                     });
                     return component.getProxy();
@@ -103,12 +115,12 @@ public class ExperimentConfiguration {
         @Override
         public void invoke(Request request, Response response) throws IOException, ServletException {
             if (!validId(request.getHeader("X-Run-ID")) || !validId(request.getHeader("X-Request-ID"))
-                || !request.getRequestURI().equals("/api/v1/products")) {
+                || !(request.getRequestURI().equals("/api/v1/products") || purchaseRequest(request))) {
                 getNext().invoke(request, response);
                 return;
             }
             active.incrementAndGet();
-            if (random.getAsDouble() >= sampleRate) {
+            if (!purchaseRequest(request) && random.getAsDouble() >= sampleRate) {
                 try {
                     getNext().invoke(request, response);
                 } finally {
@@ -131,6 +143,10 @@ public class ExperimentConfiguration {
             }
         }
 
+        private static boolean purchaseRequest(Request request) {
+            return "POST".equals(request.getMethod()) && request.getRequestURI().matches("/api/v1/orders(?:/[0-9]+/confirm)?");
+        }
+
         static boolean validId(String value) {
             return value != null && value.matches("[A-Za-z0-9._-]{1,120}");
         }
@@ -139,7 +155,7 @@ public class ExperimentConfiguration {
         public void log(Request request, Response response, long time) {
             if (!(request.getAttribute(ATTRIBUTE) instanceof ExperimentTrace trace)) return;
             Map<String, Object> event = new LinkedHashMap<>();
-            event.put("sampleRate", sampleRate);
+            event.put("sampleRate", purchaseRequest(request) ? 1.0 : sampleRate);
             event.put("runId", request.getHeader("X-Run-ID"));
             event.put("requestId", request.getHeader("X-Request-ID"));
             event.put("finishedAt", Instant.now().toString());
