@@ -1,0 +1,80 @@
+{
+  "startedAt": "2026-10-14T23:52:23Z",
+  "scenarios": [
+    {
+      "scenario": "全 조회 경로 hit 응답 일치·본인 경계",
+      "passed": true,
+      "requestConditions": 18
+    },
+    {
+      "scenario": "상품 수정 → catalog만 변경·이름/가격/가격순 갱신·다른 상품 유지",
+      "passed": true
+    },
+    {
+      "scenario": "브랜드 수정 → 소속 상품·고객 브랜드 목록 갱신",
+      "passed": true
+    },
+    {
+      "scenario": "재고 변경 → stock만 변경·품절 즉시 반영",
+      "passed": true
+    },
+    {
+      "scenario": "좋아요 등록 → 본인 목록만 즉시 변경·숫자/순위 유지·hit TTL 비연장",
+      "passed": true,
+      "initialTtl": {
+        "like-counts::v3:products/like-counts?ids=1000001,1000002,1000003:rev=7822d5fc-ef0b-413a-a04c-72d4e16b92e2": 299,
+        "rankings::v3:products?sort=likes_desc&brand=1001&page=0&size=20:rev=7822d5fc-ef0b-413a-a04c-72d4e16b92e2": 321
+      },
+      "hitTtl": {
+        "like-counts::v3:products/like-counts?ids=1000001,1000002,1000003:rev=7822d5fc-ef0b-413a-a04c-72d4e16b92e2": 298,
+        "rankings::v3:products?sort=likes_desc&brand=1001&page=0&size=20:rev=7822d5fc-ef0b-413a-a04c-72d4e16b92e2": 320
+      }
+    },
+    {
+      "scenario": "TTL 자연 만료 → 키 소멸·좋아요 수/순위 갱신·270~330초 재적재",
+      "passed": true,
+      "reloadedTtl": {
+        "like-counts::v3:products/like-counts?ids=1000001,1000002,1000003:rev=7822d5fc-ef0b-413a-a04c-72d4e16b92e2": 329,
+        "rankings::v3:products?sort=likes_desc&brand=1001&page=0&size=20:rev=7822d5fc-ef0b-413a-a04c-72d4e16b92e2": 314
+      }
+    },
+    {
+      "scenario": "좋아요 취소 → 본인 목록 즉시 제외·표시 숫자 TTL 유지",
+      "passed": true
+    },
+    {
+      "scenario": "상품 삭제 → 해당 상품만 상세/목록/일괄 조회에서 제외",
+      "passed": true
+    },
+    {
+      "scenario": "브랜드 삭제 → 소속 상품 제외·다른 브랜드 유지",
+      "passed": true
+    }
+  ],
+  "fixtures": {
+    "brands": [
+      1001,
+      1002
+    ],
+    "products": [
+      1000001,
+      1000002,
+      1000003
+    ],
+    "users": [
+      240001,
+      240002
+    ]
+  },
+  "passed": true,
+  "cleanup": {
+    "mode": "전용 브랜드·상품·사용자 soft delete; 감사 기록 보존",
+    "errors": [],
+    "activeFixtureRows": {
+      "brand": 0,
+      "product": 0,
+      "users": 0
+    }
+  },
+  "finishedAt": "2026-10-14T23:57:59Z"
+}

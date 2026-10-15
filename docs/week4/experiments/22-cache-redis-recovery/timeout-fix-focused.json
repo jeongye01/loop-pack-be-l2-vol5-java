@@ -1,0 +1,73 @@
+{
+  "suite": {
+    "name": "com.loopers.config.cache.RedisRecoveryHttpTest",
+    "tests": "9",
+    "skipped": "0",
+    "failures": "0",
+    "errors": "0",
+    "timestamp": "2026-10-15T00:53:50.105Z",
+    "hostname": "jeong-yewon-ui-MacBookAir.local",
+    "time": "23.292"
+  },
+  "cases": [
+    {
+      "name": "repetition 1 of 3",
+      "time": "2.852",
+      "failure": null
+    },
+    {
+      "name": "repetition 2 of 3",
+      "time": "1.239",
+      "failure": null
+    },
+    {
+      "name": "repetition 3 of 3",
+      "time": "1.139",
+      "failure": null
+    },
+    {
+      "name": "주문 판단: outage",
+      "time": "1.188",
+      "failure": null
+    },
+    {
+      "name": "주문 판단: recovered",
+      "time": "1.197",
+      "failure": null
+    },
+    {
+      "name": "브랜드 삭제 보호: outage",
+      "time": "1.075",
+      "failure": null
+    },
+    {
+      "name": "브랜드 삭제 보호: recovered",
+      "time": "1.243",
+      "failure": null
+    },
+    {
+      "name": "사용자 경계: outage",
+      "time": "0.972",
+      "failure": null
+    },
+    {
+      "name": "사용자 경계: recovered",
+      "time": "1.048",
+      "failure": null
+    }
+  ],
+  "observations": [
+    "REDIS_RECOVERY outageUpdateMs=249 outageDeletedMs=126 getErrors=2 putErrors=1",
+    "REDIS_DIAG recovered=true lastError=none server=PONG",
+    "REDIS_RECOVERY reconnectMs=81",
+    "REDIS_RECOVERY staleKeysPreserved=true refill=true hitOriginalCalls=0 deletedStatus=404",
+    "REDIS_RECOVERY outageUpdateMs=229 outageDeletedMs=117 getErrors=2 putErrors=1",
+    "REDIS_DIAG recovered=true lastError=none server=PONG",
+    "REDIS_RECOVERY reconnectMs=56",
+    "REDIS_RECOVERY staleKeysPreserved=true refill=true hitOriginalCalls=0 deletedStatus=404",
+    "REDIS_RECOVERY outageUpdateMs=13 outageDeletedMs=11 getErrors=2 putErrors=1",
+    "REDIS_DIAG recovered=true lastError=none server=PONG",
+    "REDIS_RECOVERY reconnectMs=57",
+    "REDIS_RECOVERY staleKeysPreserved=true refill=true hitOriginalCalls=0 deletedStatus=404"
+  ]
+}

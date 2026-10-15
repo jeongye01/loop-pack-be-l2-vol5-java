@@ -1,0 +1,61 @@
+{
+  "suites": [
+    {
+      "task": "test",
+      "name": "com.loopers.config.cache.ReadCacheHttpTest",
+      "tests": 10,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "task": "test",
+      "name": "com.loopers.architecture.ArchitectureTest",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "task": "test",
+      "name": "캐시 유효 범위: 쓰기 한 번이 갱신할 조회와 유지할 조회",
+      "tests": 15,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "task": "test",
+      "name": "com.loopers.config.cache.RedisRecoveryHttpTest",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "task": "test",
+      "name": "com.loopers.support.cache.ReadCacheTtlTest",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "task": "testAsyncLogging",
+      "name": "com.loopers.config.experiment.ExperimentAsyncHttpTest",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    }
+  ],
+  "total": {
+    "tests": 33,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "checkstyle": "passed",
+  "buildDuration": "1m 4s",
+  "environment": "local Testcontainers MySQL + Redis 7.0; MockMvc; no load"
+}

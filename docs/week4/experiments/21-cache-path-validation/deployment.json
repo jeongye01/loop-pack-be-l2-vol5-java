@@ -1,0 +1,57 @@
+{
+  "image": "commerce-api:catalog-6cae328",
+  "jarSha256": "a865420bb7405d19a5ee28f40199216366f9b7f025778e1c8d96541523aa6d7a",
+  "backendCommit": "6cae328",
+  "catalogCache": true,
+  "experimentLatestCache": false,
+  "verification": {
+    "backendBrands": {
+      "status": 200,
+      "count": 100,
+      "total": 1000,
+      "fields": [
+        "id",
+        "name"
+      ]
+    },
+    "frontendBrands": {
+      "status": 200,
+      "count": 100,
+      "total": 1000
+    },
+    "frontendProducts": {
+      "status": 200,
+      "count": 20,
+      "fields": [
+        "id",
+        "name",
+        "price",
+        "brand",
+        "likeCount",
+        "soldOut"
+      ]
+    },
+    "frontendDetail": {
+      "status": 200,
+      "fields": [
+        "id",
+        "name",
+        "price",
+        "brand",
+        "likeCount",
+        "soldOut"
+      ]
+    },
+    "redis": {
+      "customerBrandKeys": 1,
+      "observedRemainingTtlSeconds": 312
+    },
+    "openapiCustomerBrands": true
+  },
+  "frontendBrandPagination": {
+    "pages": 10,
+    "count": 1000,
+    "duplicateCount": 0
+  },
+  "frontendCompatibility": "상품 목록·상세에서 분리된 좋아요 수·재고 응답을 productId로 합성"
+}

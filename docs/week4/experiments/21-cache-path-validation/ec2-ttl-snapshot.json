@@ -1,0 +1,38 @@
+[
+  {
+    "key": "rankings::v3:products?sort=likes_desc&brand=1001&page=0&size=20:rev=7822d5fc-ef0b-413a-a04c-72d4e16b92e2",
+    "remainingTtlSeconds": 256
+  },
+  {
+    "key": "stocks::v3:products/stocks?ids=1000001,1000002,1000003:rev=7822d5fc-ef0b-413a-a04c-72d4e16b92e2:rev=e001e8f1-11cc-42f0-a62c-35587ca23299",
+    "remainingTtlSeconds": 238
+  },
+  {
+    "key": "my-likes::v3:users/240002/likes?page=0&size=20:rev=7822d5fc-ef0b-413a-a04c-72d4e16b92e2:rev=0",
+    "remainingTtlSeconds": 205
+  },
+  {
+    "key": "my-likes::v3:users/240001/likes?page=0&size=20:rev=7822d5fc-ef0b-413a-a04c-72d4e16b92e2:rev=262af6b9-ba6f-45fc-8b5f-d1599cbd0d19",
+    "remainingTtlSeconds": 212
+  },
+  {
+    "key": "products::v3:products/1000001:rev=7822d5fc-ef0b-413a-a04c-72d4e16b92e2",
+    "remainingTtlSeconds": 238
+  },
+  {
+    "key": "like-counts::v3:products/like-counts?ids=1000001,1000002,1000003:rev=7822d5fc-ef0b-413a-a04c-72d4e16b92e2",
+    "remainingTtlSeconds": 234
+  },
+  {
+    "key": "stocks::v3:products/stocks?ids=1000001,1000002,1000003:rev=7822d5fc-ef0b-413a-a04c-72d4e16b92e2:rev=102a8c80-26aa-4136-9ccf-4b61e1bb479a",
+    "remainingTtlSeconds": 231
+  },
+  {
+    "key": "brands::v3:brands?page=0&size=20:rev=7822d5fc-ef0b-413a-a04c-72d4e16b92e2",
+    "remainingTtlSeconds": 213
+  },
+  {
+    "key": "stocks::v3:products/stocks?ids=1000001,1000002,1000003:rev=7822d5fc-ef0b-413a-a04c-72d4e16b92e2:rev=f96d490d-d58d-47b4-866d-420c161337dd",
+    "remainingTtlSeconds": 248
+  }
+]
