@@ -1,0 +1,66 @@
+{
+  "before": {
+    "ttlMs": {
+      "products::v3:products?sort=latest&brand=all&page=0&size=20:rev=experiment-4938fda8-8be5-4b8f-b9e7-8f18d71fe696": 286832,
+      "like-counts::v3:products/like-counts?ids=1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20:rev=experiment-4938fda8-8be5-4b8f-b9e7-8f18d71fe696": 295395,
+      "stocks::v3:products/stocks?ids=1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20:rev=experiment-4938fda8-8be5-4b8f-b9e7-8f18d71fe696:rev=experiment-4938fda8-8be5-4b8f-b9e7-8f18d71fe696": 282873
+    },
+    "redisStats": {
+      "total_commands_processed": 2699752,
+      "expired_keys": 121,
+      "evicted_keys": 0,
+      "keyspace_hits": 2524677,
+      "keyspace_misses": 132
+    },
+    "commandCalls": {
+      "client|setname": 31,
+      "mget": 61892,
+      "role": 31,
+      "scan": 62,
+      "ttl": 18,
+      "info": 30,
+      "replconf": 193621,
+      "ping": 38515,
+      "expire": 35,
+      "del": 5,
+      "hello": 93,
+      "get": 2400960,
+      "psync": 1,
+      "exists": 2,
+      "set": 4413,
+      "pttl": 45
+    }
+  },
+  "after": {
+    "ttlMs": {
+      "products::v3:products?sort=latest&brand=all&page=0&size=20:rev=experiment-4938fda8-8be5-4b8f-b9e7-8f18d71fe696": 285436,
+      "like-counts::v3:products/like-counts?ids=1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20:rev=experiment-4938fda8-8be5-4b8f-b9e7-8f18d71fe696": 257851,
+      "stocks::v3:products/stocks?ids=1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20:rev=experiment-4938fda8-8be5-4b8f-b9e7-8f18d71fe696:rev=experiment-4938fda8-8be5-4b8f-b9e7-8f18d71fe696": 250342
+    },
+    "redisStats": {
+      "total_commands_processed": 2716009,
+      "expired_keys": 121,
+      "evicted_keys": 0,
+      "keyspace_hits": 2536576,
+      "keyspace_misses": 132
+    },
+    "commandCalls": {
+      "client|setname": 31,
+      "mget": 65876,
+      "role": 31,
+      "scan": 65,
+      "ttl": 18,
+      "info": 32,
+      "replconf": 193715,
+      "ping": 38534,
+      "expire": 35,
+      "del": 5,
+      "hello": 93,
+      "get": 2404888,
+      "psync": 1,
+      "exists": 2,
+      "set": 12637,
+      "pttl": 48
+    }
+  }
+}
