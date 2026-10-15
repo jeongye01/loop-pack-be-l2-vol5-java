@@ -1,0 +1,66 @@
+{
+  "runId": "20261015T020429-warmup-300-0d9a32",
+  "phase": "warmup",
+  "targetVisitsPerSecond": 300,
+  "durationSeconds": 20,
+  "started": 6000,
+  "completed": 6000,
+  "dropped": 0,
+  "successRate": 0.03983333333333333,
+  "mismatches": 0,
+  "httpRequests": 7638,
+  "httpRps": 305.5176549442463,
+  "durationMs": {
+    "p(99)": 9677.060000000001,
+    "avg": 5293.0375,
+    "min": 136,
+    "max": 9997,
+    "p(50)": 5001,
+    "p(95)": 8649.600000000002
+  },
+  "successDurationMs": {
+    "max": 7160,
+    "p(50)": 4184,
+    "p(95)": 6697,
+    "p(99)": 6989.780000000001,
+    "avg": 3760.205020920502,
+    "min": 136
+  },
+  "apiDurationMs": {
+    "http_req_duration{name:product.list}": {
+      "avg": 4694.073180634171,
+      "min": 32.798627,
+      "max": 5018.658013,
+      "p(50)": 5000.0535895,
+      "p(95)": 5000.76295175,
+      "p(99)": 5000.96121241
+    },
+    "http_req_duration{name:product.stocks}": {
+      "p(50)": 4999.939792,
+      "p(95)": 5000.7198321000005,
+      "p(99)": 5000.86123774,
+      "avg": 4316.198422775341,
+      "min": 73.610169,
+      "max": 5001.066444
+    },
+    "http_req_duration{name:product.counts}": {
+      "p(50)": 5000.181933,
+      "p(95)": 5001.0010808,
+      "p(99)": 5001.1214052000005,
+      "avg": 4084.112626031743,
+      "min": 43.028476,
+      "max": 5001.240597
+    },
+    "http_req_duration{expected_response:true}": {
+      "avg": 2677.2475059771214,
+      "min": 32.798627,
+      "max": 4999.085706,
+      "p(50)": 2862.06442,
+      "p(95)": 4820.565124,
+      "p(99)": 4960.341906860001
+    }
+  },
+  "recovered": true,
+  "exitCode": 0,
+  "sloPassed": false
+}

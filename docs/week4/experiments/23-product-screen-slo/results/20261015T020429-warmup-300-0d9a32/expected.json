@@ -1,0 +1,353 @@
+{
+  "data": {
+    "content": [
+      {
+        "id": 1,
+        "name": "Intelligent Rubber Keyboard-1",
+        "price": 56503161,
+        "brand": {
+          "id": 295,
+          "name": "Dicki and Sons-295"
+        }
+      },
+      {
+        "id": 2,
+        "name": "Fantastic Paper Knife-2",
+        "price": 93846083,
+        "brand": {
+          "id": 118,
+          "name": "Rau Inc-118"
+        }
+      },
+      {
+        "id": 3,
+        "name": "Fantastic Paper Table-3",
+        "price": 77563492,
+        "brand": {
+          "id": 215,
+          "name": "Kuhlman, Williamson and Moen-215"
+        }
+      },
+      {
+        "id": 4,
+        "name": "Rustic Silk Bench-4",
+        "price": 44571788,
+        "brand": {
+          "id": 850,
+          "name": "Cronin-Swaniawski-850"
+        }
+      },
+      {
+        "id": 5,
+        "name": "Awesome Granite Keyboard-5",
+        "price": 44770658,
+        "brand": {
+          "id": 126,
+          "name": "Rosenbaum Group-126"
+        }
+      },
+      {
+        "id": 6,
+        "name": "Aerodynamic Marble Shirt-6",
+        "price": 67286966,
+        "brand": {
+          "id": 45,
+          "name": "Feest, Fritsch and Little-45"
+        }
+      },
+      {
+        "id": 7,
+        "name": "Small Wooden Table-7",
+        "price": 53375808,
+        "brand": {
+          "id": 8,
+          "name": "O'Reilly-D'Amore-8"
+        }
+      },
+      {
+        "id": 8,
+        "name": "Practical Paper Plate-8",
+        "price": 70668627,
+        "brand": {
+          "id": 168,
+          "name": "Volkman-Kling-168"
+        }
+      },
+      {
+        "id": 9,
+        "name": "Gorgeous Granite Shoes-9",
+        "price": 18707615,
+        "brand": {
+          "id": 66,
+          "name": "Ryan, Volkman and Becker-66"
+        }
+      },
+      {
+        "id": 10,
+        "name": "Aerodynamic Granite Plate-10",
+        "price": 90794126,
+        "brand": {
+          "id": 195,
+          "name": "Weimann, Crist and Lowe-195"
+        }
+      },
+      {
+        "id": 11,
+        "name": "Practical Concrete Shoes-11",
+        "price": 95475229,
+        "brand": {
+          "id": 71,
+          "name": "Conn Inc-71"
+        }
+      },
+      {
+        "id": 12,
+        "name": "Gorgeous Copper Table-12",
+        "price": 93631887,
+        "brand": {
+          "id": 177,
+          "name": "Cormier, Cummings and Ebert-177"
+        }
+      },
+      {
+        "id": 13,
+        "name": "Mediocre Iron Watch-13",
+        "price": 97860254,
+        "brand": {
+          "id": 710,
+          "name": "Leannon LLC-710"
+        }
+      },
+      {
+        "id": 14,
+        "name": "Practical Aluminum Plate-14",
+        "price": 68820963,
+        "brand": {
+          "id": 441,
+          "name": "Witting-Gleason-441"
+        }
+      },
+      {
+        "id": 15,
+        "name": "Enormous Leather Bag-15",
+        "price": 22870908,
+        "brand": {
+          "id": 39,
+          "name": "Cormier-Lubowitz-39"
+        }
+      },
+      {
+        "id": 16,
+        "name": "Durable Paper Bag-16",
+        "price": 62515769,
+        "brand": {
+          "id": 626,
+          "name": "Heidenreich Inc-626"
+        }
+      },
+      {
+        "id": 17,
+        "name": "Mediocre Aluminum Chair-17",
+        "price": 83618658,
+        "brand": {
+          "id": 4,
+          "name": "Bechtelar, Wolff and Hermann-4"
+        }
+      },
+      {
+        "id": 18,
+        "name": "Gorgeous Bronze Bench-18",
+        "price": 41212188,
+        "brand": {
+          "id": 699,
+          "name": "Cassin LLC-699"
+        }
+      },
+      {
+        "id": 19,
+        "name": "Awesome Plastic Gloves-19",
+        "price": 86609421,
+        "brand": {
+          "id": 76,
+          "name": "Herzog, Goldner and Hickle-76"
+        }
+      },
+      {
+        "id": 20,
+        "name": "Practical Copper Shirt-20",
+        "price": 51959198,
+        "brand": {
+          "id": 300,
+          "name": "Mills, Zemlak and Kuphal-300"
+        }
+      }
+    ],
+    "page": 0,
+    "size": 20,
+    "last": false
+  },
+  "counts": [
+    {
+      "productId": 1,
+      "likeCount": 0
+    },
+    {
+      "productId": 2,
+      "likeCount": 0
+    },
+    {
+      "productId": 3,
+      "likeCount": 0
+    },
+    {
+      "productId": 4,
+      "likeCount": 0
+    },
+    {
+      "productId": 5,
+      "likeCount": 0
+    },
+    {
+      "productId": 6,
+      "likeCount": 0
+    },
+    {
+      "productId": 7,
+      "likeCount": 0
+    },
+    {
+      "productId": 8,
+      "likeCount": 0
+    },
+    {
+      "productId": 9,
+      "likeCount": 0
+    },
+    {
+      "productId": 10,
+      "likeCount": 0
+    },
+    {
+      "productId": 11,
+      "likeCount": 2
+    },
+    {
+      "productId": 12,
+      "likeCount": 0
+    },
+    {
+      "productId": 13,
+      "likeCount": 0
+    },
+    {
+      "productId": 14,
+      "likeCount": 0
+    },
+    {
+      "productId": 15,
+      "likeCount": 1
+    },
+    {
+      "productId": 16,
+      "likeCount": 0
+    },
+    {
+      "productId": 17,
+      "likeCount": 0
+    },
+    {
+      "productId": 18,
+      "likeCount": 0
+    },
+    {
+      "productId": 19,
+      "likeCount": 0
+    },
+    {
+      "productId": 20,
+      "likeCount": 0
+    }
+  ],
+  "stocks": [
+    {
+      "productId": 1,
+      "soldOut": false
+    },
+    {
+      "productId": 2,
+      "soldOut": false
+    },
+    {
+      "productId": 3,
+      "soldOut": false
+    },
+    {
+      "productId": 4,
+      "soldOut": false
+    },
+    {
+      "productId": 5,
+      "soldOut": false
+    },
+    {
+      "productId": 6,
+      "soldOut": false
+    },
+    {
+      "productId": 7,
+      "soldOut": false
+    },
+    {
+      "productId": 8,
+      "soldOut": false
+    },
+    {
+      "productId": 9,
+      "soldOut": false
+    },
+    {
+      "productId": 10,
+      "soldOut": false
+    },
+    {
+      "productId": 11,
+      "soldOut": false
+    },
+    {
+      "productId": 12,
+      "soldOut": false
+    },
+    {
+      "productId": 13,
+      "soldOut": false
+    },
+    {
+      "productId": 14,
+      "soldOut": false
+    },
+    {
+      "productId": 15,
+      "soldOut": false
+    },
+    {
+      "productId": 16,
+      "soldOut": false
+    },
+    {
+      "productId": 17,
+      "soldOut": false
+    },
+    {
+      "productId": 18,
+      "soldOut": false
+    },
+    {
+      "productId": 19,
+      "soldOut": false
+    },
+    {
+      "productId": 20,
+      "soldOut": false
+    }
+  ]
+}
