@@ -16,14 +16,32 @@ public class CacheVersions {
         this.enabled = enabled;
     }
     public boolean isEnabled() { return enabled; }
-    public String key(String apiKey, String... namespaces) {
-        if (!enabled) return apiKey;
-        StringBuilder key = new StringBuilder(apiKey);
-        for (String namespace : namespaces) {
-            var values = jdbc.queryForList("select revision from read_cache_revision where namespace = ?", String.class, namespace);
-            key.append(":rev=").append(values.isEmpty() ? "0" : values.getFirst());
+    public Snapshot snapshot(String... namespaces) {
+        if (!isEnabled()) return new Snapshot(false, java.util.Map.of());
+        var revisions = new java.util.LinkedHashMap<String, String>();
+        for (String namespace : namespaces) revisions.put(namespace, "0");
+        if (!revisions.isEmpty()) {
+            String placeholders = String.join(",", java.util.Collections.nCopies(revisions.size(), "?"));
+            jdbc.query("select namespace, revision from read_cache_revision where namespace in (" + placeholders + ")",
+                (org.springframework.jdbc.core.RowCallbackHandler) row -> revisions.put(row.getString("namespace"), row.getString("revision")),
+                revisions.keySet().toArray());
         }
-        return key.toString();
+        return new Snapshot(true, java.util.Map.copyOf(revisions));
+    }
+    public String key(String apiKey, String... namespaces) {
+        return snapshot(namespaces).key(apiKey, namespaces);
+    }
+    public record Snapshot(boolean enabled, java.util.Map<String, String> revisions) {
+        public Snapshot { revisions = java.util.Map.copyOf(revisions); }
+        public String key(String apiKey, String... namespaces) {
+            if (!enabled) return apiKey;
+            StringBuilder key = new StringBuilder(apiKey);
+            for (String namespace : namespaces) {
+                if (!revisions.containsKey(namespace)) throw new IllegalArgumentException("Revision not loaded: " + namespace);
+                key.append(":rev=").append(revisions.get(namespace));
+            }
+            return key.toString();
+        }
     }
     public void changed(String namespace) {
         if (!enabled) return;

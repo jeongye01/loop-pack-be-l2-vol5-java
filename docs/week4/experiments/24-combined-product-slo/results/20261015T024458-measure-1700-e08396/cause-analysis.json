@@ -1,0 +1,109 @@
+{
+  "stagesMeanMs": {
+    "jdbc.connection.prepareStatement": 0.22398537813211844,
+    "jdbc.connection.setReadOnly": 7.948934621867881,
+    "jdbc.connection.clearWarnings": 0.023030615034168565,
+    "jdbc.connection.setAutoCommit": 4.74457162642369,
+    "response.writeAndMvcCompletion": 0.30111900227790434,
+    "ProductV1Controller.getProducts": 130.58094617539862,
+    "jdbc.connection.isClosed": 0.019601334851936218,
+    "jdbc.result.read": 0.4818996264236902,
+    "jdbc.connection.commit": 4.912723569476082,
+    "jdbc.connection.close": 0.30584456036446467,
+    "jdbc.statement.other": 0.2893104601366743,
+    "jdbc.connection.getAutoCommit": 0.025254444191343962,
+    "UserRepositoryAdapter.findById": 4.079843963553531,
+    "request.pipeline": 312.63405755125285,
+    "jdbc.execute": 12.48512037357631,
+    "jdbc.acquire": 247.61441961958997
+  },
+  "metricDeltasDuringSamples": {
+    "jvm_compilation_time_ms_total": 69954.0,
+    "jvm_gc_pause_seconds_sum": 0.714,
+    "hikaricp_connections_acquire_seconds_count": 87930.0,
+    "hikaricp_connections_acquire_seconds_sum": 10059.436833377,
+    "hikaricp_connections_usage_seconds_count": 87930.0,
+    "hikaricp_connections_usage_seconds_sum": 2416.312
+  },
+  "k6TimingMs": {
+    "http_req_receiving": {
+      "max": 149.677661,
+      "p(50)": 0.079424,
+      "p(95)": 0.911324999999998,
+      "p(99)": 4.057183240000004,
+      "avg": 0.2785004609348349,
+      "min": 0
+    },
+    "http_req_connecting": {
+      "p(99)": 0.3990790800000001,
+      "avg": 0.03875231895826216,
+      "min": 0,
+      "max": 4.839584,
+      "p(50)": 0,
+      "p(95)": 0.263171
+    },
+    "http_req_duration{expected_response:true}": {
+      "avg": 4055.0163001221235,
+      "min": 14.958702,
+      "max": 5001.487074,
+      "p(50)": 4254.407219,
+      "p(95)": 4878.0190998,
+      "p(99)": 4976.538143940001
+    },
+    "http_req_duration": {
+      "min": 14.958702,
+      "max": 5009.4377,
+      "p(50)": 4324.928244,
+      "p(95)": 5000.1860902,
+      "p(99)": 5000.83026284,
+      "avg": 4133.760933236556
+    },
+    "http_req_tls_handshaking": {
+      "p(50)": 0,
+      "p(95)": 0,
+      "p(99)": 0,
+      "avg": 0,
+      "min": 0,
+      "max": 0
+    },
+    "http_req_waiting": {
+      "avg": 4133.46752014484,
+      "min": 14.912992,
+      "max": 5009.425869,
+      "p(50)": 4324.667175,
+      "p(95)": 5000.172828,
+      "p(99)": 5000.8163670799995
+    },
+    "http_req_failed": {
+      "rate": 0.08329352894347776,
+      "passes": 3662,
+      "fails": 40303
+    },
+    "http_req_blocked": {
+      "avg": 0.04841984439895407,
+      "min": 0.000805,
+      "max": 4.863544,
+      "p(50)": 0.004207,
+      "p(95)": 0.30399379999999976,
+      "p(99)": 0.45913104000000005
+    },
+    "http_req_sending": {
+      "p(50)": 0.011909,
+      "p(95)": 0.027110799999999994,
+      "p(99)": 0.0703795600000001,
+      "avg": 0.014912630774479683,
+      "min": 0.003002,
+      "max": 1.931445
+    }
+  },
+  "sampledSqlCounts": {
+    "authentication": 439,
+    "revision": 1756
+  },
+  "connectionOccupancyMsPerStartedRequest": 54.95989992039122,
+  "notes": [
+    "Stage totals are nested; do not sum them.",
+    "Connection occupancy is a coarse sample-window estimate; not a controlled capacity estimate.",
+    "JVM compilation time is aggregate elapsed compiler time, not process CPU seconds."
+  ]
+}

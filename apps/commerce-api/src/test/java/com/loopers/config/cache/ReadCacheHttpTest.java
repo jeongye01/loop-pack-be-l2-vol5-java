@@ -52,6 +52,7 @@ class ReadCacheHttpTest {
     @Autowired EntityManager em;
     @Autowired PlatformTransactionManager tm;
     @MockitoSpyBean CacheVersions versions;
+    @MockitoSpyBean org.springframework.jdbc.core.JdbcTemplate jdbc;
     @Autowired LikeUseCase likes;
     @MockitoSpyBean ProductUseCase products;
     @MockitoSpyBean org.springframework.cache.CacheManager cacheManager;
@@ -72,6 +73,32 @@ class ReadCacheHttpTest {
             .andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
     }
     String key(String bucket, String api, String... namespaces) { return bucket + "::" + versions.key(api, namespaces); }
+
+    /** 준비: 통합 응답을 캐시한다. 실행: 다시 조회한다. 확인: 각 요청이 필요한 모든 버전을 SQL 한 번으로 읽는다. */
+    @org.junit.jupiter.params.ParameterizedTest
+    @org.junit.jupiter.params.provider.ValueSource(strings = {"latest", "price_asc", "likes_desc", "detail", "mine"})
+    @DisplayName("통합 상품 hit은 revision을 한 번에 읽고 원본 상품·좋아요·재고를 조회하지 않는다")
+    void readsRevisionsOncePerCombinedHit(String route) throws Exception {
+        likes.register(user.getId(), product.getId());
+        String url = switch (route) {
+            case "detail" -> "/api/v1/products/" + product.getId();
+            case "mine" -> "/api/v1/users/" + user.getId() + "/likes";
+            default -> "/api/v1/products?sort=" + route;
+        };
+        String first = mvc.perform(get(url).with(customer(user))).andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
+        clearInvocations(jdbc, products);
+        String hit = mvc.perform(get(url).with(customer(user))).andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
+        assertThat(hit).isEqualTo(first);
+        String placeholders = route.equals("mine") ? "?,?,?" : "?,?";
+        verify(jdbc, times(1)).query(org.mockito.ArgumentMatchers.eq(
+            "select namespace, revision from read_cache_revision where namespace in (" + placeholders + ")"),
+            org.mockito.ArgumentMatchers.any(org.springframework.jdbc.core.RowCallbackHandler.class), org.mockito.ArgumentMatchers.any(Object[].class));
+        // JdbcTemplate의 공개 query는 내부 overload로 위임한다. 위임을 추가 SQL로 세지 않고 실행 경계를 검증한다.
+        verify(jdbc, times(1)).query(org.mockito.ArgumentMatchers.any(org.springframework.jdbc.core.PreparedStatementCreator.class),
+            org.mockito.ArgumentMatchers.nullable(org.springframework.jdbc.core.PreparedStatementSetter.class),
+            org.mockito.ArgumentMatchers.any(org.springframework.jdbc.core.ResultSetExtractor.class));
+        org.mockito.Mockito.verifyNoInteractions(products);
+    }
 
     /** 20개 목록의 miss는 각 일괄 조회 1회, hit은 원본 호출 0회. 재고 변경은 상품 캐시를 재사용한다. */
     @Test

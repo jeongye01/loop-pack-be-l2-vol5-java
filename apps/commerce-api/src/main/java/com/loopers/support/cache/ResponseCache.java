@@ -14,8 +14,15 @@ public class ResponseCache {
         this.cached = cached; this.versions = versions; this.json = json;
     }
     public <T> T read(String cacheName, String apiKey, TypeReference<T> type, Supplier<T> loader, String... namespaces) {
-        if (!versions.isEnabled()) return loader.get();
-        String key = versions.key(apiKey, namespaces);
+        return read(snapshot(namespaces), cacheName, apiKey, type, loader, namespaces);
+    }
+    public CacheVersions.Snapshot snapshot(String... namespaces) {
+        return versions.snapshot(namespaces);
+    }
+    public <T> T read(CacheVersions.Snapshot snapshot, String cacheName, String apiKey, TypeReference<T> type,
+                      Supplier<T> loader, String... namespaces) {
+        if (!snapshot.enabled()) return loader.get();
+        String key = snapshot.key(apiKey, namespaces);
         String value = cached.load(cacheName, key, () -> {
             try { return json.writeValueAsString(loader.get()); }
             catch (com.fasterxml.jackson.core.JsonProcessingException e) { throw new IllegalStateException(e); }

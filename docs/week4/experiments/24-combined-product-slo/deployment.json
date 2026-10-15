@@ -1,0 +1,13 @@
+{
+  "backendCommit": "8732303",
+  "implementationCommit": "c46cfdf",
+  "image": "commerce-api:catalog-8732303",
+  "previousImage": "commerce-api:catalog-b2e84c4",
+  "jarSha256": "fa4f81608f49bc5be9e89e90f858d5ad595f73c04ff001e2d5cb763447741a2d",
+  "health": "healthy",
+  "catalogCache": true,
+  "experimentLatestCache": false,
+  "ttlSeconds": 300,
+  "jitterSeconds": 30,
+  "note": "Same runtime image and Compose overlays; only application JAR replaced."
+}

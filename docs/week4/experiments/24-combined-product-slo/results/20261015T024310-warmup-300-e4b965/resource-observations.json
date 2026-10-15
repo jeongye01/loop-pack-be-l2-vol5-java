@@ -1,0 +1,115 @@
+{
+  "runId": "20261015T024310-warmup-300-e4b965",
+  "sampleCount": 5,
+  "tomcat": {
+    "http-nio-0.0.0.0-8080": {
+      "tomcat_threads_busy_threads": {
+        "count": 5,
+        "mean": 160.0,
+        "min": 0.0,
+        "max": 200.0
+      },
+      "tomcat_threads_config_max_threads": {
+        "count": 5,
+        "mean": 200.0,
+        "min": 200.0,
+        "max": 200.0
+      },
+      "tomcat_threads_current_threads": {
+        "count": 5,
+        "mean": 162.0,
+        "min": 10.0,
+        "max": 200.0
+      }
+    }
+  },
+  "metrics": {
+    "hikaricp_connections_active": {
+      "min": 0.0,
+      "max": 40.0,
+      "mean": 31.8,
+      "p99": 40.0
+    },
+    "hikaricp_connections_pending": {
+      "min": 0.0,
+      "max": 161.0,
+      "mean": 125.6,
+      "p99": 161.0
+    },
+    "experiment_active_requests": {
+      "min": 0.0,
+      "max": 200.0,
+      "mean": 159.8,
+      "p99": 200.0
+    },
+    "experiment_log_queue_size": {
+      "min": 0.0,
+      "max": 0.0,
+      "mean": 0.0,
+      "p99": 0.0
+    }
+  },
+  "dockerCpuPercent": {
+    "app": {
+      "week4-commerce-api-1": {
+        "min": 4.01,
+        "max": 199.86,
+        "mean": 156.616,
+        "p99": 199.86
+      }
+    },
+    "db": {
+      "week4-db-redis-replica-1": {
+        "min": 0.13,
+        "max": 0.15,
+        "mean": 0.14200000000000002,
+        "p99": 0.15
+      },
+      "week4-db-redis-master-1": {
+        "min": 0.11,
+        "max": 1.57,
+        "mean": 1.124,
+        "p99": 1.57
+      },
+      "week4-db-mysql-1": {
+        "min": 0.41,
+        "max": 29.55,
+        "mean": 18.291999999999998,
+        "p99": 29.55
+      }
+    }
+  },
+  "note": "Sampled resource maxima; preflight-to-recovery counter deltas include validation and recovery requests.",
+  "cacheCountersBefore": [],
+  "cacheCountersAfter": [
+    "catalog_cache_errors_total{application=\"commerce-api\",operation=\"get\"} 2.0"
+  ],
+  "loadK6CpuPercent": {
+    "min": 104.0,
+    "max": 404.0,
+    "mean": 183.4,
+    "p99": 404.0
+  },
+  "sampledTraces": {
+    "count": 53,
+    "serverDurationMs": {
+      "min": 91.020727,
+      "max": 2529.484774,
+      "mean": 776.7954703962264,
+      "p99": 2529.484774
+    },
+    "connectionWaitMs": {
+      "min": 0.061243000000000006,
+      "max": 2304.661789,
+      "mean": 580.5266323584906,
+      "p99": 2304.661789
+    },
+    "sqlCount": {
+      "min": 5,
+      "max": 5,
+      "mean": 5,
+      "p99": 5
+    },
+    "sqlErrors": 0
+  }
+}
