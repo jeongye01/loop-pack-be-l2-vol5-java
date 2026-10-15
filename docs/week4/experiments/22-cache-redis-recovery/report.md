@@ -82,3 +82,7 @@
 **개선 후 전체 검사 성공:** `:apps:commerce-api:check :modules:redis:check`, 2분 47초. 테스트 결과 총 **452개 통과**, 실패·오류·skip 0개. 이번 전체 회귀 448개와 직전 실행한 비동기 로그 4개(전체 검사에서는 UP-TO-DATE)를 합산했다. Checkstyle·ArchUnit 통과. [전체 결과](timeout-fix-full-check.json)
 
 전체 회귀에서도 복구 3회가 통과했다. 수정 상품 조회 12·218·53ms, 삭제 조회 8·110·8ms, 앱 연결 확인 51·99·42ms였다. 단독 실행과 전체 회귀에서 각각 3회, 총 6회 성공했으며 이전 실패 기록은 그대로 보존한다.
+
+### EC2 배포
+
+2026-10-15, `b2e84c4` → `commerce-api:catalog-b2e84c4` 배포 완료. 전송 JAR SHA-256 일치·컨테이너 healthy·Actuator UP, 고객 브랜드 목록과 최신순 상품 목록 각 20개 HTTP 200 확인. 공통 캐시는 ON, 기존 고정 데이터 실험 캐시는 OFF다. DB·Redis 컨테이너와 데이터는 변경하지 않았다. EC2 장애 주입·부하 테스트는 이번 배포 확인에 포함하지 않는다. [배포 기록](deployment.json)
