@@ -203,6 +203,9 @@ class CacheInvalidationScopeHttpTest {
         write(put("/api-admin/v1/products/" + a.getId() + "/stock").content("{\"quantity\":0}"));
         var after = assertScope(before, Set.of(CacheKeys.STOCK_REVISION), Set.of());
         assertThat(batchItem(after.get("stocks"), a.getId()).path("soldOut").asBoolean()).isTrue();
+        assertThat(after.get("detail-A").path("soldOut").asBoolean()).isTrue();
+        assertThat(item(after.get("my-alice").path("content"), a.getId()).path("soldOut").asBoolean()).isTrue();
+        assertThat(item(after.get("latest-all").path("content"), a.getId()).path("soldOut").asBoolean()).isTrue();
         assertThat(batchItem(after.get("stocks"), b.getId())).isEqualTo(batchItem(before.get("stocks").data(), b.getId()));
         assertThat(batchItem(after.get("stocks"), a2.getId())).isEqualTo(batchItem(before.get("stocks").data(), a2.getId()));
     }
@@ -216,6 +219,9 @@ class CacheInvalidationScopeHttpTest {
         orders.confirm(alice.getId(), order.getId());
         var after = assertScope(before, Set.of(CacheKeys.STOCK_REVISION), Set.of());
         assertThat(batchItem(after.get("stocks"), a.getId()).path("soldOut").asBoolean()).isTrue();
+        assertThat(after.get("detail-A").path("soldOut").asBoolean()).isTrue();
+        assertThat(item(after.get("my-alice").path("content"), a.getId()).path("soldOut").asBoolean()).isTrue();
+        assertThat(item(after.get("latest-all").path("content"), a.getId()).path("soldOut").asBoolean()).isTrue();
         assertThat(batchItem(after.get("stocks"), b.getId())).isEqualTo(batchItem(before.get("stocks").data(), b.getId()));
     }
 
@@ -396,7 +402,8 @@ class CacheInvalidationScopeHttpTest {
             assertThat(cacheKey(route)).isNotEqualTo(oldKey);
             resume.countDown();
             JsonNode old = oldRead.get(10, TimeUnit.SECONDS);
-            assertThat(json.readTree(redis.opsForValue().get(oldKey)).path("data")).isEqualTo(old);
+            assertThat(json.readTree(redis.opsForValue().get(oldKey)).path("data")).isEqualTo(
+                route.bucket().equals(CacheKeys.PRODUCTS) ? basePayload(old) : old);
             if (change.equals("stock")) assertThat(batchItem(old, a.getId()).path("soldOut").asBoolean()).isFalse();
             else assertThat(old.path("price").asLong()).isEqualTo(100);
 
@@ -461,6 +468,8 @@ class CacheInvalidationScopeHttpTest {
     }
 
     // 아래 도우미는 쓰기 전에 관련·무관한 조회를 모두 캐시하고, 쓰기 후 키·응답·TTL을 비교한다.
+    @Autowired com.loopers.product.interfaces.ProductReadFacade reads;
+
     record Route(String url, String bucket, String apiKey, User user, List<String> groups) { }
     record Cached(Route route, String key, JsonNode data) { }
 
@@ -486,7 +495,7 @@ class CacheInvalidationScopeHttpTest {
         List<Long> ids = List.of(a.getId(), a2.getId(), b.getId()).stream().sorted().toList();
         String query = ids.stream().map(String::valueOf).collect(java.util.stream.Collectors.joining(","));
         for (String bucket : List.of(CacheKeys.COUNTS, CacheKeys.STOCKS)) routes.put(bucket.equals(CacheKeys.COUNTS) ? "counts" : "stocks",
-            new Route("/api/v1/products/" + bucket + "?ids=" + query, bucket, CacheKeys.batch(bucket, ids), alice,
+            new Route("internal:" + bucket + "?ids=" + query, bucket, CacheKeys.batch(bucket, ids), alice,
                 bucket.equals(CacheKeys.STOCKS) ? List.of(CacheKeys.CATALOG_REVISION, CacheKeys.STOCK_REVISION) : List.of(CacheKeys.CATALOG_REVISION)));
         return routes;
     }
@@ -525,7 +534,11 @@ class CacheInvalidationScopeHttpTest {
             JsonNode data = read(old.route(), notFound.contains(name) ? 404 : 200);
             after.put(name, data);
             if (!changed) {
-                assertThat(data).as(name + " 유지 대상 응답").isEqualTo(old.data());
+                if (changedGroups.contains(CacheKeys.STOCK_REVISION)) {
+                    assertThat(withoutStock(data)).as(name + " 재고 외 응답 유지").isEqualTo(withoutStock(old.data()));
+                } else {
+                    assertThat(data).as(name + " 유지 대상 응답").isEqualTo(old.data());
+                }
                 assertThat(redis.getExpire(currentKey)).as(name + " 유지 대상 TTL").isPositive().isLessThanOrEqualTo(120L);
             } else if (!notFound.contains(name)) {
                 assertThat(redis.getExpire(currentKey)).as(name + " 새 키 TTL").isBetween(269L, 330L);
@@ -537,10 +550,36 @@ class CacheInvalidationScopeHttpTest {
     }
 
     String cacheKey(Route route) { return route.bucket() + "::" + versions.key(route.apiKey(), route.groups().toArray(String[]::new)); }
+    // 배치 API는 폐지했다. 고정 ID 집합의 무효화 범위는 내부 캐시에서 검증한다.
+    // 목록·상세·내 좋아요와 변경 요청은 실제 HTTP 경로로 검증한다.
     JsonNode read(Route route, int expectedStatus) throws Exception {
+        if (route.bucket().equals(CacheKeys.COUNTS) || route.bucket().equals(CacheKeys.STOCKS)) {
+            assertThat(expectedStatus).isEqualTo(200);
+            var ids = List.of(a.getId(), a2.getId(), b.getId());
+            return json.readTree(json.writeValueAsString(route.bucket().equals(CacheKeys.COUNTS) ? reads.counts(ids).data() : reads.stocks(ids).data()));
+        }
         var result = mvc.perform(get(route.url()).with(route.user() == null ? admin() : customer(route.user())))
             .andExpect(status().is(expectedStatus)).andReturn();
         return json.readTree(result.getResponse().getContentAsString()).path("data");
+    }
+    JsonNode withoutStock(JsonNode data) {
+        JsonNode copy = data.deepCopy();
+        if (copy.isObject()) {
+            ((com.fasterxml.jackson.databind.node.ObjectNode) copy).remove("soldOut");
+            copy.path("content").forEach(item -> ((com.fasterxml.jackson.databind.node.ObjectNode) item).remove("soldOut"));
+        }
+        return copy;
+    }
+    JsonNode basePayload(JsonNode data) {
+        JsonNode copy = data.deepCopy();
+        if (copy.isObject()) {
+            var object = (com.fasterxml.jackson.databind.node.ObjectNode) copy;
+            object.remove(List.of("likeCount", "soldOut"));
+            if (object.has("content")) {
+                object.path("content").forEach(item -> ((com.fasterxml.jackson.databind.node.ObjectNode) item).remove(List.of("likeCount", "soldOut")));
+            }
+        }
+        return copy;
     }
     JsonNode write(MockHttpServletRequestBuilder request) throws Exception {
         return json.readTree(mvc.perform(request.with(admin()).with(csrf()).contentType(MediaType.APPLICATION_JSON))

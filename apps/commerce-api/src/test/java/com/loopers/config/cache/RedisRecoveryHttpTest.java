@@ -277,7 +277,7 @@ class RedisRecoveryHttpTest {
             var poor = fixture.userWithPoint(1);
             var product = fixture.product(fixture.brand("order"), "item", 100L, 2);
             mvc.perform(get("/api/v1/products/{id}", product.getId()).with(customer(alice))).andExpect(status().isOk());
-            mvc.perform(get("/api/v1/products/stocks?ids=" + product.getId()).with(customer(alice))).andExpect(status().isOk());
+            mvc.perform(get("/api/v1/products/" + product.getId()).with(customer(alice))).andExpect(status().isOk());
             stopRedis();
             changePrice(product.getId(), 400);
             long order = createOrder(alice, product.getId());
@@ -330,7 +330,7 @@ class RedisRecoveryHttpTest {
             mvc.perform(post("/api/v1/products/{id}/likes", a.getId()).with(customer(alice))).andExpect(status().isCreated());
             String ids = a.getId() + "," + a2.getId() + "," + b.getId();
             var paths = java.util.List.of("/api/v1/products?sort=latest", "/api/v1/products?sort=price_asc", "/api/v1/products?sort=likes_desc",
-                "/api/v1/products/like-counts?ids=" + ids, "/api/v1/products/stocks?ids=" + ids, "/api/v1/users/" + alice.getId() + "/likes");
+                "/api/v1/users/" + alice.getId() + "/likes");
             for (String path : paths) mvc.perform(get(path).with(customer(alice))).andExpect(status().isOk());
             stopRedis();
             mvc.perform(delete("/api-admin/v1/brands/{id}", brand.getId()).with(admin()).with(csrf())).andExpect(status().isOk());
@@ -338,7 +338,6 @@ class RedisRecoveryHttpTest {
             for (String path : paths) {
                 var response = data(mvc.perform(get(path).with(customer(alice))).andExpect(status().isOk()).andReturn());
                 if (path.contains("/users/")) assertThat(response.path("content").size()).isZero();
-                else if (response.isArray()) { assertThat(response.size()).isEqualTo(1); assertThat(response.get(0).path("productId").asLong()).isEqualTo(b.getId()); }
                 else { assertThat(response.path("content").size()).isEqualTo(1); assertThat(response.path("content").get(0).path("id").asLong()).isEqualTo(b.getId()); }
             }
             for (Long id : java.util.List.of(a.getId(), a2.getId())) {

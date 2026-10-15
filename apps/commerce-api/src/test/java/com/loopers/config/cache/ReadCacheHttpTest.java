@@ -73,6 +73,36 @@ class ReadCacheHttpTest {
     }
     String key(String bucket, String api, String... namespaces) { return bucket + "::" + versions.key(api, namespaces); }
 
+    /** 20개 목록의 miss는 각 일괄 조회 1회, hit은 원본 호출 0회. 재고 변경은 상품 캐시를 재사용한다. */
+    @Test
+    @DisplayName("통합 목록은 20개를 일괄 합성하고 재고 변경 후에도 기본 정보 캐시를 재사용한다")
+    void combinesTwentyProductsWithoutPerProductReads() throws Exception {
+        var ids = new java.util.ArrayList<Long>();
+        ids.add(product.getId());
+        for (int i = 1; i < 20; i++) ids.add(fixture.product(brand, "batch-" + i, 100L, 1).getId());
+        ids.sort(Long::compareTo);
+        mvc.perform(get("/api/v1/products").with(customer(user))).andExpect(status().isOk())
+            .andExpect(jsonPath("$.data.content.length()").value(20));
+        verify(products, times(1)).findLikeCounts(ids);
+        verify(products, times(1)).findStockStatuses(ids);
+        verify(products, times(0)).findBasicProduct(org.mockito.ArgumentMatchers.anyLong());
+        clearInvocations(products);
+        mvc.perform(get("/api/v1/products").with(customer(user))).andExpect(status().isOk());
+        verify(products, times(0)).findBasicPage(org.mockito.ArgumentMatchers.any(), org.mockito.ArgumentMatchers.any(), org.mockito.ArgumentMatchers.anyInt(), org.mockito.ArgumentMatchers.anyInt());
+        verify(products, times(0)).findLikeCounts(org.mockito.ArgumentMatchers.anyList());
+        verify(products, times(0)).findStockStatuses(org.mockito.ArgumentMatchers.anyList());
+        mvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put("/api-admin/v1/products/" + product.getId() + "/stock")
+            .with(com.loopers.support.http.ApiHttp.admin()).with(org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf())
+            .contentType(org.springframework.http.MediaType.APPLICATION_JSON).content("{\"quantity\":0}")).andExpect(status().isOk());
+        String response = mvc.perform(get("/api/v1/products").with(customer(user))).andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
+        var content = new com.fasterxml.jackson.databind.ObjectMapper().readTree(response).path("data").path("content");
+        assertThat(java.util.stream.StreamSupport.stream(content.spliterator(), false)
+            .filter(item -> item.path("id").asLong() == product.getId()).findFirst().orElseThrow().path("soldOut").asBoolean()).isTrue();
+        verify(products, times(0)).findBasicPage(org.mockito.ArgumentMatchers.any(), org.mockito.ArgumentMatchers.any(), org.mockito.ArgumentMatchers.anyInt(), org.mockito.ArgumentMatchers.anyInt());
+        verify(products, times(0)).findLikeCounts(org.mockito.ArgumentMatchers.anyList());
+        verify(products, times(1)).findStockStatuses(ids);
+    }
+
     /**
      * 준비: 기본 목록을 조회해 캐시를 채운다.
      * 실행: 동일한 기본값을 명시해 재조회하고 사용자 헤더 없이도 요청한다.
@@ -234,7 +264,7 @@ class ReadCacheHttpTest {
         routes.add(new ReadRoute("/api/v1/brands", CacheKeys.BRANDS,
             CacheKeys.customerBrands(0, 20), new String[]{CacheKeys.CATALOG_REVISION}));
         for (String bucket : java.util.List.of(CacheKeys.COUNTS, CacheKeys.STOCKS)) {
-            routes.add(new ReadRoute("/api/v1/products/" + bucket + "?ids=" + product.getId(), bucket,
+            routes.add(new ReadRoute("/api/v1/products/" + product.getId(), bucket,
                 CacheKeys.batch(bucket, java.util.List.of(product.getId())), bucket.equals(CacheKeys.STOCKS)
                     ? new String[]{CacheKeys.CATALOG_REVISION, CacheKeys.STOCK_REVISION} : new String[]{CacheKeys.CATALOG_REVISION}));
         }
@@ -275,15 +305,15 @@ class ReadCacheHttpTest {
     @Test
     @DisplayName("좋아요 0개 캐시는 등록 직후 0을 유지하고 만료 후 1을 반환한다")
     void zeroLikeCountRefreshesOnlyAfterExpiry() throws Exception {
-        String url = "/api/v1/products/like-counts?ids=" + product.getId();
-        mvc.perform(get(url).with(customer(user))).andExpect(status().isOk()).andExpect(jsonPath("$.data[0].likeCount").value(0));
+        String url = "/api/v1/products/" + product.getId();
+        mvc.perform(get(url).with(customer(user))).andExpect(status().isOk()).andExpect(jsonPath("$.data.likeCount").value(0));
         String cacheKey = key(CacheKeys.COUNTS, CacheKeys.batch(CacheKeys.COUNTS, java.util.List.of(product.getId())), CacheKeys.CATALOG_REVISION);
         assertThat(redis.getExpire(cacheKey)).isBetween(269L, 330L);
         likes.register(user.getId(), product.getId());
-        mvc.perform(get(url).with(customer(user))).andExpect(status().isOk()).andExpect(jsonPath("$.data[0].likeCount").value(0));
+        mvc.perform(get(url).with(customer(user))).andExpect(status().isOk()).andExpect(jsonPath("$.data.likeCount").value(0));
         redis.expire(cacheKey, Duration.ofMillis(1));
         Thread.sleep(10);
-        mvc.perform(get(url).with(customer(user))).andExpect(status().isOk()).andExpect(jsonPath("$.data[0].likeCount").value(1));
+        mvc.perform(get(url).with(customer(user))).andExpect(status().isOk()).andExpect(jsonPath("$.data.likeCount").value(1));
     }
 
     @Test

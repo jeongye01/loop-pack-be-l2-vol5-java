@@ -21,22 +21,29 @@ public class ProductV1Dto {
         }
     }
 
+    public record BasicProductResponse(Long id, String name, long price, BrandResponse brand) {
+        public static BasicProductResponse from(ProductUseCase.BasicProduct view) {
+            return new BasicProductResponse(view.product().getId(), view.product().getName(), view.product().getPrice(), BrandResponse.from(view.brand()));
+        }
+    }
+
     public record CustomerProductResponse(
         Long id,
         String name,
         long price,
-        BrandResponse brand
+        BrandResponse brand,
+        long likeCount,
+        boolean soldOut
     ) {
-        public static CustomerProductResponse from(ProductUseCase.BasicProduct view) {
-            return new CustomerProductResponse(view.product().getId(), view.product().getName(), view.product().getPrice(), BrandResponse.from(view.brand()));
-        }
         public static CustomerProductResponse from(ProductUseCase.CustomerProduct view) {
             Product product = view.product();
             return new CustomerProductResponse(
                 product.getId(),
                 product.getName(),
                 product.getPrice(),
-                BrandResponse.from(view.brand())
+                BrandResponse.from(view.brand()),
+                view.likeCount(),
+                view.stock().quantity() == 0
             );
         }
     }

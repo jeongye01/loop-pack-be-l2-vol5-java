@@ -79,14 +79,15 @@ class ExperimentHttpTest {
             }
             assertThat(sum).isCloseTo(stages.path("request.pipeline").path("totalMs").asDouble(),
                 org.assertj.core.data.Offset.offset(0.001));
-            assertThat(event.path("queries").size()).isEqualTo(4);
+            // 인증 1 + 목록/브랜드 3 + 좋아요 일괄 2 + 재고 일괄 2. size=1/20 모두 고정 비용이다.
+            assertThat(event.path("queries").size()).isEqualTo(8);
             for (String repository : java.util.List.of("BrandRepositoryAdapter.findAllByIds")) {
                 assertThat(stages.path(repository).path("calls").asInt()).as(repository).isEqualTo(1);
             }
-            assertThat(stages.has("StockRepositoryAdapter.findAllByProductIds")).isFalse();
+            assertThat(stages.path("StockRepositoryAdapter.findAllByProductIds").path("calls").asInt()).isEqualTo(1);
             assertThat(stages.has("StockRepositoryAdapter.findByProductId")).isFalse();
             assertThat(stages.has("LikeRepositoryAdapter.countByProductId")).isFalse();
-            assertThat(stages.has("LikeRepositoryAdapter.countByProductIds")).isFalse();
+            assertThat(stages.path("LikeRepositoryAdapter.countByProductIds").path("calls").asInt()).isEqualTo(1);
             assertThat(stages.has("BrandRepositoryAdapter.findById")).isFalse();
             for (var query : event.path("queries")) {
                 assertThat(query.path("sql").asText()).doesNotContain("select count(p");
