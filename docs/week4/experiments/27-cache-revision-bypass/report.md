@@ -51,3 +51,7 @@ revision SQL뿐 아니라 이를 감싼 바깥 트랜잭션의 연결 점유/시
 [집계](slo-runs.json) · [자원](results/20261015T033140-measure-1700-14effc/resource-observations.json) · [Redis/TTL](results/20261015T033140-measure-1700-14effc/cache-state.json) · [배포](deployment.json) · [비교 기준](../26-cache-display-mget/report.md).
 
 배포 상태: 캐시 ON, revision 우회 옵션 true인 실험 빌드 유지. 우회를 끄려면 `revision-bypass-compose.yml`을 제외한 기존 Compose 목록으로 재생성하거나 옵션을 false로 설정한다.
+
+## 후속: 동일 빌드 추가 예열 결과
+
+[28번](../28-revision-bypass-warmed/report.md)에서 앱 재시작 없이300→700 RPS 각30초 예열 후 같은1,700 RPS60초를 실행하자 p99 52ms·성공102,001건·미시작/timeout0이었다. 본 문서의 수초 지연은 안정화되지 않은 실행의 결과로 보존하며, revision 또는 캐시 조합의 정상 성능으로 일반화하지 않는다.
