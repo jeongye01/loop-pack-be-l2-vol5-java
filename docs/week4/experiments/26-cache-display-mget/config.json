@@ -18,7 +18,7 @@
   "vus": 3000,
   "timeoutSeconds": 5,
   "gracefulStopSeconds": 10,
-  "warmupSeconds": 20,
+  "warmupSeconds": 30,
   "durationSeconds": 60,
   "sampleIntervalSeconds": 5,
   "recoverySeconds": 60,
@@ -34,12 +34,15 @@
     "expiryOverride": false,
     "enabled": true,
     "revisionLookup": "one SQL per combined request",
-    "readCommands": "GET products, MGET counts+stocks"
+    "readCommands": "GET products, MGET counts+stocks",
+    "outerReadTransaction": true,
+    "revisionBypass": false
   },
   "loadHost": "3.37.31.251",
   "loadBaseUrl": "http://172.31.26.165:8080",
   "warmupSteps": [
-    300
+    300,
+    700
   ],
   "requireTomcatMetrics": true,
   "requireAsyncLogMetrics": true,

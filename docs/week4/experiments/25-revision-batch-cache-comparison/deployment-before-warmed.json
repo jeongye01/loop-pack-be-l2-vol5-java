@@ -1,0 +1,21 @@
+{
+  "backendCommit": "81d2933",
+  "image": "commerce-api:catalog-81d2933",
+  "previousImage": "commerce-api:catalog-8732303",
+  "jarSha256": "8d6f197c1e06fe37949a6d2b832b585869a0cb67d6aed84106c7c8c7e24bba64",
+  "offHealth": "healthy",
+  "experimentLatestCache": false,
+  "ttlSeconds": 300,
+  "jitterSeconds": 30,
+  "validation": {
+    "backendTests": 468,
+    "failures": 0,
+    "skipped": 0,
+    "checkstyle": "passed",
+    "archUnit": "passed",
+    "runnerTests": 11
+  },
+  "note": "Same runtime, JAR and Compose overlays; cache OFF adds CATALOG_CACHE_ENABLED=false overlay. Each condition restarts the app.",
+  "onHealth": "healthy",
+  "finalCatalogCache": true
+}

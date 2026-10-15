@@ -90,5 +90,143 @@
     "exitCode": 0,
     "complete": false,
     "sloPassed": false
+  },
+  {
+    "runId": "20261015T034915-warmup-300-9c8a97",
+    "phase": "warmup",
+    "rps": 300,
+    "seconds": 30,
+    "planned": 9000,
+    "started": 9001,
+    "completed": 9001,
+    "dropped": 0,
+    "successRate": 1,
+    "failed": 0,
+    "timeouts": 0,
+    "transportErrors": 0,
+    "httpErrors": 0,
+    "mismatches": 0,
+    "httpRequests": 9001,
+    "httpRps": 299.9356102224007,
+    "httpFailureRate": 0,
+    "latencyMs": {
+      "avg": 1042.6803688479058,
+      "min": 4,
+      "max": 4885,
+      "p(50)": 613,
+      "p(95)": 2965,
+      "p(99)": 3610
+    },
+    "successLatencyMs": {
+      "avg": 1042.6803688479058,
+      "min": 4,
+      "max": 4885,
+      "p(50)": 613,
+      "p(95)": 2965,
+      "p(99)": 3610
+    },
+    "recovered": true,
+    "collection": {
+      "samplesComplete": true,
+      "environmentComplete": true,
+      "serverLogsCollected": true,
+      "asyncLogMetricsComplete": true,
+      "tomcatMetricsComplete": true
+    },
+    "exitCode": 0,
+    "complete": true,
+    "sloPassed": false
+  },
+  {
+    "runId": "20261015T035019-warmup-700-bc9e0a",
+    "phase": "warmup",
+    "rps": 700,
+    "seconds": 30,
+    "planned": 21000,
+    "started": 21001,
+    "completed": 21001,
+    "dropped": 0,
+    "successRate": 1,
+    "failed": 0,
+    "timeouts": 0,
+    "transportErrors": 0,
+    "httpErrors": 0,
+    "mismatches": 0,
+    "httpRequests": 21001,
+    "httpRps": 699.9094612804779,
+    "httpFailureRate": 0,
+    "latencyMs": {
+      "p(99)": 86,
+      "avg": 12.115470691871815,
+      "min": 2,
+      "max": 203,
+      "p(50)": 8,
+      "p(95)": 38
+    },
+    "successLatencyMs": {
+      "max": 203,
+      "p(50)": 8,
+      "p(95)": 38,
+      "p(99)": 86,
+      "avg": 12.115470691871815,
+      "min": 2
+    },
+    "recovered": true,
+    "collection": {
+      "samplesComplete": true,
+      "environmentComplete": true,
+      "serverLogsCollected": true,
+      "asyncLogMetricsComplete": true,
+      "tomcatMetricsComplete": true
+    },
+    "exitCode": 0,
+    "complete": true,
+    "sloPassed": true
+  },
+  {
+    "runId": "20261015T035118-measure-1700-46a651",
+    "phase": "measure",
+    "rps": 1700,
+    "seconds": 60,
+    "planned": 102000,
+    "started": 102001,
+    "completed": 102001,
+    "dropped": 0,
+    "successRate": 1,
+    "failed": 0,
+    "timeouts": 0,
+    "transportErrors": 0,
+    "httpErrors": 0,
+    "mismatches": 0,
+    "httpRequests": 102001,
+    "httpRps": 1699.8339097037983,
+    "httpFailureRate": 0,
+    "latencyMs": {
+      "p(99)": 618,
+      "avg": 108.45523083107028,
+      "min": 2,
+      "max": 1320,
+      "p(50)": 38,
+      "p(95)": 422
+    },
+    "successLatencyMs": {
+      "min": 2,
+      "max": 1320,
+      "p(50)": 38,
+      "p(95)": 422,
+      "p(99)": 618,
+      "avg": 108.45523083107028
+    },
+    "recovered": true,
+    "collection": {
+      "samplesComplete": true,
+      "environmentComplete": true,
+      "serverLogsCollected": true,
+      "asyncLogMetricsComplete": true,
+      "tomcatMetricsComplete": true
+    },
+    "exitCode": 0,
+    "complete": true,
+    "sloPassed": false
   }
 ]
