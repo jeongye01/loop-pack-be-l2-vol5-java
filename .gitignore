@@ -49,5 +49,5 @@ out/
 /docs/week3/experiments/
 /docs/week4/experiments/
 
-### Reproducible million-product CSV files ###
-/docs/week4/seed-data/skewed-1m-v1/*.csv
+### Local seed data ###
+/docs/week4/seed-data/
