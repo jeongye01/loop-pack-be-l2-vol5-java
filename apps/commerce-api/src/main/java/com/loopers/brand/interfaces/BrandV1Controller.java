@@ -23,6 +23,7 @@ public class BrandV1Controller {
     private final BrandUseCase brandUseCase;
 
     private final ResponseCache cache;
+    private final com.loopers.support.cache.CatalogReadTransaction cacheTransaction;
 
     @GetMapping
     public ApiResponse<ListResponse<BrandV1Dto.CustomerBrandResponse>> getBrands(
@@ -31,12 +32,11 @@ public class BrandV1Controller {
         @RequestParam(defaultValue = PageQuery.DEFAULT_SIZE) int size
     ) {
         var query = new PageQuery(page, size);
-        return cache.read(CacheKeys.BRANDS,
+        return cacheTransaction.read(() -> cache.read(CacheKeys.BRANDS,
             CacheKeys.customerBrands(query.page(), query.size()),
             new TypeReference<>() { },
             () -> ApiResponse.success(ListResponse.from(
-                brandUseCase.findActivePage(query.page(), query.size()), BrandV1Dto.CustomerBrandResponse::from)),
-            CacheKeys.CATALOG_REVISION);
+                brandUseCase.findActivePage(query.page(), query.size()), BrandV1Dto.CustomerBrandResponse::from))));
     }
 
     @GetMapping("/{brandId}")

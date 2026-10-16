@@ -8,7 +8,6 @@ import com.loopers.like.application.LikeUseCase;
 import com.loopers.product.application.ProductUseCase;
 import com.loopers.product.domain.ProductSort;
 import com.loopers.support.cache.CacheKeys;
-import com.loopers.support.cache.CacheVersions;
 import com.loopers.support.cache.ResponseCache;
 import java.util.List;
 import java.util.function.Function;
@@ -31,14 +30,12 @@ public class ProductReadFacade {
     }
 
     private ApiResponse<SliceResponse<ProductV1Dto.CustomerProductResponse>> pageWithinRead(Long brandId, ProductSort sort, String normalized, int page, int size) {
-        var revisions = cache.snapshot(CacheKeys.CATALOG_REVISION, CacheKeys.STOCK_REVISION);
-        ApiResponse<SliceResponse<ProductV1Dto.BasicProductResponse>> basic = cache.read(revisions,
+        ApiResponse<SliceResponse<ProductV1Dto.BasicProductResponse>> basic = cache.read(
             "likes_desc".equals(normalized) ? CacheKeys.RANKINGS : CacheKeys.PRODUCTS,
             CacheKeys.products(normalized, brandId, page, size), new TypeReference<>() { },
-            () -> ApiResponse.success(SliceResponse.from(products.findBasicPage(brandId, sort, page, size), ProductV1Dto.BasicProductResponse::from)),
-            CacheKeys.CATALOG_REVISION);
+            () -> ApiResponse.success(SliceResponse.from(products.findBasicPage(brandId, sort, page, size), ProductV1Dto.BasicProductResponse::from)));
         var data = basic.data();
-        return ApiResponse.success(new SliceResponse<>(compose(data.content(), revisions), data.page(), data.size(), data.last()));
+        return ApiResponse.success(new SliceResponse<>(compose(data.content()), data.page(), data.size(), data.last()));
     }
 
     public ApiResponse<ProductV1Dto.CustomerProductResponse> detail(Long id) {
@@ -46,10 +43,9 @@ public class ProductReadFacade {
     }
 
     private ApiResponse<ProductV1Dto.CustomerProductResponse> detailWithinRead(Long id) {
-        var revisions = cache.snapshot(CacheKeys.CATALOG_REVISION, CacheKeys.STOCK_REVISION);
-        ApiResponse<ProductV1Dto.BasicProductResponse> basic = cache.read(revisions, CacheKeys.PRODUCTS, CacheKeys.product(id), new TypeReference<>() { },
-            () -> ApiResponse.success(ProductV1Dto.BasicProductResponse.from(products.findBasicProduct(id))), CacheKeys.CATALOG_REVISION);
-        return ApiResponse.success(compose(List.of(basic.data()), revisions).get(0));
+        ApiResponse<ProductV1Dto.BasicProductResponse> basic = cache.read( CacheKeys.PRODUCTS, CacheKeys.product(id), new TypeReference<>() { },
+            () -> ApiResponse.success(ProductV1Dto.BasicProductResponse.from(products.findBasicProduct(id))));
+        return ApiResponse.success(compose(List.of(basic.data())).get(0));
     }
 
     public ApiResponse<ListResponse<ProductV1Dto.CustomerProductResponse>> mine(Long userId, int page, int size) {
@@ -57,45 +53,36 @@ public class ProductReadFacade {
     }
 
     private ApiResponse<ListResponse<ProductV1Dto.CustomerProductResponse>> mineWithinRead(Long userId, int page, int size) {
-        var revisions = cache.snapshot(CacheKeys.CATALOG_REVISION, CacheKeys.STOCK_REVISION, CacheKeys.userRevision(userId));
-        ApiResponse<ListResponse<ProductV1Dto.BasicProductResponse>> basic = cache.read(revisions, CacheKeys.MY_LIKES,
+        ApiResponse<ListResponse<ProductV1Dto.BasicProductResponse>> basic = cache.read( CacheKeys.MY_LIKES,
             CacheKeys.myLikes(userId, page, size), new TypeReference<>() { },
-            () -> ApiResponse.success(ListResponse.from(likes.findMineBasicPage(userId, userId, page, size), ProductV1Dto.BasicProductResponse::from)),
-            CacheKeys.CATALOG_REVISION, CacheKeys.userRevision(userId));
+            () -> ApiResponse.success(ListResponse.from(likes.findMineBasicPage(userId, userId, page, size), ProductV1Dto.BasicProductResponse::from)));
         var data = basic.data();
-        return ApiResponse.success(new ListResponse<>(compose(data.content(), revisions), data.page(), data.size(), data.totalElements()));
+        return ApiResponse.success(new ListResponse<>(compose(data.content()), data.page(), data.size(), data.totalElements()));
     }
 
     public ApiResponse<List<ProductUseCase.LikeCount>> counts(List<Long> ids) {
-        return transaction.read(() -> counts(ids, cache.snapshot(CacheKeys.CATALOG_REVISION)));
+        return transaction.read(() -> ApiResponse.success(cache.readBatch(countBatch(ids))));
     }
-    private ApiResponse<List<ProductUseCase.LikeCount>> counts(List<Long> ids, CacheVersions.Snapshot revisions) {
-        List<Long> normalized = ids.stream().distinct().sorted().toList();
-        return cache.read(revisions, CacheKeys.COUNTS, CacheKeys.batch(CacheKeys.COUNTS, normalized), new TypeReference<>() { },
-            () -> ApiResponse.success(products.findLikeCounts(normalized)), CacheKeys.CATALOG_REVISION);
-    }
-
     public ApiResponse<List<ProductUseCase.StockStatus>> stocks(List<Long> ids) {
-        return transaction.read(() -> stocks(ids, cache.snapshot(CacheKeys.CATALOG_REVISION, CacheKeys.STOCK_REVISION)));
-    }
-    private ApiResponse<List<ProductUseCase.StockStatus>> stocks(List<Long> ids, CacheVersions.Snapshot revisions) {
-        List<Long> normalized = ids.stream().distinct().sorted().toList();
-        return cache.read(revisions, CacheKeys.STOCKS, CacheKeys.batch(CacheKeys.STOCKS, normalized), new TypeReference<>() { },
-            () -> ApiResponse.success(products.findStockStatuses(normalized)), CacheKeys.CATALOG_REVISION, CacheKeys.STOCK_REVISION);
+        return transaction.read(() -> ApiResponse.success(cache.readBatch(stockBatch(ids))));
     }
 
-    private List<ProductV1Dto.CustomerProductResponse> compose(List<ProductV1Dto.BasicProductResponse> basic, CacheVersions.Snapshot revisions) {
+    private ResponseCache.Batch<ProductUseCase.LikeCount> countBatch(List<Long> ids) {
+        return new ResponseCache.Batch<>(CacheKeys.COUNTS, ids.stream().distinct().sorted().toList(), new TypeReference<>() { },
+            products::findLikeCounts, ProductUseCase.LikeCount::productId);
+    }
+
+    private ResponseCache.Batch<ProductUseCase.StockStatus> stockBatch(List<Long> ids) {
+        return new ResponseCache.Batch<>(CacheKeys.STOCKS, ids.stream().distinct().sorted().toList(), new TypeReference<>() { },
+            products::findStockStatuses, ProductUseCase.StockStatus::productId);
+    }
+
+    private List<ProductV1Dto.CustomerProductResponse> compose(List<ProductV1Dto.BasicProductResponse> basic) {
         if (basic.isEmpty()) return List.of();
         var ids = basic.stream().map(ProductV1Dto.BasicProductResponse::id).distinct().sorted().toList();
-        var values = cache.readPair(revisions,
-            new ResponseCache.Entry<>(CacheKeys.COUNTS, CacheKeys.batch(CacheKeys.COUNTS, ids),
-                new TypeReference<ApiResponse<List<ProductUseCase.LikeCount>>>() { },
-                () -> ApiResponse.success(products.findLikeCounts(ids)), CacheKeys.CATALOG_REVISION),
-            new ResponseCache.Entry<>(CacheKeys.STOCKS, CacheKeys.batch(CacheKeys.STOCKS, ids),
-                new TypeReference<ApiResponse<List<ProductUseCase.StockStatus>>>() { },
-                () -> ApiResponse.success(products.findStockStatuses(ids)), CacheKeys.CATALOG_REVISION, CacheKeys.STOCK_REVISION));
-        var counts = values.first().data().stream().collect(Collectors.toMap(ProductUseCase.LikeCount::productId, Function.identity()));
-        var stocks = values.second().data().stream().collect(Collectors.toMap(ProductUseCase.StockStatus::productId, Function.identity()));
+        var values = cache.readBatches( countBatch(ids), stockBatch(ids));
+        var counts = values.first().stream().collect(Collectors.toMap(ProductUseCase.LikeCount::productId, Function.identity()));
+        var stocks = values.second().stream().collect(Collectors.toMap(ProductUseCase.StockStatus::productId, Function.identity()));
         return basic.stream().map(item -> new ProductV1Dto.CustomerProductResponse(item.id(), item.name(), item.price(), item.brand(),
             counts.get(item.id()).likeCount(), stocks.get(item.id()).soldOut())).toList();
     }

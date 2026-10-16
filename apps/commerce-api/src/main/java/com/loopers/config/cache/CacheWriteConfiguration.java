@@ -16,7 +16,7 @@ import org.springframework.context.annotation.Configuration;
 @ConditionalOnProperty(name = "catalog.cache.enabled", havingValue = "true")
 public class CacheWriteConfiguration {
     @Bean
-    static BeanPostProcessor cacheRevisionWrites(ObjectProvider<CacheVersions> versions) {
+    static BeanPostProcessor cacheRevisionWrites(ObjectProvider<CacheVersions> invalidation) {
         return new BeanPostProcessor() {
             @Override public Object postProcessAfterInitialization(Object bean, String name) {
                 String type = AopUtils.getTargetClass(bean).getSimpleName();
@@ -25,13 +25,21 @@ public class CacheWriteConfiguration {
                 proxy.setProxyTargetClass(true);
                 proxy.addAdvice((MethodInterceptor) call -> {
                     Object result = call.proceed();
+                    if (type.equals("StockRepositoryAdapter")) {
+                        if (call.getMethod().getName().equals("findForOrderByProductId")
+                            || call.getMethod().getName().equals("findForStockUpdateByProductId")) {
+                            ((java.util.Optional<?>) result).ifPresent(stock -> StockCacheState.observe((com.loopers.product.domain.Stock) stock));
+                        }
+                        if (call.getMethod().getName().equals("save")
+                            && !StockCacheState.changed((com.loopers.product.domain.Stock) result)) return result;
+                    }
                     if (call.getMethod().getName().equals("save") || call.getMethod().getName().equals("delete")) {
                         String namespace = switch (type) {
-                            case "StockRepositoryAdapter" -> CacheKeys.STOCK_REVISION;
-                            case "LikeRepositoryAdapter" -> CacheKeys.userRevision(((Like) call.getArguments()[0]).getUserId());
-                            default -> CacheKeys.CATALOG_REVISION;
+                            case "StockRepositoryAdapter" -> CacheKeys.stockGroup(((com.loopers.product.domain.Stock) result).getProductId());
+                            case "LikeRepositoryAdapter" -> CacheKeys.userGroup(((Like) call.getArguments()[0]).getUserId());
+                            default -> CacheKeys.CATALOG_GROUP;
                         };
-                        versions.getObject().changed(namespace);
+                        invalidation.getObject().changed(namespace);
                     }
                     return result;
                 });

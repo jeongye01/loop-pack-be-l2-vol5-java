@@ -48,7 +48,7 @@ public class ReadCacheConfiguration implements CachingConfigurer {
     }
     @Override
     public CacheErrorHandler errorHandler() {
-        // Redis is optional. DB revision errors are outside this handler and fail closed.
+        // Redis failures fall back to the original database read.
         return new CacheErrorHandler() {
             public void handleCacheGetError(RuntimeException e, Cache c, Object k) { error("get"); }
             public void handleCachePutError(RuntimeException e, Cache c, Object k, Object v) { error("put"); }

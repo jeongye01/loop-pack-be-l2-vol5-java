@@ -4,7 +4,6 @@ import com.loopers.like.application.LikeUseCase;
 import com.loopers.product.application.ProductUseCase;
 import com.loopers.product.domain.ProductSort;
 import com.loopers.support.cache.CacheKeys;
-import com.loopers.support.cache.CacheVersions;
 import com.loopers.support.fixture.CommerceFixture;
 import com.loopers.testcontainers.MySqlTestContainersConfig;
 import com.loopers.config.redis.RedisConfig;
@@ -48,13 +47,15 @@ class ReadCacheHttpTest {
         r.add("datasource.redis.replicas[0].host", REDIS::getHost);
         r.add("datasource.redis.replicas[0].port", REDIS::getFirstMappedPort);
     }
+    @Autowired com.loopers.support.cache.CacheVersions versions;
     @Autowired MockMvc mvc;
     @Autowired EntityManager em;
     @Autowired PlatformTransactionManager tm;
-    @MockitoSpyBean CacheVersions versions;
+    @MockitoSpyBean com.loopers.support.cache.ResponseCache responseCache;
     @MockitoSpyBean org.springframework.jdbc.core.JdbcTemplate jdbc;
     @MockitoSpyBean com.loopers.support.cache.CachedJson cachedJson;
     @Autowired LikeUseCase likes;
+    @Autowired com.loopers.product.interfaces.ProductReadFacade facade;
     @MockitoSpyBean ProductUseCase products;
     @MockitoSpyBean org.springframework.cache.CacheManager cacheManager;
     @Autowired @Qualifier(RedisConfig.REDIS_TEMPLATE_MASTER) RedisTemplate<String, String> redis;
@@ -75,11 +76,52 @@ class ReadCacheHttpTest {
     }
     String key(String bucket, String api, String... namespaces) { return bucket + "::" + versions.key(api, namespaces); }
 
-    /** 준비: 통합 응답을 캐시한다. 실행: 다시 조회한다. 확인: 각 요청이 필요한 모든 버전을 SQL 한 번으로 읽는다. */
+    /** 준비: A·B 값을 채운다. 실행: B·C를 읽는다. 확인: B 키는 재사용하고 C만 일괄 로드한다. */
+    @Test
+    @DisplayName("재고와 좋아요 수는 ID 조합이 달라도 상품별 캐시를 재사용한다")
+    void reusesIndividualItemsAcrossDifferentBatches() {
+        var b = fixture.product(brand, "item-B", 100L, 1);
+        var c = fixture.product(brand, "item-C", 100L, 1);
+        var ab = java.util.List.of(product.getId(), b.getId());
+        var bc = java.util.List.of(b.getId(), c.getId());
+        facade.counts(ab); facade.stocks(ab);
+        String countB = key(CacheKeys.COUNTS, CacheKeys.item(CacheKeys.COUNTS, b.getId()), CacheKeys.CATALOG_GROUP);
+        String stockB = key(CacheKeys.STOCKS, CacheKeys.item(CacheKeys.STOCKS, b.getId()), CacheKeys.CATALOG_GROUP, CacheKeys.stockGroup(b.getId()));
+        redis.expire(countB, Duration.ofSeconds(120)); redis.expire(stockB, Duration.ofSeconds(120));
+        clearInvocations(products);
+        assertThat(facade.counts(bc).data()).extracting(ProductUseCase.LikeCount::productId).containsExactly(b.getId(), c.getId());
+        assertThat(facade.stocks(bc).data()).extracting(ProductUseCase.StockStatus::productId).containsExactly(b.getId(), c.getId());
+        verify(products, times(1)).findLikeCounts(java.util.List.of(c.getId()));
+        verify(products, times(1)).findStockStatuses(java.util.List.of(c.getId()));
+        assertThat(redis.getExpire(countB)).isBetween(110L, 120L);
+        assertThat(redis.getExpire(stockB)).isBetween(110L, 120L);
+    }
+
+    /** 준비: A·B 재고를 캐시한다. 실행: A 재고를 수정한다. 확인: B 키·TTL을 유지하고 A만 재조회한다. */
+    @Test
+    @DisplayName("A 품절 전환은 A 캐시만 삭제하고 B 재고 캐시를 유지한다")
+    void stockInvalidationIsScopedToChangedProduct() throws Exception {
+        var b = fixture.product(brand, "unchanged-B", 100L, 1);
+        var ids = java.util.List.of(product.getId(), b.getId());
+        facade.stocks(ids);
+        String stockB = key(CacheKeys.STOCKS, CacheKeys.item(CacheKeys.STOCKS, b.getId()), CacheKeys.CATALOG_GROUP, CacheKeys.stockGroup(b.getId()));
+        redis.expire(stockB, Duration.ofSeconds(120));
+        mvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put("/api-admin/v1/products/" + product.getId() + "/stock")
+            .with(com.loopers.support.http.ApiHttp.admin()).with(org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf())
+            .contentType("application/json").content("{\"quantity\":0}")).andExpect(status().isOk());
+        clearInvocations(products);
+        var response = facade.stocks(ids).data();
+        assertThat(response).contains(new ProductUseCase.StockStatus(product.getId(), true), new ProductUseCase.StockStatus(b.getId(), false));
+        verify(products, times(1)).findStockStatuses(java.util.List.of(product.getId()));
+        assertThat(key(CacheKeys.STOCKS, CacheKeys.item(CacheKeys.STOCKS, b.getId()), CacheKeys.CATALOG_GROUP, CacheKeys.stockGroup(b.getId()))).isEqualTo(stockB);
+        assertThat(redis.getExpire(stockB)).isBetween(110L, 120L);
+    }
+
+    /** 준비: 통합 응답을 캐시한다. 실행: 다시 조회한다. 확인: revision SQL 2회로 버전을 확인하고 원본 조회는 생략한다. */
     @org.junit.jupiter.params.ParameterizedTest
     @org.junit.jupiter.params.provider.ValueSource(strings = {"latest", "price_asc", "likes_desc", "detail", "mine"})
-    @DisplayName("통합 상품 hit은 revision을 한 번에 읽고 원본 상품·좋아요·재고를 조회하지 않는다")
-    void readsRevisionsOncePerCombinedHit(String route) throws Exception {
+    @DisplayName("통합 상품 hit은 revision SQL 2회와 원본 조회 0회로 같은 응답을 반환한다")
+    void combinedHitOnlyQueriesDatabaseVersions(String route) throws Exception {
         likes.register(user.getId(), product.getId());
         String url = switch (route) {
             case "detail" -> "/api/v1/products/" + product.getId();
@@ -90,14 +132,8 @@ class ReadCacheHttpTest {
         clearInvocations(jdbc, products);
         String hit = mvc.perform(get(url).with(customer(user))).andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
         assertThat(hit).isEqualTo(first);
-        String placeholders = route.equals("mine") ? "?,?,?" : "?,?";
-        verify(jdbc, times(1)).query(org.mockito.ArgumentMatchers.eq(
-            "select namespace, revision from read_cache_revision where namespace in (" + placeholders + ")"),
+        org.mockito.Mockito.verify(jdbc, times(2)).query(org.mockito.ArgumentMatchers.contains("read_cache_revision"),
             org.mockito.ArgumentMatchers.any(org.springframework.jdbc.core.RowCallbackHandler.class), org.mockito.ArgumentMatchers.any(Object[].class));
-        // JdbcTemplate의 공개 query는 내부 overload로 위임한다. 위임을 추가 SQL로 세지 않고 실행 경계를 검증한다.
-        verify(jdbc, times(1)).query(org.mockito.ArgumentMatchers.any(org.springframework.jdbc.core.PreparedStatementCreator.class),
-            org.mockito.ArgumentMatchers.nullable(org.springframework.jdbc.core.PreparedStatementSetter.class),
-            org.mockito.ArgumentMatchers.any(org.springframework.jdbc.core.ResultSetExtractor.class));
         org.mockito.Mockito.verifyNoInteractions(products);
     }
 
@@ -120,7 +156,7 @@ class ReadCacheHttpTest {
     /** 준비: 통합 응답 캐시를 채운다. 실행: 모든 캐시가 hit인 재조회. 확인: Redis 표시 조회 때 DB 트랜잭션·커넥션 자원이 없다. */
     @org.junit.jupiter.params.ParameterizedTest
     @org.junit.jupiter.params.provider.ValueSource(strings = {"latest", "price_asc", "likes_desc", "detail", "mine"})
-    @DisplayName("통합 hit은 revision 조회 후 DB 커넥션을 반환하고 Redis에서 응답을 합친다")
+    @DisplayName("통합 hit은 DB 트랜잭션 없이 Redis에서 응답을 합친다")
     void hitDoesNotHoldDatabaseTransactionDuringRedisRead(String route) throws Exception {
         likes.register(user.getId(), product.getId());
         String url = switch (route) {
@@ -142,33 +178,27 @@ class ReadCacheHttpTest {
         org.mockito.Mockito.verifyNoInteractions(products);
     }
 
-    /** 준비: 전체 miss. 실행: 목록 조회. 확인: 원본 조회 직전부터 트랜잭션이 활성화되어 revision과 같은 스냅샷을 쓴다. */
+    /** 준비: 전체 miss. 실행: 목록 조회. 확인: 원본들을 한 트랜잭션에서 읽는다. */
     @Test
-    @DisplayName("전체 miss는 revision을 트랜잭션 안에서 다시 읽고 원본을 한 번만 조회한다")
-    void missRestartsRevisionInsideTransaction() throws Exception {
-        var states = new java.util.ArrayList<Boolean>();
-        org.mockito.Mockito.doAnswer(invocation -> {
-            states.add(org.springframework.transaction.support.TransactionSynchronizationManager.isActualTransactionActive());
-            return invocation.callRealMethod();
-        }).when(versions).snapshot(CacheKeys.CATALOG_REVISION, CacheKeys.STOCK_REVISION);
+    @DisplayName("전체 miss는 트랜잭션에서 원본을 한 번만 조회한다")
+    void missLoadsOriginalInsideTransaction() throws Exception {
         org.mockito.Mockito.doAnswer(invocation -> {
             assertThat(org.springframework.transaction.support.TransactionSynchronizationManager.isActualTransactionActive()).isTrue();
             return invocation.callRealMethod();
         }).when(cachedJson).loadMany(org.mockito.ArgumentMatchers.anyList(), org.mockito.ArgumentMatchers.anyList());
         mvc.perform(get("/api/v1/products").with(customer(user))).andExpect(status().isOk());
-        assertThat(states).containsExactly(false, true);
         verify(products, times(1)).findBasicPage(org.mockito.ArgumentMatchers.any(), org.mockito.ArgumentMatchers.any(), org.mockito.ArgumentMatchers.anyInt(), org.mockito.ArgumentMatchers.anyInt());
         verify(products, times(1)).findLikeCounts(java.util.List.of(product.getId()));
         verify(products, times(1)).findStockStatuses(java.util.List.of(product.getId()));
     }
 
-    /** 준비: 상품 목록은 hit, 재고만 miss. 실행: 표시 조회 도중 상품 수정 커밋. 확인: 옛 목록을 버리고 새 revision·상품을 함께 반환한다. */
+    /** 준비: 상품 목록은 hit, 재고만 miss. 실행: 표시 조회 도중 상품 수정 커밋. 확인: 옛 목록을 버리고 새 상품을 함께 반환한다. */
     @Test
-    @DisplayName("부분 miss 사이 상품이 변경되면 옛 hit을 버리고 새 revision으로 전체 응답을 다시 구성한다")
-    void partialMissDoesNotMixOldProductWithNewRevision() throws Exception {
+    @DisplayName("부분 miss 사이 상품이 변경되면 옛 hit을 버리고 무효화 후 전체 응답을 다시 구성한다")
+    void partialMissRechecksInvalidatedBasicProduct() throws Exception {
         mvc.perform(get("/api/v1/products").with(customer(user))).andExpect(status().isOk());
         var ids = java.util.List.of(product.getId());
-        redis.delete(key(CacheKeys.STOCKS, CacheKeys.batch(CacheKeys.STOCKS, ids), CacheKeys.CATALOG_REVISION, CacheKeys.STOCK_REVISION));
+        redis.delete(key(CacheKeys.STOCKS, CacheKeys.item(CacheKeys.STOCKS, product.getId()), CacheKeys.CATALOG_GROUP, CacheKeys.stockGroup(product.getId())));
         var calls = new java.util.concurrent.atomic.AtomicInteger();
         org.mockito.Mockito.doAnswer(invocation -> {
             Object values = invocation.callRealMethod();
@@ -189,6 +219,27 @@ class ReadCacheHttpTest {
             .andExpect(jsonPath("$.data.content[0].name").value("after-probe"));
     }
 
+    /** 기본 정보 hit 이후 catalog가 바뀌면 서로 다른 버전을 합치지 않고 전체를 다시 읽는다. */
+    @Test
+    @DisplayName("통합 hit의 두 revision 조회 사이 삭제 commit은 새 스냅샷으로 재조회한다")
+    void catalogChangeBetweenRevisionReadsRestartsComposedHit() throws Exception {
+        mvc.perform(get("/api/v1/products").with(customer(user))).andExpect(status().isOk());
+        var calls = new java.util.concurrent.atomic.AtomicInteger();
+        org.mockito.Mockito.doAnswer(invocation -> {
+            if (calls.incrementAndGet() == 2) {
+                mvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete("/api-admin/v1/products/" + product.getId())
+                    .with(com.loopers.support.http.ApiHttp.admin()).with(org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf()))
+                    .andExpect(status().isOk());
+            }
+            return invocation.callRealMethod();
+        }).when(jdbc).query(org.mockito.ArgumentMatchers.contains("read_cache_revision"),
+            org.mockito.ArgumentMatchers.any(org.springframework.jdbc.core.RowCallbackHandler.class), org.mockito.ArgumentMatchers.any(Object[].class));
+        mvc.perform(get("/api/v1/products").with(customer(user))).andExpect(status().isOk())
+            .andExpect(jsonPath("$.data.content.length()").value(0))
+            .andExpect(jsonPath("$.data.last").value(true));
+        assertThat(calls.get()).isEqualTo(3);
+    }
+
     long redisCommandCalls(String command) {
         return redis.execute((org.springframework.data.redis.core.RedisCallback<Long>) connection -> {
             var info = connection.serverCommands().info("commandstats");
@@ -205,8 +256,8 @@ class ReadCacheHttpTest {
         String url = "/api/v1/products";
         String first = mvc.perform(get(url).with(customer(user))).andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
         var ids = java.util.List.of(product.getId());
-        String countsKey = key(CacheKeys.COUNTS, CacheKeys.batch(CacheKeys.COUNTS, ids), CacheKeys.CATALOG_REVISION);
-        String stocksKey = key(CacheKeys.STOCKS, CacheKeys.batch(CacheKeys.STOCKS, ids), CacheKeys.CATALOG_REVISION, CacheKeys.STOCK_REVISION);
+        String countsKey = key(CacheKeys.COUNTS, CacheKeys.item(CacheKeys.COUNTS, product.getId()), CacheKeys.CATALOG_GROUP);
+        String stocksKey = key(CacheKeys.STOCKS, CacheKeys.item(CacheKeys.STOCKS, product.getId()), CacheKeys.CATALOG_GROUP, CacheKeys.stockGroup(product.getId()));
         String missing = bucket.equals(CacheKeys.COUNTS) ? countsKey : stocksKey;
         String kept = bucket.equals(CacheKeys.COUNTS) ? stocksKey : countsKey;
         redis.expire(kept, Duration.ofSeconds(120));
@@ -253,7 +304,7 @@ class ReadCacheHttpTest {
             .filter(item -> item.path("id").asLong() == product.getId()).findFirst().orElseThrow().path("soldOut").asBoolean()).isTrue();
         verify(products, times(0)).findBasicPage(org.mockito.ArgumentMatchers.any(), org.mockito.ArgumentMatchers.any(), org.mockito.ArgumentMatchers.anyInt(), org.mockito.ArgumentMatchers.anyInt());
         verify(products, times(0)).findLikeCounts(org.mockito.ArgumentMatchers.anyList());
-        verify(products, times(1)).findStockStatuses(ids);
+        verify(products, times(1)).findStockStatuses(java.util.List.of(product.getId()));
     }
 
     /**
@@ -269,7 +320,7 @@ class ReadCacheHttpTest {
         verify(products, times(1)).findBasicPage(null, null, 0, 20);
         verify(products, times(0)).findBasicPage(null, ProductSort.LATEST, 0, 20);
         mvc.perform(get("/api/v1/products")).andExpect(status().isUnauthorized());
-        assertThat(redis.getExpire(key(CacheKeys.PRODUCTS, CacheKeys.products("latest", null, 0, 20), CacheKeys.CATALOG_REVISION))).isBetween(269L, 330L);
+        assertThat(redis.getExpire(key(CacheKeys.PRODUCTS, CacheKeys.products("latest", null, 0, 20), CacheKeys.CATALOG_GROUP))).isBetween(269L, 330L);
     }
 
     /** 같은 fixture·HTTP 입력에서 캐시 비활성 → miss → hit을 비교한다. 읽기 사이에는 쓰지 않는다. */
@@ -294,10 +345,10 @@ class ReadCacheHttpTest {
             String url = "/api/v1/products?sort=" + sort + "&page=" + page + "&size=2"
                 + (filtered ? "&brandId=" + brandId : "");
             String bucket = sort.equals("likes_desc") ? CacheKeys.RANKINGS : CacheKeys.PRODUCTS;
-            String cacheKey = key(bucket, CacheKeys.products(sort, brandId, page, 2), CacheKeys.CATALOG_REVISION);
+            String cacheKey = key(bucket, CacheKeys.products(sort, brandId, page, 2), CacheKeys.CATALOG_GROUP);
             assertThat(redis.hasKey(cacheKey)).isFalse();
             // Exercise ResponseCache's real disabled branch; only the feature switch is stubbed.
-            org.mockito.Mockito.doReturn(false).when(versions).isEnabled();
+            org.mockito.Mockito.doReturn(false).when(responseCache).isEnabled();
             clearInvocations(products);
             String databaseOnly;
             try {
@@ -306,7 +357,7 @@ class ReadCacheHttpTest {
                 verify(products, times(1)).findBasicPage(brandId, requested, page, 2);
                 assertThat(redis.hasKey(cacheKey)).as("DB-only must not populate Redis").isFalse();
             } finally {
-                org.mockito.Mockito.doCallRealMethod().when(versions).isEnabled();
+                org.mockito.Mockito.doCallRealMethod().when(responseCache).isEnabled();
             }
             clearInvocations(products);
             String miss = mvc.perform(get(url).with(customer(user))).andExpect(status().isOk())
@@ -339,7 +390,7 @@ class ReadCacheHttpTest {
     @Test
     @DisplayName("깨진 JSON 캐시는 제거하고 원본 조회 뒤 정상 캐시로 다시 채운다")
     void malformedNonExpiringCacheIsRemovedAndRefilled() throws Exception {
-        String key = key(CacheKeys.PRODUCTS, CacheKeys.product(product.getId()), CacheKeys.CATALOG_REVISION);
+        String key = key(CacheKeys.PRODUCTS, CacheKeys.product(product.getId()), CacheKeys.CATALOG_GROUP);
         redis.opsForValue().set(key, "broken JSON");
         assertThat(detail()).contains("before");
         assertThat(redis.hasKey(key)).isFalse();
@@ -376,7 +427,7 @@ class ReadCacheHttpTest {
     @DisplayName("상품 상세 cache hit은 DB 원본을 다시 읽거나 TTL을 연장하지 않는다")
     void cacheHitDoesNotRenewTheRemainingTtl() throws Exception {
         String original = detail();
-        String key = key(CacheKeys.PRODUCTS, CacheKeys.product(product.getId()), CacheKeys.CATALOG_REVISION);
+        String key = key(CacheKeys.PRODUCTS, CacheKeys.product(product.getId()), CacheKeys.CATALOG_GROUP);
         redis.expire(key, Duration.ofSeconds(120));
         clearInvocations(products);
         assertThat(detail()).isEqualTo(original);
@@ -405,21 +456,21 @@ class ReadCacheHttpTest {
             for (Long filter : java.util.Arrays.asList(null, brand.getId())) {
                 String url = "/api/v1/products?sort=" + sort + (filter == null ? "" : "&brandId=" + filter);
                 routes.add(new ReadRoute(url, "likes_desc".equals(sort) ? CacheKeys.RANKINGS : CacheKeys.PRODUCTS,
-                    CacheKeys.products(sort, filter, 0, 20), new String[]{CacheKeys.CATALOG_REVISION}));
+                    CacheKeys.products(sort, filter, 0, 20), new String[]{CacheKeys.CATALOG_GROUP}));
             }
         }
         routes.add(new ReadRoute("/api/v1/products/" + product.getId(), CacheKeys.PRODUCTS,
-            CacheKeys.product(product.getId()), new String[]{CacheKeys.CATALOG_REVISION}));
+            CacheKeys.product(product.getId()), new String[]{CacheKeys.CATALOG_GROUP}));
         routes.add(new ReadRoute("/api/v1/users/" + user.getId() + "/likes", CacheKeys.MY_LIKES,
-            CacheKeys.myLikes(user.getId(), 0, 20), new String[]{CacheKeys.CATALOG_REVISION, CacheKeys.userRevision(user.getId())}));
+            CacheKeys.myLikes(user.getId(), 0, 20), new String[]{CacheKeys.CATALOG_GROUP, CacheKeys.userGroup(user.getId())}));
         routes.add(new ReadRoute("/api-admin/v1/brands", CacheKeys.BRANDS,
-            CacheKeys.brands(0, 20), new String[]{CacheKeys.CATALOG_REVISION}));
+            CacheKeys.brands(0, 20), new String[]{CacheKeys.CATALOG_GROUP}));
         routes.add(new ReadRoute("/api/v1/brands", CacheKeys.BRANDS,
-            CacheKeys.customerBrands(0, 20), new String[]{CacheKeys.CATALOG_REVISION}));
+            CacheKeys.customerBrands(0, 20), new String[]{CacheKeys.CATALOG_GROUP}));
         for (String bucket : java.util.List.of(CacheKeys.COUNTS, CacheKeys.STOCKS)) {
             routes.add(new ReadRoute("/api/v1/products/" + product.getId(), bucket,
-                CacheKeys.batch(bucket, java.util.List.of(product.getId())), bucket.equals(CacheKeys.STOCKS)
-                    ? new String[]{CacheKeys.CATALOG_REVISION, CacheKeys.STOCK_REVISION} : new String[]{CacheKeys.CATALOG_REVISION}));
+                CacheKeys.item(bucket, product.getId()), bucket.equals(CacheKeys.STOCKS)
+                    ? new String[]{CacheKeys.CATALOG_GROUP, CacheKeys.stockGroup(product.getId())} : new String[]{CacheKeys.CATALOG_GROUP}));
         }
         return routes;
     }
@@ -460,7 +511,7 @@ class ReadCacheHttpTest {
     void zeroLikeCountRefreshesOnlyAfterExpiry() throws Exception {
         String url = "/api/v1/products/" + product.getId();
         mvc.perform(get(url).with(customer(user))).andExpect(status().isOk()).andExpect(jsonPath("$.data.likeCount").value(0));
-        String cacheKey = key(CacheKeys.COUNTS, CacheKeys.batch(CacheKeys.COUNTS, java.util.List.of(product.getId())), CacheKeys.CATALOG_REVISION);
+        String cacheKey = key(CacheKeys.COUNTS, CacheKeys.item(CacheKeys.COUNTS, product.getId()), CacheKeys.CATALOG_GROUP);
         assertThat(redis.getExpire(cacheKey)).isBetween(269L, 330L);
         likes.register(user.getId(), product.getId());
         mvc.perform(get(url).with(customer(user))).andExpect(status().isOk()).andExpect(jsonPath("$.data.likeCount").value(0));
@@ -493,8 +544,8 @@ class ReadCacheHttpTest {
         mvc.perform(get("/api/v1/brands").with(customer(user)))
             .andExpect(com.loopers.support.http.ApiHttp.success(org.springframework.http.HttpStatus.OK))
             .andExpect(jsonPath("$.data.content[0].deleted").doesNotExist());
-        String customerKey = key(CacheKeys.BRANDS, CacheKeys.customerBrands(0, 20), CacheKeys.CATALOG_REVISION);
-        String adminKey = key(CacheKeys.BRANDS, CacheKeys.brands(0, 20), CacheKeys.CATALOG_REVISION);
+        String customerKey = key(CacheKeys.BRANDS, CacheKeys.customerBrands(0, 20), CacheKeys.CATALOG_GROUP);
+        String adminKey = key(CacheKeys.BRANDS, CacheKeys.brands(0, 20), CacheKeys.CATALOG_GROUP);
         assertThat(customerKey).isNotEqualTo(adminKey);
         assertThat(redis.hasKey(customerKey)).isTrue();
         assertThat(redis.hasKey(adminKey)).isTrue();

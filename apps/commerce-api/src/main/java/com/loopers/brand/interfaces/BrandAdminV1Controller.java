@@ -27,6 +27,7 @@ public class BrandAdminV1Controller {
 
     private final BrandUseCase brandUseCase;
     private final com.loopers.support.cache.ResponseCache cache;
+    private final com.loopers.support.cache.CatalogReadTransaction cacheTransaction;
 
     @GetMapping
     public ApiResponse<ListResponse<BrandV1Dto.AdminBrandResponse>> getBrands(
@@ -34,9 +35,8 @@ public class BrandAdminV1Controller {
         @RequestParam(defaultValue = PageQuery.DEFAULT_SIZE) int size
     ) {
         PageQuery query = new PageQuery(page, size);
-        return cache.read(CacheKeys.BRANDS, CacheKeys.brands(page, size), new TypeReference<>() { },
-            () -> ApiResponse.success(ListResponse.from(brandUseCase.findPage(query.page(), query.size()), BrandV1Dto.AdminBrandResponse::from)),
-            CacheKeys.CATALOG_REVISION);
+        return cacheTransaction.read(() -> cache.read(CacheKeys.BRANDS, CacheKeys.brands(page, size), new TypeReference<>() { },
+            () -> ApiResponse.success(ListResponse.from(brandUseCase.findPage(query.page(), query.size()), BrandV1Dto.AdminBrandResponse::from))));
     }
 
     @PostMapping

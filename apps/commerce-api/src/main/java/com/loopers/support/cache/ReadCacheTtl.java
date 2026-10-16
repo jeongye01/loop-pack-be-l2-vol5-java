@@ -32,8 +32,8 @@ public final class ReadCacheTtl implements RedisCacheWriter.TtlFunction {
     @Override
     public Duration getTimeToLive(Object key, Object value) {
         if (latestFirstSeconds > 0 && key instanceof String text
-            && (text.startsWith(CacheKeys.products("latest", null, 0, 20) + ":rev=")
-                || text.equals(WriteInvalidation.key(CacheKeys.products("latest", null, 0, 20))))) {
+            && (text.equals(CacheKeys.products("latest", null, 0, 20))
+                || text.startsWith(CacheKeys.products("latest", null, 0, 20) + ":rev="))) {
             return Duration.ofSeconds(latestFirstSeconds);
         }
         return Duration.ofSeconds(BASE_SECONDS + jitter.getAsLong());

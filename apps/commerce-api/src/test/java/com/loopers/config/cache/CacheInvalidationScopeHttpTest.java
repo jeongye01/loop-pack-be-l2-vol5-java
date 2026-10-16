@@ -10,7 +10,6 @@ import com.loopers.order.application.OrderUseCase;
 import com.loopers.product.application.ProductUseCase;
 import com.loopers.product.domain.Product;
 import com.loopers.support.cache.CacheKeys;
-import com.loopers.support.cache.CacheVersions;
 import com.loopers.support.fixture.CommerceFixture;
 import com.loopers.testcontainers.MySqlTestContainersConfig;
 import com.loopers.user.domain.User;
@@ -62,10 +61,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class CacheInvalidationScopeHttpTest {
     @DynamicPropertySource
     static void redisProperties(DynamicPropertyRegistry registry) { ReadCacheHttpTest.properties(registry); }
+    @Autowired com.loopers.support.cache.CacheVersions versions;
     @Autowired MockMvc mvc;
     @Autowired EntityManager em;
     @Autowired PlatformTransactionManager tm;
-    @Autowired CacheVersions versions;
     @MockitoSpyBean LikeUseCase likes;
     @Autowired BrandUseCase brands;
     @Autowired OrderUseCase orders;
@@ -80,7 +79,6 @@ class CacheInvalidationScopeHttpTest {
     Product b;
     User alice;
     User bob;
-    Map<String, String> originalRevisions;
 
     @BeforeEach
     void setup() {
@@ -107,7 +105,7 @@ class CacheInvalidationScopeHttpTest {
         var before = warm();
         assertThat(ids(before.get("price_asc-all").data().path("content"))).containsExactly(a.getId(), a2.getId(), b.getId());
         write(put("/api-admin/v1/products/" + a.getId()).content("{\"name\":\"changed-A\",\"price\":250}"));
-        var after = assertScope(before, Set.of(CacheKeys.CATALOG_REVISION), Set.of());
+        var after = assertScope(before, Set.of(CacheKeys.CATALOG_GROUP), Set.of());
         for (String route : List.of("latest-all", "price_asc-all", "likes_desc-all", "latest-A", "price_asc-A", "likes_desc-A", "my-alice")) {
             JsonNode changed = item(after.get(route).path("content"), a.getId());
             assertThat(changed.path("name").asText()).as(route).isEqualTo("changed-A");
@@ -128,7 +126,7 @@ class CacheInvalidationScopeHttpTest {
         var before = warm();
         JsonNode created = write(post("/api-admin/v1/products").content("{\"brandId\":" + brandA.getId() + ",\"name\":\"new-A\",\"price\":50}"));
         long id = created.path("id").asLong();
-        var after = assertScope(before, Set.of(CacheKeys.CATALOG_REVISION, CacheKeys.STOCK_REVISION), Set.of());
+        var after = assertScope(before, Set.of(CacheKeys.CATALOG_GROUP), Set.of());
         for (String sort : List.of("latest", "price_asc", "likes_desc")) {
             assertThat(ids(after.get(sort + "-all").path("content"))).containsExactlyInAnyOrder(a.getId(), a2.getId(), b.getId(), id);
             assertThat(ids(after.get(sort + "-A").path("content"))).containsExactlyInAnyOrder(a.getId(), a2.getId(), id);
@@ -144,7 +142,7 @@ class CacheInvalidationScopeHttpTest {
     void productDeletionDoesNotRemoveOtherProducts() throws Exception {
         var before = warm();
         write(delete("/api-admin/v1/products/" + a.getId()));
-        var after = assertScope(before, Set.of(CacheKeys.CATALOG_REVISION), Set.of("detail-A"));
+        var after = assertScope(before, Set.of(CacheKeys.CATALOG_GROUP), Set.of("detail-A"));
         assertVisibleProducts(after, List.of(a2.getId(), b.getId()), List.of(a2.getId()));
         assertThat(ids(after.get("my-alice").path("content"))).isEmpty();
         assertOtherBrandUnchanged(before, after);
@@ -156,7 +154,7 @@ class CacheInvalidationScopeHttpTest {
     void brandUpdateRefreshesDependentViews() throws Exception {
         var before = warm();
         write(put("/api-admin/v1/brands/" + brandA.getId()).content("{\"name\":\"renamed-A\"}"));
-        var after = assertScope(before, Set.of(CacheKeys.CATALOG_REVISION), Set.of());
+        var after = assertScope(before, Set.of(CacheKeys.CATALOG_GROUP), Set.of());
         for (String route : List.of("latest-all", "price_asc-all", "likes_desc-all", "latest-A", "price_asc-A", "likes_desc-A", "my-alice")) {
             assertThat(item(after.get(route).path("content"), a.getId()).path("brand").path("name").asText()).as(route).isEqualTo("renamed-A");
         }
@@ -171,7 +169,7 @@ class CacheInvalidationScopeHttpTest {
     void brandCreateRefreshesBrandLists() throws Exception {
         var before = warm();
         JsonNode created = write(post("/api-admin/v1/brands").content("{\"name\":\"brand-C\"}"));
-        var after = assertScope(before, Set.of(CacheKeys.CATALOG_REVISION), Set.of());
+        var after = assertScope(before, Set.of(CacheKeys.CATALOG_GROUP), Set.of());
         for (String route : List.of("brands-customer", "brands-admin")) {
             assertThat(ids(after.get(route).path("content"))).containsExactlyInAnyOrder(brandA.getId(), brandB.getId(), created.path("id").asLong());
             assertThat(after.get(route).path("totalElements").asLong()).isEqualTo(3);
@@ -185,7 +183,7 @@ class CacheInvalidationScopeHttpTest {
     void brandDeletionDoesNotRemoveAnotherBrandsProducts() throws Exception {
         var before = warm();
         write(delete("/api-admin/v1/brands/" + brandA.getId()));
-        var after = assertScope(before, Set.of(CacheKeys.CATALOG_REVISION), Set.of("detail-A", "detail-A2"));
+        var after = assertScope(before, Set.of(CacheKeys.CATALOG_GROUP), Set.of("detail-A", "detail-A2"));
         assertVisibleProducts(after, List.of(b.getId()), List.of());
         assertThat(ids(after.get("my-alice").path("content"))).isEmpty();
         assertThat(ids(after.get("brands-customer").path("content"))).containsExactly(brandB.getId());
@@ -201,13 +199,66 @@ class CacheInvalidationScopeHttpTest {
     void stockWriteLeavesOtherCachesValid() throws Exception {
         var before = warm();
         write(put("/api-admin/v1/products/" + a.getId() + "/stock").content("{\"quantity\":0}"));
-        var after = assertScope(before, Set.of(CacheKeys.STOCK_REVISION), Set.of());
+        var after = assertScope(before, Set.of(CacheKeys.stockGroup(a.getId())), Set.of());
         assertThat(batchItem(after.get("stocks"), a.getId()).path("soldOut").asBoolean()).isTrue();
         assertThat(after.get("detail-A").path("soldOut").asBoolean()).isTrue();
         assertThat(item(after.get("my-alice").path("content"), a.getId()).path("soldOut").asBoolean()).isTrue();
         assertThat(item(after.get("latest-all").path("content"), a.getId()).path("soldOut").asBoolean()).isTrue();
         assertThat(batchItem(after.get("stocks"), b.getId())).isEqualTo(batchItem(before.get("stocks").data(), b.getId()));
         assertThat(batchItem(after.get("stocks"), a2.getId())).isEqualTo(batchItem(before.get("stocks").data(), a2.getId()));
+    }
+
+    /** 수량은 변해도 판매 가능 상태가 같으면 모든 표시 캐시와 revision을 재사용한다. */
+    @ParameterizedTest
+    @org.junit.jupiter.params.provider.CsvSource({"100,99", "1,100", "1,1", "0,0"})
+    @DisplayName("관리자 수량 변경: 품절 상태가 같으면 revision·응답·TTL 유지")
+    void unchangedAvailabilityKeepsCaches(int initial, int quantity) throws Exception {
+        products.changeStock(a.getId(), initial);
+        var before = warm();
+        products.changeStock(a.getId(), quantity);
+        assertScope(before, Set.of(), Set.of());
+        assertStock(a.getId(), quantity);
+    }
+
+    /** 품절 상품을 재입고하면 A의 재고 표시만 즉시 갱신한다. */
+    @Test
+    @DisplayName("재입고 0→10: 해당 상품 revision 갱신·품절 해제")
+    void restockChangesAvailability() throws Exception {
+        products.changeStock(a.getId(), 0);
+        var before = warm();
+        products.changeStock(a.getId(), 10);
+        var after = assertScope(before, Set.of(CacheKeys.stockGroup(a.getId())), Set.of());
+        assertThat(batchItem(after.get("stocks"), a.getId()).path("soldOut").asBoolean()).isFalse();
+        assertStock(a.getId(), 10);
+    }
+
+    /** 주문 금액·재고는 실제 DB에서 변경하되, 품절되지 않은 구매는 캐시를 바꾸지 않는다. */
+    @Test
+    @DisplayName("구매 100→99: 주문·재고·포인트 처리 후 표시 캐시는 유지")
+    void purchaseWithoutSelloutKeepsCaches() throws Exception {
+        products.changeStock(a.getId(), 100);
+        var order = orders.create(alice.getId(), List.of(new OrderUseCase.ItemCommand(a.getId(), 1)));
+        var before = warm();
+        orders.confirm(alice.getId(), order.getId());
+        assertScope(before, Set.of(), Set.of());
+        assertStock(a.getId(), 99);
+        assertBalance(alice, 900);
+    }
+
+    /** rollback된 상태는 버리지 않고 다음 트랜잭션에서도 다시 품절 전환을 감지한다. */
+    @Test
+    @DisplayName("품절 변경 rollback: 이전 캐시 유지, 다음 정상 변경은 갱신")
+    void availabilityRollbackDoesNotLeakState() throws Exception {
+        var before = warm();
+        new TransactionTemplate(tm).executeWithoutResult(tx -> {
+            products.changeStock(a.getId(), 0);
+            tx.setRollbackOnly();
+        });
+        assertScope(before, Set.of(), Set.of());
+        assertStock(a.getId(), 1);
+        products.changeStock(a.getId(), 0);
+        assertScope(before, Set.of(CacheKeys.stockGroup(a.getId())), Set.of());
+        assertStock(a.getId(), 0);
     }
 
     /** A 1개 주문을 확정한다. 재고만 갱신되며 catalog와 두 사용자의 좋아요 캐시는 유지된다. */
@@ -217,7 +268,7 @@ class CacheInvalidationScopeHttpTest {
         var order = orders.create(alice.getId(), List.of(new OrderUseCase.ItemCommand(a.getId(), 1)));
         var before = warm();
         orders.confirm(alice.getId(), order.getId());
-        var after = assertScope(before, Set.of(CacheKeys.STOCK_REVISION), Set.of());
+        var after = assertScope(before, Set.of(CacheKeys.stockGroup(a.getId())), Set.of());
         assertThat(batchItem(after.get("stocks"), a.getId()).path("soldOut").asBoolean()).isTrue();
         assertThat(after.get("detail-A").path("soldOut").asBoolean()).isTrue();
         assertThat(item(after.get("my-alice").path("content"), a.getId()).path("soldOut").asBoolean()).isTrue();
@@ -231,7 +282,7 @@ class CacheInvalidationScopeHttpTest {
     void registeringLikeOnlyRefreshesOwnersListImmediately() throws Exception {
         var before = warm();
         customerWrite(post("/api/v1/products/" + b.getId() + "/likes"));
-        var after = assertScope(before, Set.of(CacheKeys.userRevision(alice.getId())), Set.of());
+        var after = assertScope(before, Set.of(CacheKeys.userGroup(alice.getId())), Set.of());
         assertThat(ids(after.get("my-alice").path("content"))).containsExactlyInAnyOrder(a.getId(), b.getId());
         assertThat(after.get("my-alice").path("totalElements").asLong()).isEqualTo(2);
         JsonNode counts = expireAndRead(before.get("counts").route());
@@ -246,7 +297,7 @@ class CacheInvalidationScopeHttpTest {
     void cancellingLikeOnlyRefreshesOwnersListImmediately() throws Exception {
         var before = warm();
         customerWrite(delete("/api/v1/products/" + a.getId() + "/likes"));
-        var after = assertScope(before, Set.of(CacheKeys.userRevision(alice.getId())), Set.of());
+        var after = assertScope(before, Set.of(CacheKeys.userGroup(alice.getId())), Set.of());
         assertThat(ids(after.get("my-alice").path("content"))).isEmpty();
         assertThat(after.get("my-alice").path("totalElements").asLong()).isZero();
         JsonNode counts = expireAndRead(before.get("counts").route());
@@ -402,8 +453,9 @@ class CacheInvalidationScopeHttpTest {
             assertThat(cacheKey(route)).isNotEqualTo(oldKey);
             resume.countDown();
             JsonNode old = oldRead.get(10, TimeUnit.SECONDS);
-            assertThat(json.readTree(redis.opsForValue().get(oldKey)).path("data")).isEqualTo(
-                route.bucket().equals(CacheKeys.PRODUCTS) ? basePayload(old) : old);
+            assertThat(route.bucket().equals(CacheKeys.PRODUCTS) ? json.readTree(redis.opsForValue().get(oldKey)).path("data")
+                : json.readTree(redis.opsForValue().get(oldKey))).isEqualTo(
+                route.bucket().equals(CacheKeys.PRODUCTS) ? basePayload(old) : batchItem(old, a.getId()));
             if (change.equals("stock")) assertThat(batchItem(old, a.getId()).path("soldOut").asBoolean()).isFalse();
             else assertThat(old.path("price").asLong()).isEqualTo(100);
 
@@ -480,32 +532,27 @@ class CacheInvalidationScopeHttpTest {
                 Long brand = filter.equals("all") ? null : filter.equals("A") ? brandA.getId() : brandB.getId();
                 String url = "/api/v1/products?sort=" + sort + (brand == null ? "" : "&brandId=" + brand);
                 routes.put(sort + "-" + filter, new Route(url, sort.equals("likes_desc") ? CacheKeys.RANKINGS : CacheKeys.PRODUCTS,
-                    CacheKeys.products(sort, brand, 0, 20), alice, List.of(CacheKeys.CATALOG_REVISION)));
+                    CacheKeys.products(sort, brand, 0, 20), alice, List.of(CacheKeys.CATALOG_GROUP)));
             }
         }
         for (int page : List.of(0, 1)) routes.put("price_asc-page" + page, new Route("/api/v1/products?sort=price_asc&size=1&page=" + page,
-            CacheKeys.PRODUCTS, CacheKeys.products("price_asc", null, page, 1), alice, List.of(CacheKeys.CATALOG_REVISION)));
+            CacheKeys.PRODUCTS, CacheKeys.products("price_asc", null, page, 1), alice, List.of(CacheKeys.CATALOG_GROUP)));
         for (var entry : Map.of("A", a, "A2", a2, "B", b).entrySet()) routes.put("detail-" + entry.getKey(), new Route(
-            "/api/v1/products/" + entry.getValue().getId(), CacheKeys.PRODUCTS, CacheKeys.product(entry.getValue().getId()), alice, List.of(CacheKeys.CATALOG_REVISION)));
+            "/api/v1/products/" + entry.getValue().getId(), CacheKeys.PRODUCTS, CacheKeys.product(entry.getValue().getId()), alice, List.of(CacheKeys.CATALOG_GROUP)));
         for (var entry : Map.of("alice", alice, "bob", bob).entrySet()) routes.put("my-" + entry.getKey(), new Route(
             "/api/v1/users/" + entry.getValue().getId() + "/likes", CacheKeys.MY_LIKES, CacheKeys.myLikes(entry.getValue().getId(), 0, 20), entry.getValue(),
-            List.of(CacheKeys.CATALOG_REVISION, CacheKeys.userRevision(entry.getValue().getId()))));
-        routes.put("brands-customer", new Route("/api/v1/brands", CacheKeys.BRANDS, CacheKeys.customerBrands(0, 20), alice, List.of(CacheKeys.CATALOG_REVISION)));
-        routes.put("brands-admin", new Route("/api-admin/v1/brands", CacheKeys.BRANDS, CacheKeys.brands(0, 20), null, List.of(CacheKeys.CATALOG_REVISION)));
+            List.of(CacheKeys.CATALOG_GROUP, CacheKeys.userGroup(entry.getValue().getId()))));
+        routes.put("brands-customer", new Route("/api/v1/brands", CacheKeys.BRANDS, CacheKeys.customerBrands(0, 20), alice, List.of(CacheKeys.CATALOG_GROUP)));
+        routes.put("brands-admin", new Route("/api-admin/v1/brands", CacheKeys.BRANDS, CacheKeys.brands(0, 20), null, List.of(CacheKeys.CATALOG_GROUP)));
         List<Long> ids = List.of(a.getId(), a2.getId(), b.getId()).stream().sorted().toList();
         String query = ids.stream().map(String::valueOf).collect(java.util.stream.Collectors.joining(","));
         for (String bucket : List.of(CacheKeys.COUNTS, CacheKeys.STOCKS)) routes.put(bucket.equals(CacheKeys.COUNTS) ? "counts" : "stocks",
-            new Route("internal:" + bucket + "?ids=" + query, bucket, CacheKeys.batch(bucket, ids), alice,
-                bucket.equals(CacheKeys.STOCKS) ? List.of(CacheKeys.CATALOG_REVISION, CacheKeys.STOCK_REVISION) : List.of(CacheKeys.CATALOG_REVISION)));
+            new Route("internal:" + bucket + "?ids=" + query, bucket, CacheKeys.item(bucket, a.getId()), alice,
+                bucket.equals(CacheKeys.STOCKS) ? List.of(CacheKeys.CATALOG_GROUP, CacheKeys.stockGroup(a.getId())) : List.of(CacheKeys.CATALOG_GROUP)));
         return routes;
     }
 
     Map<String, Cached> warm() throws Exception {
-        originalRevisions = new LinkedHashMap<>();
-        for (String group : List.of(CacheKeys.CATALOG_REVISION, CacheKeys.STOCK_REVISION,
-                CacheKeys.userRevision(alice.getId()), CacheKeys.userRevision(bob.getId()))) {
-            originalRevisions.put(group, versions.key("scope", group));
-        }
         Map<String, Cached> cached = new LinkedHashMap<>();
         for (var entry : routes().entrySet()) {
             JsonNode data = read(entry.getValue(), 200);
@@ -518,10 +565,11 @@ class CacheInvalidationScopeHttpTest {
     }
 
     Map<String, JsonNode> assertScope(Map<String, Cached> before, Set<String> changedGroups, Set<String> notFound) throws Exception {
-        for (var revision : originalRevisions.entrySet()) {
-            String actual = versions.key("scope", revision.getKey());
-            if (changedGroups.contains(revision.getKey())) assertThat(actual).as(revision.getKey()).isNotEqualTo(revision.getValue());
-            else assertThat(actual).as(revision.getKey()).isEqualTo(revision.getValue());
+        // Verify revision changes before any route can refill the new keys.
+        for (var entry : before.entrySet()) {
+            boolean changed = entry.getValue().route().groups().stream().anyMatch(changedGroups::contains);
+            assertThat(cacheKey(entry.getValue().route()).equals(entry.getValue().key())).as(entry.getKey() + " revision scope").isEqualTo(!changed);
+            assertThat(redis.hasKey(entry.getValue().key())).isTrue();
         }
         Map<String, JsonNode> after = new LinkedHashMap<>();
         for (var entry : before.entrySet()) {
@@ -529,22 +577,24 @@ class CacheInvalidationScopeHttpTest {
             Cached old = entry.getValue();
             String currentKey = cacheKey(old.route());
             boolean changed = old.route().groups().stream().anyMatch(changedGroups::contains);
-            if (changed) assertThat(currentKey).as(name + " 갱신 대상 키").isNotEqualTo(old.key());
-            else assertThat(currentKey).as(name + " 유지 대상 키").isEqualTo(old.key());
+            if (changed) assertThat(currentKey).as(name + " 새 revision 키").isNotEqualTo(old.key());
+            else assertThat(currentKey).isEqualTo(old.key());
             JsonNode data = read(old.route(), notFound.contains(name) ? 404 : 200);
             after.put(name, data);
             if (!changed) {
-                if (changedGroups.contains(CacheKeys.STOCK_REVISION)) {
+                if (changedGroups.contains(CacheKeys.stockGroup(a.getId()))) {
                     assertThat(withoutStock(data)).as(name + " 재고 외 응답 유지").isEqualTo(withoutStock(old.data()));
                 } else {
                     assertThat(data).as(name + " 유지 대상 응답").isEqualTo(old.data());
                 }
                 assertThat(redis.getExpire(currentKey)).as(name + " 유지 대상 TTL").isPositive().isLessThanOrEqualTo(120L);
             } else if (!notFound.contains(name)) {
-                assertThat(redis.getExpire(currentKey)).as(name + " 새 키 TTL").isBetween(269L, 330L);
+                boolean missingItem = (old.route().bucket().equals(CacheKeys.COUNTS) || old.route().bucket().equals(CacheKeys.STOCKS))
+                    && java.util.stream.StreamSupport.stream(data.spliterator(), false).noneMatch(item -> item.path("productId").asLong() == a.getId());
+                if (missingItem) assertThat(redis.hasKey(currentKey)).as(name + " 삭제 상품은 개별 캐시에 저장하지 않음").isFalse();
+                else assertThat(redis.getExpire(currentKey)).as(name + " 새 키 TTL").isBetween(269L, 330L);
             }
-            // 무효화는 옛 키 삭제가 아니라 새 버전 선택이다. 옛 키가 남아 있어도 안전해야 한다.
-            assertThat(redis.hasKey(old.key())).as(name + " 기존 키 잔존").isTrue();
+
         }
         return after;
     }
@@ -591,6 +641,13 @@ class CacheInvalidationScopeHttpTest {
     JsonNode expireAndRead(Route route) throws Exception {
         String key = cacheKey(route);
         redis.expire(key, Duration.ofMillis(1));
+        if (route.bucket().equals(CacheKeys.COUNTS) || route.bucket().equals(CacheKeys.STOCKS)) {
+            for (Long id : List.of(a.getId(), a2.getId(), b.getId())) {
+                String[] groups = route.bucket().equals(CacheKeys.STOCKS)
+                    ? new String[]{CacheKeys.CATALOG_GROUP, CacheKeys.stockGroup(id)} : new String[]{CacheKeys.CATALOG_GROUP};
+                redis.expire(route.bucket() + "::" + versions.key(CacheKeys.item(route.bucket(), id), groups), Duration.ofMillis(1));
+            }
+        }
         Thread.sleep(10);
         assertThat(redis.hasKey(key)).isFalse();
         return read(route, 200);

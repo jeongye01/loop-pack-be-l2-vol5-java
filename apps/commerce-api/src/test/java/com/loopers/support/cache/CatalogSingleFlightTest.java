@@ -2,8 +2,8 @@ package com.loopers.support.cache;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import org.springframework.data.redis.core.RedisTemplate;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
@@ -21,6 +21,10 @@ import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 
 class CatalogSingleFlightTest {
+    private CacheVersions versions() {
+        return new CacheVersions(mock(org.springframework.jdbc.core.JdbcTemplate.class),
+            new WriteInvalidation(false, mock(RedisTemplate.class), new io.micrometer.core.instrument.simple.SimpleMeterRegistry()));
+    }
     @Test
     @DisplayName("같은 miss의 대기자는 DB 트랜잭션 없이 기다린 뒤 자기 응답을 다시 구성한다")
     void followersWaitOutsideTransactionAndRecompose() throws Exception {
@@ -43,16 +47,15 @@ class CatalogSingleFlightTest {
             return value;
         })
             .when(cached).load(anyString(), anyString(), any());
-        var response = new ResponseCache(cached, mock(CacheVersions.class), new ObjectMapper());
-        var transaction = new CatalogReadTransaction(manager, mock(CacheReadPolicy.class), response, new CacheSingleFlight());
+        var response = new ResponseCache(cached, true, new ObjectMapper(), versions());
+        var transaction = new CatalogReadTransaction(manager, response, new CacheSingleFlight());
         var entered = new CountDownLatch(1);
         var release = new CountDownLatch(1);
         var originalCalls = new AtomicInteger();
-        var snapshot = new CacheVersions.Snapshot(true, Map.of("stock", "a"));
-        java.util.function.Supplier<String> read = () -> response.read(snapshot, "stocks", "ids=1", new TypeReference<String>() { }, () -> {
+        java.util.function.Supplier<String> read = () -> response.read( "products", CacheKeys.product(1L), new TypeReference<String>() { }, () -> {
             assertThat(TransactionSynchronizationManager.isActualTransactionActive()).isTrue();
             originalCalls.incrementAndGet(); entered.countDown(); CacheSingleFlightTest.waitFor(release); return "stock";
-        }, "stock");
+        });
         var owner = new FutureTask<>(() -> transaction.read(() -> read.get() + ":owner"));
         Thread.ofPlatform().start(owner);
         assertThat(entered.await(5, TimeUnit.SECONDS)).isTrue();

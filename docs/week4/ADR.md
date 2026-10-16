@@ -1,8 +1,71 @@
 # Redis 캐시 전략 ADR
 
+## 2026-10-16 결정: 과제의 필수 보호 조건을 위해 DB revision 복원
+
+과제 요구사항을 충족하기 위해 DB revision 방식을 복원한다. 과제가 revision 구현 자체를 강제하는 것은 아니다. [과제](../../.handoff/week4-과제.md)의 **늦은 채움·무효화 실패·Redis 복구 중에도 삭제 상품을 노출하지 않는 조건**을, 현재 Write Invalidate + TTL만으로 충족하지 못했기 때문에 선택했다. Lua는 사용하지 않는다.
+
+- 상품·브랜드 변경은 `catalog`, 내 좋아요 변경은 `likes:{userId}`, 품절 상태 전환은 `stock:{productId}` revision을 데이터와 같은 DB 트랜잭션에서 변경한다. 롤백은 revision도 되돌린다.
+- 캐시 키는 기존 v4 본문에 DB revision 접미사를 붙인다. 이전 고정 v4 키는 사용하지 않는다. revision은 UUID로 발급하는 변경 식별 토큰이며 숫자 증가 순서를 비교하지 않는다.
+- miss에서는 REPEATABLE_READ 트랜잭션 안에서 revision과 원본을 읽는다. 늦게 끝난 옛 조회는 옛 revision 키에만 저장하므로 변경 완료 후 시작한 새 조회가 사용하지 않는다.
+- hit에서도 DB revision을 확인한다. 통합 상품 응답은 기본 정보 revision 1회, 상품별 표시 revision 일괄 1회이며 비싼 상품·집계 원본 조회는 생략한다. Redis 오류에도 revision 확인은 DB를 사용한다.
+- 상품별 재고·좋아요 수 캐시와 MGET, 로컬 Single Flight, 품절 상태가 변할 때만 재고 revision 갱신, TTL 5분 ±30초를 유지한다. 좋아요 수·순위는 기존 TTL 지연 정책을 유지한다.
+- 비용: hit의 DB 접근, revision 쓰기 잠금 경합, TTL까지 남는 이전 버전 키의 메모리 사용이 발생한다. DB 장애 시 캐시만으로 응답하는 정책은 제공하지 않는다. 변경과 겹쳐 이미 진행 중인 조회는 그 조회 시점의 결과를 반환할 수 있다.
+- 기존 Write Invalidate의 실패 재현 테스트는 `experiment` 프로필에서 `experiment.catalog-write-invalidate.enabled=true`를 명시할 때만 해당 방식을 사용한다. 기본·catalog-cache 경로는 DB revision이다. 과거 측정 결과는 현재 revision 성능 결과로 재사용하지 않는다.
+- 배포 전 쓰기를 멈추고 [revision 테이블 SQL](migrations/05-add-read-cache-revision.sql)을 적용해 catalog 토큰을 갱신한다. 이전 인스턴스와 혼합 쓰기를 하지 않는다. 이번 작업은 로컬 복원·검증이며 배포와 운영 DB 변경은 하지 않는다.
+
+검증: `./gradlew :apps:commerce-api:check :modules:redis:check --continue` — 2026-10-16 로컬 MySQL·Redis Testcontainers에서 BUILD SUCCESSFUL(2분 35초). 총 514개 중 513개 성공, 실패·오류 0개, opt-in 장시간 관찰 실험 1개 skip. 변경·늦은 채움 보호 26개, Redis 장애 복구 9개, 캐시 조회 37개와 Checkstyle·ArchUnit을 통과했다. 통합 hit의 두 revision 조회 사이 삭제가 커밋되는 경우도 새 DB 스냅샷에서 다시 읽는 테스트로 확인했다. 물리적 키 삭제·DB 0회에 대한 구현 검사만 revision 키 변경·revision SQL 2회로 맞췄고, 삭제 후 404·롤백·소유권·주문 판단의 업무 기대값은 유지했다.
+
+아래의 revision 제거 및 Write Invalidate 결정은 실험 이력이다. 현재 결정은 이 절을 따른다.
+
+
+## 2026-10-16 변경: Revision 구현 제거
+
+현재 구현은 **Cache Aside + 커밋 후 Write Invalidate + TTL/Jitter + 로컬 Single Flight**를 사용한다. 아래 Revision 관련 내용은 과거 설계·실험 기록이며 현재 실행 경로가 아니다.
+
+- `CacheVersions`, `CacheReadPolicy`, `ReadRevision` 엔티티를 제거한다. `catalog.cache.enabled`만으로 캐시 ON/OFF를 제어하고 별도의 `write-invalidate`·Revision 우회 모드는 없앤다.
+- 캐시 키는 `v4:` API/파라미터 키를 그대로 사용한다. 요청마다 DB에서 버전을 조회하지 않으며 쓰기에서도 버전을 갱신하지 않는다.
+- 상품·브랜드 CUD: 커밋 후 catalog 범위의 캐시 키를 삭제한다. 롤백에서는 삭제하지 않는다.
+- 재고: 상품별 품절 여부를 저장한다. 잠금 조회 전후 `quantity == 0`이 바뀔 때만 해당 상품 키를 삭제한다. 상태를 확보하지 못한 저장·생성은 보수적으로 삭제한다.
+- 좋아요 등록·취소: 해당 사용자의 내 좋아요 목록을 무효화한다. 상품별 좋아요 수와 순위는 기존 TTL 갱신 정책을 유지한다.
+- TTL 기본값은 5분 ±30초, hit은 TTL을 연장하지 않는다. 실험 프로필의 최신순 첫 페이지 TTL 오버라이드는 유지한다.
+- hit은 DB 트랜잭션 없이 처리한다. miss는 Single Flight 대표 요청만 DB 트랜잭션을 열고 원본을 읽는다. 재고·좋아요 수는 상품별 키를 MGET으로 읽는다.
+- 기존 DB revision 테이블을 삭제하는 DDL은 실행하지 않는다. 기존 migration과 실험 보고서는 이력으로 보존한다.
+- 전환 시 이전 인스턴스와의 혼합 쓰기를 피하고, 캐시 OFF 중 변경이 있었거나 기존 v4 키를 재사용하는 경우 쓰기를 멈춘 상태에서 관련 키를 비운 뒤 활성화해야 한다. 현재 작업에서는 배포·Redis 데이터 삭제를 실행하지 않는다.
+
+정상 순차 변경·롤백·TTL·Single Flight·인증·주문 계약은 계속 검증한다. 삭제 실패·늦은 채움의 표시 최신성은 이전 Revision과 동등하지 않다. 삭제 비노출 보호 기준 변경 여부는 사용자 확인 중이며, 관련 실패를 숨기거나 성공으로 기록하지 않는다.
+
+
+## 2026-10-16 추가: 표시 상태 전환으로 재고 갱신 범위 제한
+
+상품별 재고 캐시는 수량이 아닌 품절 여부만 담는다. 기존 잠금 조회에서 얻은 상태를 트랜잭션 synchronization에 기억해 저장 후와 비교하며 추가 DB 조회는 하지 않는다. 수량이 달라도 품절 여부가 같으면 revision·캐시를 유지한다. 초기 생성 또는 이전 상태를 확보하지 못한 저장은 보수적으로 갱신한다. 사용자 승인에 따른 표시 캐시 정책 변경이며 실제 구매 재고 판단·API 계약은 그대로다. [43번 실험 계획](experiments/43-availability-revision-mixed/plan.md).
+
+## 2026-10-16 변경: 상품별 재고·좋아요 수 캐시, revision ON 검증
+
+상품 목록은 필터·정렬·페이지별로 저장하고, 재고와 좋아요 수는 **상품 ID별**로 저장한다. API는 기존 통합 응답을 유지한다. 여러 상품의 표시 값은 Redis MGET 한 번으로 읽고, 각 종류의 miss 상품 ID만 모아 원본을 일괄 조회한다. 상품별 SQL 조회를 반복하지 않는다. 기존 `ids` 조합 키는 읽지 않으며 TTL로 정리된다. 배포 전 기존 쓰기 인스턴스를 중단해 공통 stock revision을 갱신하는 구버전과 상품별 revision을 갱신하는 신버전이 섞이지 않게 한다. revision OFF 동안의 상품 변경까지 반영하려면 쓰기를 멈춘 상태에서 catalog revision을 갱신하고 전환한다.
+
+| 캐시 | 키 본문(revision 접미사 제외) | 갱신 범위 |
+| --- | --- | --- |
+| 상품 목록 | 기존 필터·정렬·페이지 키 | 기존 catalog 그룹 유지 |
+| 재고 표시 | `v3:products/{productId}/stocks` | `catalog` + **`stock:{productId}`** |
+| 좋아요 수 | `v3:products/{productId}/like-counts` | `catalog`; 좋아요 변경은 기존 TTL 갱신 |
+| 내 좋아요 목록 | 기존 사용자·페이지 키 | `catalog` + `likes:{userId}` |
+
+| 쓰기 | 실제 무효화 범위 |
+| --- | --- |
+| 관리자 A 재고 변경·구매 확정 | 품절 여부(`quantity == 0`)가 달라질 때만 A의 `stock:{A}`를 같은 DB 트랜잭션으로 갱신. 100→99는 유지, 1→0·0→10은 갱신. B 캐시 유지 |
+| 좋아요 등록·취소 | 해당 사용자의 내 좋아요 revision만 즉시 갱신. 상품별 좋아요 수·순위는 TTL 유지 |
+| 상품·브랜드 CUD | 기존 catalog 갱신 유지. 목록·상세·브랜드·내 좋아요·상품별 재고·좋아요 수를 포함하는 넓은 범위이며, 이번 변경에서 세분화하지 않음 |
+| 롤백 | 데이터와 revision 모두 롤백. 기존 캐시 버전 유지 |
+
+catalog-cache 프로필은 revision ON(`write-invalidate=false`)으로 검증한다. 기본 TTL 5분 ±30초·로컬 Single Flight는 유지한다. 비교용 Write Invalidate 설정에서도 A 품절 여부가 달라질 때만 A의 상품별 재고 키를 삭제한다. 삭제 실패·늦은 채움에 대한 그 방식의 기존 한계는 해결됐다고 주장하지 않는다.
+
+DB revision은 요청 간 캐싱하지 않는다. 상품별 revision을 한 번에 조회하며 원본 miss는 트랜잭션 안에서 다시 snapshot을 확보한다. 목록 revision 1회와 상품별 재고 revision 일괄 1회, 총 두 단계 조회로 합의했고 5개 읽기 경로에서 검증했다. 상품별 키·revision이 늘어나는 저장 비용은 후속 성능 실험에서 함께 관찰한다.
+
+**아래 내용은 변경 전 설계 이력이다. `stock` 공통 그룹·`ids` 조합 키에 대한 설명은 위 결정으로 대체한다.**
+
 ## 2026-10-16 변경: TTL + Write Invalidate 기본 실험
 
-현재 catalog-cache 프로필은 **Write Invalidate**를 사용한다. DB 커밋 후 관련 Redis 키를 삭제하며, hit/miss/write에서 DB revision을 읽거나 갱신하지 않는다. v4 키에는 revision 접미사를 붙이지 않는다. Single Flight와 기존 TTL 정책을 유지한다(부하 실험의 최신순 첫 페이지만 5초).
+당시 catalog-cache 프로필은 **Write Invalidate**를 사용했다. DB 커밋 후 관련 Redis 키를 삭제하며, hit/miss/write에서 DB revision을 읽거나 갱신하지 않는다. v4 키에는 revision 접미사를 붙이지 않는다. Single Flight와 기존 TTL 정책을 유지한다(부하 실험의 최신순 첫 페이지만 5초).
 
 무효화 범위는 기존 그룹과 같고 롤백에서는 삭제하지 않는다. 삭제 실패·늦은 재채움 보호는 기본 구현의 한계로 재현하며, 정합성이 확보됐다고 미리 선언하지 않는다. [36번 계획서](experiments/36-write-invalidate/plan.md)에 부하와 실패 시나리오를 함께 정리했다.
 

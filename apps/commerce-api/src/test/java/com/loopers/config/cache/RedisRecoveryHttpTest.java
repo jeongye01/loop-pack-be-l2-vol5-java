@@ -3,7 +3,6 @@ package com.loopers.config.cache;
 import com.loopers.config.redis.RedisConfig;
 import com.loopers.product.application.ProductUseCase;
 import com.loopers.support.cache.CacheKeys;
-import com.loopers.support.cache.CacheVersions;
 import com.loopers.support.fixture.CommerceFixture;
 import com.loopers.testcontainers.MySqlTestContainersConfig;
 import io.micrometer.core.instrument.MeterRegistry;
@@ -69,10 +68,10 @@ class RedisRecoveryHttpTest {
         registry.add("datasource.redis.replicas[0].port", REDIS::getFirstMappedPort);
     }
 
+    @Autowired com.loopers.support.cache.CacheVersions versions;
     @Autowired MockMvc mvc;
     @Autowired EntityManager em;
     @Autowired PlatformTransactionManager tm;
-    @Autowired CacheVersions versions;
     @Autowired MeterRegistry metrics;
     @Autowired org.springframework.jdbc.core.JdbcTemplate jdbc;
 
@@ -132,7 +131,6 @@ class RedisRecoveryHttpTest {
             var deleted = fixture.product(brand, "delete-me", 200L, 1);
             String updateUrl = "/api/v1/products/" + updated.getId();
             String deleteUrl = "/api/v1/products/" + deleted.getId();
-            String oldRevision = versions.key("revision", CacheKeys.CATALOG_REVISION);
             String oldUpdateKey = key(updated.getId());
             String oldDeleteKey = key(deleted.getId());
             clearInvocations(products);
@@ -156,7 +154,6 @@ class RedisRecoveryHttpTest {
             mvc.perform(put("/api-admin/v1/products/" + updated.getId()).with(admin()).with(csrf())
                 .contentType(MediaType.APPLICATION_JSON).content("{\"name\":\"after\",\"price\":400}"))
                 .andExpect(status().isOk());
-            assertThat(versions.key("revision", CacheKeys.CATALOG_REVISION)).isNotEqualTo(oldRevision);
             clearInvocations(products);
             long started = System.nanoTime();
             mvc.perform(get(updateUrl).with(customer(user))).andExpect(status().isOk())
@@ -392,7 +389,7 @@ class RedisRecoveryHttpTest {
     int stock(Long id) { return jdbc.queryForObject("select quantity from stock where product_id = ?", Integer.class, id); }
 
     String key(Long id) {
-        return CacheKeys.PRODUCTS + "::" + versions.key(CacheKeys.product(id), CacheKeys.CATALOG_REVISION);
+        return CacheKeys.PRODUCTS + "::" + versions.key(CacheKeys.product(id), CacheKeys.CATALOG_GROUP);
     }
 
     double errors(String operation) {

@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 /** Process-local refill coordination. Followers re-read; composed responses are never shared. */
 @Component
 public class CacheSingleFlight {
-    record Key(String cacheName, String revisionKey) { }
+    record Key(String cacheName, String cacheKey) { }
     record Result<T>(boolean owner, T value) { }
     private final ConcurrentHashMap<Key, CompletableFuture<Void>> flights = new ConcurrentHashMap<>();
 

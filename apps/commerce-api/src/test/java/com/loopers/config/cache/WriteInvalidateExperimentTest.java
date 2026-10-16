@@ -5,7 +5,6 @@ import com.loopers.config.redis.RedisConfig;
 import com.loopers.product.application.ProductUseCase;
 import com.loopers.product.interfaces.ProductReadFacade;
 import com.loopers.support.cache.CacheKeys;
-import com.loopers.support.cache.CacheVersions;
 import com.loopers.support.cache.WriteInvalidation;
 import com.loopers.support.fixture.CommerceFixture;
 import com.loopers.testcontainers.MySqlTestContainersConfig;
@@ -55,7 +54,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /** Adversarial reproduction success is reported separately from consistency compliance. */
-@SpringBootTest(properties = {"catalog.cache.enabled=true", "catalog.cache.write-invalidate=true", "experiment.latest-first-ttl-seconds=5"})
+@SpringBootTest(properties = {"catalog.cache.enabled=true", "experiment.catalog-write-invalidate.enabled=true", "experiment.latest-first-ttl-seconds=5"})
 @ActiveProfiles({"test", "experiment"})
 @AutoConfigureMockMvc
 @Import(MySqlTestContainersConfig.class)
@@ -64,7 +63,6 @@ class WriteInvalidateExperimentTest {
     @Autowired MockMvc mvc;
     @Autowired EntityManager em;
     @Autowired PlatformTransactionManager tm;
-    @Autowired CacheVersions versions;
     @Autowired ProductReadFacade facade;
     @MockitoSpyBean ProductUseCase products;
     @MockitoSpyBean WriteInvalidation invalidation;
@@ -88,7 +86,7 @@ class WriteInvalidateExperimentTest {
         var path = Path.of("build/write-invalidate-consistency.json"); Files.createDirectories(path.getParent());
         Files.writeString(path, new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(RESULTS));
     }
-    String key() { return CacheKeys.PRODUCTS + "::" + versions.key(CacheKeys.product(product.getId()), CacheKeys.CATALOG_REVISION); }
+    String key() { return CacheKeys.PRODUCTS + "::" + CacheKeys.product(product.getId()); }
     String detail() throws Exception {
         return mvc.perform(get("/api/v1/products/" + product.getId()).with(customer(user)))
             .andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
@@ -111,6 +109,25 @@ class WriteInvalidateExperimentTest {
         long end = System.nanoTime() + TimeUnit.SECONDS.toNanos(3);
         while (Boolean.TRUE.equals(redis.hasKey(key())) && System.nanoTime() < end) Thread.sleep(20);
         assertThat(redis.hasKey(key())).isFalse();
+    }
+
+    /** 준비: A·B 재고를 캐시한다. 실행: A를 품절로 만든다. 확인: A만 삭제·재조회하고 B의 TTL은 유지한다. */
+    @Test @DisplayName("Write Invalidate도 A 재고 변경 시 B 상품의 키를 삭제하지 않는다")
+    void stockInvalidationDeletesOnlyChangedProduct() throws Exception {
+        var b = fixture.product(fixture.brand("other-brand"), "B", 100L, 1);
+        var ids = java.util.List.of(product.getId(), b.getId());
+        facade.stocks(ids);
+        String aKey = CacheKeys.STOCKS + "::" + CacheKeys.item(CacheKeys.STOCKS, product.getId());
+        String bKey = CacheKeys.STOCKS + "::" + CacheKeys.item(CacheKeys.STOCKS, b.getId());
+        redis.expire(bKey, Duration.ofSeconds(120));
+        mvc.perform(put("/api-admin/v1/products/" + product.getId() + "/stock").with(admin()).with(csrf())
+            .contentType("application/json").content("{\"quantity\":0}")).andExpect(status().isOk());
+        assertThat(redis.hasKey(aKey)).isFalse();
+        assertThat(redis.hasKey(bKey)).isTrue();
+        clearInvocations(products);
+        assertThat(facade.stocks(ids).data()).contains(new ProductUseCase.StockStatus(product.getId(), true), new ProductUseCase.StockStatus(b.getId(), false));
+        verify(products).findStockStatuses(java.util.List.of(product.getId()));
+        assertThat(redis.getExpire(bKey)).isBetween(110L, 120L);
     }
 
     @Test @DisplayName("정상 수정은 커밋 뒤 삭제하고 hit은 revision SQL 없이 새 값을 반환한다")

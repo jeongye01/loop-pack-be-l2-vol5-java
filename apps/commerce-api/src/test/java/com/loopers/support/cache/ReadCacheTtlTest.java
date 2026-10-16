@@ -32,12 +32,12 @@ class ReadCacheTtlTest {
     void shortTtlOnlyAppliesToTheSelectedLatestPage() {
         var ttl = new ReadCacheTtl(2, true);
         for (int i = 0; i < 20; i++) {
-            assertThat(ttl.getTimeToLive(CacheKeys.products("latest", null, 0, 20) + ":rev=version", "value")).isEqualTo(Duration.ofSeconds(2));
+            assertThat(ttl.getTimeToLive(CacheKeys.products("latest", null, 0, 20), "value")).isEqualTo(Duration.ofSeconds(2));
         }
         for (String key : java.util.List.of(CacheKeys.products("price_asc", null, 0, 20), CacheKeys.products("latest", 1L, 0, 20),
             CacheKeys.products("latest", null, 1, 20), CacheKeys.products("latest", null, 0, 10), CacheKeys.product(1L),
-            CacheKeys.batch(CacheKeys.COUNTS, java.util.List.of(1L)), CacheKeys.batch(CacheKeys.STOCKS, java.util.List.of(1L)))) {
-            assertThat(ttl.getTimeToLive(key + ":rev=version", "value").toSeconds()).isBetween(270L, 330L);
+            CacheKeys.item(CacheKeys.COUNTS, 1L), CacheKeys.item(CacheKeys.STOCKS, 1L))) {
+            assertThat(ttl.getTimeToLive(key, "value").toSeconds()).isBetween(270L, 330L);
         }
     }
 
@@ -46,11 +46,16 @@ class ReadCacheTtlTest {
     void rejectsNonExperimentAndNegativeOverrides() {
         org.assertj.core.api.Assertions.assertThatThrownBy(() -> new ReadCacheTtl(2, false)).isInstanceOf(IllegalArgumentException.class);
         org.assertj.core.api.Assertions.assertThatThrownBy(() -> new ReadCacheTtl(-1, true)).isInstanceOf(IllegalArgumentException.class);
-        assertThat(new ReadCacheTtl(0, false).getTimeToLive(CacheKeys.products("latest", null, 0, 20) + ":rev=v", "x").toSeconds()).isBetween(270L, 330L);
+        assertThat(new ReadCacheTtl(0, false).getTimeToLive(CacheKeys.products("latest", null, 0, 20), "x").toSeconds()).isBetween(270L, 330L);
+    }
+    @Test
+    void revisionLatestKeyUsesExperimentTtl() {
+        assertThat(new ReadCacheTtl(5, true).getTimeToLive(
+            CacheKeys.products("latest", null, 0, 20) + ":rev=old", "x").toSeconds()).isEqualTo(5);
     }
     @org.junit.jupiter.api.Test
     void writeInvalidateLatestKeyUsesExperimentTtl() {
         assertThat(new ReadCacheTtl(5, true).getTimeToLive(
-            WriteInvalidation.key(CacheKeys.products("latest", null, 0, 20)), "x").toSeconds()).isEqualTo(5);
+            CacheKeys.products("latest", null, 0, 20), "x").toSeconds()).isEqualTo(5);
     }
 }
