@@ -1,5 +1,0 @@
-{
-  "warmup": false,
-  "serverIdentity": "9613c7175751582ea7bd5e182877577ea749e621d974ae67011b037f6026c93f 2026-10-15T16:55:25.45643457Z sha256:772992c708c01a40e36ce2eebb3a0dbe123a4e5611a1c26c73f7b5f0652af720",
-  "reason": "same JVM immediately following experiment 37; retain preflight/recovery"
-}

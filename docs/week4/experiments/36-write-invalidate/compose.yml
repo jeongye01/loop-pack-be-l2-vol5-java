@@ -1,9 +1,0 @@
-services:
-  commerce-api:
-    image: commerce-api:write-invalidate-0fa881ec5d5e
-    environment:
-      CATALOG_CACHE_ENABLED: "true"
-      CATALOG_CACHE_WRITE_INVALIDATE: "true"
-      EXPERIMENT_CATALOG_REVISION_BYPASS_ENABLED: "false"
-      EXPERIMENT_LATEST_CACHE_ENABLED: "false"
-      EXPERIMENT_LATEST_FIRST_TTL_SECONDS: "5"

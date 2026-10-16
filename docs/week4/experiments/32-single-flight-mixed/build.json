@@ -1,6 +1,0 @@
-{
-  "image": "commerce-api:single-flight-0f68daa83bab",
-  "jarSha256": "0f68daa83bab7a6bea8d8ad57c1bf0c746a5e1135e2c7ddae5130fd9e9e896a3",
-  "baseGit": "ba1f57adb62813d86541f5fcd54ee7febf5469c6",
-  "workingTreeBuild": true
-}

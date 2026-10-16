@@ -1,7 +1,0 @@
-{
-  "image": "commerce-api:week4-cache-sampled-20261015",
-  "jarSha256": "84840f9219c22419e9e82c91ec5571780b3756012b4150ebedf0355e1f8ad272",
-  "traceSampleRate": 0.01,
-  "async": true,
-  "tempo": false
-}

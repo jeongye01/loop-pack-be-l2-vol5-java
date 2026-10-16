@@ -1,3 +1,0 @@
-results/**/*.log
-results/**/traces.jsonl
-diagnostic-server.log

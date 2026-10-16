@@ -1,8 +1,0 @@
-services:
-  commerce-api:
-    image: commerce-api:single-flight-0f68daa83bab
-    environment:
-      CATALOG_CACHE_ENABLED: "true"
-      EXPERIMENT_CATALOG_REVISION_BYPASS_ENABLED: "false"
-      EXPERIMENT_LATEST_CACHE_ENABLED: "false"
-      EXPERIMENT_LATEST_FIRST_TTL_SECONDS: "2"

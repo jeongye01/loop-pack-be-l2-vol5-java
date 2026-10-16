@@ -1,3 +1,0 @@
-PURCHASE_JSON {"runId":"20261015T144649-measure-5-a7452b","index":0,"buyer":240003,"productId":1,"expectedAmount":56503161,"orderId":1,"outcome":"success","httpStatus":200,"error":null,"latencyMs":407}
-PURCHASE_JSON {"runId":"20261015T144649-measure-5-a7452b","index":1,"buyer":240004,"productId":2,"expectedAmount":93846083,"orderId":2,"outcome":"success","httpStatus":200,"error":null,"latencyMs":67}
-PURCHASE_JSON {"runId":"20261015T144649-measure-5-a7452b","index":2,"buyer":240005,"productId":3,"expectedAmount":77563492,"orderId":3,"outcome":"success","httpStatus":200,"error":null,"latencyMs":50}

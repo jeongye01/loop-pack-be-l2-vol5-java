@@ -1,8 +1,0 @@
-{
-  "before": [
-    "experiment_latest_cache_total{application=\"commerce-api\",result=\"hit\"} 30008.0"
-  ],
-  "after": [
-    "experiment_latest_cache_total{application=\"commerce-api\",result=\"hit\"} 129178.0"
-  ]
-}

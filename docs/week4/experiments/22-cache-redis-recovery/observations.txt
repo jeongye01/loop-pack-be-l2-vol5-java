@@ -1,3 +1,0 @@
-REDIS_RECOVERY outageUpdateMs=41 outageDeletedMs=26 getErrors=2 putErrors=1
-REDIS_RECOVERY reconnectMs=255
-REDIS_RECOVERY staleKeysPreserved=true refill=true hitOriginalCalls=0 deletedStatus=404

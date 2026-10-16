@@ -1,7 +1,0 @@
-{
-  "build": "prepareDocker passed",
-  "tests": "not run for this change, as explicitly requested",
-  "lint": "not rerun for this change",
-  "baselineCommit": "b47b390",
-  "baselineRestorationChecks": "Single Flight tests and Checkstyle passed before revision bypass change"
-}
