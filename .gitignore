@@ -50,4 +50,12 @@ out/
 /docs/week4/experiments/
 
 ### Local seed data ###
-/docs/week4/seed-data/
+/docs/week4/seed-data/*
+!/docs/week4/seed-data/README.md
+!/docs/week4/seed-data/compose.yml
+!/docs/week4/seed-data/scripts/
+/docs/week4/seed-data/scripts/__pycache__/
+!/docs/week4/seed-data/skewed-1m-v1/
+/docs/week4/seed-data/skewed-1m-v1/*
+!/docs/week4/seed-data/skewed-1m-v1/generation.json
+!/docs/week4/seed-data/skewed-1m-v1/manifest.json
