@@ -1,10 +1,6 @@
 # commerce-api API 계약
 
-과제가 요구한 기본 API의 method, path, 입력, 성공, 오류와 응답 형식을 한곳에 정리한다. 필드 타입·필수 여부·값 제약을 포함한 기계 판독 계약은 [OpenAPI 명세](../../apps/commerce-api/src/main/resources/static/openapi.yaml)에 있다.
 
-이 문서는 사람이 검토할 정책 계약을 갖고, OpenAPI 명세는 HTTP 형식 계약을 갖는다. 각 OpenAPI `operationId`의 앞부분은 이 문서의 엔드포인트 ID와 대응한다. 각 API가 지키는 도메인 규칙은 [`domain-rules.yaml`](./domain-rules.yaml)에 있고, 여기에는 규칙 문장을 적지 않는다.
-
-공통 인증·라우팅 오류는 공통 계약에서 정하고, 각 엔드포인트의 `오류` 칸은 그 API의 입력 형식·업무 오류를 전부 담는다.
 
 ## 공통 규칙
 
@@ -13,16 +9,15 @@
 
 | 대상                              | 식별                | 실패하면                                                                                           |
 | ------------------------------- | ----------------- | ---------------------------------------------------------------------------------------------- |
-| [고객 API](#고객-api) (C-01 ~ C-12) | `X-USER-ID` 요청 헤더 | `401 USER_NOT_IDENTIFIED`. 헤더가 없거나, 숫자가 아니거나, 없는 사용자이면 같은 결과로 거절한다. (R-ACCESS-05, P-ACCESS-01) |
-| `/api-admin/v1/**`              | `ADMIN` 역할        | `403`. 관리자 접근 필터가 거절하며 컨트롤러에 닿지 않는다. 응답 본문은 [공통 응답 형식](#응답-형식)을 따르지 않는다. (R-ACCESS-04)         |
+| [고객 API](#고객-api) | `X-USER-ID` 요청 헤더 | `401 USER_NOT_IDENTIFIED`. 헤더가 없거나, 숫자가 아니거나, 없는 사용자이면 같은 결과로 거절한다.  |
+| `/api-admin/v1/**`              | `ADMIN` 역할        | `403`. 관리자 접근 필터가 거절하며 컨트롤러에 닿지 않는다. 응답 본문은 [공통 응답 형식](#응답-형식)을 따르지 않는다.          |
 
 
-- 고객은 자신의 좋아요·포인트·주문만 다룬다. 다른 고객의 것을 요청하면 없는 대상으로 알린다. (R-ACCESS-03, P-ACCESS-02)
-- 관리자의 변경은 이후 고객 조회에 반영된다. (R-ADMIN-09)
+
 
 ### 목록
 
-목록을 돌려주는 요청은 모두 같은 페이지 규칙을 쓴다. 상품 목록의 정책(P-CATALOG-05, P-CATALOG-06, P-CATALOG-07)을 다른 목록에도 똑같이 적용한다.
+목록을 돌려주는 요청은 모두 같은 페이지 규칙을 쓴다.
 
 
 | 항목                 | 규칙                                                 |
@@ -36,7 +31,7 @@
 
 ## 고객 API
 
-고객이 브랜드·상품을 조회하고 좋아요·포인트·주문 기능을 쓰는 API다. (R-ACCESS-01)
+
 
 ### C-01. 브랜드 상세
 
@@ -91,7 +86,7 @@
 | --- | --- |
 | 요청 | `DELETE /api/v1/products/{productId}/likes` |
 | 입력 | path `productId` |
-| 성공 | `200`, `data` 없음. 좋아요가 없어도 `200`이다. 상품이 삭제되었어도 자신의 좋아요를 취소한다. |
+| 성공 | `200`, `data` 없음.  |
 | 오류 | `400 INVALID_REQUEST`: `productId`가 정수가 아님 |
 
 
@@ -140,16 +135,26 @@
 | 오류 | `400 INVALID_REQUEST`: `items`·`productId`·`quantity` 누락 또는 타입이 틀림 · `400 EMPTY_ORDER_ITEMS`: `items`가 비었음 · `400 INVALID_ORDER_QUANTITY`: `quantity`가 0 이하 · `404 PRODUCT_NOT_FOUND`: 없거나 삭제된 상품 |
 
 
-### C-10. 주문 확정
+
+
+### C-10. 주문 확정 — PG 결제 요청
+
 
 
 | 항목 | 계약 |
 | --- | --- |
 | 요청 | `POST /api/v1/orders/{orderId}/confirm` |
-| 입력 | path `orderId` |
-| 성공 | `200`, 주문 상세 `id`, `status=CONFIRMED`, `items`(상품 ID·이름, 수량, 단가, 품목 금액), `totalAmount`, `payment`(결제액 `amount`, 결제 시각 `paidAt`). 재고·잔액이 차감된다. |
-| 오류 | `400 INVALID_REQUEST`: `orderId`가 정수가 아님 · `404 ORDER_NOT_FOUND`: 없거나 다른 고객의 주문 · `409 ORDER_ALREADY_CONFIRMED` · `409 PRODUCT_NOT_AVAILABLE`: 삭제된 상품이 있음 · `409 INSUFFICIENT_STOCK` · `409 INSUFFICIENT_POINT` · `409 POINT_CONFLICT`: 포인트 버전 충돌로 주문 확정 재시도 2회를 소진함. 최신 잔액을 확인한 뒤 다시 요청 · `500 INTERNAL_ERROR`: 한도 초과 충돌의 대상을 확인할 수 없거나 주문이 아직 DRAFT인 경우 등 내부 오류 |
+| 식별 | `X-USER-ID`로 고객을 식별하며 본인의 주문만 요청할 수 있다. |
+| 입력 | path `orderId`, body `paymentAttemptKey`, `cardType`, `cardNo`. 합성 테스트 카드만 사용한다. |
+| 금액 | 저장된 주문의 품목 단가·수량·합계로 결정한다. |
+| 처리 | 주문·상품·가용 재고 확인 → 재고 예약 → PG 결제 요청. 포인트 검사·차감은 수행하지 않는다. |
+| 대기 | `202`, 주문·시도 상태와 조회 경로를 반환한다. PG의 `PENDING`은 요청 수락이며 결제 성공이 아니다. |
+| 완료 | PG의 최종 성공을 확인하고 주문과 재고 예약을 확정한 결과는 `200`으로 반환할 수 있다. 가용 재고를 추가 차감하지 않는다. |
+| 결과 | 확정된 주문은 `CONFIRMED`이며 결제액·결제 시점을 갖는다. |
+| 입력·소유권 오류 | `400 INVALID_REQUEST`, `401 USER_NOT_IDENTIFIED`, `404 ORDER_NOT_FOUND`의 기존 의미를 유지한다. |
+| 예약 전 거절 | 삭제된 상품은 `409 PRODUCT_NOT_AVAILABLE`, 재고 부족은 `409 INSUFFICIENT_STOCK`. PG에 요청하지 않는다. |
 
+포인트 충전·잔액 조회 API는 유지한다. 성공 확인 수단, 실패·미확인·콜백·재요청의 상세 계약과 정확한 응답 필드명은 후속 설계에서 정한다.
 
 ### C-11. 내 주문 목록
 
@@ -175,9 +180,7 @@
 
 ## 관리자 API
 
-관리자가 브랜드·상품·재고를 관리하고 구매자들의 주문을 조회하는 API다. (R-ACCESS-02)
 
-관리자 조회는 삭제된 브랜드와 상품도 삭제 여부와 함께 보여 준다. 삭제된 대상은 수정, 재고 변경, 다시 삭제의 대상이 아니며 없는 대상으로 알린다. (P-ADMIN-06, P-ADMIN-07, R-ADMIN-13)
 
 ### A-01. 브랜드 목록
 
@@ -297,7 +300,7 @@
 | 항목 | 계약 |
 | --- | --- |
 | 요청 | `PUT /api-admin/v1/products/{productId}/stock` |
-| 입력 | path `productId`, body `{ "quantity": 10 }`. `quantity`는 0 이상인 최종 수량 |
+| 입력 | path `productId`, body `{ "quantity": 10 }`.  |
 | 성공 | `200`, 관리자 상품 |
 | 오류 | `400 INVALID_REQUEST`: `productId`가 정수가 아니거나 `quantity` 누락·타입 오류 · `400 INVALID_STOCK_QUANTITY`: 음수 · `404 PRODUCT_NOT_FOUND`: 없거나 삭제된 상품 |
 
@@ -337,12 +340,11 @@
 { "meta": { "result": "SUCCESS" }, "data": { } }
 ```
 
-- 성공은 `201 Created` 또는 `200 OK`이고 `meta.result`는 `SUCCESS`이다. 새 대상을 만든 요청은 `201`, 나머지는 `200`이다.
-- 실패는 `오류 코드`의 상태 코드이고 `meta.result`는 `FAIL`, `meta.errorCode`와 `meta.message`를 채운다.
+
 
 ### 목록 응답
 
-목록을 돌려주는 성공 응답의 `data`는 다음 필드를 가진다. 페이지 요청 규칙은 [공통 목록 규칙](#목록)을 따른다.
+
 
 
 | 필드              | 뜻              |
@@ -355,9 +357,6 @@
 
 고객 상품 목록 `GET /api/v1/products`는 위 표의 `totalElements` 대신 boolean `last`를 반환한다. 다음 페이지가 있으면 `false`, 없으면 `true`이며 빈 목록도 `true`다. `page`·`size`·정렬·필터 규칙은 유지한다. 나머지 목록 API는 기존 전체 개수 계약을 유지한다.
 
-### OpenAPI 스키마
-
-요청·응답 필드의 타입, `required`, 배열 원소, 값 범위와 예시는 [OpenAPI 명세](../../apps/commerce-api/src/main/resources/static/openapi.yaml)의 각 `path`와 `components/schemas`에서 정의한다. 각 실패 응답의 `x-error-codes`는 그 엔드포인트와 HTTP 상태에서 허용하는 오류 코드다. HTTP 테스트는 실제 요청·응답 형식과 오류 코드가 이 명세를 따르는지 검사한다. 로컬 실행 후 `/swagger-ui.html`에서 같은 명세를 확인한다.
 
 
 
@@ -397,10 +396,10 @@
 | `500` | `INTERNAL_ERROR`               | 요청과 관계없는 내부 오류이다. 예: 결제액이 없는 결제 결과, 0 이하의 수량으로 재고 차감([ADR-003](./decisions.md#adr-003-재고-차감-수량이-0-이하이면-내부-오류로-거절한다)) | 일시적인 오류가 발생했습니다.                      |
 
 
-관리자 접근 필터가 막는 요청은 `403`이며 오류 코드 없이 응답한다.
 
 
-## 4주차 고객 브랜드 목록 추가
+
+## 고객 브랜드 목록
 
 | 항목 | 계약 |
 | --- | --- |
@@ -412,5 +411,3 @@
 | 빈 목록 | 200, content 빈 배열. 범위 밖 페이지도 빈 배열 |
 | 오류 | 잘못된 페이지·크기·숫자 형식 400 INVALID_REQUEST, 사용자 식별 실패 401 USER_NOT_IDENTIFIED |
 | 캐시 | 고객용 키 분리, TTL 5분 ±30초, catalog revision. hit에도 사용자 식별 유지 |
-
-관리자 브랜드 목록은 기존 삭제 포함·관리자 권한 계약을 유지한다.
