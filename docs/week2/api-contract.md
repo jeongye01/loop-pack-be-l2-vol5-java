@@ -147,7 +147,7 @@
 | 요청 | `POST /api/v1/orders/{orderId}/confirm` |
 | 입력 | path `orderId`, body `paymentAttemptKey`, `cardType`, `cardNo`. . |
 | 성공 | `200`, `data`는 주문과 재고 예약을 확정한 결과. 주문 상태는 `CONFIRMED`이며 결제액·결제 시점을 담는다. |
-| 대기 | `202`, `data`는 주문·시도 상태와 조회 경로. 처리 중은 `PENDING`, 결과 미확인은 `UNKNOWN`으로 표현한다. `meta.result`는 `PENDING`이다. |
+| 대기 | `202`, `meta.result=PENDING`. `data`는 대사 API의 대기 응답과 동일하게 `orderStatus=DRAFT`, `paymentStatus`(`PENDING` 또는 `UNKNOWN`), `statusUrl`(`/api/v1/orders/{orderId}`)을 담는다. |
 | 오류 | `400 INVALID_REQUEST` · `404 ORDER_NOT_FOUND` · `409 PRODUCT_NOT_AVAILABLE` · `409 INSUFFICIENT_STOCK` · `422 PAYMENT_FAILED` |
 
 
