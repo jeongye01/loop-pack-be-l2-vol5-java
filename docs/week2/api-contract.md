@@ -145,7 +145,7 @@
 | 항목 | 계약 |
 | --- | --- |
 | 요청 | `POST /api/v1/orders/{orderId}/confirm` |
-| 입력 | path `orderId`, body `paymentAttemptKey`, `cardType`, `cardNo`. 합성 테스트 카드만 사용한다. |
+| 입력 | path `orderId`, body `paymentAttemptKey`, `cardType`, `cardNo`. . |
 | 성공 | `200`, `data`는 주문과 재고 예약을 확정한 결과. 주문 상태는 `CONFIRMED`이며 결제액·결제 시점을 담는다. |
 | 대기 | `202`, `data`는 주문·시도 상태와 조회 경로. 처리 중은 `PENDING`, 결과 미확인은 `UNKNOWN`으로 표현한다. `meta.result`는 `PENDING`이다. |
 | 오류 | `400 INVALID_REQUEST` · `404 ORDER_NOT_FOUND` · `409 PRODUCT_NOT_AVAILABLE` · `409 INSUFFICIENT_STOCK` · `422 PAYMENT_FAILED` |
@@ -166,13 +166,92 @@
 
 ### C-12. 내 주문 상세
 
-
 | 항목 | 계약 |
 | --- | --- |
 | 요청 | `GET /api/v1/orders/{orderId}` |
 | 입력 | path `orderId` |
-| 성공 | `200`, 주문 상세 `id`, `status`, `items`(주문 당시 상품 ID·이름, 수량, 단가, 품목 금액), `totalAmount`. `CONFIRMED`일 때만 `payment`(결제액·시각)를 담는다. 실패한 결제 조회도 `200`, `meta.result=SUCCESS`이며 `data`에 결제 상태 `FAILED`를 포함한다. 결제 상태 필드명은 후속 설계에서 정한다. |
+| 성공 | `200`, `meta.result=SUCCESS`. `data`는 아래 주문 상세를 담는다.  |
 | 오류 | `400 INVALID_REQUEST` · `404 ORDER_NOT_FOUND` |
+
+`data` 필드:
+
+| 필드 | 타입 | 의미 |
+| --- | --- | --- |
+| `id` | 정수 | 주문 ID |
+| `status` | 문자열 | 주문 상태. `DRAFT` 또는 `CONFIRMED` |
+| `items` | 배열 | 주문 당시 품목 정보 |
+| `items[].productId` | 정수 | 상품 ID |
+| `items[].productName` | 문자열 | 주문 당시 상품 이름 |
+| `items[].quantity` | 정수 | 주문 수량 |
+| `items[].unitPrice` | 정수 | 주문 당시 단가(원) |
+| `items[].amount` | 정수 | 품목 금액(원) |
+| `totalAmount` | 정수 | 주문 총액(원) |
+| `payment` | 객체 또는 `null` | 결제 정보. 결제 시작 전에는 `null` |
+| `payment.method` | 문자열 | 결제수단. 신규 결제는 `PG`, 이전 포인트 결제는 `POINT` |
+| `payment.status` | 문자열 | 결제 상태. `PENDING`, `UNKNOWN`, `SUCCESS`, `FAILED` |
+| `payment.amount` | 정수 | 결제 요청 금액(원). 이전 포인트 결제는 당시 결제액 |
+| `payment.paidAt` | 날짜·시간 문자열 또는 `null` | 결제 성공 시각. 성공 전에는 `null` |
+
+주문·결제 상태 조합:
+
+| 상황 | `data.status` | `data.payment.status` |
+| --- | --- | --- |
+| 결제 시작 전 | `DRAFT` | 없음 (`payment: null`) |
+| 결제 처리 중 | `DRAFT` | `PENDING` |
+| 결제 결과 미확인 | `DRAFT` | `UNKNOWN` |
+| 결제 성공 반영 완료 | `CONFIRMED` | `SUCCESS` |
+| 결제 실패 확정 | `DRAFT` | `FAILED` |
+
+
+
+### C-13. 결제 결과 대사
+
+| 항목 | 계약 |
+| --- | --- |
+| 요청 | `POST /api/v1/orders/{orderId}/payment/reconcile` |
+| 입력 | path `orderId`. 요청 본문 없음 |
+| 성공 | `200`, `meta.result=SUCCESS`. `data`에 `orderStatus`, `paymentStatus`를 반환한다. 결제 실패를 정상 반영한 경우에도 `200`이며 `paymentStatus=FAILED`이다. |
+| 대기 | `202`, `meta.result=PENDING`. `data`에 `orderStatus`, `paymentStatus`, `statusUrl`을 반환한다. |
+| 오류 | `400 INVALID_REQUEST` · `404 ORDER_NOT_FOUND` |
+
+`data` 필드:
+
+| 필드 | 타입 | 의미 |
+| --- | --- | --- |
+| `orderStatus` | 문자열 | 반영 후 주문 상태. `DRAFT` 또는 `CONFIRMED` |
+| `paymentStatus` | 문자열 | 결제 상태. `200`이면 `SUCCESS` 또는 `FAILED`, `202`이면 `PENDING` 또는 `UNKNOWN` |
+| `statusUrl` | 문자열 | `202`에서만 반환하는 주문 상태 조회 경로. `/api/v1/orders/{orderId}` |
+
+`202` 응답의 `data` 예시:
+
+```json
+{
+  "orderStatus": "DRAFT",
+  "paymentStatus": "UNKNOWN",
+  "statusUrl": "/api/v1/orders/42"
+}
+```
+
+## PG 콜백 API
+
+### 결제 결과 알림
+
+| 항목 | 계약 |
+| --- | --- |
+| 요청 | `POST /api/v1/payments/callback` |
+| 입력 | body `providerOrderId`, `transactionKey`, `status`. 고객 식별용 `X-USER-ID`는 요구하지 않는다. |
+| 성공 | `200`, `meta.result=SUCCESS`, `data=null`. PG 조회로 검증한 성공·실패 결과를 반영했거나 이미 반영한 동일 결과의 중복 알림인 경우 |
+| 대기 | `202`, `meta.result=PENDING`, `data=null`. PG 처리 중이거나 조회 불가로 결과를 확정하지 못한 경우 |
+| 오류 | `400 INVALID_REQUEST` · `404 PAYMENT_ATTEMPT_NOT_FOUND` · `409 PAYMENT_RESULT_CONFLICT` |
+
+요청 본문:
+
+| 필드 | 타입 | 의미 |
+| --- | --- | --- |
+| `providerOrderId` | 문자열 | PG에 전달한 우리 주문 식별자 |
+| `transactionKey` | 문자열 | PG가 발급한 거래 식별자 |
+| `status` | 문자열 | PG가 알린 상태. `PENDING`, `SUCCESS`, `FAILED` |
+
 
 ## 관리자 API
 
@@ -337,7 +416,7 @@
 | `meta.result` | API 요청 처리 결과. `SUCCESS`, `FAIL`, `PENDING` 중 하나 |
 | `meta.errorCode` | `FAIL`일 때 오류 코드. 그 외에는 `null` |
 | `meta.message` | `FAIL`일 때 오류 메시지. 그 외에는 `null` |
-| `data` | `SUCCESS`일 때 처리 결과, `PENDING`일 때 현재 상태와 조회 경로. `FAIL`이면 `null` |
+| `data` | `SUCCESS`일 때 API별 처리 결과, `PENDING`일 때 API별 대기 정보. PG 콜백은 둘 다 `null`이며, `FAIL`도 `null` |
 
 | `meta.result` | HTTP | 의미 |
 | --- | --- | --- |
@@ -399,6 +478,7 @@
 | `404` | `USER_NOT_FOUND`               | 경로의 사용자가 요청자가 아니다.                                                                                                   | 사용자를 찾을 수 없습니다.                       |
 | `404` | `LIKE_NOT_FOUND`               | 좋아요가 없거나 다른 고객의 좋아요다.                                                                                                | 좋아요를 찾을 수 없습니다.                       |
 | `404` | `NOT_FOUND`                    | 요청한 경로가 없다.                                                                                                          | 요청한 경로를 찾을 수 없습니다.                    |
+| `404` | `PAYMENT_ATTEMPT_NOT_FOUND` | 콜백에 대응하는 내부 결제 시도가 없다. | 결제 시도를 찾을 수 없습니다. |
 | `405` | `METHOD_NOT_ALLOWED`           | 경로는 있지만 허용하지 않는 method로 요청했다.                                                                                        | 허용하지 않는 요청 방식입니다.                     |
 | `409` | `DUPLICATE_BRAND_NAME`         | 삭제되지 않은 브랜드 중에 같은 이름이 있다. 앞뒤 공백을 빼고, 대소문자를 구분해 비교한다.                                                                 | 이미 사용 중인 브랜드 이름입니다.                   |
 | `409` | `DUPLICATE_PRODUCT_NAME`       | 같은 브랜드의 삭제되지 않은 상품 중에 같은 이름이 있다. 앞뒤 공백을 빼고, 대소문자를 구분해 비교한다.                                                          | 이 브랜드에 같은 이름의 상품이 있습니다.               |
@@ -409,6 +489,7 @@
 | `409` | `INSUFFICIENT_POINT`           | 확정하려는 주문의 금액보다 잔액이 적다.                                                                                               | 포인트 잔액이 부족합니다.                        |
 | `409` | `POINT_CONFLICT` | 주문 확정의 포인트 버전 충돌이 최대 2회 재시도 후에도 해소되지 않았다. 이번 확정의 변경은 롤백된다. | 포인트 잔액이 변경되었습니다. 최신 잔액을 확인한 뒤 다시 시도해 주세요. |
 | `409` | `POINT_BALANCE_LIMIT_EXCEEDED` | 충전 후 잔액이 표현할 수 있는 범위를 넘는다.                                                                                           | 충전할 수 있는 한도를 넘었습니다.                   |
+| `409` | `PAYMENT_RESULT_CONFLICT` | PG 조회 결과의 주문·거래·금액이 내부 기록과 일치하지 않거나 기존 최종 결과와 충돌한다. | 결제 결과가 기존 기록과 일치하지 않습니다. |
 | `422` | `PAYMENT_FAILED` | 주문 확정 요청에서 결제 실패가 확정되었다. 처리 중·결과 미확인에는 사용하지 않는다. | 결제가 실패했습니다. |
 | `500` | `INTERNAL_ERROR`               | 요청과 관계없는 내부 오류이다. 예: 결제액이 없는 결제 결과, 0 이하의 수량으로 재고 차감([ADR-003](./decisions.md#adr-003-재고-차감-수량이-0-이하이면-내부-오류로-거절한다)) | 일시적인 오류가 발생했습니다.                      |
 
