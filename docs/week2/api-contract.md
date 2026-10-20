@@ -29,6 +29,8 @@
 | 순서                 | 요청마다 적는다. 순서 기준이 같으면 식별자 오름차순으로 정한다.               |
 
 
+
+
 ## 고객 API
 
 
@@ -41,7 +43,7 @@
 | 요청 | `GET /api/v1/brands/{brandId}` |
 | 입력 | path `brandId` |
 | 성공 | `200`, 고객 브랜드 |
-| 오류 | `400 INVALID_REQUEST`: `brandId`가 정수가 아님 · `404 BRAND_NOT_FOUND`: 없거나 삭제된 브랜드 |
+| 오류 | `400 INVALID_REQUEST` · `404 BRAND_NOT_FOUND` |
 
 
 ### C-02. 상품 목록
@@ -53,7 +55,7 @@
 | 입력 | query `brandId`(선택), `sort`(`latest`·`price_asc`·`likes_desc`, 기본 `latest`), `page`, `size` |
 | 성공 | `200`, 고객 상품 목록. 삭제되지 않은 상품만 담는다. |
 | 순서 | `latest`는 등록 최신순, `price_asc`는 가격 오름차순, `likes_desc`는 좋아요 수 내림차순. 같으면 상품 식별자 오름차순 |
-| 오류 | `400 INVALID_REQUEST`: 정수가 아닌 `brandId`, 지원하지 않는 `sort`, 잘못된 `page`·`size` |
+| 오류 | `400 INVALID_REQUEST` |
 | 규칙 | 없거나 삭제된 `brandId`로 거르면 빈 목록을 돌려준다. |
 
 
@@ -65,7 +67,7 @@
 | 요청 | `GET /api/v1/products/{productId}` |
 | 입력 | path `productId` |
 | 성공 | `200`, 고객 상품 |
-| 오류 | `400 INVALID_REQUEST`: `productId`가 정수가 아님 · `404 PRODUCT_NOT_FOUND`: 없거나 삭제된 상품 |
+| 오류 | `400 INVALID_REQUEST` · `404 PRODUCT_NOT_FOUND` |
 
 
 ### C-04. 좋아요 등록
@@ -76,7 +78,7 @@
 | 요청 | `POST /api/v1/products/{productId}/likes` |
 | 입력 | path `productId` |
 | 성공 | `201`, `data` 없음. 이미 좋아요한 상품이면 새로 만들지 않고 `200`이며, 좋아요 수는 그대로다. |
-| 오류 | `400 INVALID_REQUEST`: `productId`가 정수가 아님 · `404 PRODUCT_NOT_FOUND`: 없거나 삭제된 상품 |
+| 오류 | `400 INVALID_REQUEST` · `404 PRODUCT_NOT_FOUND` |
 
 
 ### C-05. 좋아요 취소
@@ -87,7 +89,7 @@
 | 요청 | `DELETE /api/v1/products/{productId}/likes` |
 | 입력 | path `productId` |
 | 성공 | `200`, `data` 없음.  |
-| 오류 | `400 INVALID_REQUEST`: `productId`가 정수가 아님 |
+| 오류 | `400 INVALID_REQUEST` |
 
 
 ### C-06. 내 좋아요 목록
@@ -99,7 +101,7 @@
 | 입력 | path `userId`, query `page`, `size` |
 | 성공 | `200`, 고객 상품 목록. 삭제된 상품은 담지 않는다. |
 | 순서 | 좋아요한 시점 최신순 |
-| 오류 | `400 INVALID_REQUEST`: `userId`가 정수가 아니거나 `page`·`size`가 잘못됨 · `404 USER_NOT_FOUND`: `userId`가 요청자가 아님 |
+| 오류 | `400 INVALID_REQUEST` · `404 USER_NOT_FOUND` |
 
 
 ### C-07. 포인트 충전
@@ -110,7 +112,7 @@
 | 요청 | `POST /api/v1/points/charge` |
 | 입력 | body `{ "amount": 10000 }`. `amount`는 양의 정수 |
 | 성공 | `200`, `data`는 `{ "balance": 충전 후 잔액 }` |
-| 오류 | `400 INVALID_REQUEST`: `amount` 누락, 정수가 아님, 표현 범위 초과 · `400 INVALID_CHARGE_AMOUNT`: 0 이하 · `409 POINT_BALANCE_LIMIT_EXCEEDED`: 충전 후 잔액이 표현 범위를 넘음. 어느 경우든 잔액은 그대로다. |
+| 오류 | `400 INVALID_REQUEST` · `400 INVALID_CHARGE_AMOUNT` · `409 POINT_BALANCE_LIMIT_EXCEEDED` |
 
 
 ### C-08. 내 잔액 조회
@@ -132,7 +134,7 @@
 | 요청 | `POST /api/v1/orders` |
 | 입력 | body `{ "items": [ { "productId": 1, "quantity": 2 } ] }` |
 | 성공 | `201`, 주문 상세 `id`, `status=DRAFT`, `items`(상품 ID·이름, 수량, 단가, 품목 금액), `totalAmount`. 결제 전이라 `payment`는 없고 재고·잔액은 그대로다. |
-| 오류 | `400 INVALID_REQUEST`: `items`·`productId`·`quantity` 누락 또는 타입이 틀림 · `400 EMPTY_ORDER_ITEMS`: `items`가 비었음 · `400 INVALID_ORDER_QUANTITY`: `quantity`가 0 이하 · `404 PRODUCT_NOT_FOUND`: 없거나 삭제된 상품 |
+| 오류 | `400 INVALID_REQUEST` · `400 EMPTY_ORDER_ITEMS` · `400 INVALID_ORDER_QUANTITY` · `404 PRODUCT_NOT_FOUND` |
 
 
 
@@ -140,21 +142,15 @@
 ### C-10. 주문 확정 — PG 결제 요청
 
 
-
 | 항목 | 계약 |
 | --- | --- |
 | 요청 | `POST /api/v1/orders/{orderId}/confirm` |
-| 식별 | `X-USER-ID`로 고객을 식별하며 본인의 주문만 요청할 수 있다. |
 | 입력 | path `orderId`, body `paymentAttemptKey`, `cardType`, `cardNo`. 합성 테스트 카드만 사용한다. |
-| 금액 | 저장된 주문의 품목 단가·수량·합계로 결정한다. |
-| 처리 | 주문·상품·가용 재고 확인 → 재고 예약 → PG 결제 요청. 포인트 검사·차감은 수행하지 않는다. |
-| 대기 | `202`, 주문·시도 상태와 조회 경로를 반환한다. PG의 `PENDING`은 요청 수락이며 결제 성공이 아니다. |
-| 완료 | PG의 최종 성공을 확인하고 주문과 재고 예약을 확정한 결과는 `200`으로 반환할 수 있다. 가용 재고를 추가 차감하지 않는다. |
-| 결과 | 확정된 주문은 `CONFIRMED`이며 결제액·결제 시점을 갖는다. |
-| 입력·소유권 오류 | `400 INVALID_REQUEST`, `401 USER_NOT_IDENTIFIED`, `404 ORDER_NOT_FOUND`의 기존 의미를 유지한다. |
-| 예약 전 거절 | 삭제된 상품은 `409 PRODUCT_NOT_AVAILABLE`, 재고 부족은 `409 INSUFFICIENT_STOCK`. PG에 요청하지 않는다. |
+| 성공 | `200`, `data`는 주문과 재고 예약을 확정한 결과. 주문 상태는 `CONFIRMED`이며 결제액·결제 시점을 담는다. |
+| 대기 | `202`, `data`는 주문·시도 상태와 조회 경로. 처리 중은 `PENDING`, 결과 미확인은 `UNKNOWN`으로 표현한다. `meta.result`는 `PENDING`이다. |
+| 오류 | `400 INVALID_REQUEST` · `404 ORDER_NOT_FOUND` · `409 PRODUCT_NOT_AVAILABLE` · `409 INSUFFICIENT_STOCK` · `422 PAYMENT_FAILED` |
 
-포인트 충전·잔액 조회 API는 유지한다. 성공 확인 수단, 실패·미확인·콜백·재요청의 상세 계약과 정확한 응답 필드명은 후속 설계에서 정한다.
+
 
 ### C-11. 내 주문 목록
 
@@ -165,7 +161,7 @@
 | 입력 | query `page`, `size` |
 | 성공 | `200`, 요청자의 주문 요약 목록. 각 항목은 `id`, `status`, `itemCount`, `totalAmount`를 담고, `CONFIRMED`일 때만 `paymentAmount`를 담는다. |
 | 순서 | 주문 생성 최신순 |
-| 오류 | `400 INVALID_REQUEST`: `page`·`size`가 잘못됨 |
+| 오류 | `400 INVALID_REQUEST` |
 
 
 ### C-12. 내 주문 상세
@@ -175,8 +171,8 @@
 | --- | --- |
 | 요청 | `GET /api/v1/orders/{orderId}` |
 | 입력 | path `orderId` |
-| 성공 | `200`, 주문 상세 `id`, `status`, `items`(주문 당시 상품 ID·이름, 수량, 단가, 품목 금액), `totalAmount`. `CONFIRMED`일 때만 `payment`(결제액·시각)를 담는다. |
-| 오류 | `400 INVALID_REQUEST`: `orderId`가 정수가 아님 · `404 ORDER_NOT_FOUND`: 없거나 다른 고객의 주문 |
+| 성공 | `200`, 주문 상세 `id`, `status`, `items`(주문 당시 상품 ID·이름, 수량, 단가, 품목 금액), `totalAmount`. `CONFIRMED`일 때만 `payment`(결제액·시각)를 담는다. 실패한 결제 조회도 `200`, `meta.result=SUCCESS`이며 `data`에 결제 상태 `FAILED`를 포함한다. 결제 상태 필드명은 후속 설계에서 정한다. |
+| 오류 | `400 INVALID_REQUEST` · `404 ORDER_NOT_FOUND` |
 
 ## 관리자 API
 
@@ -191,7 +187,7 @@
 | 입력 | query `page`, `size` |
 | 성공 | `200`, 관리자 브랜드 목록. 삭제된 브랜드도 담는다. |
 | 순서 | 등록 최신순 |
-| 오류 | `400 INVALID_REQUEST`: `page`·`size`가 잘못됨 |
+| 오류 | `400 INVALID_REQUEST` |
 
 
 ### A-02. 브랜드 생성
@@ -202,7 +198,7 @@
 | 요청 | `POST /api-admin/v1/brands` |
 | 입력 | body `{ "name": "브랜드" }` |
 | 성공 | `201`, 관리자 브랜드 |
-| 오류 | `400 INVALID_REQUEST`: `name` 누락 · `400 INVALID_BRAND_NAME`: 비었음, 공백만 있음, 앞뒤 공백을 뺀 길이가 50자 초과 · `409 DUPLICATE_BRAND_NAME` |
+| 오류 | `400 INVALID_REQUEST` · `400 INVALID_BRAND_NAME` · `409 DUPLICATE_BRAND_NAME` |
 
 
 ### A-03. 브랜드 상세
@@ -213,7 +209,7 @@
 | 요청 | `GET /api-admin/v1/brands/{brandId}` |
 | 입력 | path `brandId` |
 | 성공 | `200`, 관리자 브랜드. 삭제된 브랜드도 돌려준다. |
-| 오류 | `400 INVALID_REQUEST`: `brandId`가 정수가 아님 · `404 BRAND_NOT_FOUND`: 존재한 적이 없는 브랜드 |
+| 오류 | `400 INVALID_REQUEST` · `404 BRAND_NOT_FOUND` |
 
 
 ### A-04. 브랜드 수정
@@ -224,7 +220,7 @@
 | 요청 | `PUT /api-admin/v1/brands/{brandId}` |
 | 입력 | path `brandId`, body `{ "name": "새 이름" }` |
 | 성공 | `200`, 관리자 브랜드 |
-| 오류 | `400 INVALID_REQUEST`: `brandId`가 정수가 아니거나 `name` 누락 · `400 INVALID_BRAND_NAME`: 이름 규칙 위반 · `404 BRAND_NOT_FOUND`: 없거나 삭제된 브랜드 · `409 DUPLICATE_BRAND_NAME`: 자신을 뺀 삭제되지 않은 브랜드와 이름이 같음 |
+| 오류 | `400 INVALID_REQUEST` · `400 INVALID_BRAND_NAME` · `404 BRAND_NOT_FOUND` · `409 DUPLICATE_BRAND_NAME` |
 
 
 ### A-05. 브랜드 삭제
@@ -235,7 +231,7 @@
 | 요청 | `DELETE /api-admin/v1/brands/{brandId}` |
 | 입력 | path `brandId` |
 | 성공 | `200`, `data` 없음. 브랜드와 연결된 미삭제 상품 전체를 함께 논리 삭제하고, 다른 브랜드·상품과 기존 주문은 유지한다. |
-| 오류 | `400 INVALID_REQUEST`: `brandId`가 정수가 아님 · `404 BRAND_NOT_FOUND`: 없거나 이미 삭제된 브랜드 |
+| 오류 | `400 INVALID_REQUEST` · `404 BRAND_NOT_FOUND` |
 
 
 ### A-06. 상품 목록
@@ -247,7 +243,7 @@
 | 입력 | query `brandId`(선택), `page`, `size` |
 | 성공 | `200`, 관리자 상품 목록. 삭제된 상품도 담는다. |
 | 순서 | 등록 최신순 |
-| 오류 | `400 INVALID_REQUEST`: `brandId`가 정수가 아니거나 `page`·`size`가 잘못됨 |
+| 오류 | `400 INVALID_REQUEST` |
 
 
 ### A-07. 상품 생성
@@ -258,7 +254,7 @@
 | 요청 | `POST /api-admin/v1/products` |
 | 입력 | body `{ "brandId": 1, "name": "상품", "price": 3000 }` |
 | 성공 | `201`, 관리자 상품. `stock`은 0이다. |
-| 오류 | `400 INVALID_REQUEST`: 필드 누락, 타입이 틀림 · `400 INVALID_PRODUCT_NAME`: 이름이 비었음·공백만 있음·앞뒤 공백을 뺀 길이가 100자 초과 · `400 INVALID_PRODUCT_PRICE`: 가격이 1원~1,000,000,000원 밖 · `404 BRAND_NOT_FOUND`: 없거나 삭제된 브랜드 · `409 DUPLICATE_PRODUCT_NAME` |
+| 오류 | `400 INVALID_REQUEST` · `400 INVALID_PRODUCT_NAME` · `400 INVALID_PRODUCT_PRICE` · `404 BRAND_NOT_FOUND` · `409 DUPLICATE_PRODUCT_NAME` |
 
 
 ### A-08. 상품 상세
@@ -269,7 +265,7 @@
 | 요청 | `GET /api-admin/v1/products/{productId}` |
 | 입력 | path `productId` |
 | 성공 | `200`, 관리자 상품. 삭제된 상품도 돌려준다. |
-| 오류 | `400 INVALID_REQUEST`: `productId`가 정수가 아님 · `404 PRODUCT_NOT_FOUND`: 존재한 적이 없는 상품 |
+| 오류 | `400 INVALID_REQUEST` · `404 PRODUCT_NOT_FOUND` |
 
 
 ### A-09. 상품 수정
@@ -280,7 +276,7 @@
 | 요청 | `PUT /api-admin/v1/products/{productId}` |
 | 입력 | path `productId`, body `{ "name": "새 이름", "price": 3500, "brandId": 1 }`. `brandId`는 선택이며, 보내면 현재 브랜드와 같아야 한다. |
 | 성공 | `200`, 관리자 상품. 재고는 바뀌지 않는다. |
-| 오류 | `400 INVALID_REQUEST`: `productId`가 정수가 아니거나 필드 누락·타입 오류 · `400 INVALID_PRODUCT_NAME` · `400 INVALID_PRODUCT_PRICE` · `404 PRODUCT_NOT_FOUND`: 없거나 삭제된 상품 · `409 DUPLICATE_PRODUCT_NAME` · `409 BRAND_CHANGE_NOT_ALLOWED`: `brandId`가 현재 브랜드와 다름. 어느 경우든 상품은 그대로다. |
+| 오류 | `400 INVALID_REQUEST` · `400 INVALID_PRODUCT_NAME` · `400 INVALID_PRODUCT_PRICE` · `404 PRODUCT_NOT_FOUND` · `409 DUPLICATE_PRODUCT_NAME` · `409 BRAND_CHANGE_NOT_ALLOWED` |
 
 
 ### A-10. 상품 삭제
@@ -291,7 +287,7 @@
 | 요청 | `DELETE /api-admin/v1/products/{productId}` |
 | 입력 | path `productId` |
 | 성공 | `200`, `data` 없음. 삭제 여부만 바뀌고, 이 상품을 가리키는 좋아요와 주문 품목은 남는다. |
-| 오류 | `400 INVALID_REQUEST`: `productId`가 정수가 아님 · `404 PRODUCT_NOT_FOUND`: 없거나 이미 삭제된 상품 |
+| 오류 | `400 INVALID_REQUEST` · `404 PRODUCT_NOT_FOUND` |
 
 
 ### A-11. 상품 재고 변경
@@ -302,7 +298,7 @@
 | 요청 | `PUT /api-admin/v1/products/{productId}/stock` |
 | 입력 | path `productId`, body `{ "quantity": 10 }`.  |
 | 성공 | `200`, 관리자 상품 |
-| 오류 | `400 INVALID_REQUEST`: `productId`가 정수가 아니거나 `quantity` 누락·타입 오류 · `400 INVALID_STOCK_QUANTITY`: 음수 · `404 PRODUCT_NOT_FOUND`: 없거나 삭제된 상품 |
+| 오류 | `400 INVALID_REQUEST` · `400 INVALID_STOCK_QUANTITY` · `404 PRODUCT_NOT_FOUND` |
 
 
 ### A-12. 주문 목록
@@ -314,7 +310,7 @@
 | 입력 | query `buyerId`(선택), `page`, `size` |
 | 성공 | `200`, 관리자 주문 요약 목록. 각 항목은 `id`, `buyerId`, `status`, `itemCount`, `totalAmount`와 `CONFIRMED`일 때만 `paymentAmount`를 담는다. `buyerId`가 있으면 그 구매자의 주문만 담는다. |
 | 순서 | 주문 생성 최신순 |
-| 오류 | `400 INVALID_REQUEST`: `buyerId`가 정수가 아니거나 `page`·`size`가 잘못됨 |
+| 오류 | `400 INVALID_REQUEST` |
 
 
 ### A-13. 주문 상세
@@ -325,7 +321,7 @@
 | 요청 | `GET /api-admin/v1/orders/{orderId}` |
 | 입력 | path `orderId` |
 | 성공 | `200`, 관리자 주문 상세 `id`, `buyerId`, `status`, `items`(주문 당시 상품 ID·이름, 수량, 단가, 품목 금액), `totalAmount`. `CONFIRMED`일 때만 `payment`(결제액·시각)를 담는다. |
-| 오류 | `400 INVALID_REQUEST`: `orderId`가 정수가 아님 · `404 ORDER_NOT_FOUND` |
+| 오류 | `400 INVALID_REQUEST` · `404 ORDER_NOT_FOUND` |
 
 
 ## 응답 계약
@@ -334,13 +330,33 @@
 
 ### 응답 형식
 
-모든 응답(관리자 `403` 제외)은 공통 형식을 쓴다.
+모든 응답(관리자 `403` 제외)은 `meta`와 `data`로 구성된 공통 형식을 쓴다.
+
+| 필드 | 정의 |
+| --- | --- |
+| `meta.result` | API 요청 처리 결과. `SUCCESS`, `FAIL`, `PENDING` 중 하나 |
+| `meta.errorCode` | `FAIL`일 때 오류 코드. 그 외에는 `null` |
+| `meta.message` | `FAIL`일 때 오류 메시지. 그 외에는 `null` |
+| `data` | `SUCCESS`일 때 처리 결과, `PENDING`일 때 현재 상태와 조회 경로. `FAIL`이면 `null` |
+
+| `meta.result` | HTTP | 의미 |
+| --- | --- | --- |
+| `SUCCESS` | `200`·`201` | 요청 처리가 완료되었다. 조회 요청에서는 조회가 성공했다는 의미다. |
+| `FAIL` | `4xx`·`5xx` | 요청이 거절되었거나 실행한 작업의 실패가 확정되었다. 관리자 `403`은 공통 형식에서 제외한다. |
+| `PENDING` | `202` | 요청을 수락했지만 최종 결과가 확정되지 않았다. |
+
+
 
 ```json
-{ "meta": { "result": "SUCCESS" }, "data": { } }
+{
+  "meta": {
+    "result": "FAIL",
+    "errorCode": "PAYMENT_FAILED",
+    "message": "결제가 실패했습니다."
+  },
+  "data": null
+}
 ```
-
-
 
 ### 목록 응답
 
@@ -355,7 +371,7 @@
 | `totalElements` | 조건에 맞는 전체 항목 수 |
 
 
-고객 상품 목록 `GET /api/v1/products`는 위 표의 `totalElements` 대신 boolean `last`를 반환한다. 다음 페이지가 있으면 `false`, 없으면 `true`이며 빈 목록도 `true`다. `page`·`size`·정렬·필터 규칙은 유지한다. 나머지 목록 API는 기존 전체 개수 계약을 유지한다.
+
 
 
 
@@ -393,6 +409,7 @@
 | `409` | `INSUFFICIENT_POINT`           | 확정하려는 주문의 금액보다 잔액이 적다.                                                                                               | 포인트 잔액이 부족합니다.                        |
 | `409` | `POINT_CONFLICT` | 주문 확정의 포인트 버전 충돌이 최대 2회 재시도 후에도 해소되지 않았다. 이번 확정의 변경은 롤백된다. | 포인트 잔액이 변경되었습니다. 최신 잔액을 확인한 뒤 다시 시도해 주세요. |
 | `409` | `POINT_BALANCE_LIMIT_EXCEEDED` | 충전 후 잔액이 표현할 수 있는 범위를 넘는다.                                                                                           | 충전할 수 있는 한도를 넘었습니다.                   |
+| `422` | `PAYMENT_FAILED` | 주문 확정 요청에서 결제 실패가 확정되었다. 처리 중·결과 미확인에는 사용하지 않는다. | 결제가 실패했습니다. |
 | `500` | `INTERNAL_ERROR`               | 요청과 관계없는 내부 오류이다. 예: 결제액이 없는 결제 결과, 0 이하의 수량으로 재고 차감([ADR-003](./decisions.md#adr-003-재고-차감-수량이-0-이하이면-내부-오류로-거절한다)) | 일시적인 오류가 발생했습니다.                      |
 
 
@@ -404,10 +421,8 @@
 | 항목 | 계약 |
 | --- | --- |
 | 요청 | `GET /api/v1/brands?page=0&size=20`, `X-USER-ID` 필수 |
-| 대상 | 삭제되지 않은 브랜드만 반환 |
 | 정렬 | createdAt DESC, id ASC (기존 브랜드 목록 순서) |
 | 페이지 | page 기본 0·최소 0, size 기본 20·범위 1~100 |
-| 성공 | 200, `data: {content: [{id, name}], page, size, totalElements}`. totalElements는 삭제 제외 개수 |
+| 성공 | 200, `data: {content: [{id, name}], page, size, totalElements}`.  |
 | 빈 목록 | 200, content 빈 배열. 범위 밖 페이지도 빈 배열 |
-| 오류 | 잘못된 페이지·크기·숫자 형식 400 INVALID_REQUEST, 사용자 식별 실패 401 USER_NOT_IDENTIFIED |
-| 캐시 | 고객용 키 분리, TTL 5분 ±30초, catalog revision. hit에도 사용자 식별 유지 |
+| 오류 | `400 INVALID_REQUEST` · `401 USER_NOT_IDENTIFIED` |
