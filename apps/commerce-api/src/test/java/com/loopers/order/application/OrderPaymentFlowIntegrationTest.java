@@ -7,6 +7,8 @@ import com.loopers.order.domain.Payment;
 import com.loopers.order.domain.PaymentGateway;
 import com.loopers.order.domain.PaymentMethod;
 import com.loopers.order.domain.PaymentStatus;
+import com.loopers.order.domain.PaymentGateway.ApprovalRequest;
+import com.loopers.order.infrastructure.payment.toss.TossPgFixture;
 import com.loopers.product.domain.Product;
 import com.loopers.product.domain.Stock;
 import com.loopers.support.fixture.TestEntities;
@@ -35,8 +37,11 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 import org.springframework.transaction.support.TransactionTemplate;
 
 import java.time.OffsetDateTime;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -213,6 +218,56 @@ class OrderPaymentFlowIntegrationTest {
                 () -> verify(paymentGateway, never()).approve(any()),
                 () -> verify(paymentGateway, never()).cancel(any())
             );
+        }
+
+        @DisplayName("TX A와 PG 승인이 끝난 직후 프로세스가 죽어도 재기동 후 PG 조회로 주문을 확정한다.")
+        @Test
+        void recoversApprovedPaymentAfterProcessDiesBeforeTransactionB() throws Exception {
+            Scenario scenario = inTransaction(() -> confirmationScenario(5));
+            String paymentKey = "test-payment-process-restart-" + UUID.randomUUID();
+            String attemptKey = newAttemptKey();
+            String providerOrderId = "LP-ORD-%010d".formatted(scenario.orderId());
+            ApprovalRequest request = new ApprovalRequest(paymentKey, providerOrderId, 4_000L, attemptKey);
+
+            try (TossPgFixture pg = new TossPgFixture()) {
+                pg.approve(request, APPROVED_AT);
+                pg.payment(paymentKey, 200, """
+                    {
+                      "paymentKey": "%s",
+                      "orderId": "%s",
+                      "totalAmount": 4000,
+                      "status": "DONE",
+                      "approvedAt": "%s"
+                    }
+                    """.formatted(paymentKey, providerOrderId, APPROVED_AT));
+
+                try {
+                    ChildProcessResult crashedProcess = runPaymentProcess(
+                        "approve-and-halt", pg.baseUrl().toString(), scenario, paymentKey, attemptKey);
+                    assertThat(crashedProcess.exitCode())
+                        .withFailMessage("First process output:\n%s", crashedProcess.output())
+                        .isEqualTo(73);
+                    assertThat(readPaymentFlowState(scenario.orderId(), scenario.productId()))
+                        .isEqualTo(new PaymentFlowState(OrderStatus.DRAFT, PaymentStatus.PENDING, "RESERVED", 3));
+
+                    ChildProcessResult restartedProcess = runPaymentProcess(
+                        "recover", pg.baseUrl().toString(), scenario, paymentKey, attemptKey);
+                    assertThat(restartedProcess.exitCode())
+                        .withFailMessage("Restarted process output:\n%s", restartedProcess.output())
+                        .isZero();
+
+                    assertAll(
+                        () -> assertThat(readPaymentFlowState(scenario.orderId(), scenario.productId()))
+                            .isEqualTo(new PaymentFlowState(
+                                OrderStatus.CONFIRMED, PaymentStatus.SUCCESS, "CONSUMED", 3)),
+                        () -> assertThat(pg.approvalRequests()).hasSize(1),
+                        () -> assertThat(pg.paymentRequests(paymentKey)).hasSize(1),
+                        () -> assertThat(pg.unmatchedRequests()).isEmpty()
+                    );
+                } finally {
+                    deleteScenario(scenario);
+                }
+            }
         }
 
         @DisplayName("PENDING 결제가 PG에서 실패한 상태면 재고 예약을 반환한다.")
@@ -548,6 +603,56 @@ class OrderPaymentFlowIntegrationTest {
             request.paymentKey(), request.providerOrderId(), request.amount(), APPROVED_AT);
     }
 
+    private ChildProcessResult runPaymentProcess(
+        String mode,
+        String paymentGatewayUrl,
+        Scenario scenario,
+        String paymentKey,
+        String paymentAttemptKey
+    ) throws Exception {
+        String classpath = System.getProperty("commerce.api.test.classpath");
+        String jdbcUrl = System.getProperty("datasource.mysql-jpa.main.jdbc-url");
+        String username = System.getProperty("datasource.mysql-jpa.main.username");
+        String password = System.getProperty("datasource.mysql-jpa.main.password");
+        Path outputFile = Files.createTempFile("payment-recovery-process-", ".log");
+        ProcessBuilder processBuilder = new ProcessBuilder(
+            Path.of(System.getProperty("java.home"), "bin", "java").toString(),
+            "-cp", classpath,
+            PaymentRecoveryProcessMain.class.getName(),
+            mode, jdbcUrl, username, password, paymentGatewayUrl, TossPgFixture.SECRET_KEY,
+            scenario.buyerId().toString(), scenario.orderId().toString(), paymentKey, paymentAttemptKey);
+        processBuilder.redirectErrorStream(true).redirectOutput(outputFile.toFile());
+        Process process = processBuilder.start();
+        boolean exited = process.waitFor(90, TimeUnit.SECONDS);
+        if (!exited) {
+            process.destroyForcibly().waitFor();
+        }
+        String output = Files.readString(outputFile);
+        Files.deleteIfExists(outputFile);
+        return new ChildProcessResult(exited ? process.exitValue() : -1, output);
+    }
+
+    private void deleteScenario(Scenario scenario) {
+        inTransaction(() -> {
+            entityManager.clear();
+            Order order = entityManager.find(Order.class, scenario.orderId());
+            if (order != null) {
+                entityManager.remove(order);
+            }
+            entityManager.createQuery("select s from Stock s where s.productId = :productId", Stock.class)
+                .setParameter("productId", scenario.productId())
+                .getResultList()
+                .forEach(entityManager::remove);
+            entityManager.createQuery("select p from Point p where p.userId = :userId", Point.class)
+                .setParameter("userId", scenario.buyerId())
+                .getResultList()
+                .forEach(entityManager::remove);
+            entityManager.remove(entityManager.find(Product.class, scenario.productId()));
+            entityManager.remove(entityManager.find(User.class, scenario.buyerId()));
+            return null;
+        });
+    }
+
     private String stockReservationStatus(Long orderId) {
         Object status = entityManager.createQuery(
                 "select o.stockReservationStatus from Order o where o.id = :orderId", Object.class)
@@ -576,6 +681,9 @@ class OrderPaymentFlowIntegrationTest {
     }
 
     private record Scenario(Long buyerId, Long orderId, Long productId) {
+    }
+
+    private record ChildProcessResult(int exitCode, String output) {
     }
 
     private record PaymentFlowState(
