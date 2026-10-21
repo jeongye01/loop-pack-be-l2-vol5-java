@@ -116,6 +116,21 @@ public class OrderPaymentTransactionService {
         return order;
     }
 
+    @Transactional
+    public Order cancelAfterUnresolvedPayment(Long orderId) {
+        Order order = orderRepository.findForConfirmById(orderId)
+            .orElseThrow(() -> new CoreException(ErrorCode.ORDER_NOT_FOUND));
+        if (order.getPayment() == null || order.getPayment().status() != PaymentStatus.UNKNOWN) {
+            throw new CoreException(ErrorCode.INTERNAL_ERROR);
+        }
+        restoreReservedStock(order);
+        order.releaseStockReservation();
+        order.cancel();
+        orderRepository.save(order);
+        entityManager.flush();
+        return order;
+    }
+
     private Order findOwnedOrder(Long buyerId, Long orderId) {
         Order order = orderRepository.findForConfirmById(orderId)
             .orElseThrow(() -> new CoreException(ErrorCode.ORDER_NOT_FOUND));

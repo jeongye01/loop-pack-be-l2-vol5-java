@@ -108,6 +108,11 @@ public class Order extends BaseEntity {
         this.status = OrderStatus.CONFIRMED;
     }
 
+    public void cancel() {
+        ensureDraft();
+        this.status = OrderStatus.CANCELED;
+    }
+
     public void reserveStock() {
         ensureDraft();
         if (stockReservationStatus != null) {

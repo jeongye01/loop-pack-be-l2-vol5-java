@@ -56,6 +56,40 @@ public final class TossPaymentAdapter implements PaymentGateway {
         }
     }
 
+    @Override
+    public ApprovalResult findByPaymentKey(String paymentKey) {
+        try {
+            return client.get()
+                .uri("/v1/payments/{paymentKey}", paymentKey)
+                .exchange((httpRequest, response) -> {
+                    int status = response.getStatusCode().value();
+                    if (response.getStatusCode().is5xxServerError() || status == 404) {
+                        return new Unknown();
+                    }
+                    JsonNode body;
+                    try {
+                        body = objectMapper.readTree(response.getBody());
+                    } catch (IOException exception) {
+                        return new Unknown();
+                    }
+                    if (status != 200) {
+                        return providerError(status, body);
+                    }
+                    String paymentStatus = text(body, "status");
+                    if ("DONE".equals(paymentStatus)) {
+                        return approved(body);
+                    }
+                    if ("CANCELED".equals(paymentStatus) || "PARTIAL_CANCELED".equals(paymentStatus)
+                        || "ABORTED".equals(paymentStatus) || "EXPIRED".equals(paymentStatus)) {
+                        return new ProviderError(status, paymentStatus, paymentStatus, body.toString());
+                    }
+                    return new Unknown(body.toString());
+                });
+        } catch (RestClientException exception) {
+            return new Unknown();
+        }
+    }
+
     private ApprovalResult approved(JsonNode body) {
         return new Approved(text(body, "paymentKey"), text(body, "orderId"),
             body.path("totalAmount").longValue(), OffsetDateTime.parse(text(body, "approvedAt")));

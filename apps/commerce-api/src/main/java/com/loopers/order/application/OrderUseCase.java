@@ -18,6 +18,8 @@ import com.loopers.user.domain.User;
 import com.loopers.user.domain.UserRepository;
 import com.loopers.user.domain.Point;
 import com.loopers.user.domain.PointRepository;
+import io.github.resilience4j.retry.Retry;
+import io.github.resilience4j.retry.RetryConfig;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.OptimisticLockException;
 import org.hibernate.StaleObjectStateException;
@@ -29,12 +31,20 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.time.ZonedDateTime;
+import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
 public class OrderUseCase {
+
+    private static final Retry PAYMENT_LOOKUP_RETRY = Retry.of("payment-key-lookup",
+        RetryConfig.<PaymentGateway.ApprovalResult>custom()
+            .maxAttempts(3)
+            .waitDuration(Duration.ZERO)
+            .retryOnResult(result -> result instanceof PaymentGateway.Unknown)
+            .build());
 
     private final OrderRepository orderRepository;
     private final ProductRepository productRepository;
@@ -132,6 +142,17 @@ public class OrderUseCase {
 
         PaymentGateway.ApprovalResult result = paymentGateway.approve(plan.request());
         Order order = paymentTransactionService.recordResult(orderId, result);
+        if (result instanceof PaymentGateway.Unknown) {
+            result = PAYMENT_LOOKUP_RETRY.executeSupplier(() -> {
+                PaymentGateway.ApprovalResult lookup = paymentGateway.findByPaymentKey(paymentKey);
+                return lookup == null ? new PaymentGateway.Unknown() : lookup;
+            });
+            if (result instanceof PaymentGateway.Unknown) {
+                paymentTransactionService.cancelAfterUnresolvedPayment(orderId);
+                throw new CoreException(ErrorCode.PAYMENT_CANCELLATION_PENDING);
+            }
+            order = paymentTransactionService.recordResult(orderId, result);
+        }
         if (result instanceof PaymentGateway.ProviderError) {
             throw new CoreException(ErrorCode.PAYMENT_FAILED);
         }
