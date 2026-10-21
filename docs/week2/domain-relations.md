@@ -90,6 +90,16 @@ classDiagram
         +발송시작을기록한다()
         +결제결과를기록한다()
     }
+    class PaymentStatus {
+        <<enumeration>>
+        PENDING
+        UNKNOWN
+        SUCCESS
+        FAILED
+        CANCEL_PROCESSING
+        CANCELED
+    }
+    Payment --> PaymentStatus
 
     Order "1" *-- "1..*" OrderItem : 소유
     Order "1" *-- "0..1" Payment : 소유

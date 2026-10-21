@@ -11,7 +11,6 @@ import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.get;
 import static com.github.tomakehurst.wiremock.client.WireMock.post;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
-import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlPathMatching;
 
 public final class TestPgApplication {
@@ -36,9 +35,11 @@ public final class TestPgApplication {
         server.start();
         server.stubFor(post(urlEqualTo("/v1/payments/confirm"))
             .willReturn(aResponse().withStatus(404).withTransformers("local-test-pg-api")));
-        server.stubFor(get(urlPathEqualTo("/api/v1/payments"))
+        server.stubFor(post(urlPathMatching("/v1/payments/[^/]+/cancel"))
             .willReturn(aResponse().withStatus(404).withTransformers("local-test-pg-api")));
-        server.stubFor(get(urlPathMatching("/api/v1/payments/[^/]+"))
+        server.stubFor(get(urlPathMatching("/v1/payments/orders/[^/]+"))
+            .willReturn(aResponse().withStatus(404).withTransformers("local-test-pg-api")));
+        server.stubFor(get(urlPathMatching("/v1/payments/[^/]+"))
             .willReturn(aResponse().withStatus(404).withTransformers("local-test-pg-api")));
         server.stubFor(post(urlEqualTo("/__test/payments/status"))
             .willReturn(aResponse().withStatus(404).withTransformers("local-test-pg-api")));

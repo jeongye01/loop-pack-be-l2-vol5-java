@@ -8,7 +8,29 @@ public interface PaymentGateway {
 
     ApprovalResult findByPaymentKey(String paymentKey);
 
+    CancellationResult cancel(CancellationRequest request);
+
     record ApprovalRequest(String paymentKey, String providerOrderId, long amount, String idempotencyKey) {
+    }
+
+    record CancellationRequest(String paymentKey, String cancelReason, String idempotencyKey) {
+    }
+
+    sealed interface CancellationResult permits CancellationConfirmed, CancellationRejected,
+        CancellationUnknown {
+    }
+
+    record CancellationConfirmed(String paymentKey, String rawResponse) implements CancellationResult {
+    }
+
+    record CancellationRejected(int httpStatus, String code, String message, String rawResponse)
+        implements CancellationResult {
+    }
+
+    record CancellationUnknown(String rawResponse) implements CancellationResult {
+        public CancellationUnknown() {
+            this(null);
+        }
     }
 
     sealed interface ApprovalResult permits Approved, ProviderError, Unknown {

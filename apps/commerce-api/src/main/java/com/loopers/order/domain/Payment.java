@@ -3,6 +3,10 @@ package com.loopers.order.domain;
 import com.loopers.domain.BaseEntity;
 import com.loopers.order.domain.PaymentGateway.Approved;
 import com.loopers.order.domain.PaymentGateway.ApprovalResult;
+import com.loopers.order.domain.PaymentGateway.CancellationConfirmed;
+import com.loopers.order.domain.PaymentGateway.CancellationRejected;
+import com.loopers.order.domain.PaymentGateway.CancellationResult;
+import com.loopers.order.domain.PaymentGateway.CancellationUnknown;
 import com.loopers.order.domain.PaymentGateway.ProviderError;
 import com.loopers.order.domain.PaymentGateway.Unknown;
 import com.loopers.support.error.CoreException;
@@ -81,6 +85,25 @@ public class Payment extends BaseEntity {
         } else if (result instanceof Unknown unknown) {
             this.status = PaymentStatus.UNKNOWN;
             this.rawProviderResponse = unknown.rawResponse();
+        }
+    }
+
+    public void recordCancellationResult(CancellationResult result) {
+        if (result instanceof CancellationConfirmed confirmed) {
+            this.status = PaymentStatus.CANCELED;
+            recordRawResponse(confirmed.rawResponse());
+        } else if (result instanceof CancellationUnknown unknown) {
+            this.status = PaymentStatus.CANCEL_PROCESSING;
+            recordRawResponse(unknown.rawResponse());
+        } else if (result instanceof CancellationRejected rejected) {
+            this.status = PaymentStatus.UNKNOWN;
+            recordRawResponse(rejected.rawResponse());
+        }
+    }
+
+    private void recordRawResponse(String rawResponse) {
+        if (rawResponse != null) {
+            this.rawProviderResponse = rawResponse;
         }
     }
 

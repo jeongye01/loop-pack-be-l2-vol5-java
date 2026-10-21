@@ -22,15 +22,19 @@ public final class TestPgResponseTransformer implements ResponseTransformerV2 {
     private static final String USER_ID = "135135";
     private static final String IDEMPOTENCY_KEY_HEADER = "Idempotency-Key";
     private static final String CONFIRM_PATH = "/v1/payments/confirm";
+    private static final String CANCEL_PATH = "/v1/payments/";
     private static final String PAYMENT_KEY_PATH = "/v1/payments/";
     private static final String ORDER_ID_PATH = "/v1/payments/orders/";
     private static final String TEST_STATUS_PATH = "/__test/payments/status";
     private static final String REJECTED_PAYMENT_KEY = "test-payment-rejected";
     private static final String SERVER_ERROR_PAYMENT_KEY = "test-payment-server-error";
+    private static final String CANCEL_SERVER_ERROR_PAYMENT_KEY = "test-payment-cancel-server-error";
     private static final String CARD_REJECTION_MESSAGE = "한도초과 혹은 잔액부족으로 결제에 실패했습니다.";
     private static final String INTERNAL_ERROR_MESSAGE = "내부 시스템 처리 작업이 실패했습니다. 잠시 후 다시 시도해주세요.";
     private static final Pattern PAYMENT_KEY_PATTERN =
         Pattern.compile("^" + Pattern.quote(PAYMENT_KEY_PATH) + "([^/]+)$");
+    private static final Pattern CANCEL_PATTERN =
+        Pattern.compile("^" + Pattern.quote(CANCEL_PATH) + "([^/]+)/cancel$");
     private static final Pattern ORDER_ID_PATTERN =
         Pattern.compile("^" + Pattern.quote(ORDER_ID_PATH) + "([^/]+)$");
 
@@ -54,6 +58,9 @@ public final class TestPgResponseTransformer implements ResponseTransformerV2 {
         }
         if (path.equals(TEST_STATUS_PATH)) {
             return updateStatus(request, response);
+        }
+        if (CANCEL_PATTERN.matcher(path).matches()) {
+            return cancel(request, response, path);
         }
         if (!PAYMENT_KEY_PATTERN.matcher(path).matches() && !ORDER_ID_PATTERN.matcher(path).matches()) {
             return response;
@@ -139,6 +146,67 @@ public final class TestPgResponseTransformer implements ResponseTransformerV2 {
         return store.findByPaymentKey(key)
             .map(transaction -> json(response, 200, objectMapper.valueToTree(transaction)))
             .orElseGet(() -> json(response, 404, objectMapper.createObjectNode()));
+    }
+
+    private Response cancel(Request request, Response response, String path) {
+        if (!"POST".equals(request.getMethod().getName())) {
+            return json(response, 405, objectMapper.createObjectNode().put("code", "METHOD_NOT_ALLOWED"));
+        }
+        if (!authorization.equals(request.getHeader("Authorization"))) {
+            return json(response, 401, objectMapper.createObjectNode()
+                .put("code", "UNAUTHORIZED_REQUEST")
+                .put("message", "Invalid authorization."));
+        }
+        String idempotencyKey = request.getHeader(IDEMPOTENCY_KEY_HEADER);
+        if (idempotencyKey != null && idempotencyKey.length() > 300) {
+            return json(response, 400, objectMapper.createObjectNode()
+                .put("code", "INVALID_IDEMPOTENCY_KEY")
+                .put("message", "멱등키는 300자 이하여야 합니다."));
+        }
+        try {
+            JsonNode body = objectMapper.readTree(request.getBodyAsString());
+            String cancelReason = text(body, "cancelReason");
+            if (cancelReason == null || cancelReason.isBlank() || cancelReason.length() > 200) {
+                return json(response, 400, objectMapper.createObjectNode()
+                    .put("code", "INVALID_REQUEST")
+                    .put("message", "cancelReason은 1자 이상 200자 이하여야 합니다."));
+            }
+
+            Matcher matcher = CANCEL_PATTERN.matcher(path);
+            if (!matcher.matches()) {
+                return json(response, 404, objectMapper.createObjectNode());
+            }
+            String paymentKey = decode(matcher.group(1));
+            TransactionStore.Submission submission = CANCEL_SERVER_ERROR_PAYMENT_KEY.equals(paymentKey)
+                ? store.error(idempotencyKey, 500, "FAILED_INTERNAL_SYSTEM_PROCESSING", INTERNAL_ERROR_MESSAGE)
+                : store.cancel(idempotencyKey, paymentKey, cancelReason);
+            if (submission.errorCode() != null) {
+                return json(response, submission.httpStatus(), objectMapper.createObjectNode()
+                    .put("code", submission.errorCode())
+                    .put("message", submission.errorMessage()));
+            }
+
+            TransactionStore.Transaction transaction = submission.transaction();
+            var payment = objectMapper.createObjectNode()
+                .put("paymentKey", transaction.paymentKey())
+                .put("orderId", transaction.orderId())
+                .put("totalAmount", transaction.amount())
+                .put("status", "CANCELED");
+            var cancels = payment.putArray("cancels");
+            for (TransactionStore.Cancellation cancellation : transaction.cancels()) {
+                cancels.addObject()
+                    .put("cancelAmount", cancellation.cancelAmount())
+                    .put("cancelReason", cancellation.cancelReason())
+                    .put("canceledAt", cancellation.canceledAt())
+                    .put("transactionKey", cancellation.transactionKey())
+                    .put("cancelStatus", cancellation.cancelStatus());
+            }
+            return json(response, 200, payment);
+        } catch (IOException exception) {
+            return json(response, 400, objectMapper.createObjectNode()
+                .put("code", "INVALID_REQUEST")
+                .put("message", "Invalid JSON."));
+        }
     }
 
     private Response findByOrderId(Response response, String path) {

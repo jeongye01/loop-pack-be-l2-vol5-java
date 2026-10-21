@@ -8,11 +8,18 @@ Run it with Docker Compose from the repository root:
 docker compose -f docker/pg-compose.yml up --build -d
 ```
 
-The local base URL is `http://127.0.0.1:18089`. The contract API requires `X-USER-ID: 135135`:
+The local base URL is `http://127.0.0.1:18089`:
 
-- `POST /api/v1/payments` creates a `PENDING` transaction.
+- `POST /v1/payments/confirm` approves a payment. Send the Toss-compatible `paymentKey`, `orderId`, and `amount` body, Basic authentication, and `Idempotency-Key` header.
+- `POST /v1/payments/{paymentKey}/cancel` cancels an approved payment. Send Basic authentication, an `Idempotency-Key` header, and `{"cancelReason":"..."}`. Omitting `cancelAmount` requests a full cancellation.
 - `GET /v1/payments/{paymentKey}` returns one stored transaction.
 - `GET /v1/payments/orders/{orderId}` returns the transactions for an order.
+
+To exercise a cancellation server error, create a payment with `paymentKey` set to
+`test-payment-cancel-server-error`, then call its cancellation endpoint. It returns the Toss-style
+`500 FAILED_INTERNAL_SYSTEM_PROCESSING` response and leaves the stored transaction unchanged.
+
+Lookup requests require `X-USER-ID: 135135`.
 
 At startup, the process seeds four lookup examples in memory: `local-txn-success-1` and
 `local-txn-success-2` have status `SUCCESS`; `local-txn-failed-1` and `local-txn-failed-2`

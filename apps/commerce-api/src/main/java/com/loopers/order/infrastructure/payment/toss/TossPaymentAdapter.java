@@ -3,6 +3,11 @@ package com.loopers.order.infrastructure.payment.toss;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.loopers.order.domain.PaymentGateway;
+import com.loopers.order.domain.PaymentGateway.CancellationConfirmed;
+import com.loopers.order.domain.PaymentGateway.CancellationRejected;
+import com.loopers.order.domain.PaymentGateway.CancellationRequest;
+import com.loopers.order.domain.PaymentGateway.CancellationResult;
+import com.loopers.order.domain.PaymentGateway.CancellationUnknown;
 import org.springframework.http.MediaType;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientException;
@@ -87,6 +92,39 @@ public final class TossPaymentAdapter implements PaymentGateway {
                 });
         } catch (RestClientException exception) {
             return new Unknown();
+        }
+    }
+
+    @Override
+    public CancellationResult cancel(CancellationRequest request) {
+        try {
+            return client.post()
+                .uri("/v1/payments/{paymentKey}/cancel", request.paymentKey())
+                .header("Idempotency-Key", request.idempotencyKey())
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(Map.of("cancelReason", request.cancelReason()))
+                .exchange((httpRequest, response) -> {
+                    int status = response.getStatusCode().value();
+                    JsonNode body;
+                    try {
+                        body = objectMapper.readTree(response.getBody());
+                    } catch (IOException exception) {
+                        return new CancellationUnknown();
+                    }
+                    if (status == 200 && "CANCELED".equals(text(body, "status"))) {
+                        return new CancellationConfirmed(request.paymentKey(), body.toString());
+                    }
+                    if (response.getStatusCode().is5xxServerError()) {
+                        return new CancellationUnknown(body.toString());
+                    }
+                    if (response.getStatusCode().is4xxClientError()) {
+                        return new CancellationRejected(status, text(body, "code"), text(body, "message"),
+                            body.toString());
+                    }
+                    return new CancellationUnknown(body.toString());
+                });
+        } catch (RestClientException exception) {
+            return new CancellationUnknown();
         }
     }
 

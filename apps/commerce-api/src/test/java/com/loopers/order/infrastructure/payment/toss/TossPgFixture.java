@@ -6,6 +6,7 @@ import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.client.MappingBuilder;
 import com.github.tomakehurst.wiremock.verification.LoggedRequest;
 import com.loopers.order.domain.PaymentGateway.ApprovalRequest;
+import com.loopers.order.domain.PaymentGateway.CancellationRequest;
 
 import java.net.URI;
 import java.time.Duration;
@@ -36,6 +37,7 @@ public final class TossPgFixture implements AutoCloseable {
     public static final ApprovalRequest SERVER_ERROR_REQUEST =
         new ApprovalRequest("test-payment-server-error", "LP-ORD-SERVER-ERROR", 7000, "test-attempt-server-error");
     private static final String APPROVAL_PATH = "/v1/payments/confirm";
+    private static final String CANCEL_PATH = "/v1/payments/%s/cancel";
     private static final Set<String> ERROR_CODES = Set.of(
         "ALREADY_PROCESSED_PAYMENT", "ALREADY_PROCESSING_REQUEST",
         "PROVIDER_ERROR", "INVALID_REQUEST"
@@ -102,6 +104,43 @@ public final class TossPgFixture implements AutoCloseable {
             "code", "FAILED_INTERNAL_SYSTEM_PROCESSING",
             "message", "내부 시스템 처리 작업이 실패했습니다. 잠시 후 다시 시도해주세요."
         )), Duration.ZERO);
+    }
+
+    public void cancel(CancellationRequest request) {
+        respondToCancellation(request, 200, json(Map.of(
+            "paymentKey", request.paymentKey(),
+            "orderId", REQUEST_ORDER_ID,
+            "totalAmount", 7000,
+            "status", "CANCELED",
+            "cancels", List.of(Map.of(
+                "cancelAmount", 7000,
+                "cancelReason", request.cancelReason(),
+                "canceledAt", "2026-10-21T15:01:00+09:00",
+                "transactionKey", "test-cancel-42",
+                "cancelStatus", "DONE"
+            ))
+        )));
+    }
+
+    private static final String REQUEST_ORDER_ID = "LP-ORD-0000000042";
+
+    private void respondToCancellation(CancellationRequest request, int status, String body) {
+        server.stubFor(cancellationRequest(request)
+            .willReturn(aResponse().withStatus(status)
+                .withHeader("Content-Type", "application/json")
+                .withBody(body)));
+    }
+
+    private MappingBuilder cancellationRequest(CancellationRequest request) {
+        return post(urlEqualTo(CANCEL_PATH.formatted(request.paymentKey())))
+            .withBasicAuth(SECRET_KEY, "")
+            .withHeader("Idempotency-Key", equalTo(request.idempotencyKey()))
+            .withHeader("Content-Type", matching("application/json.*"))
+            .withRequestBody(equalToJson(json(Map.of("cancelReason", request.cancelReason()))));
+    }
+
+    public List<LoggedRequest> cancellationRequests(CancellationRequest request) {
+        return server.findAll(postRequestedFor(urlEqualTo(CANCEL_PATH.formatted(request.paymentKey()))));
     }
 
     public void error(ApprovalRequest request, String code, String message) {

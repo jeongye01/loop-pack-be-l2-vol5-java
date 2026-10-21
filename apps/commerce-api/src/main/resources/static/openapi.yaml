@@ -378,7 +378,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorEnvelope'
         '503':
-          description: 결제 결과를 확인하지 못해 주문 취소와 재고 예약 반환을 완료했고, PG 결제 취소가 진행될 예정이다.
+          description: 결제 결과를 확인하지 못해 동일한 취소 멱등키로 최대 3회 취소를 요청했다. 최종 취소 결과가 확인되지 않으면 결제 상태는 CANCEL_PROCESSING이다.
           x-error-codes: [PAYMENT_CANCELLATION_PENDING]
           content:
             application/json:
@@ -1052,7 +1052,7 @@ components:
           enum: [PG, POINT]
         status:
           type: string
-          enum: [PENDING, UNKNOWN, SUCCESS, FAILED]
+          enum: [PENDING, UNKNOWN, SUCCESS, FAILED, CANCEL_PROCESSING, CANCELED]
         amount:
           type: integer
           format: int64

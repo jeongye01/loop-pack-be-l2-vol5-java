@@ -3,6 +3,8 @@ package com.loopers.order.infrastructure.payment.toss;
 import com.loopers.order.domain.PaymentGateway;
 import com.loopers.order.domain.PaymentGateway.ApprovalRequest;
 import com.loopers.order.domain.PaymentGateway.Approved;
+import com.loopers.order.domain.PaymentGateway.CancellationConfirmed;
+import com.loopers.order.domain.PaymentGateway.CancellationRequest;
 import com.loopers.order.domain.PaymentGateway.ProviderError;
 import com.loopers.order.domain.PaymentGateway.Unknown;
 import org.junit.jupiter.api.AfterEach;
@@ -49,6 +51,21 @@ class TossPaymentAdapterTest {
 
         assertThat(result).isEqualTo(new Approved(
             REQUEST.paymentKey(), REQUEST.providerOrderId(), REQUEST.amount(), APPROVED_AT));
+    }
+
+    @Test
+    @DisplayName("paymentKey로 PG 취소를 요청하고 취소 확인 응답을 변환한다")
+    void convertsCanceledPayment() {
+        var request = new CancellationRequest(
+            REQUEST.paymentKey(), "결제 결과 미확정 주문 취소", REQUEST.idempotencyKey() + "-cancel");
+        pg.cancel(request);
+
+        var result = gateway.cancel(request);
+
+        assertThat(result).isInstanceOf(CancellationConfirmed.class);
+        assertThat(((CancellationConfirmed) result).paymentKey()).isEqualTo(REQUEST.paymentKey());
+        assertThat(pg.cancellationRequests(request)).hasSize(1);
+        assertThat(pg.unmatchedRequests()).isEmpty();
     }
 
     @Test

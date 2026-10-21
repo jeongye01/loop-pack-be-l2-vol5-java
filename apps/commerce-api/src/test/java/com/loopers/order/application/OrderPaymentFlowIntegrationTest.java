@@ -40,6 +40,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.times;
@@ -115,34 +116,71 @@ class OrderPaymentFlowIntegrationTest {
         }
     }
 
-    @DisplayName("[INV-ORDER-47] UNKNOWN 결제 결과를 최대 3회 재조회한 뒤에도 최종 결과가 확인되지 않으면 주문은 CANCELED, 결제는 UNKNOWN, 재고 예약은 반환 완료 상태다.")
+    @DisplayName("[INV-ORDER-48] 결제 결과 확인을 위한 재조회가 끝난 뒤 PG 취소 요청도 최대 3회 미확정이면 재고 예약은 반환 완료되고 결제 상태는 CANCEL_PROCESSING이다. 취소가 확인되면 결제 상태는 CANCELED다.")
     @Nested
     class CancelAfterUnresolvedPaymentLookups {
 
-        @DisplayName("[상태 전이] 승인 결과와 paymentKey 조회 3회가 모두 미확정이면 주문을 취소하고 예약을 반환한다.")
+        @DisplayName("[상태 전이] paymentKey 조회 3회가 미확정이면 PG에 취소를 요청하고, 취소 확인 후 결제를 CANCELED로 기록하고 예약을 반환한다.")
         @Test
-        void cancelsOrderAfterThreeUnresolvedPaymentLookups() {
+        void recordsConfirmedCancellationAfterThreeUnresolvedPaymentLookups() {
             Scenario scenario = confirmationScenario(5);
             String paymentKey = "test-payment-unresolved";
             String attemptKey = newAttemptKey();
             when(paymentGateway.approve(any())).thenReturn(new PaymentGateway.Unknown());
             when(paymentGateway.findByPaymentKey(paymentKey)).thenReturn(
                 new PaymentGateway.Unknown(), new PaymentGateway.Unknown(), new PaymentGateway.Unknown());
+            when(paymentGateway.cancel(any())).thenReturn(
+                new PaymentGateway.CancellationUnknown(null),
+                new PaymentGateway.CancellationUnknown(null),
+                new PaymentGateway.CancellationConfirmed(paymentKey, null));
 
             CoreException failure = assertThrows(CoreException.class,
                 () -> useCase.confirm(scenario.buyerId(), scenario.orderId(), paymentKey, attemptKey));
             entityManager.flush();
             entityManager.clear();
-            Order canceled = entityManager.find(Order.class, scenario.orderId());
+            Order order = entityManager.find(Order.class, scenario.orderId());
 
             assertAll(
                 () -> assertThat(failure.getErrorCode()).isEqualTo(ErrorCode.PAYMENT_CANCELLATION_PENDING),
-                () -> assertThat(canceled.getStatus().name()).isEqualTo("CANCELED"),
-                () -> assertThat(canceled.getPayment().status()).isEqualTo(PaymentStatus.UNKNOWN),
+                () -> assertThat(order.getPayment().status()).isEqualTo(PaymentStatus.CANCELED),
                 () -> assertThat(stockReservationStatus(scenario.orderId())).isNull(),
                 () -> assertThat(TestEntities.stockQuantity(entityManager, scenario.productId())).isEqualTo(5),
                 () -> verify(paymentGateway, times(1)).approve(any()),
-                () -> verify(paymentGateway, times(3)).findByPaymentKey(paymentKey)
+                () -> verify(paymentGateway, times(3)).findByPaymentKey(paymentKey),
+                () -> verify(paymentGateway, times(3)).cancel(argThat(request ->
+                    request.paymentKey().equals(paymentKey)
+                        && request.idempotencyKey().equals(attemptKey + "-cancel")))
+            );
+        }
+
+        @DisplayName("[상태 전이] 취소 요청도 3회 미확정이면 같은 요청을 3회 보내고 결제는 CANCEL_PROCESSING, 재고 예약은 반환 상태다.")
+        @Test
+        void returnsReservationWhenThreeCancellationAttemptsRemainUnknown() {
+            Scenario scenario = confirmationScenario(5);
+            String paymentKey = "test-payment-cancel-unresolved";
+            String attemptKey = newAttemptKey();
+            when(paymentGateway.approve(any())).thenReturn(new PaymentGateway.Unknown());
+            when(paymentGateway.findByPaymentKey(paymentKey)).thenReturn(
+                new PaymentGateway.Unknown(), new PaymentGateway.Unknown(), new PaymentGateway.Unknown());
+            when(paymentGateway.cancel(any())).thenReturn(
+                new PaymentGateway.CancellationUnknown(null),
+                new PaymentGateway.CancellationUnknown(null),
+                new PaymentGateway.CancellationUnknown(null));
+
+            CoreException failure = assertThrows(CoreException.class,
+                () -> useCase.confirm(scenario.buyerId(), scenario.orderId(), paymentKey, attemptKey));
+            entityManager.flush();
+            entityManager.clear();
+            Order cancelProcessing = entityManager.find(Order.class, scenario.orderId());
+
+            assertAll(
+                () -> assertThat(failure.getErrorCode()).isEqualTo(ErrorCode.PAYMENT_CANCELLATION_PENDING),
+                () -> assertThat(cancelProcessing.getPayment().status()).isEqualTo(PaymentStatus.CANCEL_PROCESSING),
+                () -> assertThat(stockReservationStatus(scenario.orderId())).isNull(),
+                () -> assertThat(TestEntities.stockQuantity(entityManager, scenario.productId())).isEqualTo(5),
+                () -> verify(paymentGateway, times(3)).cancel(argThat(request ->
+                    request.paymentKey().equals(paymentKey)
+                        && request.idempotencyKey().equals(attemptKey + "-cancel")))
             );
         }
     }

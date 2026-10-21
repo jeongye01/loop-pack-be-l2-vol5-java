@@ -5,6 +5,7 @@ import com.loopers.order.domain.OrderItem;
 import com.loopers.order.domain.OrderRepository;
 import com.loopers.order.domain.Payment;
 import com.loopers.order.domain.PaymentGateway;
+import com.loopers.order.domain.PaymentGateway.CancellationResult;
 import com.loopers.order.domain.PaymentMethod;
 import com.loopers.order.domain.PaymentStatus;
 import com.loopers.product.domain.Product;
@@ -51,7 +52,8 @@ public class OrderPaymentTransactionService {
             }
             Payment payment = existingAttempt.getPayment();
             if (payment.status() == PaymentStatus.SUCCESS || payment.status() == PaymentStatus.FAILED
-                || payment.status() == PaymentStatus.UNKNOWN) {
+                || payment.status() == PaymentStatus.UNKNOWN || payment.status() == PaymentStatus.CANCELED
+                || payment.status() == PaymentStatus.CANCEL_PROCESSING) {
                 throw new CoreException(ErrorCode.PAYMENT_ALREADY_PROCESSED);
             }
             return new DispatchPlan(existingAttempt, null);
@@ -117,7 +119,7 @@ public class OrderPaymentTransactionService {
     }
 
     @Transactional
-    public Order cancelAfterUnresolvedPayment(Long orderId) {
+    public Order recordCancellationResultAndReleaseReservation(Long orderId, CancellationResult result) {
         Order order = orderRepository.findForConfirmById(orderId)
             .orElseThrow(() -> new CoreException(ErrorCode.ORDER_NOT_FOUND));
         if (order.getPayment() == null || order.getPayment().status() != PaymentStatus.UNKNOWN) {
@@ -125,7 +127,7 @@ public class OrderPaymentTransactionService {
         }
         restoreReservedStock(order);
         order.releaseStockReservation();
-        order.cancel();
+        order.getPayment().recordCancellationResult(result);
         orderRepository.save(order);
         entityManager.flush();
         return order;

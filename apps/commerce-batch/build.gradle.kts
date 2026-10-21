@@ -8,7 +8,9 @@ dependencies {
 
     // batch
     implementation("org.springframework.boot:spring-boot-starter-batch")
+    implementation("org.springframework:spring-web")
     testImplementation("org.springframework.batch:spring-batch-test")
+    testImplementation("com.h2database:h2")
 
     // querydsl
     annotationProcessor("com.querydsl:querydsl-apt::jakarta")

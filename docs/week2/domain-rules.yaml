@@ -64,7 +64,7 @@ requirements:
   R-ORDER-30:   [INV-STOCK-47, INV-ORDER-45]
   R-ORDER-31:   [INV-STOCK-49, INV-ORDER-46]
   R-ORDER-32:   [INV-PAYMENT-50, INV-PAYMENT-51]
-  R-ORDER-33:   [INV-ORDER-47]
+  R-ORDER-34:   [INV-ORDER-48]
 
   R-ADMIN-01:   []
   R-ADMIN-04:   []
@@ -172,7 +172,7 @@ rules:
     INV-ORDER-44: 확정에 성공한 주문의 상태는 CONFIRMED다.
     INV-ORDER-45: PG 결제 요청 전에 주문 품목의 재고를 예약한다.
     INV-ORDER-46: PG 결제가 완료되면 주문 품목의 재고 예약을 확정하고 주문 상태를 CONFIRMED로 바꾼다.
-    INV-ORDER-47: UNKNOWN 결제 결과를 최대 3회 재조회한 뒤에도 최종 결과가 확인되지 않으면 주문은 CANCELED, 결제는 UNKNOWN, 재고 예약은 반환 완료 상태다.
+    INV-ORDER-48: 결제 결과 확인을 위한 재조회가 끝난 뒤 PG 취소 요청도 최대 3회 미확정이면 재고 예약은 반환 완료되고 결제 상태는 CANCEL_PROCESSING이다. 취소가 확인되면 결제 상태는 CANCELED다.
 
   OrderItem:
     INV-ORDERITEM-39: 품목 수량은 양수다.

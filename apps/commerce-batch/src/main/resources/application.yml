@@ -17,6 +17,12 @@ spring:
     jdbc:
       initialize-schema: never
 
+payment:
+  toss:
+    base-url: ${TOSS_BASE_URL:https://api.tosspayments.com}
+    secret-key: ${TOSS_SECRET_KEY:}
+
+
 management:
   health:
     defaults:

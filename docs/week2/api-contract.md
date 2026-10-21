@@ -190,7 +190,7 @@
 | `totalAmount` | 정수 | 주문 총액(원) |
 | `payment` | 객체 또는 `null` | 결제 정보. 결제 시작 전에는 `null` |
 | `payment.method` | 문자열 | 결제수단. 신규 결제는 `PG`, 이전 포인트 결제는 `POINT` |
-| `payment.status` | 문자열 | 결제 상태. `PENDING`, `UNKNOWN`, `SUCCESS`, `FAILED` |
+| `payment.status` | 문자열 | 결제 상태. `PENDING`, `UNKNOWN`, `SUCCESS`, `FAILED`, `CANCEL_PROCESSING`, `CANCELED` |
 | `payment.amount` | 정수 | 결제 요청 금액(원). 이전 포인트 결제는 당시 결제액 |
 | `payment.paidAt` | 날짜·시간 문자열 또는 `null` | 결제 성공 시각. 성공 전에는 `null` |
 
@@ -200,7 +200,7 @@
 | --- | --- | --- |
 | 결제 시작 전 | `DRAFT` | 없음 (`payment: null`) |
 | 결제 처리 중 | `DRAFT` | `PENDING` |
-| 결제 결과 미확인 후 취소 | `CANCELED` | `UNKNOWN` |
+| 결제 결과 미확인 후 취소 요청 | 주문 상태는 이 처리로 변경하지 않음 | `CANCEL_PROCESSING` 또는 `CANCELED` |
 | 결제 성공 반영 완료 | `CONFIRMED` | `SUCCESS` |
 | 결제 실패 확정 | `DRAFT` | `FAILED` |
 
@@ -494,7 +494,7 @@
 | `409` | `POINT_BALANCE_LIMIT_EXCEEDED` | 충전 후 잔액이 표현할 수 있는 범위를 넘는다.                                                                                           | 충전할 수 있는 한도를 넘었습니다.                   |
 | `409` | `PAYMENT_RESULT_CONFLICT` | PG 조회 결과의 주문·거래·금액이 내부 기록과 일치하지 않거나 기존 최종 결과와 충돌한다. | 결제 결과가 기존 기록과 일치하지 않습니다. |
 | `422` | `PAYMENT_FAILED` | 주문 확정 요청에서 결제 실패가 확정되었다. 처리 중·결과 미확인에는 사용하지 않는다. | 결제가 실패했습니다. |
-| `503` | `PAYMENT_CANCELLATION_PENDING` | PG 결제 결과를 끝내 확인하지 못해 주문을 취소하고 재고 예약을 반환했다. PG 결제 취소는 진행 예정이다. | 결제 결과 확인 중 문제가 발생했습니다. 결제 취소가 진행될 예정입니다. |
+| `503` | `PAYMENT_CANCELLATION_PENDING` | PG 결제 결과를 확인하지 못해 같은 취소 멱등키로 최대 3회 취소를 요청했다. 최종 취소 결과가 확인되지 않으면 결제 상태는 `CANCEL_PROCESSING`이다. | 결제 결과 확인 중 문제가 발생했습니다. 결제 취소가 진행 중입니다. |
 | `500` | `INTERNAL_ERROR`               | 요청과 관계없는 내부 오류이다. 예: 결제액이 없는 결제 결과, 0 이하의 수량으로 재고 차감([ADR-003](./decisions.md#adr-003-재고-차감-수량이-0-이하이면-내부-오류로-거절한다)) | 일시적인 오류가 발생했습니다.                      |
 
 

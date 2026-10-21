@@ -6,6 +6,7 @@ import com.loopers.order.domain.OrderItem;
 import com.loopers.order.domain.OrderRepository;
 import com.loopers.order.domain.OrderStatus;
 import com.loopers.order.domain.PaymentGateway;
+import com.loopers.order.domain.PaymentGateway.CancellationRequest;
 import com.loopers.product.domain.Product;
 import com.loopers.product.domain.ProductRepository;
 import com.loopers.product.domain.Stock;
@@ -44,6 +45,13 @@ public class OrderUseCase {
             .maxAttempts(3)
             .waitDuration(Duration.ZERO)
             .retryOnResult(result -> result instanceof PaymentGateway.Unknown)
+            .build());
+
+    private static final Retry PAYMENT_CANCELLATION_RETRY = Retry.of("payment-cancellation",
+        RetryConfig.<PaymentGateway.CancellationResult>custom()
+            .maxAttempts(3)
+            .waitDuration(Duration.ZERO)
+            .retryOnResult(result -> result instanceof PaymentGateway.CancellationUnknown)
             .build());
 
     private final OrderRepository orderRepository;
@@ -148,7 +156,13 @@ public class OrderUseCase {
                 return lookup == null ? new PaymentGateway.Unknown() : lookup;
             });
             if (result instanceof PaymentGateway.Unknown) {
-                paymentTransactionService.cancelAfterUnresolvedPayment(orderId);
+                CancellationRequest cancellationRequest = new CancellationRequest(
+                    paymentKey,
+                    "결제 결과 확인 불가로 주문 취소",
+                    plan.order().getPayment().paymentAttemptKey() + "-cancel");
+                PaymentGateway.CancellationResult cancellation = PAYMENT_CANCELLATION_RETRY.executeSupplier(
+                    () -> paymentGateway.cancel(cancellationRequest));
+                paymentTransactionService.recordCancellationResultAndReleaseReservation(orderId, cancellation);
                 throw new CoreException(ErrorCode.PAYMENT_CANCELLATION_PENDING);
             }
             order = paymentTransactionService.recordResult(orderId, result);

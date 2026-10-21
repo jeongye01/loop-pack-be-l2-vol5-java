@@ -90,6 +90,43 @@ public final class TransactionStore {
         return failure;
     }
 
+    public synchronized Submission cancel(String idempotencyKey, String paymentKey, String cancelReason) {
+        Submission previousSubmission = previousSubmission(idempotencyKey);
+        if (previousSubmission != null) {
+            return previousSubmission;
+        }
+
+        Optional<Transaction> matched = findByPaymentKey(paymentKey);
+        if (matched.isEmpty()) {
+            Submission notFound = cache(idempotencyKey, new Submission(null, false, paymentKey, null, 404,
+                "NOT_FOUND_PAYMENT", "존재하지 않는 결제입니다."));
+            persist();
+            return notFound;
+        }
+        Transaction transaction = matched.get();
+        if (transaction.status() == TransactionStatus.CANCELED) {
+            Submission alreadyCanceled = cache(idempotencyKey, new Submission(null, false, paymentKey, null, 400,
+                "ALREADY_CANCELED_PAYMENT", "이미 취소된 결제입니다."));
+            persist();
+            return alreadyCanceled;
+        }
+        if (transaction.status() != TransactionStatus.SUCCESS) {
+            Submission notCancelable = cache(idempotencyKey, new Submission(null, false, paymentKey, null, 400,
+                "NOT_CANCELABLE_PAYMENT", "취소할 수 없는 결제입니다."));
+            persist();
+            return notCancelable;
+        }
+
+        Cancellation cancellation = new Cancellation(transaction.amount(), cancelReason,
+            OffsetDateTime.now(ZoneOffset.UTC).toString(), "test-cancel-" + UUID.randomUUID(), "DONE");
+        Transaction canceled = transaction.withCancellation(cancellation);
+        transactions.put(canceled.transactionKey(), canceled);
+        Submission result = new Submission(canceled, false, paymentKey, null, 200, null, null);
+        cache(idempotencyKey, result);
+        persist();
+        return result;
+    }
+
     private Submission previousSubmission(String idempotencyKey) {
         return idempotencyKey == null ? null : submissionsByIdempotencyKey.get(idempotencyKey);
     }
@@ -187,10 +224,30 @@ public final class TransactionStore {
     }
 
     public record Transaction(String transactionKey, String paymentKey, String orderId, long amount,
-                              TransactionStatus status) {
-        public Transaction withStatus(TransactionStatus nextStatus) {
-            return new Transaction(transactionKey, paymentKey, orderId, amount, nextStatus);
+                              TransactionStatus status, List<Cancellation> cancels) {
+        public Transaction {
+            cancels = cancels == null ? List.of() : List.copyOf(cancels);
         }
+
+        public Transaction(String transactionKey, String paymentKey, String orderId, long amount,
+                           TransactionStatus status) {
+            this(transactionKey, paymentKey, orderId, amount, status, List.of());
+        }
+
+        public Transaction withStatus(TransactionStatus nextStatus) {
+            return new Transaction(transactionKey, paymentKey, orderId, amount, nextStatus, cancels);
+        }
+
+        public Transaction withCancellation(Cancellation cancellation) {
+            List<Cancellation> updatedCancels = new java.util.ArrayList<>(cancels);
+            updatedCancels.add(cancellation);
+            return new Transaction(transactionKey, paymentKey, orderId, amount,
+                TransactionStatus.CANCELED, updatedCancels);
+        }
+    }
+
+    public record Cancellation(long cancelAmount, String cancelReason, String canceledAt,
+                               String transactionKey, String cancelStatus) {
     }
 
     public record Submission(Transaction transaction, boolean alreadyProcessed, String paymentKey,
@@ -208,6 +265,7 @@ public final class TransactionStore {
     public enum TransactionStatus {
         PENDING,
         SUCCESS,
-        FAILED
+        FAILED,
+        CANCELED
     }
 }
