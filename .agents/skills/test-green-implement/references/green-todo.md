@@ -304,3 +304,14 @@ Green 에이전트가 Red 전체를 실행하고 실패를 분석한 뒤, produc
   - 선행 작업: 기존 `BrandRemovalService`와 `ProductRepository.findAllByBrandId` 사용
   - 테스트 명령: `./gradlew :apps:commerce-api:test --tests 'com.loopers.brand.application.BrandUseCaseIntegrationTest' --tests 'com.loopers.brand.interfaces.BrandHttpTest' --rerun-tasks`
   - 완료 조건: 두 클래스 전체가 Green이고 새 두 사례에서 브랜드·연결 상품의 삭제와 다른 대상·기존 주문 보존을 확인한다.
+
+## PG 결제 도메인 Red 5개
+
+- [ ] 31. Payment 상태 기록과 결제 시도 재발송 정책
+  - 요구사항 ID: R-ORDER-32, INV-PAYMENT-50, INV-PAYMENT-51
+  - 관찰한 Red: 초기 `PaymentTest` 5개 중 5개 실패. 성공·실패 승인 결과 후 재발송이 차단되지 않고, 대기/미확인 상태·attempt key를 읽을 수 없으며, 승인 응답 본문이 기록되지 않는다. `TossPaymentAdapterTest`는 통과했다.
+  - 필요한 최소 동작: JPA가 기본 생성자와 변경 가능한 필드로 저장할 수 있도록 결제수단·금액·attempt key·PG 주문 ID·상태·발송 시각·결제 시각·거래 키·원문 응답을 매핑한다. 승인 성공은 `SUCCESS`, PG 거절은 `FAILED`, 결과 미확인은 `UNKNOWN`으로 기록한다. 발송 시작은 `PENDING`/`UNKNOWN`에서 허용하고, `SUCCESS`/`FAILED`이면 `PAYMENT_ALREADY_PROCESSED`로 거절한다. 재시도에서 기존 attempt key를 보존한다.
+  - 변경할 production 파일: `apps/commerce-api/src/main/java/com/loopers/order/domain/Payment.java`, `PaymentMethod.java`, `PaymentStatus.java`
+  - 선행 작업: 없음. 기존 `ErrorCode.PAYMENT_ALREADY_PROCESSED` 존재.
+  - 테스트 명령: `./gradlew :apps:commerce-api:test --tests com.loopers.order.domain.PaymentTest --tests com.loopers.order.infrastructure.payment.toss.TossPaymentAdapterTest`
+  - 완료 조건: `PaymentTest`가 Green이고 `TossPaymentAdapterTest` 회귀가 유지되며, 기존 호환 생성자 결과를 쓰는 어댑터 테스트를 수정하지 않는다. Adapter의 PG 원문 포착은 해당 테스트의 record equality 기대값과 충돌하므로 별도 해결 전에는 변경하지 않고 보고한다.

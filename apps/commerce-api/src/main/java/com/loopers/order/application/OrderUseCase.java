@@ -97,6 +97,10 @@ public class OrderUseCase {
         }
     }
 
+    public Order confirm(Long buyerId, Long orderId, String paymentAttemptKey) {
+        return confirm(buyerId, orderId);
+    }
+
     private boolean isPointConflict(Throwable exception) {
         for (Throwable cause = exception; cause != null; cause = cause.getCause()) {
             if (cause instanceof ObjectOptimisticLockingFailureException conflict

@@ -16,14 +16,24 @@ public interface PaymentGateway {
         String paymentKey,
         String providerOrderId,
         long amount,
-        OffsetDateTime paidAt
+        OffsetDateTime paidAt,
+        String rawResponse
     ) implements ApprovalResult {
+        public Approved(String paymentKey, String providerOrderId, long amount, OffsetDateTime paidAt) {
+            this(paymentKey, providerOrderId, amount, paidAt, null);
+        }
     }
 
     // PG 오류 관찰이며 내부 결제 FAILED를 의미하지 않는다.
-    record ProviderError(int httpStatus, String code, String message) implements ApprovalResult {
+    record ProviderError(int httpStatus, String code, String message, String rawResponse) implements ApprovalResult {
+        public ProviderError(int httpStatus, String code, String message) {
+            this(httpStatus, code, message, null);
+        }
     }
 
-    record Unknown() implements ApprovalResult {
+    record Unknown(String rawResponse) implements ApprovalResult {
+        public Unknown() {
+            this(null);
+        }
     }
 }

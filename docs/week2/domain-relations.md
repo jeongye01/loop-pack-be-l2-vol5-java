@@ -86,6 +86,7 @@ classDiagram
         +providerOrderId: String
         +transactionKey: String
         +dispatchStartedAt: ZonedDateTime
+        +rawProviderResponse: String
         +발송시작을기록한다()
         +결제결과를기록한다()
     }

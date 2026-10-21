@@ -148,7 +148,7 @@
 | 입력 | path `orderId`, body `paymentAttemptKey`, `cardType`, `cardNo`. . |
 | 성공 | `200`, `data`는 주문과 재고 예약을 확정한 결과. 주문 상태는 `CONFIRMED`이며 결제액·결제 시점을 담는다. |
 | 대기 | `202`, `meta.result=PENDING`. `data`는 대사 API의 대기 응답과 동일하게 `orderStatus=DRAFT`, `paymentStatus`(`PENDING` 또는 `UNKNOWN`), `statusUrl`(`/api/v1/orders/{orderId}`)을 담는다. |
-| 오류 | `400 INVALID_REQUEST` · `404 ORDER_NOT_FOUND` · `409 PRODUCT_NOT_AVAILABLE` · `409 INSUFFICIENT_STOCK` · `422 PAYMENT_FAILED` |
+| 오류 | `400 INVALID_REQUEST` · `404 ORDER_NOT_FOUND` · `409 PRODUCT_NOT_AVAILABLE` · `409 INSUFFICIENT_STOCK` · `409 PAYMENT_ALREADY_PROCESSED` · `422 PAYMENT_FAILED` |
 
 
 
@@ -487,6 +487,7 @@
 | `409` | `PRODUCT_NOT_AVAILABLE`        | 확정하려는 주문의 상품이 삭제되었다.                                                                                                 | 주문한 상품 중 판매하지 않는 상품이 있습니다.            |
 | `409` | `INSUFFICIENT_STOCK`           | 확정하려는 주문의 수량보다 재고가 적다.                                                                                               | 재고가 부족합니다.                            |
 | `409` | `INSUFFICIENT_POINT`           | 확정하려는 주문의 금액보다 잔액이 적다.                                                                                               | 포인트 잔액이 부족합니다.                        |
+| `409` | `PAYMENT_ALREADY_PROCESSED`    | 같은 결제 시도의 결제가 이미 성공 또는 실패로 종결되어 다시 요청했다.                                                                     | 이미 처리된 결제입니다.                         |
 | `409` | `POINT_CONFLICT` | 주문 확정의 포인트 버전 충돌이 최대 2회 재시도 후에도 해소되지 않았다. 이번 확정의 변경은 롤백된다. | 포인트 잔액이 변경되었습니다. 최신 잔액을 확인한 뒤 다시 시도해 주세요. |
 | `409` | `POINT_BALANCE_LIMIT_EXCEEDED` | 충전 후 잔액이 표현할 수 있는 범위를 넘는다.                                                                                           | 충전할 수 있는 한도를 넘었습니다.                   |
 | `409` | `PAYMENT_RESULT_CONFLICT` | PG 조회 결과의 주문·거래·금액이 내부 기록과 일치하지 않거나 기존 최종 결과와 충돌한다. | 결제 결과가 기존 기록과 일치하지 않습니다. |

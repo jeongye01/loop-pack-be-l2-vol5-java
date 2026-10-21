@@ -61,7 +61,7 @@ requirements:
   R-ORDER-29:   []
   R-ORDER-30:   [INV-STOCK-47, INV-ORDER-45]
   R-ORDER-31:   [INV-STOCK-49, INV-ORDER-46]
-  R-ORDER-32:   [INV-PAYMENT-50]
+  R-ORDER-32:   [INV-PAYMENT-50, INV-PAYMENT-51]
 
   R-ADMIN-01:   []
   R-ADMIN-04:   []
@@ -178,3 +178,4 @@ rules:
   Payment:
     INV-PAYMENTRESULT-42: 성공한 결제는 결제액과 결제 시점을 갖는다.
     INV-PAYMENT-50: 같은 결제 시도를 재요청할 때 최초 승인 요청과 같은 멱등키를 사용해 중복 결제를 막는다.
+    INV-PAYMENT-51: 이미 사용된 멱등키로 들어온 결제 승인 요청은 PG에 다시 전달하지 않는다.

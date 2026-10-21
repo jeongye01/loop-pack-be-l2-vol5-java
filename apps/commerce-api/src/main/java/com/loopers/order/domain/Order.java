@@ -8,6 +8,8 @@ import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.Table;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Version;
 
 import java.time.ZonedDateTime;
@@ -26,6 +28,8 @@ public class Order extends BaseEntity {
     private OrderStatus status;
     @Embedded
     private PaymentResult paymentResult;
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
+    private Payment payment;
     @Version
     private Long version;
 
@@ -59,6 +63,14 @@ public class Order extends BaseEntity {
 
     public PaymentResult getPaymentResult() {
         return paymentResult;
+    }
+
+    public Payment getPayment() {
+        return payment;
+    }
+
+    public void setPayment(Payment payment) {
+        this.payment = payment;
     }
 
     public boolean isOwnedBy(Long userId) {

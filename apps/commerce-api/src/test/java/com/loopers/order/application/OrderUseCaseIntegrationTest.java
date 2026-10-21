@@ -6,6 +6,10 @@ import com.loopers.order.domain.Order;
 import com.loopers.order.domain.OrderItem;
 import com.loopers.order.domain.OrderRepository;
 import com.loopers.order.domain.OrderStatus;
+import com.loopers.order.domain.PaymentGateway;
+import com.loopers.order.domain.PaymentMethod;
+import com.loopers.order.domain.PaymentStatus;
+import com.loopers.order.domain.Payment;
 import com.loopers.product.domain.Product;
 import com.loopers.product.domain.Stock;
 import com.loopers.support.error.CoreException;
@@ -21,12 +25,19 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import java.util.List;
+import java.time.OffsetDateTime;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @SpringBootTest
 @Import(MySqlTestContainersConfig.class)
@@ -35,6 +46,176 @@ class OrderUseCaseIntegrationTest {
     @Autowired private OrderUseCase useCase;
     @Autowired private OrderRepository orderRepository;
     @Autowired private EntityManager entityManager;
+    @MockitoBean private PaymentGateway paymentGateway;
+
+    @DisplayName("[INV-ORDER-45][INV-STOCK-47] PG 결제 요청 전에 주문 품목의 재고를 예약한다.")
+    @Nested class ReserveBeforeProviderApproval {
+        @DisplayName("[상태 전이] 재고 5개 중 2개를 예약하면 PG 승인 요청 전에 예약 상태가 RESERVED로 바뀌고 재고가 3개가 된다.")
+        @Test void reservesStockBeforeApprovalRequest() {
+            Scenario scenario = confirmationScenario(5, 10_000L);
+            AtomicReference<String> reservationStatusAtApproval = new AtomicReference<>("NOT_CALLED");
+            AtomicInteger stockAtApproval = new AtomicInteger(-1);
+            when(paymentGateway.approve(any())).thenAnswer(invocation -> {
+                reservationStatusAtApproval.set(stockReservationStatus(scenario.order().getId()));
+                stockAtApproval.set(TestEntities.stockQuantity(entityManager, scenario.product().getId()));
+                PaymentGateway.ApprovalRequest request = invocation.getArgument(0);
+                return new PaymentGateway.Approved(
+                    request.paymentKey(), request.providerOrderId(), request.amount(),
+                    OffsetDateTime.parse("2026-10-21T15:00:00+09:00"));
+            });
+
+            useCase.confirm(scenario.buyer().getId(), scenario.order().getId());
+
+            assertAll(
+                () -> assertThat(reservationStatusAtApproval).hasValue("RESERVED"),
+                () -> assertThat(stockAtApproval).hasValue(3)
+            );
+        }
+    }
+
+    @DisplayName("[INV-ORDER-46] PG 결제가 완료되면 주문 품목의 재고 예약을 확정하고 주문 상태를 CONFIRMED로 바꾼다.")
+    @Nested class ConfirmReservationAfterProviderApproval {
+        @DisplayName("[상태 전이] PG 승인 성공 후 주문 상태는 CONFIRMED, 재고 예약 상태는 CONSUMED가 된다.")
+        @Test void consumesReservationAndConfirmsOrder_afterProviderApproval() {
+            Scenario scenario = confirmationScenario(5, 10_000L);
+            when(paymentGateway.approve(any())).thenAnswer(invocation -> {
+                PaymentGateway.ApprovalRequest request = invocation.getArgument(0);
+                return new PaymentGateway.Approved(
+                    request.paymentKey(), request.providerOrderId(), request.amount(),
+                    OffsetDateTime.parse("2026-10-21T15:00:00+09:00"));
+            });
+
+            useCase.confirm(scenario.buyer().getId(), scenario.order().getId());
+            entityManager.flush();
+            entityManager.clear();
+            Order confirmed = entityManager.find(Order.class, scenario.order().getId());
+            String reservationStatus = stockReservationStatus(scenario.order().getId());
+
+            assertAll(
+                () -> assertThat(confirmed.getStatus()).isEqualTo(OrderStatus.CONFIRMED),
+                () -> assertThat(reservationStatus).isEqualTo("CONSUMED"),
+                () -> verify(paymentGateway).approve(any())
+            );
+        }
+    }
+
+    @DisplayName("[카드 승인 거절] 주문은 DRAFT로 남고 재고 예약을 반환한다.")
+    @Nested class ReleaseReservationAfterCardRejection {
+        @DisplayName("[상태 전이] 카드 승인이 거절되면 재고 예약이 RESERVED에서 미예약으로 돌아가고 재고가 복구된다.")
+        @Test void releasesReservationAfterCardRejection() {
+            Scenario scenario = confirmationScenario(5, 10_000L);
+            when(paymentGateway.approve(any())).thenReturn(new PaymentGateway.ProviderError(
+                403, "REJECT_CARD_PAYMENT", "한도초과 혹은 잔액부족으로 결제에 실패했습니다."));
+
+            var failure = assertThrows(CoreException.class,
+                () -> useCase.confirm(scenario.buyer().getId(), scenario.order().getId()));
+            entityManager.flush();
+            entityManager.clear();
+            Order order = entityManager.find(Order.class, scenario.order().getId());
+
+            assertAll(
+                () -> assertThat(failure.getErrorCode().name()).isEqualTo("PAYMENT_FAILED"),
+                () -> assertThat(order.getStatus()).isEqualTo(OrderStatus.DRAFT),
+                () -> assertThat(stockReservationStatus(scenario.order().getId())).isNull(),
+                () -> assertThat(TestEntities.stockQuantity(entityManager, scenario.product().getId()))
+                    .isEqualTo(5),
+                () -> assertThat(TestEntities.pointBalance(entityManager, scenario.buyer().getId()))
+                    .isEqualTo(10_000L),
+                () -> verify(paymentGateway).approve(any())
+            );
+        }
+    }
+
+    @DisplayName("[INV-PAYMENT-51][R-ORDER-32] 이미 사용된 멱등키의 결제 승인 요청은 PG에 다시 전달하지 않는다.")
+    @Nested class RejectProcessedPaymentAttempt {
+        private static final String ATTEMPT_KEY = "test-attempt-42";
+
+        @DisplayName("[상태 전이] 같은 키의 결제가 SUCCESS면 PAYMENT_ALREADY_PROCESSED를 반환하고 PG를 호출하지 않는다.")
+        @Test void rejectsRetryForSuccessfulPayment() {
+            Scenario scenario = confirmationScenario(5, 10_000L);
+            Payment payment = new Payment(PaymentMethod.PG, 4_000L, ATTEMPT_KEY, "LP-ORD-0000000042");
+            payment.recordResult(new PaymentGateway.Approved(
+                "test-payment-42", "LP-ORD-0000000042", 4_000L,
+                OffsetDateTime.parse("2026-10-21T15:00:00+09:00")));
+            scenario.order().setPayment(payment);
+            entityManager.flush();
+            entityManager.clear();
+
+            CoreException failure = assertThrows(CoreException.class,
+                () -> useCase.confirm(scenario.buyer().getId(), scenario.order().getId(), ATTEMPT_KEY));
+            entityManager.clear();
+            Order order = entityManager.find(Order.class, scenario.order().getId());
+
+            assertAll(
+                () -> assertThat(failure.getErrorCode()).isEqualTo(ErrorCode.PAYMENT_ALREADY_PROCESSED),
+                () -> assertThat(order.getStatus()).isEqualTo(OrderStatus.DRAFT),
+                () -> assertThat(order.getPayment().status()).isEqualTo(PaymentStatus.SUCCESS),
+                () -> org.mockito.Mockito.verifyNoInteractions(paymentGateway)
+            );
+        }
+
+        @DisplayName("[상태 전이] 같은 키의 결제가 FAILED면 PAYMENT_ALREADY_PROCESSED를 반환하고 PG를 호출하지 않는다.")
+        @Test void rejectsRetryForFailedPayment() {
+            Scenario scenario = confirmationScenario(5, 10_000L);
+            Payment payment = new Payment(PaymentMethod.PG, 4_000L, ATTEMPT_KEY, "LP-ORD-0000000042");
+            payment.recordResult(new PaymentGateway.ProviderError(403, "REJECT_CARD_PAYMENT", "거절"));
+            scenario.order().setPayment(payment);
+            entityManager.flush();
+            entityManager.clear();
+
+            CoreException failure = assertThrows(CoreException.class,
+                () -> useCase.confirm(scenario.buyer().getId(), scenario.order().getId(), ATTEMPT_KEY));
+            entityManager.clear();
+            Order order = entityManager.find(Order.class, scenario.order().getId());
+
+            assertAll(
+                () -> assertThat(failure.getErrorCode()).isEqualTo(ErrorCode.PAYMENT_ALREADY_PROCESSED),
+                () -> assertThat(order.getStatus()).isEqualTo(OrderStatus.DRAFT),
+                () -> assertThat(order.getPayment().status()).isEqualTo(PaymentStatus.FAILED),
+                () -> org.mockito.Mockito.verifyNoInteractions(paymentGateway)
+            );
+        }
+
+        @DisplayName("[상태 전이] 같은 키의 결제가 UNKNOWN이면 결과 대기 상태를 유지하고 PG를 다시 호출하지 않는다.")
+        @Test void doesNotRetryUnknownPayment() {
+            Scenario scenario = confirmationScenario(5, 10_000L);
+            Payment payment = new Payment(PaymentMethod.PG, 4_000L, ATTEMPT_KEY, "LP-ORD-0000000042");
+            payment.recordResult(new PaymentGateway.Unknown());
+            scenario.order().setPayment(payment);
+            entityManager.flush();
+            entityManager.clear();
+
+            Order result = useCase.confirm(scenario.buyer().getId(), scenario.order().getId(), ATTEMPT_KEY);
+            entityManager.flush();
+            entityManager.clear();
+            Order pending = entityManager.find(Order.class, scenario.order().getId());
+
+            assertAll(
+                () -> assertThat(result.getStatus()).isEqualTo(OrderStatus.DRAFT),
+                () -> assertThat(pending.getStatus()).isEqualTo(OrderStatus.DRAFT),
+                () -> assertThat(pending.getPayment().status()).isEqualTo(PaymentStatus.UNKNOWN),
+                () -> org.mockito.Mockito.verifyNoInteractions(paymentGateway)
+            );
+        }
+    }
+
+    @DisplayName("[INV-STOCK-49] PG 성공으로 예약을 확정한 뒤 가용 재고는 예약 직후와 같다. 예약 확정에 따른 추가 차감은 0이다.")
+    @Nested class ConfirmationDoesNotDeductReservedStockAgain {
+        @DisplayName("[시나리오 기반] 승인 요청 시점과 승인 완료 후의 가용 재고가 같다.")
+        @Test void keepsAvailableStock_whenReservationIsConfirmed() {
+            Scenario scenario = confirmationScenario(5, 10_000L);
+            AtomicInteger stockAtApproval = new AtomicInteger(-1);
+            stubApprovalAndCaptureStock(scenario, stockAtApproval);
+
+            useCase.confirm(scenario.buyer().getId(), scenario.order().getId());
+
+            int stockAfterApproval = TestEntities.stockQuantity(entityManager, scenario.product().getId());
+            assertAll(
+                () -> assertThat(stockAtApproval).hasValue(3),
+                () -> assertThat(stockAfterApproval).isEqualTo(stockAtApproval.get())
+            );
+        }
+    }
 
     @DisplayName("[INV-ORDER-32] 주문 생성은 재고와 잔액을 바꾸지 않는다.")
     @Nested class CreateWithoutDeduction {
@@ -92,7 +273,8 @@ class OrderUseCaseIntegrationTest {
                 () -> assertThat(entityManager.find(Order.class, scenario.order().getId()).getStatus())
                     .isEqualTo(OrderStatus.DRAFT),
                 () -> assertThat(TestEntities.stockQuantity(entityManager, scenario.product().getId())).isEqualTo(1),
-                () -> assertThat(TestEntities.pointBalance(entityManager, scenario.buyer().getId())).isEqualTo(10_000L)
+                () -> assertThat(TestEntities.pointBalance(entityManager, scenario.buyer().getId())).isEqualTo(10_000L),
+                () -> org.mockito.Mockito.verifyNoInteractions(paymentGateway)
             );
         }
 
@@ -179,6 +361,24 @@ class OrderUseCaseIntegrationTest {
         if (point > 0) persist(new Point(buyer.getId(), point));
         Order order = persist(new Order(buyer.getId(), List.of(OrderItem.of(product, 2))));
         return new Scenario(product, buyer, order);
+    }
+
+    private void stubApprovalAndCaptureStock(Scenario scenario, AtomicInteger stockAtApproval) {
+        when(paymentGateway.approve(any())).thenAnswer(invocation -> {
+            stockAtApproval.set(TestEntities.stockQuantity(entityManager, scenario.product().getId()));
+            PaymentGateway.ApprovalRequest request = invocation.getArgument(0);
+            return new PaymentGateway.Approved(
+                request.paymentKey(), request.providerOrderId(), request.amount(),
+                OffsetDateTime.parse("2026-10-21T15:00:00+09:00"));
+        });
+    }
+
+    private String stockReservationStatus(Long orderId) {
+        Object status = entityManager.createQuery(
+                "select o.stockReservationStatus from Order o where o.id = :orderId", Object.class)
+            .setParameter("orderId", orderId)
+            .getSingleResult();
+        return status == null ? null : status.toString();
     }
 
     private Product productWithStock(int stock) {
