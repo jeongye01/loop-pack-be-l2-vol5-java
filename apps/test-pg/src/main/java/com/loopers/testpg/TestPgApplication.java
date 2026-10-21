@@ -5,6 +5,8 @@ import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration;
 import com.github.tomakehurst.wiremock.extension.Extension;
 
+import java.nio.file.Path;
+
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.get;
 import static com.github.tomakehurst.wiremock.client.WireMock.post;
@@ -20,9 +22,12 @@ public final class TestPgApplication {
     public static void main(String[] args) {
         int port = Integer.parseInt(System.getenv().getOrDefault("TEST_PG_PORT", "8080"));
         String bindAddress = System.getenv().getOrDefault("TEST_PG_BIND_ADDRESS", "0.0.0.0");
-        var store = new TransactionStore();
+        ObjectMapper objectMapper = new ObjectMapper();
+        Path dataFile = Path.of(System.getenv().getOrDefault(
+            "TEST_PG_DATA_FILE", "build/test-pg/transactions.json"));
+        var store = new TransactionStore(dataFile, objectMapper);
         String secretKey = System.getenv().getOrDefault("TEST_PG_SECRET_KEY", "local-secret");
-        Extension api = new TestPgResponseTransformer(store, new ObjectMapper(), secretKey);
+        Extension api = new TestPgResponseTransformer(store, objectMapper, secretKey);
         WireMockServer server = new WireMockServer(WireMockConfiguration.options()
             .bindAddress(bindAddress)
             .port(port)

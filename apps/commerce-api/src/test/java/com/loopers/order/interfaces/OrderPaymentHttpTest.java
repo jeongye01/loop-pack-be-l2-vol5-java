@@ -104,20 +104,18 @@ class OrderPaymentHttpTest {
             verify(paymentGateway).approve(any());
         }
 
-        @DisplayName("응답 타임아웃·PG 5xx로 결과가 UNKNOWN이면 202와 대기 상태를 반환한다.")
+        @DisplayName("재조회 후에도 PG 결과가 UNKNOWN이면 503 PAYMENT_CANCELLATION_PENDING을 반환한다.")
         @Test
-        void returnsPendingWhenProviderOutcomeIsUnknown() throws Exception {
+        void returnsCancellationPendingWhenProviderOutcomeRemainsUnknown() throws Exception {
             User buyer = fixture.user();
             Product product = fixture.product(fixture.brand("PG-" + System.nanoTime()), "상품", 2_000L, 5);
             var order = fixture.draftOrder(buyer, fixture.item(product, 2));
             when(paymentGateway.approve(any())).thenReturn(new PaymentGateway.Unknown());
 
             mockMvc.perform(confirm(buyer, order.getId()))
-                .andExpect(status().isAccepted())
-                .andExpect(jsonPath("$.meta.result").value("PENDING"))
-                .andExpect(jsonPath("$.data.orderStatus").value("DRAFT"))
-                .andExpect(jsonPath("$.data.paymentStatus").value("UNKNOWN"))
-                .andExpect(jsonPath("$.data.statusUrl").value("/api/v1/orders/" + order.getId()));
+                .andExpect(failure(HttpStatus.SERVICE_UNAVAILABLE, "PAYMENT_CANCELLATION_PENDING"))
+                .andExpect(jsonPath("$.meta.message")
+                    .value("결제 결과 확인 중 문제가 발생했습니다. 결제 취소가 진행될 예정입니다."));
 
             verify(paymentGateway).approve(any());
         }

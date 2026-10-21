@@ -147,8 +147,10 @@
 | 요청 | `POST /api/v1/orders/{orderId}/confirm` |
 | 입력 | path `orderId`. body가 없으면 기존 포인트 결제로 확정한다. PG 결제는 body `paymentKey`, `paymentAttemptKey`를 받으며, `paymentKey`는 클라이언트가 PG에서 받은 결제 키이고 `paymentAttemptKey`는 같은 승인 재요청에 재사용한다. |
 | 성공 | `200`, `data`는 주문과 재고 예약을 확정한 결과. 주문 상태는 `CONFIRMED`이며 결제액·결제 시점을 담는다. |
-| 대기 | `202`, `meta.result=PENDING`. `data`는 대사 API의 대기 응답과 동일하게 `orderStatus=DRAFT`, `paymentStatus`(`PENDING` 또는 `UNKNOWN`), `statusUrl`(`/api/v1/orders/{orderId}`)을 담는다. |
-| 오류 | `400 INVALID_REQUEST` · `404 ORDER_NOT_FOUND` · `409 ORDER_ALREADY_CONFIRMED` · `409 PRODUCT_NOT_AVAILABLE` · `409 INSUFFICIENT_STOCK` · `409 INSUFFICIENT_POINT` · `409 PAYMENT_ALREADY_PROCESSED` · `409 POINT_CONFLICT` · `422 PAYMENT_FAILED` · `500 INTERNAL_ERROR` |
+| 대기 | PG 처리가 `PENDING`이면 `202`, `meta.result=PENDING`. `data`는 `orderStatus=DRAFT`, `paymentStatus=PENDING`, `statusUrl`(`/api/v1/orders/{orderId}`)을 담는다. |
+| 오류 | `400 INVALID_REQUEST` · `404 ORDER_NOT_FOUND` · `409 ORDER_ALREADY_CONFIRMED` · `409 PRODUCT_NOT_AVAILABLE` · `409 INSUFFICIENT_STOCK` · `409 INSUFFICIENT_POINT` · `409 PAYMENT_ALREADY_PROCESSED` · `409 POINT_CONFLICT` · `422 PAYMENT_FAILED` · `503 PAYMENT_CANCELLATION_PENDING` · `500 INTERNAL_ERROR` |
+
+
 
 
 
@@ -178,7 +180,7 @@
 | 필드 | 타입 | 의미 |
 | --- | --- | --- |
 | `id` | 정수 | 주문 ID |
-| `status` | 문자열 | 주문 상태. `DRAFT` 또는 `CONFIRMED` |
+| `status` | 문자열 | 주문 상태. `DRAFT`, `CONFIRMED` 또는 `CANCELED` |
 | `items` | 배열 | 주문 당시 품목 정보 |
 | `items[].productId` | 정수 | 상품 ID |
 | `items[].productName` | 문자열 | 주문 당시 상품 이름 |
@@ -198,7 +200,7 @@
 | --- | --- | --- |
 | 결제 시작 전 | `DRAFT` | 없음 (`payment: null`) |
 | 결제 처리 중 | `DRAFT` | `PENDING` |
-| 결제 결과 미확인 | `DRAFT` | `UNKNOWN` |
+| 결제 결과 미확인 후 취소 | `CANCELED` | `UNKNOWN` |
 | 결제 성공 반영 완료 | `CONFIRMED` | `SUCCESS` |
 | 결제 실패 확정 | `DRAFT` | `FAILED` |
 
@@ -218,7 +220,7 @@
 
 | 필드 | 타입 | 의미 |
 | --- | --- | --- |
-| `orderStatus` | 문자열 | 반영 후 주문 상태. `DRAFT` 또는 `CONFIRMED` |
+| `orderStatus` | 문자열 | 반영 후 주문 상태. `DRAFT`, `CONFIRMED` 또는 `CANCELED` |
 | `paymentStatus` | 문자열 | 결제 상태. `200`이면 `SUCCESS` 또는 `FAILED`, `202`이면 `PENDING` 또는 `UNKNOWN` |
 | `statusUrl` | 문자열 | `202`에서만 반환하는 주문 상태 조회 경로. `/api/v1/orders/{orderId}` |
 
@@ -492,6 +494,7 @@
 | `409` | `POINT_BALANCE_LIMIT_EXCEEDED` | 충전 후 잔액이 표현할 수 있는 범위를 넘는다.                                                                                           | 충전할 수 있는 한도를 넘었습니다.                   |
 | `409` | `PAYMENT_RESULT_CONFLICT` | PG 조회 결과의 주문·거래·금액이 내부 기록과 일치하지 않거나 기존 최종 결과와 충돌한다. | 결제 결과가 기존 기록과 일치하지 않습니다. |
 | `422` | `PAYMENT_FAILED` | 주문 확정 요청에서 결제 실패가 확정되었다. 처리 중·결과 미확인에는 사용하지 않는다. | 결제가 실패했습니다. |
+| `503` | `PAYMENT_CANCELLATION_PENDING` | PG 결제 결과를 끝내 확인하지 못해 주문을 취소하고 재고 예약을 반환했다. PG 결제 취소는 진행 예정이다. | 결제 결과 확인 중 문제가 발생했습니다. 결제 취소가 진행될 예정입니다. |
 | `500` | `INTERNAL_ERROR`               | 요청과 관계없는 내부 오류이다. 예: 결제액이 없는 결제 결과, 0 이하의 수량으로 재고 차감([ADR-003](./decisions.md#adr-003-재고-차감-수량이-0-이하이면-내부-오류로-거절한다)) | 일시적인 오류가 발생했습니다.                      |
 
 

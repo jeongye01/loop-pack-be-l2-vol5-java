@@ -342,7 +342,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/OrderDetailEnvelope'
         '202':
-          description: 처리 중 또는 결과 미확인. 주문·시도 상태와 조회 경로 반환
+          description: PG 처리가 PENDING. 주문·결제 상태와 조회 경로 반환
           content:
             application/json:
               schema:
@@ -373,6 +373,13 @@ paths:
         '422':
           description: PAYMENT_FAILED
           x-error-codes: [PAYMENT_FAILED]
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '503':
+          description: 결제 결과를 확인하지 못해 주문 취소와 재고 예약 반환을 완료했고, PG 결제 취소가 진행될 예정이다.
+          x-error-codes: [PAYMENT_CANCELLATION_PENDING]
           content:
             application/json:
               schema:
@@ -1086,6 +1093,24 @@ components:
         orderStatus: DRAFT
         paymentStatus: UNKNOWN
         statusUrl: /api/v1/orders/42
+    ConfirmPendingResult:
+      type: object
+      required: [orderStatus, paymentStatus, statusUrl]
+      properties:
+        orderStatus:
+          type: string
+          enum: [DRAFT]
+        paymentStatus:
+          type: string
+          enum: [PENDING]
+        statusUrl:
+          type: string
+          description: 주문 상태 GET 조회 경로
+          example: /api/v1/orders/42
+      example:
+        orderStatus: DRAFT
+        paymentStatus: PENDING
+        statusUrl: /api/v1/orders/42
     ConfirmPendingEnvelope:
       type: object
       required: [meta, data]
@@ -1093,7 +1118,7 @@ components:
         meta:
           $ref: '#/components/schemas/PendingMetadata'
         data:
-          $ref: '#/components/schemas/PaymentPendingResult'
+          $ref: '#/components/schemas/ConfirmPendingResult'
     ReconcileResultEnvelope:
       type: object
       required: [meta, data]
@@ -1175,6 +1200,7 @@ components:
             - POINT_CONFLICT
             - POINT_BALANCE_LIMIT_EXCEEDED
             - PAYMENT_FAILED
+            - PAYMENT_CANCELLATION_PENDING
             - PAYMENT_ATTEMPT_NOT_FOUND
             - PAYMENT_RESULT_CONFLICT
             - INTERNAL_ERROR
@@ -1402,7 +1428,7 @@ components:
         balance: 10000
     OrderStatus:
       type: string
-      enum: [DRAFT, CONFIRMED]
+      enum: [DRAFT, CONFIRMED, CANCELED]
     OrderItem:
       type: object
       required: [productId, productName, quantity, unitPrice, amount]

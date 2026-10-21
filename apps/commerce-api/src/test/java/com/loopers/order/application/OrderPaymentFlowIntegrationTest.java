@@ -42,6 +42,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
 
 @SpringBootTest
@@ -86,6 +87,64 @@ class OrderPaymentFlowIntegrationTest {
                 );
             }
         }
+
+        @DisplayName("[상태 전이] 최초 승인 결과가 UNKNOWN이면 승인 요청은 반복하지 않고 paymentKey 조회를 재시도해 성공 확인 후 주문을 확정한다.")
+        @Test
+        void confirmsOrderWhenUnknownPaymentIsFoundApproved() {
+            Scenario scenario = confirmationScenario(5);
+            String paymentKey = "test-payment-recovered";
+            String attemptKey = newAttemptKey();
+            var approved = new PaymentGateway.Approved(paymentKey,
+                "LP-ORD-%010d".formatted(scenario.orderId()), 4_000L, APPROVED_AT);
+            when(paymentGateway.approve(any())).thenReturn(new PaymentGateway.Unknown());
+            when(paymentGateway.findByPaymentKey(paymentKey)).thenReturn(new PaymentGateway.Unknown(), approved);
+
+            useCase.confirm(scenario.buyerId(), scenario.orderId(), paymentKey, attemptKey);
+            entityManager.flush();
+            entityManager.clear();
+            Order confirmed = entityManager.find(Order.class, scenario.orderId());
+
+            assertAll(
+                () -> assertThat(confirmed.getStatus()).isEqualTo(OrderStatus.CONFIRMED),
+                () -> assertThat(confirmed.getPayment().status()).isEqualTo(PaymentStatus.SUCCESS),
+                () -> assertThat(stockReservationStatus(scenario.orderId())).isEqualTo("CONSUMED"),
+                () -> assertThat(TestEntities.stockQuantity(entityManager, scenario.productId())).isEqualTo(3),
+                () -> verify(paymentGateway, times(1)).approve(any()),
+                () -> verify(paymentGateway, times(2)).findByPaymentKey(paymentKey)
+            );
+        }
+    }
+
+    @DisplayName("[INV-ORDER-47] UNKNOWN 결제 결과를 최대 3회 재조회한 뒤에도 최종 결과가 확인되지 않으면 주문은 CANCELED, 결제는 UNKNOWN, 재고 예약은 반환 완료 상태다.")
+    @Nested
+    class CancelAfterUnresolvedPaymentLookups {
+
+        @DisplayName("[상태 전이] 승인 결과와 paymentKey 조회 3회가 모두 미확정이면 주문을 취소하고 예약을 반환한다.")
+        @Test
+        void cancelsOrderAfterThreeUnresolvedPaymentLookups() {
+            Scenario scenario = confirmationScenario(5);
+            String paymentKey = "test-payment-unresolved";
+            String attemptKey = newAttemptKey();
+            when(paymentGateway.approve(any())).thenReturn(new PaymentGateway.Unknown());
+            when(paymentGateway.findByPaymentKey(paymentKey)).thenReturn(
+                new PaymentGateway.Unknown(), new PaymentGateway.Unknown(), new PaymentGateway.Unknown());
+
+            CoreException failure = assertThrows(CoreException.class,
+                () -> useCase.confirm(scenario.buyerId(), scenario.orderId(), paymentKey, attemptKey));
+            entityManager.flush();
+            entityManager.clear();
+            Order canceled = entityManager.find(Order.class, scenario.orderId());
+
+            assertAll(
+                () -> assertThat(failure.getErrorCode()).isEqualTo(ErrorCode.PAYMENT_CANCELLATION_PENDING),
+                () -> assertThat(canceled.getStatus().name()).isEqualTo("CANCELED"),
+                () -> assertThat(canceled.getPayment().status()).isEqualTo(PaymentStatus.UNKNOWN),
+                () -> assertThat(stockReservationStatus(scenario.orderId())).isNull(),
+                () -> assertThat(TestEntities.stockQuantity(entityManager, scenario.productId())).isEqualTo(5),
+                () -> verify(paymentGateway, times(1)).approve(any()),
+                () -> verify(paymentGateway, times(3)).findByPaymentKey(paymentKey)
+            );
+        }
     }
 
     @DisplayName("[카드 승인 거절] 주문은 DRAFT로 남고 재고 예약을 반환한다.")
@@ -112,25 +171,31 @@ class OrderPaymentFlowIntegrationTest {
         );
     }
 
-    @DisplayName("[상태 전이] PG 결과가 UNKNOWN이면 주문을 미확정으로 두고 재고 예약을 반환하지 않는다.")
+    @DisplayName("[조회 중 결제 실패] UNKNOWN 재조회 중 최종 실패를 확인하면 결제를 FAILED로 기록하고 재고 예약을 반환한다.")
     @Test
-    void keepsReservationWhenPaymentOutcomeIsUnknown() {
+    void releasesReservationWhenUnknownPaymentLookupFindsFailure() {
         Scenario scenario = confirmationScenario(5);
+        String paymentKey = "test-payment-retry-failed";
         String attemptKey = newAttemptKey();
         when(paymentGateway.approve(any())).thenReturn(new PaymentGateway.Unknown());
+        when(paymentGateway.findByPaymentKey(paymentKey)).thenReturn(
+            new PaymentGateway.Unknown(),
+            new PaymentGateway.ProviderError(403, "REJECT_CARD_PAYMENT", "한도초과 혹은 잔액부족으로 결제에 실패했습니다."));
 
-        Order result = useCase.confirm(scenario.buyerId(), scenario.orderId(), attemptKey);
+        CoreException failure = assertThrows(CoreException.class,
+            () -> useCase.confirm(scenario.buyerId(), scenario.orderId(), paymentKey, attemptKey));
         entityManager.flush();
         entityManager.clear();
-        Order pending = entityManager.find(Order.class, scenario.orderId());
+        Order order = entityManager.find(Order.class, scenario.orderId());
 
         assertAll(
-            () -> assertThat(result.getStatus()).isEqualTo(OrderStatus.DRAFT),
-            () -> assertThat(pending.getStatus()).isEqualTo(OrderStatus.DRAFT),
-            () -> assertThat(pending.getPayment().status()).isEqualTo(PaymentStatus.UNKNOWN),
-            () -> assertThat(stockReservationStatus(scenario.orderId())).isEqualTo("RESERVED"),
-            () -> assertThat(TestEntities.stockQuantity(entityManager, scenario.productId())).isEqualTo(3),
-            () -> verify(paymentGateway).approve(any())
+            () -> assertThat(failure.getErrorCode()).isEqualTo(ErrorCode.PAYMENT_FAILED),
+            () -> assertThat(order.getStatus()).isEqualTo(OrderStatus.DRAFT),
+            () -> assertThat(order.getPayment().status()).isEqualTo(PaymentStatus.FAILED),
+            () -> assertThat(stockReservationStatus(scenario.orderId())).isNull(),
+            () -> assertThat(TestEntities.stockQuantity(entityManager, scenario.productId())).isEqualTo(5),
+            () -> verify(paymentGateway, times(1)).approve(any()),
+            () -> verify(paymentGateway, times(2)).findByPaymentKey(paymentKey)
         );
     }
 
@@ -218,27 +283,28 @@ class OrderPaymentFlowIntegrationTest {
             );
         }
 
-        @DisplayName("[상태 전이] UNKNOWN 결제는 결과 대기를 유지하고 PG를 다시 호출하지 않는다.")
+        @DisplayName("[상태 전이] UNKNOWN 결제에 같은 멱등키로 재요청하면 PAYMENT_ALREADY_PROCESSED이고 PG를 호출하지 않는다.")
         @Test
-        void doesNotRetryUnknownPayment() {
+        void rejectsRetryForUnknownPayment() {
             Scenario scenario = confirmationScenario(5);
             Payment payment = new Payment(PaymentMethod.PG, 4_000L, PROCESSED_ATTEMPT_KEY,
                 "LP-ORD-0000000042");
             payment.recordResult(new PaymentGateway.Unknown());
             attachPayment(scenario.orderId(), payment);
 
-            Order result = useCase.confirm(scenario.buyerId(), scenario.orderId(), PROCESSED_ATTEMPT_KEY);
-            entityManager.flush();
+            CoreException failure = assertThrows(CoreException.class,
+                () -> useCase.confirm(scenario.buyerId(), scenario.orderId(), PROCESSED_ATTEMPT_KEY));
             entityManager.clear();
-            Order pending = entityManager.find(Order.class, scenario.orderId());
+            Order order = entityManager.find(Order.class, scenario.orderId());
 
             assertAll(
-                () -> assertThat(result.getStatus()).isEqualTo(OrderStatus.DRAFT),
-                () -> assertThat(pending.getStatus()).isEqualTo(OrderStatus.DRAFT),
-                () -> assertThat(pending.getPayment().status()).isEqualTo(PaymentStatus.UNKNOWN),
+                () -> assertThat(failure.getErrorCode()).isEqualTo(ErrorCode.PAYMENT_ALREADY_PROCESSED),
+                () -> assertThat(order.getStatus()).isEqualTo(OrderStatus.DRAFT),
+                () -> assertThat(order.getPayment().status()).isEqualTo(PaymentStatus.UNKNOWN),
                 () -> org.mockito.Mockito.verifyNoInteractions(paymentGateway)
             );
         }
+
     }
 
     private void attachPayment(Long orderId, Payment payment) {

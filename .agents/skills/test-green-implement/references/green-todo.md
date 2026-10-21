@@ -349,3 +349,25 @@ Green 에이전트가 Red 전체를 실행하고 실패를 분석한 뒤, produc
   - 선행 작업: Order가 Payment를 소유하고 Payment의 멱등키가 유일하게 저장됨.
   - 테스트 명령: `./gradlew :apps:commerce-api:test --tests 'com.loopers.order.application.OrderUseCaseIntegrationTest$RejectProcessedPaymentAttempt'`
   - 완료 조건: 위 통합 테스트 3개가 Green이며, 테스트 소스와 기대값은 바뀌지 않는다.
+
+## UNKNOWN 멱등키 통합 Red 1개
+
+- [ ] 35. UNKNOWN 결제 시도 재요청 차단
+  - 요구사항 ID: R-ORDER-32, INV-PAYMENT-50, INV-PAYMENT-51
+  - 관찰한 Red: `OrderPaymentFlowIntegrationTest$RejectProcessedPaymentAttempt.rejectsRetryForUnknownPayment`에서 같은 멱등키의 UNKNOWN 결제를 재요청해도 `PAYMENT_ALREADY_PROCESSED`가 발생하지 않는다.
+  - 필요한 최소 동작: 같은 멱등키로 이미 저장된 Payment가 `UNKNOWN`이면 기존 성공·실패와 같이 `PAYMENT_ALREADY_PROCESSED`로 거절하고 PG 승인 포트를 호출하지 않는다.
+  - 변경할 production 파일: `apps/commerce-api/src/main/java/com/loopers/order/application/OrderPaymentTransactionService.java`
+  - 선행 작업: 기존 SUCCESS/FAILED 결제 시도 차단 로직.
+  - 테스트 명령: `./gradlew :apps:commerce-api:test --tests 'com.loopers.order.application.OrderPaymentFlowIntegrationTest$RejectProcessedPaymentAttempt'`
+  - 완료 조건: 해당 중첩 테스트 세 사례가 Green이고, 테스트 소스와 기대값은 구현 전 해시와 같다.
+
+## UNKNOWN 결제 재조회·결과 반영 통합 Red 3개
+
+- [ ] 36. UNKNOWN 조회 성공·실패·최대 횟수 보상 처리
+  - 요구사항 ID: R-ORDER-31, R-ORDER-33, INV-ORDER-46, INV-ORDER-47
+  - 관찰한 Red: `OrderPaymentFlowIntegrationTest`의 UNKNOWN 복구 성공, UNKNOWN 조회 중 최종 FAILED, 3회 조회 후 미확정 테스트가 모두 실패한다. 현재 `OrderUseCase.confirm`은 승인 결과가 UNKNOWN이면 그대로 기록하고 반환하며, `PaymentGateway`의 기본 `findByPaymentKey`는 미구현 예외를 던진다.
+  - 필요한 최소 동작: 승인 결과가 UNKNOWN이면 POST 승인을 반복하지 않고 같은 `paymentKey`로 최대 3회 조회한다. 조회에서 Approved를 받으면 성공 처리·예약 소비·주문 확정 후 중단한다. ProviderError를 받으면 실패 처리·예약 반환 후 중단한다. 3회 모두 Unknown이면 Payment UNKNOWN을 유지하고 주문을 취소·예약 반환한 뒤 PAYMENT_CANCELLATION_PENDING을 반환한다.
+  - 변경할 production 파일: `apps/commerce-api/src/main/java/com/loopers/order/application/OrderUseCase.java`, `OrderPaymentTransactionService.java`, `order/domain/Order.java`, `order/domain/OrderStatus.java`, `order/domain/PaymentGateway.java`, `order/infrastructure/payment/toss/TossPaymentAdapter.java`
+  - 선행 작업: PaymentGateway의 paymentKey 조회 포트와 PAYMENT_CANCELLATION_PENDING 오류 매핑이 존재함.
+  - 테스트 명령: `./gradlew :apps:commerce-api:test --tests 'com.loopers.order.application.OrderPaymentFlowIntegrationTest*' --tests 'com.loopers.order.interfaces.OrderPaymentHttpTest' --tests 'com.loopers.order.infrastructure.payment.toss.TossPaymentAdapterTest'`
+  - 완료 조건: UNKNOWN 조회 성공·최종 FAILED·3회 미확정 통합 테스트, 기존 HTTP 및 어댑터 테스트가 Green이고 테스트 파일과 기대값이 구현 전 해시와 같다.

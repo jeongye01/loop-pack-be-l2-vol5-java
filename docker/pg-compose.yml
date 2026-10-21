@@ -7,6 +7,10 @@ services:
       dockerfile: docker/test-pg.Dockerfile
     ports:
       - "127.0.0.1:18089:8080"
+    environment:
+      TEST_PG_DATA_FILE: /data/transactions.json
+    volumes:
+      - ../build/test-pg:/data
     logging:
       driver: json-file
       options:

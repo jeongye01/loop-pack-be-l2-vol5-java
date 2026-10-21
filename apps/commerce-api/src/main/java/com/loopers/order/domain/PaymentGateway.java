@@ -6,6 +6,10 @@ public interface PaymentGateway {
 
     ApprovalResult approve(ApprovalRequest request);
 
+    default ApprovalResult findByPaymentKey(String paymentKey) {
+        throw new UnsupportedOperationException("Payment lookup is not implemented");
+    }
+
     record ApprovalRequest(String paymentKey, String providerOrderId, long amount, String idempotencyKey) {
     }
 

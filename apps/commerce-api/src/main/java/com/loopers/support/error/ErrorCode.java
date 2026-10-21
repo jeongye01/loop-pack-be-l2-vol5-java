@@ -46,6 +46,7 @@ public enum ErrorCode {
     INSUFFICIENT_POINT("포인트 잔액이 부족합니다."),
     PAYMENT_ALREADY_PROCESSED("이미 처리된 결제입니다."),
     PAYMENT_FAILED("결제가 실패했습니다."),
+    PAYMENT_CANCELLATION_PENDING("결제 결과 확인 중 문제가 발생했습니다. 결제 취소가 진행될 예정입니다."),
     POINT_CONFLICT("포인트 잔액이 변경되었습니다. 최신 잔액을 확인한 뒤 다시 시도해 주세요."),
     POINT_BALANCE_LIMIT_EXCEEDED("충전할 수 있는 한도를 넘었습니다."),
 

@@ -21,6 +21,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.get;
 import static com.github.tomakehurst.wiremock.client.WireMock.post;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
+import static com.github.tomakehurst.wiremock.client.WireMock.urlPathMatching;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -28,7 +29,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 class TestPgApiIntegrationTest {
 
     private static final String CONFIRM_PATH = "/v1/payments/confirm";
-    private static final String PAYMENTS_PATH = "/api/v1/payments";
+    private static final String PAYMENT_LOOKUP_PATH = "/v1/payments/";
+    private static final String ORDER_LOOKUP_PATH = "/v1/payments/orders/";
     private static final String SECRET_KEY = "local-secret";
     private static final String AUTHORIZATION = "Basic " + Base64.getEncoder()
         .encodeToString((SECRET_KEY + ":").getBytes(StandardCharsets.UTF_8));
@@ -53,7 +55,9 @@ class TestPgApiIntegrationTest {
         server.start();
         server.stubFor(post(urlEqualTo(CONFIRM_PATH))
             .willReturn(aResponse().withStatus(404).withTransformers("local-test-pg-api")));
-        server.stubFor(get(urlPathEqualTo(PAYMENTS_PATH))
+        server.stubFor(get(urlPathMatching(PAYMENT_LOOKUP_PATH + "[^/]+"))
+            .willReturn(aResponse().withStatus(404).withTransformers("local-test-pg-api")));
+        server.stubFor(get(urlPathMatching(ORDER_LOOKUP_PATH + "[^/]+"))
             .willReturn(aResponse().withStatus(404).withTransformers("local-test-pg-api")));
     }
 
@@ -75,18 +79,45 @@ class TestPgApiIntegrationTest {
         assertThat(body.get("status").asText()).isEqualTo("DONE");
         assertThat(OffsetDateTime.parse(body.get("approvedAt").asText())).isNotNull();
 
-        HttpResponse<String> transactions = httpClient.send(HttpRequest.newBuilder()
-                .uri(URI.create(server.baseUrl() + PAYMENTS_PATH + "?orderId=LP-ORD-0000000042"))
-                .header("X-USER-ID", "135135")
-                .GET()
-                .build(), HttpResponse.BodyHandlers.ofString());
-        assertThat(transactions.statusCode()).isEqualTo(200);
-        var savedTransactions = objectMapper.readTree(transactions.body());
+        var savedTransactions = transactionsForOrder("LP-ORD-0000000042");
         assertThat(savedTransactions).hasSize(1);
         assertThat(savedTransactions.get(0).get("paymentKey").asText()).isEqualTo("test-payment-42");
         assertThat(savedTransactions.get(0).get("orderId").asText()).isEqualTo("LP-ORD-0000000042");
         assertThat(savedTransactions.get(0).get("amount").asLong()).isEqualTo(7000);
         assertThat(savedTransactions.get(0).get("status").asText()).isEqualTo("SUCCESS");
+
+        assertPaymentTransaction("test-payment-42", savedTransactions.get(0).get("transactionKey").asText(),
+            "SUCCESS");
+    }
+
+    @Test
+    @DisplayName("시작 시 준비된 성공·실패 거래를 paymentKey로 조회한다")
+    void findsSeededSuccessfulAndFailedTransactionsByPaymentKey() throws Exception {
+        assertPaymentTransaction("test-payment-success-1", "local-txn-success-1", "SUCCESS");
+        assertPaymentTransaction("test-payment-success-2", "local-txn-success-2", "SUCCESS");
+        assertPaymentTransaction("test-payment-failed-1", "local-txn-failed-1", "FAILED");
+        assertPaymentTransaction("test-payment-failed-2", "local-txn-failed-2", "FAILED");
+    }
+
+    @Test
+    @DisplayName("paymentKey로 단건 거래를 조회한다")
+    void findsOneTransactionByPaymentKey() throws Exception {
+        HttpResponse<String> response = paymentByKey("test-payment-success-1");
+
+        assertThat(response.statusCode()).isEqualTo(200);
+        JsonNode transaction = objectMapper.readTree(response.body());
+        assertThat(transaction.isObject()).isTrue();
+        assertThat(transaction.get("paymentKey").asText()).isEqualTo("test-payment-success-1");
+        assertThat(transaction.get("transactionKey").asText()).isEqualTo("local-txn-success-1");
+        assertThat(transaction.get("status").asText()).isEqualTo("SUCCESS");
+    }
+
+    @Test
+    @DisplayName("존재하지 않는 paymentKey 조회는 404를 반환한다")
+    void returnsNotFoundForUnknownPaymentKey() throws Exception {
+        HttpResponse<String> response = paymentByKey("missing-payment-key");
+
+        assertThat(response.statusCode()).isEqualTo(404);
     }
 
     @Test
@@ -102,13 +133,7 @@ class TestPgApiIntegrationTest {
             }
             """));
 
-        HttpResponse<String> transactions = httpClient.send(HttpRequest.newBuilder()
-                .uri(URI.create(server.baseUrl() + PAYMENTS_PATH + "?orderId=LP-ORD-0000000042"))
-                .header("X-USER-ID", "135135")
-                .GET()
-                .build(), HttpResponse.BodyHandlers.ofString());
-        assertThat(transactions.statusCode()).isEqualTo(200);
-        assertThat(objectMapper.readTree(transactions.body())).isEmpty();
+        assertThat(transactionsForOrder("LP-ORD-0000000042")).isEmpty();
     }
 
     @Test
@@ -153,12 +178,30 @@ class TestPgApiIntegrationTest {
 
     private JsonNode transactionsForOrder(String orderId) throws Exception {
         HttpResponse<String> response = httpClient.send(HttpRequest.newBuilder()
-                .uri(URI.create(server.baseUrl() + PAYMENTS_PATH + "?orderId=" + orderId))
+                .uri(URI.create(server.baseUrl() + ORDER_LOOKUP_PATH + orderId))
                 .header("X-USER-ID", "135135")
                 .GET()
                 .build(), HttpResponse.BodyHandlers.ofString());
         assertThat(response.statusCode()).isEqualTo(200);
         return objectMapper.readTree(response.body());
+    }
+
+    private void assertPaymentTransaction(String paymentKey, String transactionKey, String status) throws Exception {
+        HttpResponse<String> response = paymentByKey(paymentKey);
+
+        assertThat(response.statusCode()).isEqualTo(200);
+        JsonNode transaction = objectMapper.readTree(response.body());
+        assertThat(transaction.get("paymentKey").asText()).isEqualTo(paymentKey);
+        assertThat(transaction.get("transactionKey").asText()).isEqualTo(transactionKey);
+        assertThat(transaction.get("status").asText()).isEqualTo(status);
+    }
+
+    private HttpResponse<String> paymentByKey(String paymentKey) throws Exception {
+        return httpClient.send(HttpRequest.newBuilder()
+                .uri(URI.create(server.baseUrl() + PAYMENT_LOOKUP_PATH + paymentKey))
+                .header("X-USER-ID", "135135")
+                .GET()
+                .build(), HttpResponse.BodyHandlers.ofString());
     }
 
     private HttpResponse<String> confirmPayment(String paymentKey, String idempotencyKey) throws Exception {

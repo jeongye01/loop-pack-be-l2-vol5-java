@@ -14,4 +14,11 @@ class ErrorStatusTest {
     void mapsAlreadyProcessedPaymentToConflict() {
         assertThat(ErrorStatus.of(ErrorCode.PAYMENT_ALREADY_PROCESSED)).isEqualTo(HttpStatus.CONFLICT);
     }
+
+    @Test
+    @DisplayName("결제 취소 예정 오류는 HTTP 503으로 변환한다")
+    void mapsPaymentCancellationPendingToServiceUnavailable() {
+        assertThat(ErrorStatus.of(ErrorCode.PAYMENT_CANCELLATION_PENDING))
+            .isEqualTo(HttpStatus.SERVICE_UNAVAILABLE);
+    }
 }

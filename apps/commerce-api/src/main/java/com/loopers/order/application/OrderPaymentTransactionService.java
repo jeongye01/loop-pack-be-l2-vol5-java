@@ -50,7 +50,8 @@ public class OrderPaymentTransactionService {
                 throw new CoreException(ErrorCode.PAYMENT_ALREADY_PROCESSED);
             }
             Payment payment = existingAttempt.getPayment();
-            if (payment.status() == PaymentStatus.SUCCESS || payment.status() == PaymentStatus.FAILED) {
+            if (payment.status() == PaymentStatus.SUCCESS || payment.status() == PaymentStatus.FAILED
+                || payment.status() == PaymentStatus.UNKNOWN) {
                 throw new CoreException(ErrorCode.PAYMENT_ALREADY_PROCESSED);
             }
             return new DispatchPlan(existingAttempt, null);

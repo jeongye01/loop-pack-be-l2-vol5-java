@@ -41,6 +41,7 @@ public final class ErrorStatus {
                  POINT_CONFLICT,
                  POINT_BALANCE_LIMIT_EXCEEDED -> HttpStatus.CONFLICT;
             case PAYMENT_FAILED -> HttpStatus.UNPROCESSABLE_ENTITY;
+            case PAYMENT_CANCELLATION_PENDING -> HttpStatus.SERVICE_UNAVAILABLE;
             case INTERNAL_ERROR -> HttpStatus.INTERNAL_SERVER_ERROR;
         };
     }

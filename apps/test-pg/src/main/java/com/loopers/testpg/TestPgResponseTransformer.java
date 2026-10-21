@@ -22,13 +22,17 @@ public final class TestPgResponseTransformer implements ResponseTransformerV2 {
     private static final String USER_ID = "135135";
     private static final String IDEMPOTENCY_KEY_HEADER = "Idempotency-Key";
     private static final String CONFIRM_PATH = "/v1/payments/confirm";
-    private static final String PAYMENTS_PATH = "/api/v1/payments";
+    private static final String PAYMENT_KEY_PATH = "/v1/payments/";
+    private static final String ORDER_ID_PATH = "/v1/payments/orders/";
     private static final String TEST_STATUS_PATH = "/__test/payments/status";
     private static final String REJECTED_PAYMENT_KEY = "test-payment-rejected";
     private static final String SERVER_ERROR_PAYMENT_KEY = "test-payment-server-error";
     private static final String CARD_REJECTION_MESSAGE = "한도초과 혹은 잔액부족으로 결제에 실패했습니다.";
     private static final String INTERNAL_ERROR_MESSAGE = "내부 시스템 처리 작업이 실패했습니다. 잠시 후 다시 시도해주세요.";
-    private static final Pattern TRANSACTION_PATH = Pattern.compile("^/api/v1/payments/([^/]+)$");
+    private static final Pattern PAYMENT_KEY_PATTERN =
+        Pattern.compile("^" + Pattern.quote(PAYMENT_KEY_PATH) + "([^/]+)$");
+    private static final Pattern ORDER_ID_PATTERN =
+        Pattern.compile("^" + Pattern.quote(ORDER_ID_PATH) + "([^/]+)$");
 
     private final TransactionStore store;
     private final ObjectMapper objectMapper;
@@ -51,7 +55,7 @@ public final class TestPgResponseTransformer implements ResponseTransformerV2 {
         if (path.equals(TEST_STATUS_PATH)) {
             return updateStatus(request, response);
         }
-        if (!path.equals(PAYMENTS_PATH) && !path.startsWith(PAYMENTS_PATH + "/")) {
+        if (!PAYMENT_KEY_PATTERN.matcher(path).matches() && !ORDER_ID_PATTERN.matcher(path).matches()) {
             return response;
         }
         if (!USER_ID.equals(request.getHeader("X-USER-ID"))) {
@@ -61,11 +65,11 @@ public final class TestPgResponseTransformer implements ResponseTransformerV2 {
         }
 
         String method = request.getMethod().getName();
-        if ("GET".equals(method) && PAYMENTS_PATH.equals(path)) {
-            return findByOrderId(request, response);
+        if ("GET".equals(method) && ORDER_ID_PATTERN.matcher(path).matches()) {
+            return findByOrderId(response, path);
         }
         if ("GET".equals(method)) {
-            return findByTransactionKey(response, path);
+            return findByPaymentKey(response, path);
         }
         return json(response, 405, objectMapper.createObjectNode()
             .put("code", "METHOD_NOT_ALLOWED"));
@@ -126,23 +130,23 @@ public final class TestPgResponseTransformer implements ResponseTransformerV2 {
         }
     }
 
-    private Response findByTransactionKey(Response response, String path) {
-        Matcher matcher = TRANSACTION_PATH.matcher(path);
+    private Response findByPaymentKey(Response response, String path) {
+        Matcher matcher = PAYMENT_KEY_PATTERN.matcher(path);
         if (!matcher.matches()) {
             return json(response, 404, objectMapper.createObjectNode());
         }
         String key = decode(matcher.group(1));
-        return store.findByTransactionKey(key)
+        return store.findByPaymentKey(key)
             .map(transaction -> json(response, 200, objectMapper.valueToTree(transaction)))
             .orElseGet(() -> json(response, 404, objectMapper.createObjectNode()));
     }
 
-    private Response findByOrderId(Request request, Response response) {
-        String orderId = queryParameter(request.getUrl(), "orderId");
-        if (orderId == null) {
-            return json(response, 400, objectMapper.createObjectNode()
-                .put("code", "ORDER_ID_REQUIRED"));
+    private Response findByOrderId(Response response, String path) {
+        Matcher matcher = ORDER_ID_PATTERN.matcher(path);
+        if (!matcher.matches()) {
+            return json(response, 404, objectMapper.createObjectNode());
         }
+        String orderId = decode(matcher.group(1));
         List<JsonNode> transactions = store.findByOrderId(orderId).stream()
             .map(transaction -> (JsonNode) objectMapper.valueToTree(transaction))
             .toList();
@@ -170,20 +174,6 @@ public final class TestPgResponseTransformer implements ResponseTransformerV2 {
             return json(response, 400, objectMapper.createObjectNode()
                 .put("code", "INVALID_STATUS"));
         }
-    }
-
-    private String queryParameter(String url, String name) {
-        int queryStart = url.indexOf('?');
-        if (queryStart < 0) {
-            return null;
-        }
-        for (String part : url.substring(queryStart + 1).split("&")) {
-            String[] pair = part.split("=", 2);
-            if (pair.length == 2 && name.equals(decode(pair[0]))) {
-                return decode(pair[1]);
-            }
-        }
-        return null;
     }
 
     private String decode(String value) {
