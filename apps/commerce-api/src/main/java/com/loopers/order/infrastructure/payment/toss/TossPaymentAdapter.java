@@ -8,18 +8,11 @@ import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientException;
 
 import java.io.IOException;
-import java.math.BigDecimal;
+import java.net.SocketTimeoutException;
 import java.time.OffsetDateTime;
-import java.time.format.DateTimeParseException;
 import java.util.Map;
-import java.util.Set;
 
 public final class TossPaymentAdapter implements PaymentGateway {
-
-    private static final Set<String> ERROR_CODES = Set.of(
-        "ALREADY_PROCESSED_PAYMENT", "ALREADY_PROCESSING_REQUEST",
-        "PROVIDER_ERROR", "INVALID_REQUEST"
-    );
 
     private final RestClient client;
     private final ObjectMapper objectMapper = new ObjectMapper();
@@ -42,7 +35,7 @@ public final class TossPaymentAdapter implements PaymentGateway {
                 ))
                 .exchange((httpRequest, response) -> {
                     int status = response.getStatusCode().value();
-                    if (status != 200 && status != 400) {
+                    if (response.getStatusCode().is5xxServerError()) {
                         return new Unknown();
                     }
                     JsonNode body;
@@ -51,44 +44,26 @@ public final class TossPaymentAdapter implements PaymentGateway {
                     } catch (IOException exception) {
                         return new Unknown();
                     }
-                    return status == 200 ? approved(request, body) : providerError(body);
+                    return status == 200 ? approved(body) : providerError(status, body);
                 });
         } catch (RestClientException exception) {
-            return new Unknown();
+            for (Throwable cause = exception; cause != null; cause = cause.getCause()) {
+                if (cause instanceof SocketTimeoutException) {
+                    return new Unknown();
+                }
+            }
+            throw exception;
         }
     }
 
-    private ApprovalResult approved(ApprovalRequest request, JsonNode body) {
-        if (body == null
-            || !request.paymentKey().equals(text(body, "paymentKey"))
-            || !request.providerOrderId().equals(text(body, "orderId"))
-            || !"DONE".equals(text(body, "status"))
-            || !body.path("totalAmount").isNumber()
-            || body.path("totalAmount").decimalValue().compareTo(BigDecimal.valueOf(request.amount())) != 0) {
-            return new Unknown();
-        }
-        String approvedAt = text(body, "approvedAt");
-        if (approvedAt == null) {
-            return new Unknown();
-        }
-        try {
-            return new Approved(request.paymentKey(), request.providerOrderId(),
-                request.amount(), OffsetDateTime.parse(approvedAt));
-        } catch (DateTimeParseException exception) {
-            return new Unknown();
-        }
+    private ApprovalResult approved(JsonNode body) {
+        return new Approved(text(body, "paymentKey"), text(body, "orderId"),
+            body.path("totalAmount").longValue(), OffsetDateTime.parse(text(body, "approvedAt")));
     }
 
-    private ApprovalResult providerError(JsonNode body) {
-        if (body == null) {
-            return new Unknown();
-        }
-        String code = text(body, "code");
-        String message = text(body, "message");
-        if (code == null || message == null || !ERROR_CODES.contains(code)) {
-            return new Unknown();
-        }
-        return new ProviderError(400, code, message);
+    private ApprovalResult providerError(int status, JsonNode body) {
+        return new ProviderError(status, body == null ? null : text(body, "code"),
+            body == null ? null : text(body, "message"));
     }
 
     private String text(JsonNode body, String field) {

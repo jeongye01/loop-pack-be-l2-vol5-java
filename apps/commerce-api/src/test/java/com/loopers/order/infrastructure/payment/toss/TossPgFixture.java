@@ -3,6 +3,7 @@ package com.loopers.order.infrastructure.payment.toss;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.tomakehurst.wiremock.WireMockServer;
+import com.github.tomakehurst.wiremock.client.MappingBuilder;
 import com.github.tomakehurst.wiremock.verification.LoggedRequest;
 import com.loopers.order.domain.PaymentGateway.ApprovalRequest;
 
@@ -26,6 +27,14 @@ import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMoc
 public final class TossPgFixture implements AutoCloseable {
 
     public static final String SECRET_KEY = "local-secret";
+    public static final ApprovalRequest SUCCESS_REQUEST =
+        new ApprovalRequest("test-payment-success", "LP-ORD-SUCCESS", 7000, "test-attempt-success");
+    public static final ApprovalRequest REJECTED_REQUEST =
+        new ApprovalRequest("test-payment-rejected", "LP-ORD-REJECTED", 7000, "test-attempt-rejected");
+    public static final ApprovalRequest TIMEOUT_REQUEST =
+        new ApprovalRequest("test-payment-timeout", "LP-ORD-TIMEOUT", 7000, "test-attempt-timeout");
+    public static final ApprovalRequest SERVER_ERROR_REQUEST =
+        new ApprovalRequest("test-payment-server-error", "LP-ORD-SERVER-ERROR", 7000, "test-attempt-server-error");
     private static final String APPROVAL_PATH = "/v1/payments/confirm";
     private static final Set<String> ERROR_CODES = Set.of(
         "ALREADY_PROCESSED_PAYMENT", "ALREADY_PROCESSING_REQUEST",
@@ -40,22 +49,59 @@ public final class TossPgFixture implements AutoCloseable {
         server.start();
     }
 
+    /** 합의한 승인 케이스를 함께 등록한다. 클라이언트 응답 대기는 3초보다 짧게 설정한다. */
+    public static TossPgFixture withScenarios() {
+        var pg = new TossPgFixture();
+        try {
+            var approvedAt = OffsetDateTime.parse("2026-10-21T15:00:00+09:00");
+            pg.approve(SUCCESS_REQUEST, approvedAt);
+            pg.reject(REJECTED_REQUEST);
+            pg.delayedApproval(TIMEOUT_REQUEST, approvedAt, Duration.ofSeconds(3));
+            pg.serverError(SERVER_ERROR_REQUEST);
+            return pg;
+        } catch (RuntimeException exception) {
+            pg.close();
+            throw exception;
+        }
+    }
+
     public URI baseUrl() {
         return URI.create("http://127.0.0.1:" + server.port());
     }
 
+    /** 같은 멱등키·본문으로 재요청해도 동일한 성공 응답을 반환한다. */
     public void approve(ApprovalRequest request, OffsetDateTime approvedAt) {
         delayedApproval(request, approvedAt, Duration.ZERO);
     }
 
+    /** 클라이언트의 응답 대기 제한보다 긴 지연을 지정해 타임아웃을 재현한다. */
     public void delayedApproval(ApprovalRequest request, OffsetDateTime approvedAt, Duration delay) {
-        respond(request, 200, json(Map.of(
+        respond(request, 200, approvalBody(request, approvedAt), delay);
+    }
+
+    private String approvalBody(ApprovalRequest request, OffsetDateTime approvedAt) {
+        return json(Map.of(
             "paymentKey", request.paymentKey(),
             "orderId", request.providerOrderId(),
             "totalAmount", request.amount(),
             "status", "DONE",
             "approvedAt", approvedAt.toString()
-        )), delay);
+        ));
+    }
+
+    /** 같은 멱등키·본문으로 재요청해도 동일한 승인 거절 응답을 반환한다. */
+    public void reject(ApprovalRequest request) {
+        respond(request, 403, json(Map.of(
+            "code", "REJECT_CARD_PAYMENT",
+            "message", "한도초과 혹은 잔액부족으로 결제에 실패했습니다."
+        )), Duration.ZERO);
+    }
+
+    public void serverError(ApprovalRequest request) {
+        respond(request, 500, json(Map.of(
+            "code", "FAILED_INTERNAL_SYSTEM_PROCESSING",
+            "message", "내부 시스템 처리 작업이 실패했습니다. 잠시 후 다시 시도해주세요."
+        )), Duration.ZERO);
     }
 
     public void error(ApprovalRequest request, String code, String message) {
@@ -71,9 +117,15 @@ public final class TossPgFixture implements AutoCloseable {
             throw new IllegalArgumentException("Response delay must not be negative");
         }
         int delayMillis = Math.toIntExact(delay.toMillis());
-        // 설정을 바꾸어도 실제 호출 기록은 보존한다.
-        server.resetMappings();
-        server.stubFor(post(urlEqualTo(APPROVAL_PATH))
+        // 서로 다른 결제 케이스를 함께 등록할 수 있도록 기존 매핑을 유지한다.
+        server.stubFor(approvalRequest(request)
+            .willReturn(aResponse().withStatus(httpStatus)
+                .withHeader("Content-Type", "application/json")
+                .withBody(body).withFixedDelay(delayMillis)));
+    }
+
+    private MappingBuilder approvalRequest(ApprovalRequest request) {
+        return post(urlEqualTo(APPROVAL_PATH))
             .withBasicAuth(SECRET_KEY, "")
             .withHeader("Idempotency-Key", equalTo(request.idempotencyKey()))
             .withHeader("Content-Type", matching("application/json.*"))
@@ -81,10 +133,7 @@ public final class TossPgFixture implements AutoCloseable {
                 "paymentKey", request.paymentKey(),
                 "orderId", request.providerOrderId(),
                 "amount", request.amount()
-            ))))
-            .willReturn(aResponse().withStatus(httpStatus)
-                .withHeader("Content-Type", "application/json")
-                .withBody(body).withFixedDelay(delayMillis)));
+            ))));
     }
 
     public List<LoggedRequest> approvalRequests() {

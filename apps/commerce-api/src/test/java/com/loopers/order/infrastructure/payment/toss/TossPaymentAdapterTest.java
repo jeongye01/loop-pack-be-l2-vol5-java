@@ -51,17 +51,14 @@ class TossPaymentAdapterTest {
             REQUEST.paymentKey(), REQUEST.providerOrderId(), REQUEST.amount(), APPROVED_AT));
     }
 
-    @ParameterizedTest(name = "{0} 오류를 그대로 전달한다")
-    @ValueSource(strings = {
-        "ALREADY_PROCESSED_PAYMENT", "ALREADY_PROCESSING_REQUEST", "PROVIDER_ERROR", "INVALID_REQUEST"
-    })
-    @DisplayName("합의한 PG 오류의 HTTP 상태·코드·메시지를 전달한다")
-    void preservesProviderError(String code) {
-        pg.error(REQUEST, code, "테스트 오류");
+    @Test
+    @DisplayName("PG 오류의 HTTP 상태·코드·메시지를 전달한다")
+    void preservesProviderError() {
+        pg.error(REQUEST, "INVALID_REQUEST", "테스트 오류");
 
         var result = gateway.approve(REQUEST);
 
-        assertThat(result).isEqualTo(new ProviderError(400, code, "테스트 오류"));
+        assertThat(result).isEqualTo(new ProviderError(400, "INVALID_REQUEST", "테스트 오류"));
     }
 
     @Test
@@ -75,4 +72,14 @@ class TossPaymentAdapterTest {
         assertThat(pg.approvalRequests()).hasSize(1);
         assertThat(pg.unmatchedRequests()).isEmpty();
     }
+
+    @ParameterizedTest(name = "HTTP {0}")
+    @ValueSource(ints = {500, 503})
+    @DisplayName("PG 5xx 응답은 Unknown으로 반환한다")
+    void returnsUnknownForServerError(int status) {
+        pg.respond(REQUEST, status, "", Duration.ZERO);
+
+        assertThat(gateway.approve(REQUEST)).isEqualTo(new Unknown());
+    }
+
 }
