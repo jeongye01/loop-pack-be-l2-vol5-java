@@ -59,8 +59,9 @@ requirements:
   R-ORDER-14:   []
   R-ORDER-15:   [INV-ORDER-28]
   R-ORDER-29:   []
-  R-ORDER-30:   [INV-STOCK-47]
-  R-ORDER-31:   [INV-STOCK-49]
+  R-ORDER-30:   [INV-STOCK-47, INV-ORDER-45]
+  R-ORDER-31:   [INV-STOCK-49, INV-ORDER-46]
+  R-ORDER-32:   [INV-PAYMENT-50]
 
   R-ADMIN-01:   []
   R-ADMIN-04:   []
@@ -166,6 +167,8 @@ rules:
     INV-ORDER-38: 품목 수량이 바뀌는 주문의 상태는 DRAFT다.
     INV-ORDER-43: 결제액은 확정 시점의 주문 합계다.
     INV-ORDER-44: 확정에 성공한 주문의 상태는 CONFIRMED다.
+    INV-ORDER-45: PG 결제 요청 전에 주문 품목의 재고를 예약한다.
+    INV-ORDER-46: PG 결제가 완료되면 주문 품목의 재고 예약을 확정하고 주문 상태를 CONFIRMED로 바꾼다.
 
   OrderItem:
     INV-ORDERITEM-39: 품목 수량은 양수다.
@@ -174,3 +177,4 @@ rules:
 
   Payment:
     INV-PAYMENTRESULT-42: 성공한 결제는 결제액과 결제 시점을 갖는다.
+    INV-PAYMENT-50: 같은 결제 시도를 재요청할 때 최초 승인 요청과 같은 멱등키를 사용해 중복 결제를 막는다.

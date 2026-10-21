@@ -51,6 +51,7 @@ classDiagram
         +items: OrderItem[]
         +status: OrderStatus
         +stockReservationStatus: StockReservationStatus?
+        +payment: Payment?
         +paymentResult: PaymentResult?
         +주문총액을계산한다()
         +재고예약상태를변경한다(상태)
@@ -75,8 +76,22 @@ classDiagram
         +amount: Long
         +paidAt: ZonedDateTime
     }
+    class Payment {
+        <<Entity>>
+        +method: PaymentMethod
+        +status: PaymentStatus
+        +amount: Long
+        +paidAt: ZonedDateTime
+        +paymentAttemptKey: String
+        +providerOrderId: String
+        +transactionKey: String
+        +dispatchStartedAt: ZonedDateTime
+        +발송시작을기록한다()
+        +결제결과를기록한다()
+    }
 
     Order "1" *-- "1..*" OrderItem : 소유
+    Order "1" *-- "0..1" Payment : 소유
     Order "1" *-- "0..1" PaymentResult : 내장
     Order --> StockReservationStatus : 재고 예약 상태
     OrderItem "N" ..> "1" Product : 생성 시 정보 복사
@@ -85,7 +100,7 @@ classDiagram
     note for Point "포인트 애그리거트 : Point"
     note for Product "상품 애그리거트 : Product"
     note for Stock "재고 애그리거트 : Stock"
-    note for Order "주문 애그리거트 : Order + OrderItem + PaymentResult / 예약 상태 null=미예약·반환 완료"
+    note for Order "주문 애그리거트 : Order + OrderItem + Payment + PaymentResult / 예약 상태 null=미예약·반환 완료"
 
     class BrandRemovalService {
         <<Domain Service>>
