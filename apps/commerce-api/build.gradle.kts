@@ -70,6 +70,7 @@ dependencies {
     // test-fixtures
     testImplementation(testFixtures(project(":modules:jpa")))
     testImplementation(testFixtures(project(":modules:redis")))
+    testImplementation("org.wiremock:wiremock-standalone:3.13.2")
 
     // architecture test
     testImplementation("com.tngtech.archunit:archunit:1.5.0")

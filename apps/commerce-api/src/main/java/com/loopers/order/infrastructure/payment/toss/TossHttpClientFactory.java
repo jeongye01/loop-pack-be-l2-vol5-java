@@ -1,4 +1,4 @@
-package com.loopers.config;
+package com.loopers.order.infrastructure.payment.toss;
 
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.web.client.RestClient;
