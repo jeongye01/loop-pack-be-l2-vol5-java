@@ -315,3 +315,14 @@ Green 에이전트가 Red 전체를 실행하고 실패를 분석한 뒤, produc
   - 선행 작업: 없음. 기존 `ErrorCode.PAYMENT_ALREADY_PROCESSED` 존재.
   - 테스트 명령: `./gradlew :apps:commerce-api:test --tests com.loopers.order.domain.PaymentTest --tests com.loopers.order.infrastructure.payment.toss.TossPaymentAdapterTest`
   - 완료 조건: `PaymentTest`가 Green이고 `TossPaymentAdapterTest` 회귀가 유지되며, 기존 호환 생성자 결과를 쓰는 어댑터 테스트를 수정하지 않는다. Adapter의 PG 원문 포착은 해당 테스트의 record equality 기대값과 충돌하므로 별도 해결 전에는 변경하지 않고 보고한다.
+
+## PG 멱등키 통합 Red 3개
+
+- [x] 32. 이미 등록된 멱등키의 승인 요청 재처리 차단
+  - 요구사항 ID: R-ORDER-32, INV-PAYMENT-51
+  - 관찰한 Red: `OrderUseCaseIntegrationTest$RejectProcessedPaymentAttempt` 3개가 실패한다. SUCCESS/FAILED는 `PAYMENT_ALREADY_PROCESSED`를 던지지 않고, UNKNOWN은 기존 DRAFT 결제 상태를 반환하지 않고 레거시 확정 흐름으로 진입한다.
+  - 필요한 최소 동작: 결제 승인 요청을 처리하기 전에 해당 멱등키로 연결된 Payment를 조회한다. 기존 SUCCESS/FAILED이면 `PAYMENT_ALREADY_PROCESSED`로 거절하고, PENDING/UNKNOWN이면 저장된 결제와 주문 상태를 그대로 반환해 PG를 다시 호출하지 않는다. 키가 등록되지 않은 경우 기존 주문 확정 흐름을 유지한다.
+  - 변경할 production 파일: `apps/commerce-api/src/main/java/com/loopers/order/application/OrderUseCase.java`, `apps/commerce-api/src/main/java/com/loopers/order/domain/OrderRepository.java`, `apps/commerce-api/src/main/java/com/loopers/order/infrastructure/OrderJpaRepository.java`, `apps/commerce-api/src/main/java/com/loopers/order/infrastructure/OrderRepositoryAdapter.java`
+  - 선행 작업: Order가 Payment를 소유하고 Payment의 멱등키가 유일하게 저장됨.
+  - 테스트 명령: `./gradlew :apps:commerce-api:test --tests 'com.loopers.order.application.OrderUseCaseIntegrationTest$RejectProcessedPaymentAttempt'`
+  - 완료 조건: 위 통합 테스트 3개가 Green이며, 테스트 소스와 기대값은 바뀌지 않는다.

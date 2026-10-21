@@ -41,6 +41,11 @@ public class OrderRepositoryAdapter implements OrderRepository {
     }
 
     @Override
+    public Optional<Order> findByPaymentAttemptKey(String paymentAttemptKey) {
+        return jpaRepository.findByPayment_PaymentAttemptKey(paymentAttemptKey);
+    }
+
+    @Override
     public List<Order> findAllByBuyerId(Long buyerId, int page, int size) {
         return jpaRepository.findAllByBuyerId(buyerId, pageRequest(page, size));
     }

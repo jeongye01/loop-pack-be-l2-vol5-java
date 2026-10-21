@@ -5,6 +5,8 @@ import com.loopers.order.domain.OrderConfirmService;
 import com.loopers.order.domain.OrderItem;
 import com.loopers.order.domain.OrderRepository;
 import com.loopers.order.domain.OrderStatus;
+import com.loopers.order.domain.Payment;
+import com.loopers.order.domain.PaymentStatus;
 import com.loopers.product.domain.Product;
 import com.loopers.product.domain.ProductRepository;
 import com.loopers.product.domain.Stock;
@@ -98,7 +100,19 @@ public class OrderUseCase {
     }
 
     public Order confirm(Long buyerId, Long orderId, String paymentAttemptKey) {
-        return confirm(buyerId, orderId);
+        Order existingAttempt = orderRepository.findByPaymentAttemptKey(paymentAttemptKey).orElse(null);
+        if (existingAttempt == null) {
+            return confirm(buyerId, orderId);
+        }
+        if (!existingAttempt.isOwnedBy(buyerId) || !existingAttempt.getId().equals(orderId)) {
+            throw new CoreException(ErrorCode.PAYMENT_ALREADY_PROCESSED);
+        }
+
+        Payment payment = existingAttempt.getPayment();
+        if (payment.status() == PaymentStatus.SUCCESS || payment.status() == PaymentStatus.FAILED) {
+            throw new CoreException(ErrorCode.PAYMENT_ALREADY_PROCESSED);
+        }
+        return existingAttempt;
     }
 
     private boolean isPointConflict(Throwable exception) {
