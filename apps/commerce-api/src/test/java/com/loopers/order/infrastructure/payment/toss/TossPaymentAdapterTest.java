@@ -21,7 +21,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class TossPaymentAdapterTest {
 
     private static final ApprovalRequest REQUEST =
-        new ApprovalRequest("test-payment-42", "LP-ORD-0000000042", 7000);
+        new ApprovalRequest("test-payment-42", "LP-ORD-0000000042", 7000, "test-attempt-42");
     private static final OffsetDateTime APPROVED_AT =
         OffsetDateTime.parse("2026-10-21T15:00:00+09:00");
 

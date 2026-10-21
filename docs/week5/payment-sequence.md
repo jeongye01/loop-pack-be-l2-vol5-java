@@ -26,16 +26,8 @@ sequenceDiagram
             App->>DB: COMMIT
         end
         App-->>Client: 202 처리 중
-    else 확정 거절
-        PG-->>App: 거래 생성 전 거절 (거래 없음 보장)
-        rect rgb(235, 245, 255)
-            Note over App,DB: TX B
-            App->>DB: FAILED 기록 + 재고 예약 반환 (한 번만)
-            App->>DB: COMMIT
-        end
-        App-->>Client: 422 결제 실패
-    else timeout
-        Note over App,PG: 응답을 받지 못함 — PG 요청 도착·거래 생성 여부 미확인
+    else 타임아웃 또는 PG 5xx 오류
+        Note over App,PG: 결제 결과 미확인
         rect rgb(235, 245, 255)
             Note over App,DB: TX B
             App->>DB: UNKNOWN 기록

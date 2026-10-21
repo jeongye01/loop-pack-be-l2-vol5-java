@@ -6,7 +6,7 @@ public interface PaymentGateway {
 
     ApprovalResult approve(ApprovalRequest request);
 
-    record ApprovalRequest(String paymentKey, String providerOrderId, long amount) {
+    record ApprovalRequest(String paymentKey, String providerOrderId, long amount, String idempotencyKey) {
     }
 
     sealed interface ApprovalResult permits Approved, ProviderError, Unknown {

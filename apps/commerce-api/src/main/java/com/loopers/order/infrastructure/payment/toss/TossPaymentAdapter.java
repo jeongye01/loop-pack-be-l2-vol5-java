@@ -33,6 +33,7 @@ public final class TossPaymentAdapter implements PaymentGateway {
         try {
             return client.post()
                 .uri("/v1/payments/confirm")
+                .header("Idempotency-Key", request.idempotencyKey())
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(Map.of(
                     "paymentKey", request.paymentKey(),

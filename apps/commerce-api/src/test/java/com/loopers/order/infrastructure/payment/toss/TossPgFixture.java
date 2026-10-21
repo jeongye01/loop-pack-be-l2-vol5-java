@@ -14,6 +14,7 @@ import java.util.Map;
 import java.util.Set;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
+import static com.github.tomakehurst.wiremock.client.WireMock.equalTo;
 import static com.github.tomakehurst.wiremock.client.WireMock.equalToJson;
 import static com.github.tomakehurst.wiremock.client.WireMock.matching;
 import static com.github.tomakehurst.wiremock.client.WireMock.post;
@@ -74,6 +75,7 @@ public final class TossPgFixture implements AutoCloseable {
         server.resetMappings();
         server.stubFor(post(urlEqualTo(APPROVAL_PATH))
             .withBasicAuth(SECRET_KEY, "")
+            .withHeader("Idempotency-Key", equalTo(request.idempotencyKey()))
             .withHeader("Content-Type", matching("application/json.*"))
             .withRequestBody(equalToJson(json(Map.of(
                 "paymentKey", request.paymentKey(),
