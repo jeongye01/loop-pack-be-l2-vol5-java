@@ -5,31 +5,31 @@
 | 항목 | 계약 |
 | --- | --- |
 | Base URL | `http://127.0.0.1:18089` |
-| 요청 헤더 | 생성·조회 API 모두 `X-USER-ID: 135135` |
+| 요청 헤더 | Toss 승인 API는 `Authorization: Basic ...`; 조회·테스트 제어 API는 `X-USER-ID: 135135` |
+| 승인 요청 멱등 키 | `POST /v1/payments/confirm`은 Toss처럼 `Idempotency-Key`를 선택적으로 받음. 같은 키의 재요청은 최초 응답을 재사용하고 300자 초과 키는 `400 INVALID_IDEMPOTENCY_KEY`로 거절 |
 | 본문 형식 | JSON. 본문이 있는 요청·응답은 `Content-Type: application/json` |
-| 응답 형식 | PG 거래 객체 또는 배열을 직접 반환. commerce의 `meta`, `data` 형식을 사용하지 않음 |
+| 응답 형식 | 승인 API는 Toss Payment 응답 중 합의한 필드만 반환. 조회 API는 거래 객체 또는 배열을 직접 반환 |
 | 외부 상태 | `PENDING`, `SUCCESS`, `FAILED`. `UNKNOWN`은 commerce 내부 판단이며 PG 상태가 아님 |
 | 주문 식별자 | PG의 `orderId`는 commerce의 `providerOrderId`. 내부 주문 ID와 구분하며 생성·조회에 같은 값 사용 |
-| 생성 중복 | 호출자 멱등 키를 받지 않음. 같은 `orderId`로 새 POST를 보내도 중복 제거를 보장하지 않음 |
+| 승인 중복 | 같은 `paymentKey`는 한 번만 승인. 같은 멱등키의 재요청은 최초 응답을 반환하고, 이미 승인된 `paymentKey`를 다른 멱등키로 승인하면 `400 ALREADY_PROCESSED_PAYMENT` |
 | 시나리오 선택 | 테스트가 WireMock 설정으로 선택. 고객 요청에 동기·비동기 모드 필드를 추가하지 않음 |
 
-## PG-01. 결제 생성
+## PG-01. 결제 승인
 
 | 항목 | 계약 |
 | --- | --- |
-| 요청 | `POST /api/v1/payments` |
-| 입력 | body `orderId`, `cardType`, `cardNo`, `amount`, `callbackUrl` |
-| 비동기 접수 | `202`, 거래 객체의 `status=PENDING` |
-| 동기 완료 | 거래 객체의 `status=SUCCESS` 또는 `FAILED`. **HTTP 코드는 합의 대기** |
-| 생성 전 확정 거절 | `422`, 아래의 전용 오류 객체 |
+| 요청 | `POST /v1/payments/confirm` |
+| 헤더 | Basic 인증, 선택 `Idempotency-Key` |
+| 입력 | body `paymentKey`, `orderId`, `amount` |
+| 성공 | `200`, Toss 응답 중 `paymentKey`, `orderId`, `totalAmount`, `status=DONE`, `approvedAt` 반환 |
+| 이미 처리된 결제 | `400 ALREADY_PROCESSED_PAYMENT` |
+| 멱등키 길이 초과 | `400 INVALID_IDEMPOTENCY_KEY` |
 
 | 필드 | 타입 | 의미 |
 | --- | --- | --- |
+| `paymentKey` | string | 인증된 결제의 고유 키 |
 | `orderId` | string | 6자 이상 PG 주문 식별자 |
-| `cardType` | string | 합성 카드 타입 `TEST` |
-| `cardNo` | string | 합성 카드 번호 `0000-0000-0000-0000` |
 | `amount` | integer | 저장된 주문에서 결정한 원화 결제 금액 |
-| `callbackUrl` | string | 서버 설정으로 고정한 로컬 callback URL |
 
 ### 거래 객체
 

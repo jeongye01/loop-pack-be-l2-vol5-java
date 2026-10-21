@@ -38,12 +38,43 @@ sequenceDiagram
         App-->>Client: 422 결제 실패
     else 타임아웃 또는 PG 5xx 오류
         Note over App,PG: 결제 결과 미확인
-        rect rgb(235, 245, 255)
-            Note over App,DB: TX B
-            App->>DB: UNKNOWN 기록 (재고 예약 유지)
-            App->>DB: COMMIT
-        end
+        App->>DB: UNKNOWN 기록 (재고 예약 유지)
+        App->>DB: COMMIT
         App-->>Client: 202 결과 미확인
+        opt UNKNOWN 결제 조회
+            Note over App,PG: 승인 POST는 다시 보내지 않고 기존 거래만 GET으로 조회
+            loop SUCCESS·FAILED 응답을 받지 못했고 재시도 횟수가 3회 미만
+                App->>PG: GET /api/v1/payments/{transactionKey}
+                alt 조회 결과 SUCCESS
+                    PG-->>App: SUCCESS + 거래 정보
+                    App->>App: 요청한 결제와 응답 일치 확인
+                    rect rgb(235, 245, 255)
+                        Note over App,DB: 결과 반영 TX
+                        App->>DB: 결제 성공 기록 + 주문 확정 + 재고 예약 소비
+                        App->>DB: COMMIT
+                    end
+                else 조회 결과 FAILED
+                    PG-->>App: FAILED + 거래 정보
+                    App->>App: 요청한 결제와 응답 일치 확인
+                    rect rgb(235, 245, 255)
+                        Note over App,DB: 결과 반영 TX
+                        App->>DB: 결제 실패 기록 + 재고 예약 반환
+                        App->>DB: COMMIT
+                    end
+                else PENDING·거래 없음·조회 실패
+                    PG-->>App: 미확정 또는 조회 오류
+                    Note over App,PG: 최종 결과가 아니므로 GET 재시도
+                end
+            end
+            opt 3회 재시도 후에도 최종 결과를 받지 못함
+                rect rgb(235, 245, 255)
+                    Note over App,DB: 보상 트랜잭션
+                    App->>DB: Payment UNKNOWN 기록 유지 + 주문 취소 + 재고 예약 반환
+                    App->>DB: COMMIT
+                end
+                Note over App,PG: PG 결제 결과는 미확정 상태로 남음
+            end
+        end
     end
 
     opt 웹훅이 도착한 경우

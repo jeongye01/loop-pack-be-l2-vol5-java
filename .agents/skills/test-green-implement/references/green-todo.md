@@ -328,6 +328,17 @@ Green 에이전트가 Red 전체를 실행하고 실패를 분석한 뒤, produc
   - 테스트 명령: `./gradlew :apps:commerce-api:test --tests 'com.loopers.order.application.OrderPaymentFlowIntegrationTest' --tests 'com.loopers.order.interfaces.OrderPaymentHttpTest' --tests 'com.loopers.order.infrastructure.payment.toss.TossPaymentAdapterTest'`
   - 완료 조건: 세 테스트 클래스 Green, `./gradlew :apps:commerce-api:check`, `./gradlew :apps:commerce-api:test --tests 'com.loopers.architecture.ArchitectureTest'`, `git diff --check` 통과. 기존 테스트의 기대값·규칙은 완화하지 않는다.
 
+## 테스트 PG 승인 응답 시나리오 Red 3개
+
+- [x] 34. 테스트 PG가 Toss 성공·실패·서버 오류 응답과 멱등 재응답을 제공
+  - 요구사항 ID: PG-01, Toss 멱등키 계약
+  - 관찰한 실패: `TestPgApiIntegrationTest` 5개 중 3개가 실패한다. 승인 거절 요청과 PG 서버 오류 요청이 모두 현재 구현에서 `200 DONE`으로 처리된다. 성공 재요청 두 테스트는 통과한다.
+  - 필요한 최소 동작: 성공 승인 결과는 기존처럼 멱등키별 최초 응답을 재사용한다. `test-payment-rejected` 요청은 거래를 만들지 않고 `403 REJECT_CARD_PAYMENT`와 공식 메시지를 반환하며, 같은 멱등키 재요청도 동일 응답을 반환한다. `test-payment-server-error` 요청은 `500 FAILED_INTERNAL_SYSTEM_PROCESSING`와 공식 메시지를 반환한다.
+  - 변경할 production 파일: `apps/test-pg/src/main/java/com/loopers/testpg/TestPgResponseTransformer.java`, `apps/test-pg/src/main/java/com/loopers/testpg/TransactionStore.java`
+  - 선행 작업: 테스트 PG HTTP 테스트가 위 응답과 거래 저장 여부를 검증하도록 작성됨; `docs/week5/toss-pg-api-contract.md`의 오류 계약 참조.
+  - 테스트 명령: `./gradlew :apps:test-pg:test --tests com.loopers.testpg.TestPgApiIntegrationTest`
+  - 완료 조건: 위 테스트 5개 Green, Checkstyle·`git diff --check` 통과, 테스트 파일 목록과 SHA-256이 구현 전과 동일하다.
+
 ## PG 멱등키 통합 Red 3개
 
 - [x] 32. 이미 등록된 멱등키의 승인 요청 재처리 차단

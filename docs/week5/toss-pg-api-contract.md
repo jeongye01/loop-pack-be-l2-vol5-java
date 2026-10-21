@@ -12,7 +12,8 @@
 
 | 필드 | 타입 | 의미 |
 | --- | --- | --- |
-| `Idempotency-Key` | string | 요청별 멱등키. 같은 요청의 재전송에는 같은 키를 사용한다. |
+| `Authorization` | Basic | Toss 시크릿 키와 콜론을 Base64로 인코딩한 인증 값 |
+| `Idempotency-Key` | string, 선택 | 멱등 요청에 사용하는 키. 재전송에는 같은 키를 사용한다. 최대 300자이며 초과하면 `400 INVALID_IDEMPOTENCY_KEY`를 반환한다. |
 
 ## 입력
 
