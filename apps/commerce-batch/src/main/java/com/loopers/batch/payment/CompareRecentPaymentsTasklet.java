@@ -53,13 +53,19 @@ public class CompareRecentPaymentsTasklet implements Tasklet {
     private void reconcile(PaymentRecord payment) {
         PaymentLookupClient.LookupResult lookup = lookupClient.findByOrderId(payment.providerOrderId());
         RemotePaymentState remoteState = interpreter.interpret(lookup);
-        if ("SUCCESS".equals(payment.status()) && remoteState == RemotePaymentState.FAILED) {
-            int updated = repository.compensateSucceededPaymentAsFailed(payment.id(), lookup.rawResponse());
-            LOGGER.info("PG payment discrepancy corrected: paymentId={}, local=SUCCESS, remote=FAILED, applied={}",
-                payment.id(), updated == 1);
-            return;
+        String reconciliationStatus;
+        if (remoteState == RemotePaymentState.UNKNOWN || remoteState == RemotePaymentState.PROCESSING) {
+            reconciliationStatus = "UNRESOLVED";
+        } else if (payment.status().equals(remoteState.name())) {
+            reconciliationStatus = "MATCHED";
+        } else {
+            reconciliationStatus = "MISMATCH";
         }
-        if (remoteState != RemotePaymentState.UNKNOWN && !payment.status().equals(remoteState.name())) {
+
+        repository.recordReconciliation(payment, reconciliationStatus, lookup.paymentStatus(), lookup.rawResponse(),
+            LocalDateTime.now(clock));
+
+        if ("MISMATCH".equals(reconciliationStatus)) {
             LOGGER.warn("PG payment discrepancy requires review: paymentId={}, local={}, remote={}, httpStatus={}",
                 payment.id(), payment.status(), remoteState, lookup.httpStatus());
         }

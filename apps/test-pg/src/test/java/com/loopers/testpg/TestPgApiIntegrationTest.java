@@ -7,6 +7,7 @@ import com.github.tomakehurst.wiremock.core.WireMockConfiguration;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import java.net.URI;
@@ -138,30 +139,35 @@ class TestPgApiIntegrationTest {
         assertThat(transactionsForOrder("LP-ORD-0000000042")).isEmpty();
     }
 
-    @Test
-    @DisplayName("승인 성공 후 같은 멱등키로 재요청하면 최초 응답을 반환하고 거래를 추가 생성하지 않는다")
-    void reusesSuccessfulResponseForSameIdempotencyKey() throws Exception {
-        HttpResponse<String> first = confirmPayment("test-payment-42", "attempt-42");
-        HttpResponse<String> repeated = confirmPayment("test-payment-42", "attempt-42");
+    @DisplayName("[INV-PAYMENT-50] 같은 결제 시도 재요청은 최초 응답을 재사용해 중복 거래를 막는다.")
+    @Nested
+    class RepeatedIdempotencyKey {
 
-        assertThat(first.statusCode()).isEqualTo(200);
-        assertThat(repeated.statusCode()).isEqualTo(200);
-        assertThat(repeated.body()).isEqualTo(first.body());
-        assertThat(transactionsForOrder("LP-ORD-0000000042")).hasSize(1);
-    }
+        @Test
+        @DisplayName("승인 성공 후 같은 멱등키로 재요청하면 최초 응답을 반환하고 거래를 추가 생성하지 않는다")
+        void reusesSuccessfulResponseForSameIdempotencyKey() throws Exception {
+            HttpResponse<String> first = confirmPayment("test-payment-42", "attempt-42");
+            HttpResponse<String> repeated = confirmPayment("test-payment-42", "attempt-42");
 
-    @Test
-    @DisplayName("카드 승인 거절 후 같은 멱등키로 재요청하면 최초 거절 응답을 반환한다")
-    void reusesRejectedResponseForSameIdempotencyKey() throws Exception {
-        HttpResponse<String> first = confirmPayment("test-payment-rejected", "attempt-rejected");
-        HttpResponse<String> repeated = confirmPayment("test-payment-rejected", "attempt-rejected");
+            assertThat(first.statusCode()).isEqualTo(200);
+            assertThat(repeated.statusCode()).isEqualTo(200);
+            assertThat(repeated.body()).isEqualTo(first.body());
+            assertThat(transactionsForOrder("LP-ORD-0000000042")).hasSize(1);
+        }
 
-        assertThat(first.statusCode()).isEqualTo(403);
-        assertThat(repeated.statusCode()).isEqualTo(403);
-        assertThat(repeated.body()).isEqualTo(first.body());
-        assertThat(objectMapper.readTree(first.body()).get("code").asText())
-            .isEqualTo("REJECT_CARD_PAYMENT");
-        assertThat(transactionsForOrder("LP-ORD-0000000042")).isEmpty();
+        @Test
+        @DisplayName("카드 승인 거절 후 같은 멱등키로 재요청하면 최초 거절 응답을 반환한다")
+        void reusesRejectedResponseForSameIdempotencyKey() throws Exception {
+            HttpResponse<String> first = confirmPayment("test-payment-rejected", "attempt-rejected");
+            HttpResponse<String> repeated = confirmPayment("test-payment-rejected", "attempt-rejected");
+
+            assertThat(first.statusCode()).isEqualTo(403);
+            assertThat(repeated.statusCode()).isEqualTo(403);
+            assertThat(repeated.body()).isEqualTo(first.body());
+            assertThat(objectMapper.readTree(first.body()).get("code").asText())
+                .isEqualTo("REJECT_CARD_PAYMENT");
+            assertThat(transactionsForOrder("LP-ORD-0000000042")).isEmpty();
+        }
     }
 
     @Test

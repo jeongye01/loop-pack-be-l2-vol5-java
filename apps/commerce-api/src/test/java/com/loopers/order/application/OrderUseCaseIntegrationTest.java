@@ -7,9 +7,6 @@ import com.loopers.order.domain.OrderItem;
 import com.loopers.order.domain.OrderRepository;
 import com.loopers.order.domain.OrderStatus;
 import com.loopers.order.domain.PaymentGateway;
-import com.loopers.order.domain.PaymentMethod;
-import com.loopers.order.domain.PaymentStatus;
-import com.loopers.order.domain.Payment;
 import com.loopers.product.domain.Product;
 import com.loopers.product.domain.Stock;
 import com.loopers.support.error.CoreException;
@@ -28,16 +25,10 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import java.util.List;
-import java.time.OffsetDateTime;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicReference;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 @SpringBootTest
 @Import(MySqlTestContainersConfig.class)

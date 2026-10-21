@@ -16,6 +16,9 @@ spring:
       name: ${job.name:NONE}
     jdbc:
       initialize-schema: never
+  sql:
+    init:
+      mode: always
 
 payment:
   toss:

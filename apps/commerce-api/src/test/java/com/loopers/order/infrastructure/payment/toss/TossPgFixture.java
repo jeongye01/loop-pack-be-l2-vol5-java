@@ -18,6 +18,8 @@ import java.util.Set;
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.equalTo;
 import static com.github.tomakehurst.wiremock.client.WireMock.equalToJson;
+import static com.github.tomakehurst.wiremock.client.WireMock.get;
+import static com.github.tomakehurst.wiremock.client.WireMock.getRequestedFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.matching;
 import static com.github.tomakehurst.wiremock.client.WireMock.post;
 import static com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor;
@@ -37,6 +39,7 @@ public final class TossPgFixture implements AutoCloseable {
     public static final ApprovalRequest SERVER_ERROR_REQUEST =
         new ApprovalRequest("test-payment-server-error", "LP-ORD-SERVER-ERROR", 7000, "test-attempt-server-error");
     private static final String APPROVAL_PATH = "/v1/payments/confirm";
+    private static final String PAYMENT_PATH = "/v1/payments/%s";
     private static final String CANCEL_PATH = "/v1/payments/%s/cancel";
     private static final Set<String> ERROR_CODES = Set.of(
         "ALREADY_PROCESSED_PAYMENT", "ALREADY_PROCESSING_REQUEST",
@@ -141,6 +144,18 @@ public final class TossPgFixture implements AutoCloseable {
 
     public List<LoggedRequest> cancellationRequests(CancellationRequest request) {
         return server.findAll(postRequestedFor(urlEqualTo(CANCEL_PATH.formatted(request.paymentKey()))));
+    }
+
+    public void payment(String paymentKey, int status, String body) {
+        server.stubFor(get(urlEqualTo(PAYMENT_PATH.formatted(paymentKey)))
+            .withBasicAuth(SECRET_KEY, "")
+            .willReturn(aResponse().withStatus(status)
+                .withHeader("Content-Type", "application/json")
+                .withBody(body)));
+    }
+
+    public List<LoggedRequest> paymentRequests(String paymentKey) {
+        return server.findAll(getRequestedFor(urlEqualTo(PAYMENT_PATH.formatted(paymentKey))));
     }
 
     public void error(ApprovalRequest request, String code, String message) {

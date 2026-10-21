@@ -54,6 +54,53 @@ class TossPaymentAdapterTest {
     }
 
     @Test
+    @DisplayName("paymentKey로 조회한 200 DONE 응답을 내부 승인 성공 결과로 변환한다")
+    void convertsPaymentLookupResult() {
+        pg.payment(REQUEST.paymentKey(), 200, """
+            {
+              "paymentKey": "test-payment-42",
+              "orderId": "LP-ORD-0000000042",
+              "totalAmount": 7000,
+              "status": "DONE",
+              "approvedAt": "2026-10-21T15:00:00+09:00"
+            }
+            """);
+
+        var result = gateway.findByPaymentKey(REQUEST.paymentKey());
+
+        assertThat(result).isEqualTo(new Approved(
+            REQUEST.paymentKey(), REQUEST.providerOrderId(), REQUEST.amount(), APPROVED_AT));
+        assertThat(pg.paymentRequests(REQUEST.paymentKey())).hasSize(1);
+        assertThat(pg.unmatchedRequests()).isEmpty();
+    }
+
+    @Test
+    @DisplayName("paymentKey 조회가 404이면 결과 미확정으로 변환한다")
+    void returnsUnknownWhenPaymentLookupIsNotFound() {
+        pg.payment(REQUEST.paymentKey(), 404, "{}");
+
+        assertThat(gateway.findByPaymentKey(REQUEST.paymentKey())).isEqualTo(new Unknown());
+        assertThat(pg.paymentRequests(REQUEST.paymentKey())).hasSize(1);
+        assertThat(pg.unmatchedRequests()).isEmpty();
+    }
+
+    @Test
+    @DisplayName("paymentKey 조회가 PROCESSING이면 결과 미확정으로 변환한다")
+    void returnsUnknownWhenPaymentLookupIsProcessing() {
+        pg.payment(REQUEST.paymentKey(), 200, """
+            {
+              "paymentKey": "test-payment-42",
+              "status": "IN_PROGRESS"
+            }
+            """);
+
+        assertThat(gateway.findByPaymentKey(REQUEST.paymentKey()))
+            .isEqualTo(new Unknown("{\"paymentKey\":\"test-payment-42\",\"status\":\"IN_PROGRESS\"}"));
+        assertThat(pg.paymentRequests(REQUEST.paymentKey())).hasSize(1);
+        assertThat(pg.unmatchedRequests()).isEmpty();
+    }
+
+    @Test
     @DisplayName("paymentKey로 PG 취소를 요청하고 취소 확인 응답을 변환한다")
     void convertsCanceledPayment() {
         var request = new CancellationRequest(

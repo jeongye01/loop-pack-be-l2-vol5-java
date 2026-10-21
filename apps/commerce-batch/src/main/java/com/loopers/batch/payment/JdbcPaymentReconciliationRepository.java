@@ -2,9 +2,7 @@ package com.loopers.batch.payment;
 
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
-import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.stereotype.Repository;
-import org.springframework.transaction.support.TransactionTemplate;
 
 import javax.sql.DataSource;
 import java.time.LocalDateTime;
@@ -15,29 +13,42 @@ public class JdbcPaymentReconciliationRepository implements PaymentReconciliatio
     private static final RowMapper<PaymentRecord> PAYMENT_RECORD_MAPPER = (resultSet, rowNumber) ->
         new PaymentRecord(resultSet.getLong("id"), resultSet.getString("provider_order_id"),
             resultSet.getString("status"));
-    private static final RowMapper<PaymentOrderState> PAYMENT_ORDER_STATE_MAPPER = (resultSet, rowNumber) ->
-        new PaymentOrderState(resultSet.getString("payment_status"), resultSet.getLong("order_id"),
-            resultSet.getString("order_status"), resultSet.getString("reservation_status"));
-    private static final RowMapper<OrderItemStock> ORDER_ITEM_STOCK_MAPPER = (resultSet, rowNumber) ->
-        new OrderItemStock(resultSet.getLong("product_id"), resultSet.getInt("quantity"));
 
     private final JdbcTemplate jdbcTemplate;
-    private final TransactionTemplate transactionTemplate;
 
     public JdbcPaymentReconciliationRepository(JdbcTemplate jdbcTemplate, DataSource dataSource) {
         this.jdbcTemplate = jdbcTemplate;
-        this.transactionTemplate = new TransactionTemplate(new DataSourceTransactionManager(dataSource));
     }
 
     @Override
     public List<PaymentRecord> findRecentTerminalPayments(LocalDateTime from, LocalDateTime until, long afterId,
                                                          int limit) {
         return jdbcTemplate.query(
-            "select id, provider_order_id, status from payments"
-                + " where status in ('SUCCESS', 'FAILED') and updated_at >= ? and updated_at < ?"
-                + " and deleted_at is null and id > ? order by id limit ?",
+            "select p.id, p.provider_order_id, p.status from payments p"
+                + " where p.status in ('SUCCESS', 'FAILED') and p.deleted_at is null and p.id > ?"
+                + " and ((p.updated_at >= ? and p.updated_at < ?)"
+                + " or exists (select 1 from payment_reconciliations r"
+                + " where r.payment_id = p.id and r.status = 'UNRESOLVED'))"
+                + " and not exists (select 1 from payment_reconciliations r"
+                + " where r.payment_id = p.id and r.status in ('MATCHED', 'MISMATCH'))"
+                + " order by p.id limit ?",
             PAYMENT_RECORD_MAPPER,
-            java.sql.Timestamp.valueOf(from), java.sql.Timestamp.valueOf(until), afterId, limit
+            afterId, java.sql.Timestamp.valueOf(from), java.sql.Timestamp.valueOf(until), limit
+        );
+    }
+
+    @Override
+    public void recordReconciliation(PaymentRecord payment, String reconciliationStatus, String providerStatus,
+                                     String providerResponse, LocalDateTime checkedAt) {
+        jdbcTemplate.update(
+            "insert into payment_reconciliations"
+                + " (payment_id, status, local_status, pg_status, pg_response, attempt_count, last_checked_at)"
+                + " values (?, ?, ?, ?, ?, 1, ?)"
+                + " on duplicate key update status = values(status), local_status = values(local_status),"
+                + " pg_status = values(pg_status), pg_response = values(pg_response),"
+                + " attempt_count = attempt_count + 1, last_checked_at = values(last_checked_at)",
+            payment.id(), reconciliationStatus, payment.status(), providerStatus, providerResponse,
+            java.sql.Timestamp.valueOf(checkedAt)
         );
     }
 
@@ -59,61 +70,4 @@ public class JdbcPaymentReconciliationRepository implements PaymentReconciliatio
         );
     }
 
-    @Override
-    public int compensateSucceededPaymentAsFailed(long paymentId, String rawProviderResponse) {
-        Integer updated = transactionTemplate.execute(transaction -> {
-            List<PaymentOrderState> states = jdbcTemplate.query(
-                "select p.status as payment_status, o.id as order_id, o.status as order_status,"
-                    + " o.stock_reservation_status as reservation_status"
-                    + " from payments p join orders o on o.payment_id = p.id where p.id = ? for update",
-                PAYMENT_ORDER_STATE_MAPPER, paymentId);
-            if (states.isEmpty() || !isCompensatable(states.getFirst())) {
-                return 0;
-            }
-
-            long orderId = states.getFirst().orderId();
-            List<OrderItemStock> items = jdbcTemplate.query(
-                "select product_id, sum(quantity) as quantity from orders_items"
-                    + " where order_id = ? group by product_id",
-                ORDER_ITEM_STOCK_MAPPER, orderId);
-            if (items.isEmpty()) {
-                return 0;
-            }
-            for (OrderItemStock item : items) {
-                int restored = jdbcTemplate.update(
-                    "update stock set quantity = quantity + ? where product_id = ?",
-                    item.quantity(), item.productId());
-                if (restored != 1) {
-                    throw new IllegalStateException("Missing stock for payment reconciliation: " + item.productId());
-                }
-            }
-
-            int orderUpdated = jdbcTemplate.update(
-                "update orders set status = 'CANCELED', stock_reservation_status = null,"
-                    + " updated_at = current_timestamp where id = ? and status = 'CONFIRMED'"
-                    + " and stock_reservation_status = 'CONSUMED'",
-                orderId);
-            int paymentUpdated = jdbcTemplate.update(
-                "update payments set status = 'FAILED', raw_provider_response = ?,"
-                    + " updated_at = current_timestamp where id = ? and status = 'SUCCESS'",
-                rawProviderResponse, paymentId);
-            if (orderUpdated != 1 || paymentUpdated != 1) {
-                throw new IllegalStateException("Payment reconciliation compensation lost its state guard");
-            }
-            return 1;
-        });
-        return updated == null ? 0 : updated;
-    }
-
-    private boolean isCompensatable(PaymentOrderState state) {
-        return "SUCCESS".equals(state.paymentStatus()) && "CONFIRMED".equals(state.orderStatus())
-            && "CONSUMED".equals(state.reservationStatus());
-    }
-
-    private record PaymentOrderState(String paymentStatus, long orderId, String orderStatus,
-                                     String reservationStatus) {
-    }
-
-    private record OrderItemStock(long productId, int quantity) {
-    }
 }
