@@ -68,7 +68,7 @@ public final class TossPaymentAdapter implements PaymentGateway {
                 .uri("/v1/payments/{paymentKey}", paymentKey)
                 .exchange((httpRequest, response) -> {
                     int status = response.getStatusCode().value();
-                    if (response.getStatusCode().is5xxServerError() || status == 404) {
+                    if (response.getStatusCode().is5xxServerError()) {
                         return new Unknown();
                     }
                     JsonNode body;
@@ -76,6 +76,9 @@ public final class TossPaymentAdapter implements PaymentGateway {
                         body = objectMapper.readTree(response.getBody());
                     } catch (IOException exception) {
                         return new Unknown();
+                    }
+                    if (status == 404) {
+                        return providerError(status, body);
                     }
                     if (status != 200) {
                         return providerError(status, body);

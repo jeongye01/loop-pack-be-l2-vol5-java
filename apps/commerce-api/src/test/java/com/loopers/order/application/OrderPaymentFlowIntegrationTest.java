@@ -20,7 +20,11 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -43,6 +47,7 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
 
@@ -57,6 +62,9 @@ class OrderPaymentFlowIntegrationTest {
 
     @Autowired private OrderUseCase useCase;
     @Autowired private EntityManager entityManager;
+    @Autowired private OrderPaymentTransactionService paymentTransactionService;
+    @Autowired private ApplicationEventPublisher eventPublisher;
+    @Autowired private ConfigurableApplicationContext applicationContext;
     @Autowired private PlatformTransactionManager transactionManager;
     @MockitoBean private PaymentGateway paymentGateway;
 
@@ -114,6 +122,156 @@ class OrderPaymentFlowIntegrationTest {
                 () -> verify(paymentGateway, times(2)).findByPaymentKey(paymentKey)
             );
         }
+    }
+
+    @DisplayName("앱 재기동 시 PENDING·UNKNOWN 결제를 PG 조회로 복구한다.")
+    @Nested
+    class RecoverPendingPaymentsOnStartup {
+
+        @DisplayName("PENDING 결제가 PG에서 승인된 상태면 주문을 확정하고 예약을 소비한다.")
+        @Test
+        void confirmsPendingPaymentFoundApprovedOnStartup() {
+            Scenario scenario = confirmationScenario(5);
+            String paymentKey = "test-payment-startup-recovery";
+            String attemptKey = newAttemptKey();
+            var plan = paymentTransactionService.prepare(
+                scenario.buyerId(), scenario.orderId(), paymentKey, attemptKey);
+            when(paymentGateway.findByPaymentKey(paymentKey)).thenReturn(approved(plan.request()));
+            entityManager.flush();
+            entityManager.clear();
+
+            eventPublisher.publishEvent(new ApplicationReadyEvent(
+                new SpringApplication(), new String[0], applicationContext, java.time.Duration.ZERO));
+            entityManager.flush();
+            entityManager.clear();
+            Order recovered = entityManager.find(Order.class, scenario.orderId());
+
+            assertAll(
+                () -> assertThat(recovered.getStatus()).isEqualTo(OrderStatus.CONFIRMED),
+                () -> assertThat(recovered.getPayment().status()).isEqualTo(PaymentStatus.SUCCESS),
+                () -> assertThat(stockReservationStatus(scenario.orderId())).isEqualTo("CONSUMED"),
+                () -> assertThat(TestEntities.stockQuantity(entityManager, scenario.productId())).isEqualTo(3),
+                () -> verify(paymentGateway).findByPaymentKey(paymentKey),
+                () -> verify(paymentGateway, never()).approve(any())
+            );
+        }
+
+        @DisplayName("UNKNOWN 결제가 PG 조회에서 승인된 상태면 주문을 확정하고 예약을 소비한다.")
+        @Test
+        void confirmsUnknownPaymentFoundApprovedOnStartup() {
+            Scenario scenario = confirmationScenario(5);
+            String paymentKey = "test-payment-startup-unknown";
+            String attemptKey = newAttemptKey();
+            var plan = paymentTransactionService.prepare(
+                scenario.buyerId(), scenario.orderId(), paymentKey, attemptKey);
+            plan.order().getPayment().recordResult(new PaymentGateway.Unknown());
+            when(paymentGateway.findByPaymentKey(paymentKey)).thenReturn(approved(plan.request()));
+            entityManager.flush();
+            entityManager.clear();
+
+            eventPublisher.publishEvent(new ApplicationReadyEvent(
+                new SpringApplication(), new String[0], applicationContext, java.time.Duration.ZERO));
+            entityManager.flush();
+            entityManager.clear();
+            Order recovered = entityManager.find(Order.class, scenario.orderId());
+
+            assertAll(
+                () -> assertThat(recovered.getStatus()).isEqualTo(OrderStatus.CONFIRMED),
+                () -> assertThat(recovered.getPayment().status()).isEqualTo(PaymentStatus.SUCCESS),
+                () -> assertThat(stockReservationStatus(scenario.orderId())).isEqualTo("CONSUMED"),
+                () -> assertThat(TestEntities.stockQuantity(entityManager, scenario.productId())).isEqualTo(3),
+                () -> verify(paymentGateway).findByPaymentKey(paymentKey),
+                () -> verify(paymentGateway, never()).approve(any())
+            );
+        }
+
+        @DisplayName("UNKNOWN 결제를 조회해도 최종 결과가 UNKNOWN이면 상태와 재고 예약을 유지한다.")
+        @Test
+        void keepsUnknownPaymentUnchangedWhenLookupRemainsUnknownOnStartup() {
+            Scenario scenario = confirmationScenario(5);
+            String paymentKey = "test-payment-startup-still-unknown";
+            String attemptKey = newAttemptKey();
+            var plan = paymentTransactionService.prepare(
+                scenario.buyerId(), scenario.orderId(), paymentKey, attemptKey);
+            plan.order().getPayment().recordResult(new PaymentGateway.Unknown());
+            when(paymentGateway.findByPaymentKey(paymentKey)).thenReturn(new PaymentGateway.Unknown());
+            entityManager.flush();
+            entityManager.clear();
+
+            eventPublisher.publishEvent(new ApplicationReadyEvent(
+                new SpringApplication(), new String[0], applicationContext, java.time.Duration.ZERO));
+            entityManager.flush();
+            entityManager.clear();
+            Order unresolved = entityManager.find(Order.class, scenario.orderId());
+
+            assertAll(
+                () -> assertThat(unresolved.getStatus()).isEqualTo(OrderStatus.DRAFT),
+                () -> assertThat(unresolved.getPayment().status()).isEqualTo(PaymentStatus.UNKNOWN),
+                () -> assertThat(stockReservationStatus(scenario.orderId())).isEqualTo("RESERVED"),
+                () -> assertThat(TestEntities.stockQuantity(entityManager, scenario.productId())).isEqualTo(3),
+                () -> verify(paymentGateway).findByPaymentKey(paymentKey),
+                () -> verify(paymentGateway, never()).approve(any()),
+                () -> verify(paymentGateway, never()).cancel(any())
+            );
+        }
+
+        @DisplayName("PENDING 결제가 PG에서 실패한 상태면 재고 예약을 반환한다.")
+        @Test
+        void releasesReservationWhenPendingPaymentFailedOnProvider() {
+            Scenario scenario = confirmationScenario(5);
+            String paymentKey = "test-payment-startup-failed";
+            String attemptKey = newAttemptKey();
+            paymentTransactionService.prepare(scenario.buyerId(), scenario.orderId(), paymentKey, attemptKey);
+            when(paymentGateway.findByPaymentKey(paymentKey)).thenReturn(new PaymentGateway.ProviderError(
+                403, "REJECT_CARD_PAYMENT", "카드 승인이 거절되었습니다."));
+            entityManager.flush();
+            entityManager.clear();
+
+            eventPublisher.publishEvent(new ApplicationReadyEvent(
+                new SpringApplication(), new String[0], applicationContext, java.time.Duration.ZERO));
+            entityManager.flush();
+            entityManager.clear();
+            Order recovered = entityManager.find(Order.class, scenario.orderId());
+
+            assertAll(
+                () -> assertThat(recovered.getStatus()).isEqualTo(OrderStatus.DRAFT),
+                () -> assertThat(recovered.getPayment().status()).isEqualTo(PaymentStatus.FAILED),
+                () -> assertThat(stockReservationStatus(scenario.orderId())).isNull(),
+                () -> assertThat(TestEntities.stockQuantity(entityManager, scenario.productId())).isEqualTo(5),
+                () -> verify(paymentGateway).findByPaymentKey(paymentKey),
+                () -> verify(paymentGateway, never()).approve(any())
+            );
+        }
+
+        @DisplayName("PG 조회가 404이면 무효 결제로 기록하고 재고 예약을 반환한다.")
+        @Test
+        void marksPaymentFailedAndReleasesReservationWhenLookupReturnsNotFound() {
+            Scenario scenario = confirmationScenario(5);
+            String paymentKey = "test-payment-startup-not-found";
+            String attemptKey = newAttemptKey();
+            paymentTransactionService.prepare(scenario.buyerId(), scenario.orderId(), paymentKey, attemptKey);
+            when(paymentGateway.findByPaymentKey(paymentKey)).thenReturn(
+                new PaymentGateway.ProviderError(404, "PAYMENT_NOT_FOUND", "결제를 찾을 수 없습니다."));
+            entityManager.flush();
+            entityManager.clear();
+
+            eventPublisher.publishEvent(new ApplicationReadyEvent(
+                new SpringApplication(), new String[0], applicationContext, java.time.Duration.ZERO));
+            entityManager.flush();
+            entityManager.clear();
+            Order recovered = entityManager.find(Order.class, scenario.orderId());
+
+            assertAll(
+                () -> assertThat(recovered.getStatus()).isEqualTo(OrderStatus.DRAFT),
+                () -> assertThat(recovered.getPayment().status()).isEqualTo(PaymentStatus.FAILED),
+                () -> assertThat(stockReservationStatus(scenario.orderId())).isNull(),
+                () -> assertThat(TestEntities.stockQuantity(entityManager, scenario.productId())).isEqualTo(5),
+                () -> verify(paymentGateway).findByPaymentKey(paymentKey),
+                () -> verify(paymentGateway, never()).approve(any()),
+                () -> verify(paymentGateway, never()).cancel(any())
+            );
+        }
+
     }
 
     @DisplayName("[INV-ORDER-48] 결제 결과 확인을 위한 재조회가 끝난 뒤 PG 취소 요청도 최대 3회 미확정이면 재고 예약은 반환 완료되고 결제 상태는 CANCEL_PROCESSING이다. 취소가 확인되면 결제 상태는 CANCELED다.")

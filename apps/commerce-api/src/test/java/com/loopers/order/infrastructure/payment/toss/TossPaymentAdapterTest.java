@@ -75,11 +75,11 @@ class TossPaymentAdapterTest {
     }
 
     @Test
-    @DisplayName("paymentKey 조회가 404이면 결과 미확정으로 변환한다")
-    void returnsUnknownWhenPaymentLookupIsNotFound() {
+    @DisplayName("paymentKey 조회가 404이면 결제 없음 오류로 변환한다")
+    void returnsProviderErrorWhenPaymentLookupIsNotFound() {
         pg.payment(REQUEST.paymentKey(), 404, "{}");
 
-        assertThat(gateway.findByPaymentKey(REQUEST.paymentKey())).isEqualTo(new Unknown());
+        assertThat(gateway.findByPaymentKey(REQUEST.paymentKey())).isEqualTo(new ProviderError(404, null, null));
         assertThat(pg.paymentRequests(REQUEST.paymentKey())).hasSize(1);
         assertThat(pg.unmatchedRequests()).isEmpty();
     }

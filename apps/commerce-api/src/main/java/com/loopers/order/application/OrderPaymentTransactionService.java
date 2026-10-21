@@ -85,7 +85,8 @@ public class OrderPaymentTransactionService {
         }
 
         String providerOrderId = "LP-ORD-%010d".formatted(orderId);
-        Payment payment = new Payment(PaymentMethod.PG, order.getTotalAmount(), paymentAttemptKey, providerOrderId);
+        Payment payment = new Payment(
+            PaymentMethod.PG, order.getTotalAmount(), paymentKey, paymentAttemptKey, providerOrderId);
         payment.markDispatchStarted(ZonedDateTime.now());
         order.setPayment(payment);
         orderRepository.save(order);

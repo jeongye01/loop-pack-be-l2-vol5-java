@@ -32,6 +32,9 @@ public class Payment extends BaseEntity {
     @Column(nullable = false)
     private Long amount;
 
+    @Column(nullable = false, length = 200)
+    private String paymentKey;
+
     @Column(nullable = false, unique = true, length = 100)
     private String paymentAttemptKey;
 
@@ -56,8 +59,19 @@ public class Payment extends BaseEntity {
     }
 
     public Payment(PaymentMethod method, Long amount, String paymentAttemptKey, String providerOrderId) {
+        this(method, amount, paymentAttemptKey, paymentAttemptKey, providerOrderId);
+    }
+
+    public Payment(
+        PaymentMethod method,
+        Long amount,
+        String paymentKey,
+        String paymentAttemptKey,
+        String providerOrderId
+    ) {
         this.method = method;
         this.amount = amount;
+        this.paymentKey = paymentKey;
         this.paymentAttemptKey = paymentAttemptKey;
         this.providerOrderId = providerOrderId;
         this.status = PaymentStatus.PENDING;
@@ -113,6 +127,10 @@ public class Payment extends BaseEntity {
 
     public String transactionKey() {
         return transactionKey;
+    }
+
+    public String paymentKey() {
+        return paymentKey;
     }
 
     public String rawProviderResponse() {
