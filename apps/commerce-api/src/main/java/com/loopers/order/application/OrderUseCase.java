@@ -5,8 +5,7 @@ import com.loopers.order.domain.OrderConfirmService;
 import com.loopers.order.domain.OrderItem;
 import com.loopers.order.domain.OrderRepository;
 import com.loopers.order.domain.OrderStatus;
-import com.loopers.order.domain.Payment;
-import com.loopers.order.domain.PaymentStatus;
+import com.loopers.order.domain.PaymentGateway;
 import com.loopers.product.domain.Product;
 import com.loopers.product.domain.ProductRepository;
 import com.loopers.product.domain.Stock;
@@ -23,6 +22,7 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.OptimisticLockException;
 import org.hibernate.StaleObjectStateException;
 import org.springframework.stereotype.Service;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.transaction.annotation.Transactional;
@@ -43,7 +43,32 @@ public class OrderUseCase {
     private final StockRepository stockRepository;
     private final TransactionRetryExecutor transactionRetryExecutor;
     private final EntityManager entityManager;
+    private final OrderPaymentTransactionService paymentTransactionService;
+    private final PaymentGateway paymentGateway;
     private final OrderConfirmService confirmService = new OrderConfirmService();
+
+    @Autowired
+    public OrderUseCase(
+        OrderRepository orderRepository,
+        ProductRepository productRepository,
+        UserRepository userRepository,
+        PointRepository pointRepository,
+        StockRepository stockRepository,
+        TransactionRetryExecutor transactionRetryExecutor,
+        EntityManager entityManager,
+        OrderPaymentTransactionService paymentTransactionService,
+        PaymentGateway paymentGateway
+    ) {
+        this.orderRepository = orderRepository;
+        this.productRepository = productRepository;
+        this.userRepository = userRepository;
+        this.pointRepository = pointRepository;
+        this.stockRepository = stockRepository;
+        this.transactionRetryExecutor = transactionRetryExecutor;
+        this.entityManager = entityManager;
+        this.paymentTransactionService = paymentTransactionService;
+        this.paymentGateway = paymentGateway;
+    }
 
     public OrderUseCase(
         OrderRepository orderRepository,
@@ -54,13 +79,8 @@ public class OrderUseCase {
         TransactionRetryExecutor transactionRetryExecutor,
         EntityManager entityManager
     ) {
-        this.orderRepository = orderRepository;
-        this.productRepository = productRepository;
-        this.userRepository = userRepository;
-        this.pointRepository = pointRepository;
-        this.stockRepository = stockRepository;
-        this.transactionRetryExecutor = transactionRetryExecutor;
-        this.entityManager = entityManager;
+        this(orderRepository, productRepository, userRepository, pointRepository, stockRepository,
+            transactionRetryExecutor, entityManager, null, null);
     }
 
     @Transactional
@@ -100,19 +120,22 @@ public class OrderUseCase {
     }
 
     public Order confirm(Long buyerId, Long orderId, String paymentAttemptKey) {
-        Order existingAttempt = orderRepository.findByPaymentAttemptKey(paymentAttemptKey).orElse(null);
-        if (existingAttempt == null) {
-            return confirm(buyerId, orderId);
-        }
-        if (!existingAttempt.isOwnedBy(buyerId) || !existingAttempt.getId().equals(orderId)) {
-            throw new CoreException(ErrorCode.PAYMENT_ALREADY_PROCESSED);
+        return confirm(buyerId, orderId, paymentAttemptKey, paymentAttemptKey);
+    }
+
+    public Order confirm(Long buyerId, Long orderId, String paymentKey, String paymentAttemptKey) {
+        OrderPaymentTransactionService.DispatchPlan plan = paymentTransactionService.prepare(
+            buyerId, orderId, paymentKey, paymentAttemptKey);
+        if (!plan.shouldDispatch()) {
+            return plan.order();
         }
 
-        Payment payment = existingAttempt.getPayment();
-        if (payment.status() == PaymentStatus.SUCCESS || payment.status() == PaymentStatus.FAILED) {
-            throw new CoreException(ErrorCode.PAYMENT_ALREADY_PROCESSED);
+        PaymentGateway.ApprovalResult result = paymentGateway.approve(plan.request());
+        Order order = paymentTransactionService.recordResult(orderId, result);
+        if (result instanceof PaymentGateway.ProviderError) {
+            throw new CoreException(ErrorCode.PAYMENT_FAILED);
         }
-        return existingAttempt;
+        return order;
     }
 
     private boolean isPointConflict(Throwable exception) {

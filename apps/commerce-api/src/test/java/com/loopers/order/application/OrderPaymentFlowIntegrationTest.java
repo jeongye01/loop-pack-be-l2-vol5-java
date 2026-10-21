@@ -47,10 +47,9 @@ import static org.mockito.Mockito.when;
 @SpringBootTest
 @Import(MySqlTestContainersConfig.class)
 @Transactional
-@DisplayName("[INV-ORDER-45] PG 결제 요청 전에 주문 품목의 재고를 예약한다.")
+@DisplayName("동기 PG 결제 흐름")
 class OrderPaymentFlowIntegrationTest {
 
-    private static final String ATTEMPT_KEY = "test-attempt-flow";
     private static final String PROCESSED_ATTEMPT_KEY = "test-attempt-42";
     private static final OffsetDateTime APPROVED_AT = OffsetDateTime.parse("2026-10-21T15:00:00+09:00");
 
@@ -59,35 +58,46 @@ class OrderPaymentFlowIntegrationTest {
     @Autowired private PlatformTransactionManager transactionManager;
     @MockitoBean private PaymentGateway paymentGateway;
 
-    @DisplayName("[INV-ORDER-46] PG 승인 성공 후 주문을 확정하고 재고 예약 상태를 CONSUMED로 바꾼다.")
-    @Test
-    void consumesReservationAfterProviderApproval() {
-        Scenario scenario = confirmationScenario(5);
-        when(paymentGateway.approve(any())).thenAnswer(invocation -> approved(invocation.getArgument(0)));
+    @DisplayName("[INV-ORDER-46] PG 결제가 완료되면 주문 품목의 재고 예약을 확정하고 주문 상태를 CONFIRMED로 바꾼다.")
+    @Nested
+    class ConfirmOrderAfterProviderApproval {
 
-        useCase.confirm(scenario.buyerId(), scenario.orderId(), ATTEMPT_KEY);
-        entityManager.flush();
-        entityManager.clear();
-        Order confirmed = entityManager.find(Order.class, scenario.orderId());
+        @DisplayName("[INV-STOCK-49] PG 성공으로 예약을 확정한 뒤 가용 재고는 예약 직후와 같다. 예약 확정에 따른 추가 차감은 0이다.")
+        @Nested
+        class ReservationConsumptionDoesNotDeductTwice {
 
-        assertAll(
-            () -> assertThat(confirmed.getStatus()).isEqualTo(OrderStatus.CONFIRMED),
-            () -> assertThat(stockReservationStatus(scenario.orderId())).isEqualTo("CONSUMED"),
-            () -> assertThat(confirmed.getPayment().status()).isEqualTo(PaymentStatus.SUCCESS),
-            () -> assertThat(TestEntities.stockQuantity(entityManager, scenario.productId())).isEqualTo(3),
-            () -> verify(paymentGateway).approve(any())
-        );
+            @Test
+            void consumesReservationAfterProviderApproval() {
+                Scenario scenario = confirmationScenario(5);
+                String attemptKey = newAttemptKey();
+                when(paymentGateway.approve(any())).thenAnswer(invocation -> approved(invocation.getArgument(0)));
+
+                useCase.confirm(scenario.buyerId(), scenario.orderId(), attemptKey);
+                entityManager.flush();
+                entityManager.clear();
+                Order confirmed = entityManager.find(Order.class, scenario.orderId());
+
+                assertAll(
+                    () -> assertThat(confirmed.getStatus()).isEqualTo(OrderStatus.CONFIRMED),
+                    () -> assertThat(stockReservationStatus(scenario.orderId())).isEqualTo("CONSUMED"),
+                    () -> assertThat(confirmed.getPayment().status()).isEqualTo(PaymentStatus.SUCCESS),
+                    () -> assertThat(TestEntities.stockQuantity(entityManager, scenario.productId())).isEqualTo(3),
+                    () -> verify(paymentGateway).approve(any())
+                );
+            }
+        }
     }
 
     @DisplayName("[카드 승인 거절] 주문은 DRAFT로 남고 재고 예약을 반환한다.")
     @Test
     void releasesReservationAfterCardRejection() {
         Scenario scenario = confirmationScenario(5);
+        String attemptKey = newAttemptKey();
         when(paymentGateway.approve(any())).thenReturn(new PaymentGateway.ProviderError(
             403, "REJECT_CARD_PAYMENT", "한도초과 혹은 잔액부족으로 결제에 실패했습니다."));
 
         CoreException failure = assertThrows(CoreException.class,
-            () -> useCase.confirm(scenario.buyerId(), scenario.orderId(), ATTEMPT_KEY));
+            () -> useCase.confirm(scenario.buyerId(), scenario.orderId(), attemptKey));
         entityManager.flush();
         entityManager.clear();
         Order order = entityManager.find(Order.class, scenario.orderId());
@@ -106,9 +116,10 @@ class OrderPaymentFlowIntegrationTest {
     @Test
     void keepsReservationWhenPaymentOutcomeIsUnknown() {
         Scenario scenario = confirmationScenario(5);
+        String attemptKey = newAttemptKey();
         when(paymentGateway.approve(any())).thenReturn(new PaymentGateway.Unknown());
 
-        Order result = useCase.confirm(scenario.buyerId(), scenario.orderId(), ATTEMPT_KEY);
+        Order result = useCase.confirm(scenario.buyerId(), scenario.orderId(), attemptKey);
         entityManager.flush();
         entityManager.clear();
         Order pending = entityManager.find(Order.class, scenario.orderId());
@@ -123,29 +134,39 @@ class OrderPaymentFlowIntegrationTest {
         );
     }
 
-    @DisplayName("[INV-ORDER-45][INV-STOCK-47] 동기 PG 호출 시 Payment는 PENDING, 주문은 DRAFT, 예약은 RESERVED이며 재고가 차감돼 있다.")
-    @Test
-    @Transactional(propagation = Propagation.NOT_SUPPORTED)
-    void persistsPendingPaymentBeforeSynchronousProviderCall() {
-        Scenario scenario = createScenario();
-        AtomicBoolean transactionActiveAtApproval = new AtomicBoolean(true);
-        AtomicReference<PaymentFlowState> stateAtApproval = new AtomicReference<>();
-        when(paymentGateway.approve(any())).thenAnswer(invocation -> {
-            transactionActiveAtApproval.set(TransactionSynchronizationManager.isActualTransactionActive());
-            stateAtApproval.set(readPaymentFlowState(scenario.orderId(), scenario.productId()));
-            PaymentGateway.ApprovalRequest request = invocation.getArgument(0);
-            return new PaymentGateway.Approved(
-                request.paymentKey(), request.providerOrderId(), request.amount(), APPROVED_AT);
-        });
+    @DisplayName("[INV-ORDER-45] PG 결제 요청 전에 주문 품목의 재고를 예약한다.")
+    @Nested
+    class ReserveStockBeforeProviderApproval {
 
-        useCase.confirm(scenario.buyerId(), scenario.orderId(), ATTEMPT_KEY);
+        @DisplayName("[INV-STOCK-47] PG 요청 전에 주문 품목 수량만큼 재고가 예약되어 있고 그 수량은 가용 재고에서 제외된 상태다.")
+        @Nested
+        class ReservedQuantityIsExcludedFromAvailableStock {
 
-        assertAll(
-            () -> assertThat(transactionActiveAtApproval).isFalse(),
-            () -> assertThat(stateAtApproval).hasValue(
-                new PaymentFlowState(OrderStatus.DRAFT, PaymentStatus.PENDING, "RESERVED", 3)),
-            () -> verify(paymentGateway).approve(any())
-        );
+            @Test
+            @Transactional(propagation = Propagation.NOT_SUPPORTED)
+            void persistsPendingPaymentBeforeSynchronousProviderCall() {
+                Scenario scenario = createScenario();
+                String attemptKey = newAttemptKey();
+                AtomicBoolean transactionActiveAtApproval = new AtomicBoolean(true);
+                AtomicReference<PaymentFlowState> stateAtApproval = new AtomicReference<>();
+                when(paymentGateway.approve(any())).thenAnswer(invocation -> {
+                    transactionActiveAtApproval.set(TransactionSynchronizationManager.isActualTransactionActive());
+                    stateAtApproval.set(readPaymentFlowState(scenario.orderId(), scenario.productId()));
+                    PaymentGateway.ApprovalRequest request = invocation.getArgument(0);
+                    return new PaymentGateway.Approved(
+                        request.paymentKey(), request.providerOrderId(), request.amount(), APPROVED_AT);
+                });
+
+                useCase.confirm(scenario.buyerId(), scenario.orderId(), attemptKey);
+
+                assertAll(
+                    () -> assertThat(transactionActiveAtApproval).isFalse(),
+                    () -> assertThat(stateAtApproval).hasValue(
+                        new PaymentFlowState(OrderStatus.DRAFT, PaymentStatus.PENDING, "RESERVED", 3)),
+                    () -> verify(paymentGateway).approve(any())
+                );
+            }
+        }
     }
 
     @DisplayName("[INV-PAYMENT-51] 이미 사용한 멱등키의 결제 요청을 PG로 다시 보내지 않는다.")
@@ -225,6 +246,10 @@ class OrderPaymentFlowIntegrationTest {
         order.setPayment(payment);
         entityManager.flush();
         entityManager.clear();
+    }
+
+    private static String newAttemptKey() {
+        return "test-attempt-flow-" + UUID.randomUUID();
     }
 
     private Scenario createScenario() {

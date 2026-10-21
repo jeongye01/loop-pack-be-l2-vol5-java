@@ -145,10 +145,10 @@
 | 항목 | 계약 |
 | --- | --- |
 | 요청 | `POST /api/v1/orders/{orderId}/confirm` |
-| 입력 | path `orderId`, body `paymentAttemptKey`, `cardType`, `cardNo`. . |
+| 입력 | path `orderId`. body가 없으면 기존 포인트 결제로 확정한다. PG 결제는 body `paymentKey`, `paymentAttemptKey`를 받으며, `paymentKey`는 클라이언트가 PG에서 받은 결제 키이고 `paymentAttemptKey`는 같은 승인 재요청에 재사용한다. |
 | 성공 | `200`, `data`는 주문과 재고 예약을 확정한 결과. 주문 상태는 `CONFIRMED`이며 결제액·결제 시점을 담는다. |
 | 대기 | `202`, `meta.result=PENDING`. `data`는 대사 API의 대기 응답과 동일하게 `orderStatus=DRAFT`, `paymentStatus`(`PENDING` 또는 `UNKNOWN`), `statusUrl`(`/api/v1/orders/{orderId}`)을 담는다. |
-| 오류 | `400 INVALID_REQUEST` · `404 ORDER_NOT_FOUND` · `409 PRODUCT_NOT_AVAILABLE` · `409 INSUFFICIENT_STOCK` · `409 PAYMENT_ALREADY_PROCESSED` · `422 PAYMENT_FAILED` |
+| 오류 | `400 INVALID_REQUEST` · `404 ORDER_NOT_FOUND` · `409 ORDER_ALREADY_CONFIRMED` · `409 PRODUCT_NOT_AVAILABLE` · `409 INSUFFICIENT_STOCK` · `409 INSUFFICIENT_POINT` · `409 PAYMENT_ALREADY_PROCESSED` · `409 POINT_CONFLICT` · `422 PAYMENT_FAILED` · `500 INTERNAL_ERROR` |
 
 
 

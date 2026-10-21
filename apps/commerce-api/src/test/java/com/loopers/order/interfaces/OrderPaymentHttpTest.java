@@ -113,7 +113,7 @@ class OrderPaymentHttpTest {
             when(paymentGateway.approve(any())).thenReturn(new PaymentGateway.Unknown());
 
             mockMvc.perform(confirm(buyer, order.getId()))
-                .andExpect(success(HttpStatus.ACCEPTED))
+                .andExpect(status().isAccepted())
                 .andExpect(jsonPath("$.meta.result").value("PENDING"))
                 .andExpect(jsonPath("$.data.orderStatus").value("DRAFT"))
                 .andExpect(jsonPath("$.data.paymentStatus").value("UNKNOWN"))
@@ -130,9 +130,8 @@ class OrderPaymentHttpTest {
             .contentType(MediaType.APPLICATION_JSON)
             .content("""
                 {
-                  "paymentAttemptKey": "attempt-%s",
-                  "cardType": "SAMSUNG",
-                  "cardNo": "1234567890123456"
+                  "paymentKey": "test-payment-%s",
+                  "paymentAttemptKey": "attempt-%s"
                 }
                 """.formatted(orderId, orderId));
     }

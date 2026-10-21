@@ -40,6 +40,7 @@ public final class ErrorStatus {
                  PAYMENT_ALREADY_PROCESSED,
                  POINT_CONFLICT,
                  POINT_BALANCE_LIMIT_EXCEEDED -> HttpStatus.CONFLICT;
+            case PAYMENT_FAILED -> HttpStatus.UNPROCESSABLE_ENTITY;
             case INTERNAL_ERROR -> HttpStatus.INTERNAL_SERVER_ERROR;
         };
     }

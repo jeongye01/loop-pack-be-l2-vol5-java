@@ -5,6 +5,8 @@ import com.loopers.support.error.CoreException;
 import com.loopers.support.error.ErrorCode;
 import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Embedded;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.Table;
@@ -26,6 +28,8 @@ public class Order extends BaseEntity {
     @ElementCollection(fetch = FetchType.EAGER)
     private List<OrderItem> items;
     private OrderStatus status;
+    @Enumerated(EnumType.STRING)
+    private StockReservationStatus stockReservationStatus;
     @Embedded
     private PaymentResult paymentResult;
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
@@ -59,6 +63,10 @@ public class Order extends BaseEntity {
 
     public OrderStatus getStatus() {
         return status;
+    }
+
+    public StockReservationStatus getStockReservationStatus() {
+        return stockReservationStatus;
     }
 
     public PaymentResult getPaymentResult() {
@@ -98,6 +106,28 @@ public class Order extends BaseEntity {
         PaymentResult result = new PaymentResult(paymentAmount, paidAt);
         this.paymentResult = result;
         this.status = OrderStatus.CONFIRMED;
+    }
+
+    public void reserveStock() {
+        ensureDraft();
+        if (stockReservationStatus != null) {
+            throw new CoreException(ErrorCode.PAYMENT_ALREADY_PROCESSED);
+        }
+        stockReservationStatus = StockReservationStatus.RESERVED;
+    }
+
+    public void consumeStockReservation() {
+        if (stockReservationStatus != StockReservationStatus.RESERVED) {
+            throw new CoreException(ErrorCode.INTERNAL_ERROR);
+        }
+        stockReservationStatus = StockReservationStatus.CONSUMED;
+    }
+
+    public void releaseStockReservation() {
+        if (stockReservationStatus != StockReservationStatus.RESERVED) {
+            throw new CoreException(ErrorCode.INTERNAL_ERROR);
+        }
+        stockReservationStatus = null;
     }
 
     private static List<OrderItem> mergeItems(List<OrderItem> items) {

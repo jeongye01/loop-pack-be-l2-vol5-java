@@ -329,7 +329,7 @@ paths:
       parameters:
         - $ref: '#/components/parameters/OrderId'
       requestBody:
-        required: true
+        required: false
         content:
           application/json:
             schema:
@@ -364,8 +364,8 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorEnvelope'
         '409':
-          description: PRODUCT_NOT_AVAILABLE, INSUFFICIENT_STOCK
-          x-error-codes: [PRODUCT_NOT_AVAILABLE, INSUFFICIENT_STOCK]
+          description: ORDER_ALREADY_CONFIRMED, PRODUCT_NOT_AVAILABLE, INSUFFICIENT_STOCK, INSUFFICIENT_POINT, PAYMENT_ALREADY_PROCESSED, POINT_CONFLICT
+          x-error-codes: [ORDER_ALREADY_CONFIRMED, PRODUCT_NOT_AVAILABLE, INSUFFICIENT_STOCK, INSUFFICIENT_POINT, PAYMENT_ALREADY_PROCESSED, POINT_CONFLICT]
           content:
             application/json:
               schema:
@@ -373,6 +373,13 @@ paths:
         '422':
           description: PAYMENT_FAILED
           x-error-codes: [PAYMENT_FAILED]
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '500':
+          description: INTERNAL_ERROR
+          x-error-codes: [INTERNAL_ERROR]
           content:
             application/json:
               schema:
@@ -1007,17 +1014,14 @@ components:
           enum: [null]
     ConfirmPaymentRequest:
       type: object
-      required: [paymentAttemptKey, cardType, cardNo]
+      required: [paymentKey, paymentAttemptKey]
       properties:
+        paymentKey:
+          type: string
+          description: PG에서 발급되어 승인 요청에 사용하는 결제 키
         paymentAttemptKey:
           type: string
           description: 클라이언트가 생성하며 같은 요청의 재전송에 재사용하는 시도 키
-        cardType:
-          type: string
-          enum: [TEST]
-        cardNo:
-          type: string
-          enum: ['0000-0000-0000-0000']
     PaymentCallbackRequest:
       type: object
       required: [providerOrderId, transactionKey, status]
@@ -1033,6 +1037,7 @@ components:
     Payment:
       type: object
       nullable: true
+      description: 결제 전에는 null이며 결제 시도 후에는 결제수단·상태·금액·결제 시각을 포함한다.
       required: [method, status, amount, paidAt]
       properties:
         method:
@@ -1455,9 +1460,7 @@ components:
           minimum: 1
           description: 주문 품목 금액의 합계. DRAFT에도 존재함
         payment:
-          description: 결제 시작 전에는 null. 처리 중·미확인·실패는 주문 DRAFT를 유지하며 결제 상태로 구분한다.
-          allOf:
-            - $ref: '#/components/schemas/Payment'
+          $ref: '#/components/schemas/Payment'
     OrderSummary:
       type: object
       required: [id, status, itemCount, totalAmount]
@@ -1505,9 +1508,7 @@ components:
           minimum: 1
           description: 주문 품목 금액의 합계. DRAFT에도 존재함
         payment:
-          description: CONFIRMED일 때만 존재하는 결제액과 결제 시각. DRAFT에서는 생략함
-          allOf:
-            - $ref: '#/components/schemas/LegacyPayment'
+          $ref: '#/components/schemas/Payment'
     AdminOrderSummary:
       type: object
       required: [id, buyerId, status, itemCount, totalAmount]

@@ -45,6 +45,8 @@ requirements:
   R-POINT-07:   [INV-POINT-19]
   R-POINT-08:   [INV-POINT-21]
 
+  R-STOCK-01:   [INV-STOCK-15]
+
   R-ORDER-01:   [INV-ORDER-27]
   R-ORDER-02:   [INV-ORDER-29, INV-ORDERITEM-40]
   R-ORDER-03:   [INV-ORDER-30, INV-ORDER-34]
@@ -53,7 +55,7 @@ requirements:
   R-ORDER-06:   [INV-ORDERITEM-39]
   R-ORDER-09:   [INV-POINT-16, INV-POINT-20, INV-ORDER-43]
   R-ORDER-10:   [INV-ORDER-35]
-  R-ORDER-11:   [INV-ORDER-36, INV-ORDER-43]
+  R-ORDER-11:   [INV-ORDER-43]
   R-ORDER-12:   [INV-ORDER-34, INV-PAYMENTRESULT-42, INV-ORDER-43, INV-ORDER-44]
   R-ORDER-13:   []
   R-ORDER-14:   []
@@ -162,7 +164,7 @@ rules:
     INV-ORDER-33: 주문에 쓰인 상품은 주문 생성 시점에 존재하며 삭제되지 않은 상태다.
     INV-ORDER-34: 확정된 주문은 성공한 결제를 갖는다. DRAFT 주문은 성공한 결제를 갖지 않으며 미완료·실패 결제는 가질 수 있다.
     INV-ORDER-35: 결제 시작 전 검증에서 거절된 요청은 주문 상태·재고·잔액을 바꾸지 않는다.
-    INV-ORDER-36: 포인트 결제의 확정에 성공하면 재고는 품목 수량만큼, 잔액은 주문 합계만큼 줄어든다.
+    # INV-ORDER-36: 포인트 결제의 확정에 성공하면 재고는 품목 수량만큼, 잔액은 주문 합계만큼 줄어든다.
     INV-ORDER-37: 확정된 주문의 결제 결과는 바뀌지 않는다.
     INV-ORDER-38: 품목 수량이 바뀌는 주문의 상태는 DRAFT다.
     INV-ORDER-43: 결제액은 확정 시점의 주문 합계다.

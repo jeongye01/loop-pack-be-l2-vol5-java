@@ -316,6 +316,18 @@ Green 에이전트가 Red 전체를 실행하고 실패를 분석한 뒤, produc
   - 테스트 명령: `./gradlew :apps:commerce-api:test --tests com.loopers.order.domain.PaymentTest --tests com.loopers.order.infrastructure.payment.toss.TossPaymentAdapterTest`
   - 완료 조건: `PaymentTest`가 Green이고 `TossPaymentAdapterTest` 회귀가 유지되며, 기존 호환 생성자 결과를 쓰는 어댑터 테스트를 수정하지 않는다. Adapter의 PG 원문 포착은 해당 테스트의 record equality 기대값과 충돌하므로 별도 해결 전에는 변경하지 않고 보고한다.
 
+## 동기 PG 주문 결제 흐름 Red
+
+- [ ] 33. Toss 동기 승인 흐름과 주문 재고 예약·결과 반영
+  - 요구사항 ID: R-ORDER-29, R-ORDER-30, R-ORDER-31, R-ORDER-32, INV-ORDER-45, INV-ORDER-46, INV-STOCK-47, INV-STOCK-49, INV-PAYMENT-51, C-10
+  - 관찰한 실패: `OrderPaymentFlowIntegrationTest` 6개 중 4개가 실패한다. UNKNOWN 반환 후 주문이 UNKNOWN으로 기록되지 않고, 주문에 `stockReservationStatus` 필드가 없어 성공/예약 검증 JPQL이 실패하며, 새 흐름에서 PG 호출 전 Payment·예약을 만들지 않아 CoreException이 난다. `OrderPaymentHttpTest` 3개 모두 기존 컨트롤러가 요청 본문과 PG 결과를 처리하지 않아 실패한다.
+  - 필요한 최소 동작: API 계약에 클라이언트 `paymentKey`를 받도록 추가한다. `paymentAttemptKey`는 Toss `Idempotency-Key`, `paymentKey`는 승인 요청의 결제 키로 전달한다. 별도 트랜잭션 서비스로 TX A에서 주문 검증·Stock 차감·RESERVED 상태·Payment PENDING 저장을 커밋하고, TX 밖에서 Gateway를 호출한 뒤 TX B에서 Approved는 Payment SUCCESS·예약 CONSUMED·주문 CONFIRMED, ProviderError는 Payment FAILED·재고 복구·예약 해제 후 커밋한다. Unknown은 Payment UNKNOWN을 기록하고 주문 DRAFT·예약 RESERVED를 유지한다. 이미 등록된 멱등키는 기존 규칙대로 PG에 재전달하지 않는다. Controller는 200 성공, 202 대기 응답을 주고 확정 거절은 422 PAYMENT_FAILED로 매핑한다. 결제 확정 요청은 `paymentKey`와 `paymentAttemptKey`만 받으며 카드 정보는 받지 않는다.
+  - 변경할 production 파일: `apps/commerce-api/src/main/java/com/loopers/order/interfaces/OrderV1Controller.java`, `OrderV1Dto.java`, `order/application/OrderUseCase.java`, 신규 `order/application/OrderPaymentTransactionService.java`, `order/domain/Order.java`, 신규 `order/domain/StockReservationStatus.java`, `order/infrastructure/OrderJpaRepository.java`, 신규 `order/infrastructure/payment/toss/TossPaymentConfiguration.java`, `support/error/ErrorCode.java`, `interfaces/api/ErrorStatus.java`
+  - 계약·검증 파일: `docs/week2/api-contract.md`, `apps/commerce-api/src/main/resources/static/openapi.yaml`; HTTP 요청 fixture는 두 키만 전달하도록 갱신했다.
+  - 선행 작업: `Payment`, `PaymentGateway`, StockRepository의 기존 PG·재고 모델 사용. 실제 PG 호출은 Toss 승인 포트로 한정한다.
+  - 테스트 명령: `./gradlew :apps:commerce-api:test --tests 'com.loopers.order.application.OrderPaymentFlowIntegrationTest' --tests 'com.loopers.order.interfaces.OrderPaymentHttpTest' --tests 'com.loopers.order.infrastructure.payment.toss.TossPaymentAdapterTest'`
+  - 완료 조건: 세 테스트 클래스 Green, `./gradlew :apps:commerce-api:check`, `./gradlew :apps:commerce-api:test --tests 'com.loopers.architecture.ArchitectureTest'`, `git diff --check` 통과. 기존 테스트의 기대값·규칙은 완화하지 않는다.
+
 ## PG 멱등키 통합 Red 3개
 
 - [x] 32. 이미 등록된 멱등키의 승인 요청 재처리 차단
