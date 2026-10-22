@@ -16,7 +16,7 @@ public class TossPaymentConfiguration {
         @Value("${payment.toss.base-url:https://api.tosspayments.com}") URI baseUrl,
         @Value("${payment.toss.secret-key:}") String secretKey,
         @Value("${payment.toss.connect-timeout:2s}") Duration connectTimeout,
-        @Value("${payment.toss.read-timeout:5s}") Duration readTimeout
+        @Value("${payment.toss.read-timeout:3s}") Duration readTimeout
     ) {
         return new TossPaymentAdapter(TossHttpClientFactory.create(
             baseUrl, secretKey, connectTimeout, readTimeout));
