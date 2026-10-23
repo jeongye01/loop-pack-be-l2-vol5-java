@@ -33,7 +33,7 @@ public interface PaymentGateway {
         }
     }
 
-    sealed interface ApprovalResult permits Approved, ProviderError, Unknown {
+    sealed interface ApprovalResult permits Approved, ProviderError, DispatchRejected, Unknown {
     }
 
     record Approved(
@@ -53,6 +53,9 @@ public interface PaymentGateway {
         public ProviderError(int httpStatus, String code, String message) {
             this(httpStatus, code, message, null);
         }
+    }
+
+    record DispatchRejected(String reason) implements ApprovalResult {
     }
 
     record Unknown(String rawResponse) implements ApprovalResult {

@@ -125,6 +125,13 @@ public final class TossPgFixture implements AutoCloseable {
         )));
     }
 
+    public void cancellationServerError(CancellationRequest request) {
+        respondToCancellation(request, 500, json(Map.of(
+            "code", "FAILED_INTERNAL_SYSTEM_PROCESSING",
+            "message", "내부 시스템 처리 작업이 실패했습니다. 잠시 후 다시 시도해주세요."
+        )));
+    }
+
     private static final String REQUEST_ORDER_ID = "LP-ORD-0000000042";
 
     private void respondToCancellation(CancellationRequest request, int status, String body) {

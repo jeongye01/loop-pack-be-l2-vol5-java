@@ -54,6 +54,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 @SpringBootTest
@@ -419,6 +420,32 @@ class OrderPaymentFlowIntegrationTest {
             () -> assertThat(stockReservationStatus(scenario.orderId())).isNull(),
             () -> assertThat(TestEntities.stockQuantity(entityManager, scenario.productId())).isEqualTo(5),
             () -> verify(paymentGateway).approve(any())
+        );
+    }
+
+    @DisplayName("[PG Bulkhead 거절] 승인 HTTP 요청이 전송되지 않으면 결제를 실패 처리하고 재고 예약을 반환한다.")
+    @Test
+    void releasesReservationWhenPgApprovalIsRejectedBeforeDispatch() {
+        Scenario scenario = confirmationScenario(5);
+        String paymentKey = "test-payment-bulkhead-rejected";
+        String attemptKey = newAttemptKey();
+        when(paymentGateway.approve(any())).thenReturn(
+            new PaymentGateway.DispatchRejected("PG 요청 처리 한도를 초과했습니다."));
+
+        CoreException failure = assertThrows(CoreException.class,
+            () -> useCase.confirm(scenario.buyerId(), scenario.orderId(), paymentKey, attemptKey));
+        entityManager.flush();
+        entityManager.clear();
+        Order order = entityManager.find(Order.class, scenario.orderId());
+
+        assertAll(
+            () -> assertThat(failure.getErrorCode()).isEqualTo(ErrorCode.PAYMENT_FAILED),
+            () -> assertThat(order.getStatus()).isEqualTo(OrderStatus.DRAFT),
+            () -> assertThat(order.getPayment().status()).isEqualTo(PaymentStatus.FAILED),
+            () -> assertThat(stockReservationStatus(scenario.orderId())).isNull(),
+            () -> assertThat(TestEntities.stockQuantity(entityManager, scenario.productId())).isEqualTo(5),
+            () -> verify(paymentGateway).approve(any()),
+            () -> verifyNoMoreInteractions(paymentGateway)
         );
     }
 

@@ -2,6 +2,7 @@ package com.loopers.order.domain;
 
 import com.loopers.domain.BaseEntity;
 import com.loopers.order.domain.PaymentGateway.Approved;
+import com.loopers.order.domain.PaymentGateway.DispatchRejected;
 import com.loopers.order.domain.PaymentGateway.ApprovalResult;
 import com.loopers.order.domain.PaymentGateway.CancellationConfirmed;
 import com.loopers.order.domain.PaymentGateway.CancellationRejected;
@@ -96,6 +97,8 @@ public class Payment extends BaseEntity {
         } else if (result instanceof ProviderError providerError) {
             this.status = PaymentStatus.FAILED;
             this.rawProviderResponse = providerError.rawResponse();
+        } else if (result instanceof DispatchRejected) {
+            this.status = PaymentStatus.FAILED;
         } else if (result instanceof Unknown unknown) {
             this.status = PaymentStatus.UNKNOWN;
             this.rawProviderResponse = unknown.rawResponse();

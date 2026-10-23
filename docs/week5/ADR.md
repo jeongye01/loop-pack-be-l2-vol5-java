@@ -19,10 +19,10 @@
 ## PG 호출 지연·장애 보호
 
 - Toss PG HTTP 연결 타임아웃은 2초, 응답 읽기 타임아웃은 3초로 둔다. 이 제한은 개별 HTTP 시도의 대기 시간만 제한하며, 동시에 PG 응답을 기다리는 요청 수를 제한하지 않는다.
-- 동기 주문 결제 흐름은 Resilience4j Bulkhead로 동시 실행 수를 제한한다. 현재 Tomcat 최대 worker 200개를 기준으로 기본 허용 수는 150개, 대기 없이 즉시 거절한다. Bulkhead 허가는 TX A 이전에 획득하고 결제 응답 처리가 끝난 뒤 반환한다. 허가를 얻지 못하면 결제·재고 예약을 만들지 않고 `PAYMENT_FAILED`로 빠르게 응답한다.
-- Circuit Breaker는 API의 승인과 paymentKey 조회를 각각 분리해 적용하고, 배치의 주문별 결제 조회에도 별도 적용한다. 승인 장애가 결과 조회와 보상 취소를 함께 막지 않도록 취소 요청은 Circuit Breaker 적용 대상에서 제외한다.
-- Circuit Breaker는 시간 기반 30초 창, 최소 20회 관측, 기술 실패율 70%에서 OPEN, OPEN 유지 30초, HALF_OPEN 확인 호출 2회로 시작한다. 승인·조회 재시도 각각의 HTTP 시도를 개별 관측한다.
+- API의 실제 PG HTTP 요청 동안 Resilience4j Bulkhead 허가를 점유한다. 승인·조회·취소 요청이 공유하는 기본 동시 실행 한도는 Tomcat 최대 worker 200개 기준 150개이며, 대기 없이 초과 요청을 거절한다. 이는 요청을 대기열에 쌓지 않고 PG 응답을 기다리는 worker도 일부 남겨두기 위한 시작값이며, 부하 관측 후 조정한다. 승인 Bulkhead 거절은 PG 요청이 전송되지 않았다는 `DispatchRejected`로 기록하고 예약 재고를 반환한다. 조회·취소 Bulkhead 거절은 각 결과를 미확정으로 처리한다. HTTP 응답을 받으면 허가를 반환한다.
+- Circuit Breaker는 API 승인 POST, paymentKey 조회 GET, 결제 취소 POST에 각각 분리 적용하고, 배치 주문별 조회에도 별도 적용한다. 각 경로의 실패율과 회복 시점이 다를 수 있고, 승인 장애가 보상 취소 요청을 차단하지 않도록 회로를 분리한다.
+- Circuit Breaker는 시간 기반 30초 창, 최소 20회 관측, 기술 실패율 70%에서 OPEN, OPEN 유지 30초, HALF_OPEN 확인 호출 2회로 시작한다. 최소 표본으로 순간 오류에 바로 열리지 않게 하고, 70%는 장애 차단과 정상 결제 기회 사이의 초기 균형값으로 둔다. 각 회로는 해당 경로의 HTTP 호출 시도를 개별 관측하며, 운영 지표에 따라 조정한다.
 - 연결 오류·타임아웃·PG 5xx·응답 해석 실패는 기술 실패로 집계한다. 정상적인 PG 4xx 응답과 결제 `PROCESSING` 응답은 PG가 응답한 것이므로 실패율에 포함하지 않는다.
-- OPEN 회로는 해당 PG HTTP 요청을 보내지 않는다. 승인 요청이 차단되면 승인 요청을 재전송하지 않고 기존 paymentKey 조회 흐름으로 결과를 확인한다. 조회 회로가 OPEN이면 결과 미확정으로 취급하며, 기존 UNKNOWN 조회 후 취소 흐름을 따른다. 취소 API는 Circuit Breaker에서 제외해 보상 요청 기회를 유지한다.
+- OPEN 회로는 해당 PG HTTP 요청을 보내지 않는다. 승인 회로가 OPEN이면 승인 결과를 미확정으로 처리하고 기존 paymentKey 조회 흐름으로 확인한다. 조회 회로가 OPEN이면 결과 미확정으로 취급하며, 기존 UNKNOWN 조회 후 취소 흐름을 따른다. 취소 회로가 OPEN이면 취소 결과를 미확정으로 기록하고 후속 대사에서 다시 확인한다.
 - 배치 조회는 Tomcat worker를 사용하지 않고 현재 단일 실행 작업이므로 Bulkhead는 적용하지 않는다. 배치 Circuit Breaker가 OPEN이거나 조회가 미확정이면 DB 상태를 바꾸지 않고 다음 실행에서 다시 확인한다.
-- Bulkhead는 동시 실행을 제한하고 Circuit Breaker는 관측된 장애 후 호출을 차단한다. Circuit Breaker만으로 동시 대기 수가 제한되지는 않는다.
+- Bulkhead는 PG HTTP 호출의 동시 실행을 제한하고 Circuit Breaker는 관측된 장애 후 해당 경로의 호출을 차단한다. Circuit Breaker만으로 동시 대기 수가 제한되지는 않는다.

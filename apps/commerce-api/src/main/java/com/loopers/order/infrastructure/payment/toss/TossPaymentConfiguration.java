@@ -42,15 +42,28 @@ public class TossPaymentConfiguration {
             slidingWindowSeconds, minimumNumberOfCalls, failureRateThreshold, waitDuration, halfOpenCalls));
     }
 
-    @Bean(name = "paymentFlowBulkhead")
-    public Bulkhead paymentFlowBulkhead(
+    @Bean(name = "paymentCancellationCircuitBreaker")
+    public CircuitBreaker paymentCancellationCircuitBreaker(
+        @Value("${payment.resilience.circuit-breaker.sliding-window-seconds:30}") int slidingWindowSeconds,
+        @Value("${payment.resilience.circuit-breaker.minimum-number-of-calls:20}") int minimumNumberOfCalls,
+        @Value("${payment.resilience.circuit-breaker.failure-rate-threshold:70}") float failureRateThreshold,
+        @Value("${payment.resilience.circuit-breaker.wait-duration-in-open-state:30s}") Duration waitDuration,
+        @Value("${payment.resilience.circuit-breaker.permitted-number-of-calls-in-half-open-state:2}")
+        int halfOpenCalls
+    ) {
+        return CircuitBreaker.of("toss-payment-cancellation", circuitBreakerConfig(
+            slidingWindowSeconds, minimumNumberOfCalls, failureRateThreshold, waitDuration, halfOpenCalls));
+    }
+
+    @Bean(name = "paymentPgRequestBulkhead")
+    public Bulkhead paymentPgRequestBulkhead(
         @Value("${payment.resilience.bulkhead.max-concurrent-calls:150}") int maxConcurrentCalls,
         @Value("${server.tomcat.threads.max:200}") int tomcatMaxThreads
     ) {
         if (maxConcurrentCalls < 1 || maxConcurrentCalls >= tomcatMaxThreads) {
-            throw new IllegalArgumentException("Payment Bulkhead must be positive and lower than Tomcat max threads");
+            throw new IllegalArgumentException("PG request Bulkhead must be positive and lower than Tomcat max threads");
         }
-        return Bulkhead.of("payment-flow", BulkheadConfig.custom()
+        return Bulkhead.of("toss-pg-request", BulkheadConfig.custom()
             .maxConcurrentCalls(maxConcurrentCalls)
             .maxWaitDuration(Duration.ZERO)
             .build());
@@ -63,10 +76,13 @@ public class TossPaymentConfiguration {
         @Value("${payment.toss.connect-timeout:2s}") Duration connectTimeout,
         @Value("${payment.toss.read-timeout:3s}") Duration readTimeout,
         @Qualifier("paymentApprovalCircuitBreaker") CircuitBreaker approvalCircuitBreaker,
-        @Qualifier("paymentLookupCircuitBreaker") CircuitBreaker lookupCircuitBreaker
+        @Qualifier("paymentLookupCircuitBreaker") CircuitBreaker lookupCircuitBreaker,
+        @Qualifier("paymentCancellationCircuitBreaker") CircuitBreaker cancellationCircuitBreaker,
+        @Qualifier("paymentPgRequestBulkhead") Bulkhead pgRequestBulkhead
     ) {
         return new TossPaymentAdapter(TossHttpClientFactory.create(
-            baseUrl, secretKey, connectTimeout, readTimeout), approvalCircuitBreaker, lookupCircuitBreaker);
+            baseUrl, secretKey, connectTimeout, readTimeout), approvalCircuitBreaker, lookupCircuitBreaker,
+            cancellationCircuitBreaker, pgRequestBulkhead);
     }
 
     private CircuitBreakerConfig circuitBreakerConfig(
@@ -83,8 +99,14 @@ public class TossPaymentConfiguration {
             .failureRateThreshold(failureRateThreshold)
             .waitDurationInOpenState(waitDuration)
             .permittedNumberOfCallsInHalfOpenState(halfOpenCalls)
-            .recordResult(result -> result instanceof PaymentGateway.Unknown unknown
-                && (unknown.rawResponse() == null || unknown.rawResponse().isBlank()))
+            .recordResult(result -> isTechnicalFailure(result))
             .build();
+    }
+
+    private boolean isTechnicalFailure(Object result) {
+        if (result instanceof PaymentGateway.Unknown unknown) {
+            return unknown.rawResponse() == null || unknown.rawResponse().isBlank();
+        }
+        return result instanceof PaymentGateway.CancellationUnknown;
     }
 }

@@ -4,6 +4,8 @@ import com.loopers.order.domain.PaymentGateway;
 import com.loopers.order.domain.PaymentGateway.ApprovalRequest;
 import com.loopers.order.domain.PaymentGateway.Approved;
 import com.loopers.order.domain.PaymentGateway.CancellationRequest;
+import com.loopers.order.domain.PaymentGateway.CancellationUnknown;
+import io.github.resilience4j.bulkhead.Bulkhead;
 import io.github.resilience4j.circuitbreaker.CircuitBreaker;
 import io.github.resilience4j.circuitbreaker.CircuitBreakerConfig;
 import org.junit.jupiter.api.AfterEach;
@@ -26,6 +28,7 @@ class TossPaymentCircuitBreakerTest {
     private TossPgFixture pg;
     private CircuitBreaker approvalCircuitBreaker;
     private CircuitBreaker lookupCircuitBreaker;
+    private CircuitBreaker cancellationCircuitBreaker;
     private PaymentGateway gateway;
 
     @BeforeEach
@@ -33,9 +36,11 @@ class TossPaymentCircuitBreakerTest {
         pg = new TossPgFixture();
         approvalCircuitBreaker = testCircuitBreaker("test-approval");
         lookupCircuitBreaker = testCircuitBreaker("test-lookup");
+        cancellationCircuitBreaker = testCircuitBreaker("test-cancellation");
         gateway = new TossPaymentAdapter(TossHttpClientFactory.create(
             pg.baseUrl(), TossPgFixture.SECRET_KEY, Duration.ofSeconds(1), Duration.ofSeconds(1)),
-            approvalCircuitBreaker, lookupCircuitBreaker);
+            approvalCircuitBreaker, lookupCircuitBreaker, cancellationCircuitBreaker,
+            Bulkhead.ofDefaults("test-toss-pg"));
     }
 
     @AfterEach
@@ -125,6 +130,21 @@ class TossPaymentCircuitBreakerTest {
         assertThat(pg.cancellationRequests(cancellationRequest)).hasSize(1);
     }
 
+    @Test
+    @DisplayName("취소 POST 기술 실패율이 임계치에 도달하면 취소 요청을 더 보내지 않는다")
+    void opensCancellationCircuitAndRejectsFurtherRequests() {
+        CancellationRequest cancellationRequest = new CancellationRequest(
+            REQUEST.paymentKey(), "결제 결과 미확인 주문 취소", REQUEST.idempotencyKey() + "-cancel");
+        pg.cancellationServerError(cancellationRequest);
+
+        assertThat(gateway.cancel(cancellationRequest)).isInstanceOf(CancellationUnknown.class);
+        assertThat(gateway.cancel(cancellationRequest)).isInstanceOf(CancellationUnknown.class);
+
+        assertThat(cancellationCircuitBreaker.getState()).isEqualTo(CircuitBreaker.State.OPEN);
+        assertThat(gateway.cancel(cancellationRequest)).isInstanceOf(CancellationUnknown.class);
+        assertThat(pg.cancellationRequests(cancellationRequest)).hasSize(2);
+    }
+
     private CircuitBreaker testCircuitBreaker(String name) {
         CircuitBreakerConfig config = CircuitBreakerConfig.custom()
             .slidingWindowType(CircuitBreakerConfig.SlidingWindowType.COUNT_BASED)
@@ -133,8 +153,9 @@ class TossPaymentCircuitBreakerTest {
             .failureRateThreshold(50)
             .waitDurationInOpenState(Duration.ofMinutes(1))
             .permittedNumberOfCallsInHalfOpenState(1)
-            .recordResult(result -> result instanceof PaymentGateway.Unknown unknown
-                && (unknown.rawResponse() == null || unknown.rawResponse().isBlank()))
+            .recordResult(result -> result instanceof PaymentGateway.CancellationUnknown
+                || (result instanceof PaymentGateway.Unknown unknown
+                && (unknown.rawResponse() == null || unknown.rawResponse().isBlank())))
             .build();
         return CircuitBreaker.of(name, config);
     }

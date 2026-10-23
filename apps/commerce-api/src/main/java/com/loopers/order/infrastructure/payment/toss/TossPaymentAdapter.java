@@ -8,6 +8,10 @@ import com.loopers.order.domain.PaymentGateway.CancellationRejected;
 import com.loopers.order.domain.PaymentGateway.CancellationRequest;
 import com.loopers.order.domain.PaymentGateway.CancellationResult;
 import com.loopers.order.domain.PaymentGateway.CancellationUnknown;
+import com.loopers.order.domain.PaymentGateway.DispatchRejected;
+import com.loopers.order.domain.PaymentGateway.ProviderError;
+import io.github.resilience4j.bulkhead.Bulkhead;
+import io.github.resilience4j.bulkhead.BulkheadFullException;
 import io.github.resilience4j.circuitbreaker.CallNotPermittedException;
 import io.github.resilience4j.circuitbreaker.CircuitBreaker;
 import org.springframework.http.MediaType;
@@ -24,26 +28,36 @@ public final class TossPaymentAdapter implements PaymentGateway {
     private final ObjectMapper objectMapper = new ObjectMapper();
     private final CircuitBreaker approvalCircuitBreaker;
     private final CircuitBreaker lookupCircuitBreaker;
+    private final CircuitBreaker cancellationCircuitBreaker;
+    private final Bulkhead pgRequestBulkhead;
 
     public TossPaymentAdapter(RestClient client) {
         this(client, CircuitBreaker.ofDefaults("toss-payment-approval"),
-            CircuitBreaker.ofDefaults("toss-payment-lookup"));
+            CircuitBreaker.ofDefaults("toss-payment-lookup"),
+            CircuitBreaker.ofDefaults("toss-payment-cancellation"), Bulkhead.ofDefaults("toss-pg-request"));
     }
 
     public TossPaymentAdapter(
         RestClient client,
         CircuitBreaker approvalCircuitBreaker,
-        CircuitBreaker lookupCircuitBreaker
+        CircuitBreaker lookupCircuitBreaker,
+        CircuitBreaker cancellationCircuitBreaker,
+        Bulkhead pgRequestBulkhead
     ) {
         this.client = client;
         this.approvalCircuitBreaker = approvalCircuitBreaker;
         this.lookupCircuitBreaker = lookupCircuitBreaker;
+        this.cancellationCircuitBreaker = cancellationCircuitBreaker;
+        this.pgRequestBulkhead = pgRequestBulkhead;
     }
 
     @Override
     public ApprovalResult approve(ApprovalRequest request) {
         try {
-            return approvalCircuitBreaker.executeSupplier(() -> approveOnce(request));
+            return pgRequestBulkhead.executeSupplier(
+                () -> approvalCircuitBreaker.executeSupplier(() -> approveOnce(request)));
+        } catch (BulkheadFullException exception) {
+            return new DispatchRejected("PG 요청 처리 한도를 초과했습니다.");
         } catch (CallNotPermittedException exception) {
             return new Unknown();
         } catch (RestClientException exception) {
@@ -54,7 +68,10 @@ public final class TossPaymentAdapter implements PaymentGateway {
     @Override
     public ApprovalResult findByPaymentKey(String paymentKey) {
         try {
-            return lookupCircuitBreaker.executeSupplier(() -> findByPaymentKeyOnce(paymentKey));
+            return pgRequestBulkhead.executeSupplier(
+                () -> lookupCircuitBreaker.executeSupplier(() -> findByPaymentKeyOnce(paymentKey)));
+        } catch (BulkheadFullException exception) {
+            return new Unknown();
         } catch (CallNotPermittedException exception) {
             return new Unknown();
         } catch (RestClientException exception) {
@@ -122,34 +139,41 @@ public final class TossPaymentAdapter implements PaymentGateway {
     @Override
     public CancellationResult cancel(CancellationRequest request) {
         try {
-            return client.post()
-                .uri("/v1/payments/{paymentKey}/cancel", request.paymentKey())
-                .header("Idempotency-Key", request.idempotencyKey())
-                .contentType(MediaType.APPLICATION_JSON)
-                .body(Map.of("cancelReason", request.cancelReason()))
-                .exchange((httpRequest, response) -> {
-                    int status = response.getStatusCode().value();
-                    JsonNode body;
-                    try {
-                        body = objectMapper.readTree(response.getBody());
-                    } catch (IOException exception) {
-                        return new CancellationUnknown();
-                    }
-                    if (status == 200 && "CANCELED".equals(text(body, "status"))) {
-                        return new CancellationConfirmed(request.paymentKey(), body.toString());
-                    }
-                    if (response.getStatusCode().is5xxServerError()) {
-                        return new CancellationUnknown(body.toString());
-                    }
-                    if (response.getStatusCode().is4xxClientError()) {
-                        return new CancellationRejected(status, text(body, "code"), text(body, "message"),
-                            body.toString());
-                    }
-                    return new CancellationUnknown(body.toString());
-                });
+            return pgRequestBulkhead.executeSupplier(
+                () -> cancellationCircuitBreaker.executeSupplier(() -> cancelOnce(request)));
+        } catch (BulkheadFullException | CallNotPermittedException exception) {
+            return new CancellationUnknown();
         } catch (RestClientException exception) {
             return new CancellationUnknown();
         }
+    }
+
+    private CancellationResult cancelOnce(CancellationRequest request) {
+        return client.post()
+            .uri("/v1/payments/{paymentKey}/cancel", request.paymentKey())
+            .header("Idempotency-Key", request.idempotencyKey())
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(Map.of("cancelReason", request.cancelReason()))
+            .exchange((httpRequest, response) -> {
+                int status = response.getStatusCode().value();
+                JsonNode body;
+                try {
+                    body = objectMapper.readTree(response.getBody());
+                } catch (IOException exception) {
+                    return new CancellationUnknown();
+                }
+                if (status == 200 && "CANCELED".equals(text(body, "status"))) {
+                    return new CancellationConfirmed(request.paymentKey(), body.toString());
+                }
+                if (response.getStatusCode().is5xxServerError()) {
+                    return new CancellationUnknown(body.toString());
+                }
+                if (response.getStatusCode().is4xxClientError()) {
+                    return new CancellationRejected(status, text(body, "code"), text(body, "message"),
+                        body.toString());
+                }
+                return new CancellationUnknown(body.toString());
+            });
     }
 
     private ApprovalResult approved(JsonNode body) {

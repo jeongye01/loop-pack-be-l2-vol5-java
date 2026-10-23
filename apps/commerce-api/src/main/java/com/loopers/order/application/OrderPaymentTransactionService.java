@@ -6,6 +6,7 @@ import com.loopers.order.domain.OrderRepository;
 import com.loopers.order.domain.Payment;
 import com.loopers.order.domain.PaymentGateway;
 import com.loopers.order.domain.PaymentGateway.CancellationResult;
+import com.loopers.order.domain.PaymentGateway.DispatchRejected;
 import com.loopers.order.domain.PaymentMethod;
 import com.loopers.order.domain.PaymentStatus;
 import com.loopers.product.domain.Product;
@@ -109,7 +110,7 @@ public class OrderPaymentTransactionService {
         if (result instanceof PaymentGateway.Approved approved) {
             order.consumeStockReservation();
             order.confirm(approved.amount(), approved.paidAt().toZonedDateTime());
-        } else if (result instanceof PaymentGateway.ProviderError) {
+        } else if (result instanceof PaymentGateway.ProviderError || result instanceof DispatchRejected) {
             restoreReservedStock(order);
             order.releaseStockReservation();
         }
