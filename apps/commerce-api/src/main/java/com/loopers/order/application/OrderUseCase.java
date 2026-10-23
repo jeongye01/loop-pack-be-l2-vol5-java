@@ -19,6 +19,9 @@ import com.loopers.user.domain.User;
 import com.loopers.user.domain.UserRepository;
 import com.loopers.user.domain.Point;
 import com.loopers.user.domain.PointRepository;
+import io.github.resilience4j.bulkhead.Bulkhead;
+import io.github.resilience4j.bulkhead.BulkheadConfig;
+import io.github.resilience4j.bulkhead.BulkheadFullException;
 import io.github.resilience4j.retry.Retry;
 import io.github.resilience4j.retry.RetryConfig;
 import jakarta.persistence.EntityManager;
@@ -63,6 +66,7 @@ public class OrderUseCase {
     private final EntityManager entityManager;
     private final OrderPaymentTransactionService paymentTransactionService;
     private final PaymentGateway paymentGateway;
+    private final Bulkhead paymentFlowBulkhead;
     private final OrderConfirmService confirmService = new OrderConfirmService();
 
     @Autowired
@@ -75,7 +79,8 @@ public class OrderUseCase {
         TransactionRetryExecutor transactionRetryExecutor,
         EntityManager entityManager,
         OrderPaymentTransactionService paymentTransactionService,
-        PaymentGateway paymentGateway
+        PaymentGateway paymentGateway,
+        Bulkhead paymentFlowBulkhead
     ) {
         this.orderRepository = orderRepository;
         this.productRepository = productRepository;
@@ -86,6 +91,23 @@ public class OrderUseCase {
         this.entityManager = entityManager;
         this.paymentTransactionService = paymentTransactionService;
         this.paymentGateway = paymentGateway;
+        this.paymentFlowBulkhead = paymentFlowBulkhead;
+    }
+
+    public OrderUseCase(
+        OrderRepository orderRepository,
+        ProductRepository productRepository,
+        UserRepository userRepository,
+        PointRepository pointRepository,
+        StockRepository stockRepository,
+        TransactionRetryExecutor transactionRetryExecutor,
+        EntityManager entityManager,
+        OrderPaymentTransactionService paymentTransactionService,
+        PaymentGateway paymentGateway
+    ) {
+        this(orderRepository, productRepository, userRepository, pointRepository, stockRepository,
+            transactionRetryExecutor, entityManager, paymentTransactionService, paymentGateway,
+            Bulkhead.of("payment-flow-test", BulkheadConfig.ofDefaults()));
     }
 
     public OrderUseCase(
@@ -98,7 +120,8 @@ public class OrderUseCase {
         EntityManager entityManager
     ) {
         this(orderRepository, productRepository, userRepository, pointRepository, stockRepository,
-            transactionRetryExecutor, entityManager, null, null);
+            transactionRetryExecutor, entityManager, null, null,
+            Bulkhead.of("payment-flow-test", BulkheadConfig.ofDefaults()));
     }
 
     @Transactional
@@ -142,6 +165,15 @@ public class OrderUseCase {
     }
 
     public Order confirm(Long buyerId, Long orderId, String paymentKey, String paymentAttemptKey) {
+        try {
+            return paymentFlowBulkhead.executeSupplier(
+                () -> confirmWithPaymentGateway(buyerId, orderId, paymentKey, paymentAttemptKey));
+        } catch (BulkheadFullException exception) {
+            throw new CoreException(ErrorCode.PAYMENT_FAILED);
+        }
+    }
+
+    private Order confirmWithPaymentGateway(Long buyerId, Long orderId, String paymentKey, String paymentAttemptKey) {
         OrderPaymentTransactionService.DispatchPlan plan = paymentTransactionService.prepare(
             buyerId, orderId, paymentKey, paymentAttemptKey);
         if (!plan.shouldDispatch()) {

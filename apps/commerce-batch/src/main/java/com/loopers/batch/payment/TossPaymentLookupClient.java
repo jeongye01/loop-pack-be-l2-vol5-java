@@ -2,6 +2,8 @@ package com.loopers.batch.payment;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.github.resilience4j.circuitbreaker.CallNotPermittedException;
+import io.github.resilience4j.circuitbreaker.CircuitBreaker;
 import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
@@ -14,11 +16,13 @@ import java.util.Base64;
 public class TossPaymentLookupClient implements PaymentLookupClient {
     private final RestClient client;
     private final ObjectMapper objectMapper;
+    private final CircuitBreaker circuitBreaker;
 
     public TossPaymentLookupClient(
         RestClient.Builder builder,
         ObjectMapper objectMapper,
-        TossPaymentProperties properties
+        TossPaymentProperties properties,
+        CircuitBreaker paymentLookupCircuitBreaker
     ) {
         String credential = properties.secretKey() + ":";
         String authorization = Base64.getEncoder().encodeToString(credential.getBytes(StandardCharsets.UTF_8));
@@ -27,12 +31,13 @@ public class TossPaymentLookupClient implements PaymentLookupClient {
             .defaultHeader(HttpHeaders.AUTHORIZATION, "Basic " + authorization)
             .build();
         this.objectMapper = objectMapper;
+        this.circuitBreaker = paymentLookupCircuitBreaker;
     }
 
     @Override
     public LookupResult findByOrderId(String orderId) {
         try {
-            return client.get()
+            return circuitBreaker.executeSupplier(() -> client.get()
                 .uri("/v1/payments/orders/{orderId}", orderId)
                 .exchange((request, response) -> {
                     int httpStatus = response.getStatusCode().value();
@@ -43,9 +48,15 @@ public class TossPaymentLookupClient implements PaymentLookupClient {
                     JsonNode json = objectMapper.readTree(body);
                     JsonNode status = json.path("status");
                     return new LookupResult(httpStatus, status.isTextual() ? status.textValue() : null, body);
-                });
+                }));
+        } catch (CallNotPermittedException exception) {
+            return unresolved();
         } catch (RestClientException exception) {
-            return new LookupResult(0, null, null);
+            return unresolved();
         }
+    }
+
+    private LookupResult unresolved() {
+        return new LookupResult(0, null, null);
     }
 }
