@@ -23,6 +23,13 @@ import com.loopers.user.domain.User;
 import jakarta.persistence.EntityManager;
 import org.apache.kafka.clients.producer.RecordMetadata;
 import org.apache.kafka.clients.producer.ProducerRecord;
+import org.apache.kafka.clients.admin.AdminClient;
+import org.apache.kafka.clients.admin.AdminClientConfig;
+import org.apache.kafka.clients.admin.NewTopic;
+import org.apache.kafka.clients.consumer.ConsumerConfig;
+import org.apache.kafka.clients.consumer.KafkaConsumer;
+import org.apache.kafka.common.serialization.ByteArrayDeserializer;
+import org.apache.kafka.common.serialization.StringDeserializer;
 import org.apache.kafka.common.TopicPartition;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -49,12 +56,14 @@ import java.sql.Timestamp;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.OffsetDateTime;
+import java.nio.charset.StandardCharsets;
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -187,6 +196,27 @@ class OrderConfirmedPublicationIntegrationTest {
             verify(kafkaTemplate).send(eq(orderEventTopic()), eq(scenario.orderId().toString()), any());
             assertThat(readOrder(scenario.orderId()).getStatus()).isEqualTo(OrderStatus.CONFIRMED);
             assertThat(readReservationStatus(scenario.orderId())).isEqualTo(StockReservationStatus.CONSUMED);
+        }
+
+        @Test
+        @DisplayName("Kafka 전송 실패로 이벤트는 없지만 주문 확정은 유지된다.")
+        void leavesConfirmedOrderWithoutKafkaRecordWhenSendFailsAtTestHook() throws Exception {
+            String topic = orderEventTopic();
+            ensureTopicExists(topic);
+            Scenario scenario = createScenario();
+            String paymentKey = "payment-" + UUID.randomUUID();
+            String attemptKey = "attempt-" + UUID.randomUUID();
+            String expectedEventId = "order-confirmed:" + scenario.orderId();
+            when(paymentGateway.approve(any())).thenAnswer(invocation -> approved(invocation.getArgument(0)));
+            when(kafkaTemplate.send(anyString(), anyString(), any()))
+                .thenReturn(CompletableFuture.failedFuture(new IllegalStateException("test hook: fail before broker send")));
+
+            orderUseCase.confirm(scenario.buyerId(), scenario.orderId(), paymentKey, attemptKey);
+
+            assertThat(readOrder(scenario.orderId()).getStatus()).isEqualTo(OrderStatus.CONFIRMED);
+            assertThat(readReservationStatus(scenario.orderId())).isEqualTo(StockReservationStatus.CONSUMED);
+            verify(kafkaTemplate).send(eq(topic), eq(scenario.orderId().toString()), any());
+            assertThat(readBrokerContainsEvent(topic, expectedEventId)).isFalse();
         }
     }
 
@@ -379,6 +409,66 @@ class OrderConfirmedPublicationIntegrationTest {
 
     private String orderEventTopic() {
         return orderConfirmedContract.path("topic").asText();
+    }
+
+    private void ensureTopicExists(String topic) throws Exception {
+        try (AdminClient admin = AdminClient.create(kafkaClientProperties())) {
+            if (!admin.listTopics().names().get(10, TimeUnit.SECONDS).contains(topic)) {
+                admin.createTopics(List.of(new NewTopic(topic, 1, (short) 1)))
+                    .all().get(10, TimeUnit.SECONDS);
+            }
+        }
+    }
+
+    private boolean readBrokerContainsEvent(String topic, String eventId) throws Exception {
+        try (AdminClient admin = AdminClient.create(kafkaClientProperties())) {
+            var topicDescription = admin.describeTopics(List.of(topic)).allTopicNames()
+                .get(10, TimeUnit.SECONDS).get(topic);
+            List<TopicPartition> partitions = topicDescription.partitions().stream()
+                .map(partition -> new TopicPartition(topic, partition.partition()))
+                .toList();
+            try (KafkaConsumer<String, byte[]> consumer = new KafkaConsumer<>(kafkaConsumerProperties())) {
+                consumer.assign(partitions);
+                consumer.seekToBeginning(partitions);
+                Map<TopicPartition, Long> endOffsets = consumer.endOffsets(partitions);
+                long deadline = System.nanoTime() + Duration.ofSeconds(10).toNanos();
+                do {
+                    var records = consumer.poll(Duration.ofMillis(100));
+                    for (var record : records) {
+                        String payload = new String(record.value(), StandardCharsets.UTF_8);
+                        if (payload.contains(eventId)) {
+                            return true;
+                        }
+                    }
+                    boolean reachedSnapshotEnd = partitions.stream()
+                        .allMatch(partition -> consumer.position(partition) >= endOffsets.get(partition));
+                    if (reachedSnapshotEnd) {
+                        return false;
+                    }
+                } while (System.nanoTime() < deadline);
+                throw new AssertionError("Timed out scanning Kafka topic " + topic + " for event " + eventId);
+            }
+        }
+    }
+
+    private Map<String, Object> kafkaClientProperties() {
+        Map<String, Object> properties = new HashMap<>();
+        properties.put(AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaBootstrapServers());
+        return properties;
+    }
+
+    private Map<String, Object> kafkaConsumerProperties() {
+        Map<String, Object> properties = kafkaClientProperties();
+        properties.put(ConsumerConfig.GROUP_ID_CONFIG, "week6-publication-gap-" + UUID.randomUUID());
+        properties.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, false);
+        properties.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
+        properties.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
+        properties.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, ByteArrayDeserializer.class);
+        return properties;
+    }
+
+    private String kafkaBootstrapServers() {
+        return System.getenv().getOrDefault("BOOTSTRAP_SERVERS", "localhost:19092");
     }
 
     private record Scenario(Long buyerId, Long orderId, Long firstProductId, Long secondProductId) {

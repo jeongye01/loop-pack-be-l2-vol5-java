@@ -29,7 +29,8 @@ public class OrderConfirmedKafkaPublisher {
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void publish(OrderConfirmedEvent event) {
         try {
-            kafkaTemplate.send(contract.topic(), event.orderId().toString(), event)
+            OrderConfirmedKafkaMessage message = OrderConfirmedKafkaMessage.from(event);
+            kafkaTemplate.send(contract.topic(), event.orderId().toString(), message)
                 .whenComplete((result, failure) -> logResult(event, result, failure));
         } catch (RuntimeException exception) {
             LOGGER.error("OrderConfirmed send failed: eventId={}", event.eventId(), exception);

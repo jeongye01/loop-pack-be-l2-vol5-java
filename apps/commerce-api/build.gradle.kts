@@ -93,3 +93,39 @@ dependencies {
     // OpenAPI contract test
     testImplementation("com.atlassian.oai:swagger-request-validator-mockmvc:${project.properties["openApiRequestValidatorVersion"]}")
 }
+
+val week6E2eTest by sourceSets.creating {
+    java.srcDir("src/week6E2eTest/java")
+    resources.srcDir("src/week6E2eTest/resources")
+    compileClasspath += sourceSets.main.get().output
+    runtimeClasspath += sourceSets.main.get().output
+}
+
+val week6E2eTestImplementation by configurations.getting {
+    extendsFrom(configurations.testImplementation.get())
+}
+
+val commerceStreamer = project(":apps:commerce-streamer")
+val commerceStreamerMain = commerceStreamer.extensions
+    .getByType<org.gradle.api.tasks.SourceSetContainer>().named("main")
+
+dependencies {
+    week6E2eTestImplementation(files(commerceStreamerMain.get().output))
+}
+
+tasks.named(week6E2eTest.compileJavaTaskName) {
+    dependsOn(commerceStreamer.tasks.named("compileJava"))
+    dependsOn(commerceStreamer.tasks.named("processResources"))
+}
+
+tasks.register<Test>("week6E2eTest") {
+    description = "Runs Week 6 order publication to purchase activity end-to-end test"
+    group = "verification"
+    testClassesDirs = week6E2eTest.output.classesDirs
+    classpath = week6E2eTest.runtimeClasspath
+    useJUnitPlatform()
+    systemProperty("user.timezone", "Asia/Seoul")
+    systemProperty("spring.profiles.active", "test")
+    jvmArgs("-Xshare:off")
+    dependsOn(tasks.named(week6E2eTest.classesTaskName))
+}

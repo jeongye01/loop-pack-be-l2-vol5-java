@@ -18,6 +18,15 @@
 - 운영 추적·복구 정책은 아직 미정이다.
 - 테스트에서 주문 DB의 확정 사실과 Kafka record를 대조해 발행 결과를 확인한다.
 
+## 주문 확정부터 offset commit까지 E2E
+
+- PG SUCCESS 응답만 테스트 대역으로 준비하고, 실제 주문 확정 경로를 실행한다.
+- 실제 Kafka producer와 streamer listener를 연결해 격리 topic에 발행·소비한다.
+- broker에서 target record의 `partition`, `offset`을 얻고, streamer의 처리 기록·상품 구매 활동 DB를 확인한다.
+- 같은 consumer group의 committed offset이 target `offset + 1` 이상인지 확인하고, 주문 DB·payload·구매 활동의 상품·수량·확정 시각을 대조한다.
+- 실행: `./gradlew :apps:commerce-api:week6E2eTest :apps:commerce-api:checkstyleWeek6E2eTest`
+- 테스트 전용 topic·group을 생성하고 종료 후 제거한다. 기존 `order-events`와 `purchase-activity` group은 사용하지 않는다.
+
 ## 구매 활동 consumer 테스트
 
 - 정상 소비: `OrderConfirmed`의 상품별 `productId`, `quantity`, `confirmedAt`과 일치하는 구매 활동을 저장하고 이벤트 처리 완료 기록을 남긴다.
