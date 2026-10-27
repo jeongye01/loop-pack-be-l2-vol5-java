@@ -34,7 +34,7 @@ tasks.test {
         .withPathSensitivity(PathSensitivity.RELATIVE)
 }
 
-sourceSets.test {
+sourceSets.main {
     resources.srcDir(rootProject.file("contracts"))
 }
 
@@ -56,6 +56,7 @@ tasks.test {
 dependencies {
     // add-ons
     implementation(project(":modules:jpa"))
+    implementation(project(":modules:kafka"))
     implementation(project(":modules:redis"))
     implementation(project(":supports:jackson"))
     implementation(project(":supports:logging"))
@@ -80,7 +81,6 @@ dependencies {
     // test-fixtures
     testImplementation(testFixtures(project(":modules:jpa")))
     testImplementation(testFixtures(project(":modules:redis")))
-    testImplementation(project(":modules:kafka"))
     testImplementation("com.networknt:json-schema-validator:2.0.4")
     testImplementation("org.wiremock:wiremock-standalone:3.13.2")
 

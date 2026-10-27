@@ -22,6 +22,8 @@ import com.loopers.user.domain.Point;
 import com.loopers.user.domain.User;
 import jakarta.persistence.EntityManager;
 import org.apache.kafka.clients.producer.RecordMetadata;
+import org.apache.kafka.clients.producer.ProducerRecord;
+import org.apache.kafka.common.TopicPartition;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -54,7 +56,6 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -329,14 +330,10 @@ class OrderConfirmedPublicationIntegrationTest {
     }
 
     private SendResult<Object, Object> successfulSendResult() {
-        @SuppressWarnings("unchecked")
-        SendResult<Object, Object> sendResult = mock(SendResult.class);
-        RecordMetadata metadata = mock(RecordMetadata.class);
-        when(metadata.topic()).thenReturn(orderEventTopic());
-        when(metadata.partition()).thenReturn(1);
-        when(metadata.offset()).thenReturn(0L);
-        when(sendResult.getRecordMetadata()).thenReturn(metadata);
-        return sendResult;
+        RecordMetadata metadata = new RecordMetadata(
+            new TopicPartition(orderEventTopic(), 1), 0L, 0, 0L, -1, -1);
+        ProducerRecord<Object, Object> record = new ProducerRecord<>(orderEventTopic(), "42", "{}");
+        return new SendResult<>(record, metadata);
     }
 
     private Schema orderConfirmedSchema() {
