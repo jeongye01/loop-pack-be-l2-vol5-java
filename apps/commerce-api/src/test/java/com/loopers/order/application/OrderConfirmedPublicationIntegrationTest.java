@@ -30,6 +30,10 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.context.event.ApplicationReadyEvent;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Import;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.support.SendResult;
@@ -42,6 +46,7 @@ import org.springframework.transaction.support.TransactionTemplate;
 import java.io.InputStream;
 import java.io.IOException;
 import java.sql.Timestamp;
+import java.time.Duration;
 import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.util.EnumMap;
@@ -76,6 +81,8 @@ class OrderConfirmedPublicationIntegrationTest {
     };
     @Autowired private OrderUseCase orderUseCase;
     @Autowired private OrderPaymentTransactionService transactionService;
+    @Autowired private ApplicationEventPublisher eventPublisher;
+    @Autowired private ConfigurableApplicationContext applicationContext;
     @Autowired private EntityManager entityManager;
     @Autowired private PlatformTransactionManager transactionManager;
     @Autowired private JdbcTemplate jdbcTemplate;
@@ -141,6 +148,28 @@ class OrderConfirmedPublicationIntegrationTest {
             Map<Long, Integer> storedItems = new HashMap<>();
             storedOrder.getItems().forEach(item -> storedItems.put(item.productId(), item.quantity()));
             assertThat(actualItems).hasSize(payload.path("items").size()).isEqualTo(storedItems);
+        }
+
+        @Test
+        @DisplayName("UNKNOWN 결제가 재기동 대사에서 SUCCESS로 확인되면 이벤트를 발행한다.")
+        void publishesWhenStartupRecoveryFindsUnknownPaymentApproved() {
+            Scenario scenario = createScenario();
+            OrderPaymentTransactionService.DispatchPlan plan = prepare(scenario);
+            transactionService.recordResult(scenario.orderId(), new PaymentGateway.Unknown());
+            when(paymentGateway.findByPaymentKey(plan.request().paymentKey()))
+                .thenReturn(approved(plan.request()));
+
+            eventPublisher.publishEvent(new ApplicationReadyEvent(
+                new SpringApplication(), new String[0], applicationContext, Duration.ZERO));
+
+            Order confirmed = readOrder(scenario.orderId());
+            assertThat(confirmed.getStatus()).isEqualTo(OrderStatus.CONFIRMED);
+            assertThat(confirmed.getPayment().status()).isEqualTo(PaymentStatus.SUCCESS);
+            assertThat(readReservationStatus(scenario.orderId())).isEqualTo(StockReservationStatus.CONSUMED);
+            verify(paymentGateway).findByPaymentKey(plan.request().paymentKey());
+            verify(paymentGateway, never()).approve(any());
+            verify(kafkaTemplate).send(
+                eq(orderEventTopic()), eq(scenario.orderId().toString()), any());
         }
 
         @Test
