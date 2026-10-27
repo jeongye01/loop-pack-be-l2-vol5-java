@@ -1,0 +1,364 @@
+package com.loopers.order.application;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.networknt.schema.Schema;
+import com.networknt.schema.SchemaRegistry;
+import com.networknt.schema.SchemaRegistryConfig;
+import com.networknt.schema.SpecificationVersion;
+import com.loopers.order.domain.Order;
+import com.loopers.order.domain.OrderItem;
+import com.loopers.order.domain.OrderStatus;
+import com.loopers.order.domain.PaymentGateway;
+import com.loopers.order.domain.PaymentGateway.ApprovalRequest;
+import com.loopers.order.domain.PaymentStatus;
+import com.loopers.order.domain.StockReservationStatus;
+import com.loopers.product.domain.Product;
+import com.loopers.product.domain.Stock;
+import com.loopers.support.error.CoreException;
+import com.loopers.support.error.ErrorCode;
+import com.loopers.testcontainers.MySqlTestContainersConfig;
+import com.loopers.user.domain.Point;
+import com.loopers.user.domain.User;
+import jakarta.persistence.EntityManager;
+import org.apache.kafka.clients.producer.RecordMetadata;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
+import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.kafka.support.SendResult;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionDefinition;
+import org.springframework.transaction.support.TransactionTemplate;
+
+import java.io.InputStream;
+import java.io.IOException;
+import java.sql.Timestamp;
+import java.time.Instant;
+import java.time.OffsetDateTime;
+import java.util.EnumMap;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+@SpringBootTest
+@Import(MySqlTestContainersConfig.class)
+@DisplayName("OrderConfirmed producer 발행 통합 테스트")
+class OrderConfirmedPublicationIntegrationTest {
+
+    private static final OffsetDateTime APPROVED_AT = OffsetDateTime.parse("2026-10-21T15:00:00+09:00");
+    private static final PaymentStatus[] DRAFT_PAYMENT_STATUSES = {
+        PaymentStatus.PENDING,
+        PaymentStatus.UNKNOWN,
+        PaymentStatus.FAILED,
+        PaymentStatus.CANCELED,
+        PaymentStatus.CANCEL_PROCESSING
+    };
+    @Autowired private OrderUseCase orderUseCase;
+    @Autowired private OrderPaymentTransactionService transactionService;
+    @Autowired private EntityManager entityManager;
+    @Autowired private PlatformTransactionManager transactionManager;
+    @Autowired private JdbcTemplate jdbcTemplate;
+    @Autowired private ObjectMapper objectMapper;
+    @MockitoBean private PaymentGateway paymentGateway;
+    @MockitoBean private KafkaTemplate<Object, Object> kafkaTemplate;
+    private JsonNode orderConfirmedContract;
+
+    @BeforeEach
+    void returnsSuccessfulSendMetadata() throws IOException {
+        InputStream contract = getClass().getClassLoader()
+            .getResourceAsStream("events/order/order-confirmed-v1.contract.json");
+        assertThat(contract).as("OrderConfirmed v1 event contract resource").isNotNull();
+        orderConfirmedContract = objectMapper.readTree(contract);
+
+        when(kafkaTemplate.send(anyString(), anyString(), any()))
+            .thenReturn(CompletableFuture.completedFuture(successfulSendResult()));
+    }
+
+    @Nested
+    @DisplayName("주문 확정 후 이벤트 발행한다")
+    class PublishAfterOrderConfirmation {
+
+        @Test
+        @DisplayName("1. 확정 트랜잭션 commit 후 send를 한 번 호출한다.")
+        void callsSendOnceAfterConfirmationCommit() {
+            when(kafkaTemplate.send(anyString(), anyString(), any())).thenAnswer(invocation -> {
+                Long orderId = Long.valueOf(invocation.getArgument(1));
+                assertOrderIsCommittedAsConfirmed(orderId);
+                return CompletableFuture.completedFuture(successfulSendResult());
+            });
+
+            ConfirmedOrder confirmed = confirmPgOrder();
+
+            assertThat(confirmed.order().getStatus()).isEqualTo(OrderStatus.CONFIRMED);
+            verify(kafkaTemplate, times(1)).send(anyString(), anyString(), any());
+        }
+
+        @Test
+        @DisplayName("2. 계약된 topic·key로 보내고 payload가 스키마 및 DB에 저장된 주문 값과 일치한다.")
+        void sendsEventAccordingToContract() {
+            ConfirmedOrder confirmed = confirmPgOrder();
+            var topic = org.mockito.ArgumentCaptor.forClass(String.class);
+            var key = org.mockito.ArgumentCaptor.forClass(String.class);
+            var value = org.mockito.ArgumentCaptor.forClass(Object.class);
+
+            verify(kafkaTemplate).send(topic.capture(), key.capture(), value.capture());
+
+            assertThat(topic.getValue()).isEqualTo(orderEventTopic());
+            assertThat(key.getValue()).isEqualTo(confirmed.scenario().orderId().toString());
+            JsonNode payload = objectMapper.valueToTree(value.getValue());
+            assertThat(orderConfirmedSchema().validate(payload)).isEmpty();
+            Order storedOrder = readOrder(confirmed.scenario().orderId());
+            assertThat(payload.path("orderId").asLong()).isEqualTo(storedOrder.getId());
+            assertThat(payload.path("eventId").asText())
+                .isEqualTo("order-confirmed:" + storedOrder.getId());
+            assertThat(Instant.parse(payload.path("confirmedAt").asText()))
+                .isEqualTo(readConfirmedAt(storedOrder.getId()));
+
+            Map<Long, Integer> actualItems = new HashMap<>();
+            payload.path("items").forEach(item -> actualItems.put(
+                item.path("productId").asLong(), item.path("quantity").asInt()));
+            Map<Long, Integer> storedItems = new HashMap<>();
+            storedOrder.getItems().forEach(item -> storedItems.put(item.productId(), item.quantity()));
+            assertThat(actualItems).hasSize(payload.path("items").size()).isEqualTo(storedItems);
+        }
+
+        @Test
+        @DisplayName("주문 확정 commit 후 Kafka 발행이 실패해도 주문 확정과 재고 예약 소비는 유지한다.")
+        void keepsConfirmedOrderWhenKafkaSendFailsAfterCommit() {
+            Scenario scenario = createScenario();
+            String paymentKey = "payment-" + UUID.randomUUID();
+            String attemptKey = "attempt-" + UUID.randomUUID();
+            when(paymentGateway.approve(any())).thenAnswer(invocation -> approved(invocation.getArgument(0)));
+            when(kafkaTemplate.send(anyString(), anyString(), any()))
+                .thenReturn(CompletableFuture.failedFuture(new IllegalStateException("broker unavailable")));
+
+            orderUseCase.confirm(scenario.buyerId(), scenario.orderId(), paymentKey, attemptKey);
+
+            verify(kafkaTemplate).send(eq(orderEventTopic()), eq(scenario.orderId().toString()), any());
+            assertThat(readOrder(scenario.orderId()).getStatus()).isEqualTo(OrderStatus.CONFIRMED);
+            assertThat(readReservationStatus(scenario.orderId())).isEqualTo(StockReservationStatus.CONSUMED);
+        }
+    }
+
+    @Test
+    @DisplayName("PG 미확정·카드 취소 결제 상태에서는 주문이 DRAFT에 남고 이벤트를 발행하지 않는다.")
+    void doesNotPublishWhileOrdersRemainDraft() {
+        Scenario unpaid = createScenario();
+        Map<PaymentStatus, Scenario> scenariosByPaymentStatus = new EnumMap<>(PaymentStatus.class);
+
+        for (PaymentStatus paymentStatus : DRAFT_PAYMENT_STATUSES) {
+            Scenario scenario = createScenario();
+            applyDraftPaymentStatus(scenario, paymentStatus);
+            scenariosByPaymentStatus.put(paymentStatus, scenario);
+        }
+
+        assertDraftOrder(unpaid, null);
+        for (PaymentStatus paymentStatus : DRAFT_PAYMENT_STATUSES) {
+            assertDraftOrder(scenariosByPaymentStatus.get(paymentStatus), paymentStatus);
+        }
+        verify(kafkaTemplate, never()).send(anyString(), anyString(), any());
+    }
+
+    @Test
+    @DisplayName("최초 확정 트랜잭션이 rollback되면 Kafka 이벤트를 발행하지 않는다.")
+    void doesNotPublishWhenConfirmationTransactionRollsBack() {
+        Scenario scenario = createScenario();
+        var plan = prepare(scenario);
+        TransactionTemplate transaction = new TransactionTemplate(transactionManager);
+
+        transaction.executeWithoutResult(status -> {
+            transactionService.recordResult(scenario.orderId(), approved(plan.request()));
+            status.setRollbackOnly();
+        });
+
+        verify(kafkaTemplate, never()).send(anyString(), anyString(), any());
+        Order rolledBack = readOrder(scenario.orderId());
+        assertThat(rolledBack.getStatus()).isEqualTo(OrderStatus.DRAFT);
+        assertThat(rolledBack.getPayment().status()).isEqualTo(PaymentStatus.PENDING);
+        assertThat(readReservationStatus(scenario.orderId())).isEqualTo(StockReservationStatus.RESERVED);
+    }
+
+    @Test
+    @DisplayName("이미 완료된 주문에 확정 서비스를 다시 호출해도 새 이벤트를 발행하지 않는다.")
+    void doesNotPublishAgainWhenConfirmingAlreadyConfirmedOrder() {
+        Scenario scenario = createScenario();
+        String paymentKey = "payment-" + UUID.randomUUID();
+        String attemptKey = "attempt-" + UUID.randomUUID();
+        when(paymentGateway.approve(any())).thenAnswer(invocation -> approved(invocation.getArgument(0)));
+        orderUseCase.confirm(scenario.buyerId(), scenario.orderId(), paymentKey, attemptKey);
+
+        assertThatThrownBy(() -> orderUseCase.confirm(
+            scenario.buyerId(), scenario.orderId(),
+            "retry-payment-" + UUID.randomUUID(), "retry-attempt-" + UUID.randomUUID()))
+            .isInstanceOfSatisfying(CoreException.class, exception ->
+                assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.PAYMENT_ALREADY_PROCESSED));
+
+        verify(paymentGateway, times(1)).approve(any());
+        verify(kafkaTemplate, times(1)).send(eq(orderEventTopic()), eq(scenario.orderId().toString()), any());
+        assertThat(readOrder(scenario.orderId()).getStatus()).isEqualTo(OrderStatus.CONFIRMED);
+    }
+
+    private Scenario createScenario() {
+        TransactionTemplate transaction = new TransactionTemplate(transactionManager);
+        return transaction.execute(status -> {
+            Product first = new Product(1L, "order event first " + UUID.randomUUID(), 2_000L);
+            Product second = new Product(1L, "order event second " + UUID.randomUUID(), 3_000L);
+            entityManager.persist(first);
+            entityManager.persist(second);
+            entityManager.flush();
+            entityManager.persist(new Stock(first.getId(), 5));
+            entityManager.persist(new Stock(second.getId(), 5));
+            User buyer = new User();
+            entityManager.persist(buyer);
+            entityManager.flush();
+            entityManager.persist(new Point(buyer.getId(), 20_000L));
+            Order order = new Order(buyer.getId(), List.of(
+                OrderItem.of(first, 2),
+                OrderItem.of(second, 1)
+            ));
+            entityManager.persist(order);
+            entityManager.flush();
+            return new Scenario(buyer.getId(), order.getId(), first.getId(), second.getId());
+        });
+    }
+
+    private OrderPaymentTransactionService.DispatchPlan prepare(Scenario scenario) {
+        return transactionService.prepare(
+            scenario.buyerId(), scenario.orderId(), "payment-" + UUID.randomUUID(), "attempt-" + UUID.randomUUID());
+    }
+
+    private PaymentGateway.Approved approved(ApprovalRequest request) {
+        return new PaymentGateway.Approved(
+            request.paymentKey(), request.providerOrderId(), request.amount(), APPROVED_AT);
+    }
+
+    private ConfirmedOrder confirmPgOrder() {
+        Scenario scenario = createScenario();
+        String paymentKey = "payment-" + UUID.randomUUID();
+        String attemptKey = "attempt-" + UUID.randomUUID();
+        when(paymentGateway.approve(any())).thenAnswer(invocation -> approved(invocation.getArgument(0)));
+        Order order = orderUseCase.confirm(scenario.buyerId(), scenario.orderId(), paymentKey, attemptKey);
+        return new ConfirmedOrder(scenario, order);
+    }
+
+    private Order readOrder(Long orderId) {
+        entityManager.clear();
+        return entityManager.find(Order.class, orderId);
+    }
+
+    private void applyDraftPaymentStatus(Scenario scenario, PaymentStatus paymentStatus) {
+        switch (paymentStatus) {
+            case PENDING -> prepare(scenario);
+            case UNKNOWN -> {
+                prepare(scenario);
+                transactionService.recordResult(scenario.orderId(), new PaymentGateway.Unknown());
+            }
+            case FAILED -> {
+                prepare(scenario);
+                transactionService.recordResult(scenario.orderId(), new PaymentGateway.ProviderError(
+                    403, "REJECT_CARD_PAYMENT", "payment rejected"));
+            }
+            case CANCELED -> {
+                var plan = prepare(scenario);
+                transactionService.recordResult(scenario.orderId(), new PaymentGateway.Unknown());
+                transactionService.recordCancellationResultAndReleaseReservation(scenario.orderId(),
+                    new PaymentGateway.CancellationConfirmed(plan.request().paymentKey(), null));
+            }
+            case CANCEL_PROCESSING -> {
+                prepare(scenario);
+                transactionService.recordResult(scenario.orderId(), new PaymentGateway.Unknown());
+                transactionService.recordCancellationResultAndReleaseReservation(scenario.orderId(),
+                    new PaymentGateway.CancellationUnknown());
+            }
+            case SUCCESS -> throw new IllegalArgumentException("SUCCESS cannot leave the order DRAFT");
+        }
+    }
+
+    private void assertDraftOrder(Scenario scenario, PaymentStatus expectedPaymentStatus) {
+        Order order = readOrder(scenario.orderId());
+        assertThat(order.getStatus()).isEqualTo(OrderStatus.DRAFT);
+        if (expectedPaymentStatus == null) {
+            assertThat(order.getPayment()).isNull();
+            return;
+        }
+        assertThat(order.getPayment().status()).isEqualTo(expectedPaymentStatus);
+    }
+
+    private StockReservationStatus readReservationStatus(Long orderId) {
+        return entityManager.createQuery(
+                "select o.stockReservationStatus from Order o where o.id = :orderId", StockReservationStatus.class)
+            .setParameter("orderId", orderId)
+            .getSingleResult();
+    }
+
+    private Instant readConfirmedAt(Long orderId) {
+        Object value = entityManager.createNativeQuery(
+                "select confirmed_at from orders where id = :orderId")
+            .setParameter("orderId", orderId)
+            .getSingleResult();
+        return ((Timestamp) value).toInstant();
+    }
+
+    private void assertOrderIsCommittedAsConfirmed(Long orderId) {
+        TransactionTemplate independentTransaction = new TransactionTemplate(transactionManager);
+        independentTransaction.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
+        String status = independentTransaction.execute(transaction -> jdbcTemplate.queryForObject(
+            "select status from orders where id = ?", String.class, orderId));
+
+        assertThat(status).isEqualTo(OrderStatus.CONFIRMED.name());
+    }
+
+    private SendResult<Object, Object> successfulSendResult() {
+        @SuppressWarnings("unchecked")
+        SendResult<Object, Object> sendResult = mock(SendResult.class);
+        RecordMetadata metadata = mock(RecordMetadata.class);
+        when(metadata.topic()).thenReturn(orderEventTopic());
+        when(metadata.partition()).thenReturn(1);
+        when(metadata.offset()).thenReturn(0L);
+        when(sendResult.getRecordMetadata()).thenReturn(metadata);
+        return sendResult;
+    }
+
+    private Schema orderConfirmedSchema() {
+        String schemaPath = orderConfirmedContract.path("payloadSchema").asText();
+        InputStream schema = getClass().getClassLoader()
+            .getResourceAsStream("events/order/" + schemaPath);
+        assertThat(schema).as("OrderConfirmed v1 JSON Schema resource").isNotNull();
+        SchemaRegistry registry = SchemaRegistry.withDefaultDialect(
+            SpecificationVersion.DRAFT_2020_12,
+            builder -> builder.schemaRegistryConfig(
+                SchemaRegistryConfig.builder().formatAssertionsEnabled(true).build()));
+        return registry.getSchema(schema);
+    }
+
+    private String orderEventTopic() {
+        return orderConfirmedContract.path("topic").asText();
+    }
+
+    private record Scenario(Long buyerId, Long orderId, Long firstProductId, Long secondProductId) {
+    }
+
+    private record ConfirmedOrder(Scenario scenario, Order order) {
+    }
+
+}

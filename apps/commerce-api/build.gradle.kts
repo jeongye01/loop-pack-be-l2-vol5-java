@@ -34,6 +34,10 @@ tasks.test {
         .withPathSensitivity(PathSensitivity.RELATIVE)
 }
 
+sourceSets.test {
+    resources.srcDir(rootProject.file("contracts"))
+}
+
 // Logback configuration is process-global. The async profile needs its own JVM.
 val testAsyncLogging by tasks.registering(Test::class) {
     testClassesDirs = sourceSets.test.get().output.classesDirs
@@ -76,6 +80,8 @@ dependencies {
     // test-fixtures
     testImplementation(testFixtures(project(":modules:jpa")))
     testImplementation(testFixtures(project(":modules:redis")))
+    testImplementation(project(":modules:kafka"))
+    testImplementation("com.networknt:json-schema-validator:2.0.4")
     testImplementation("org.wiremock:wiremock-standalone:3.13.2")
 
     // architecture test
