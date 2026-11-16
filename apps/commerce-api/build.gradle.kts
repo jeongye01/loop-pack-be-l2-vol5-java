@@ -38,6 +38,9 @@ tasks.test {
     if (providers.gradleProperty("skipPaymentFlowTests").isPresent) {
         exclude("**/OrderPaymentFlowIntegrationTest.class")
     }
+    if (providers.gradleProperty("skipCacheInvalidationScopeTests").isPresent) {
+        exclude("**/CacheInvalidationScopeHttpTest.class")
+    }
     doFirst {
         systemProperty("commerce.api.test.classpath", sourceSets.test.get().runtimeClasspath.asPath)
     }
